@@ -14,4 +14,4 @@ keystore.properties
 *.jks
 *.keystore
 .kotlin/
-/public/fonts/qcf4/*.ttf
+
