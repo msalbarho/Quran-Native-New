@@ -1,0 +1,28 @@
+{
+  "reciters": [
+    {
+      "id": "yasser-al-dosari",
+      "name": "الشيخ ياسر الدوسري",
+      "audio": {
+        "type": "equran",
+        "baseUrl": "https://cdn.equran.id/audio-partial/Yasser-Al-Dosari/"
+      }
+    },
+    {
+      "id": "ar.ahmedajamy",
+      "name": "الشيخ أحمد العجمي",
+      "audio": {
+        "type": "islamic-network",
+        "baseUrl": "https://cdn.islamic.network/quran/audio/128/ar.ahmedajamy/"
+      }
+    },
+    {
+      "id": "ar.alafasy",
+      "name": "الشيخ مشاري العفاسي",
+      "audio": {
+        "type": "islamic-network",
+        "baseUrl": "https://cdn.islamic.network/quran/audio/128/ar.alafasy/"
+      }
+    }
+  ]
+}

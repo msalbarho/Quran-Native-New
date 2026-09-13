@@ -1,0 +1,196 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "3982e8a88d3a80261e576e93dc12757b",
+    "entities": [
+      {
+        "tableName": "rub",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rub_number` INTEGER, `verses_count` INTEGER, `first_verse_key` TEXT, `last_verse_key` TEXT, `verse_mapping` TEXT, `hizb_number` INTEGER, `quarter_type_label` TEXT, `label` TEXT, PRIMARY KEY(`rub_number`))",
+        "fields": [
+          {
+            "fieldPath": "rubNumber",
+            "columnName": "rub_number",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "versesCount",
+            "columnName": "verses_count",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "firstVerseKey",
+            "columnName": "first_verse_key",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastVerseKey",
+            "columnName": "last_verse_key",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "verseMapping",
+            "columnName": "verse_mapping",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hizbNumber",
+            "columnName": "hizb_number",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "quarterTypeLabel",
+            "columnName": "quarter_type_label",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "label",
+            "columnName": "label",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "rub_number"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "sajda",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sajdah_number` INTEGER, `verse_key` TEXT, `sajdah_type` TEXT, PRIMARY KEY(`sajdah_number`))",
+        "fields": [
+          {
+            "fieldPath": "sajdahNumber",
+            "columnName": "sajdah_number",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "verseKey",
+            "columnName": "verse_key",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sajdahType",
+            "columnName": "sajdah_type",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "sajdah_number"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "juz",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`juz_number` INTEGER, `verses_count` INTEGER, `first_verse_key` TEXT, `last_verse_key` TEXT, `verse_mapping` TEXT, PRIMARY KEY(`juz_number`))",
+        "fields": [
+          {
+            "fieldPath": "juzNumber",
+            "columnName": "juz_number",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "versesCount",
+            "columnName": "verses_count",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "firstVerseKey",
+            "columnName": "first_verse_key",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastVerseKey",
+            "columnName": "last_verse_key",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "verseMapping",
+            "columnName": "verse_mapping",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "juz_number"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "hizb",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`hizb_number` INTEGER, `verses_count` INTEGER, `first_verse_key` TEXT, `last_verse_key` TEXT, `verse_mapping` TEXT, PRIMARY KEY(`hizb_number`))",
+        "fields": [
+          {
+            "fieldPath": "hizbNumber",
+            "columnName": "hizb_number",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "versesCount",
+            "columnName": "verses_count",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "firstVerseKey",
+            "columnName": "first_verse_key",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastVerseKey",
+            "columnName": "last_verse_key",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "verseMapping",
+            "columnName": "verse_mapping",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "hizb_number"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3982e8a88d3a80261e576e93dc12757b')"
+    ]
+  }
+}

@@ -1,0 +1,55 @@
+import sqlite3
+
+path = r"d:\HolyQuran-Native\app\src\main\assets\db\quran_final.db"
+con = sqlite3.connect(path)
+cur = con.cursor()
+
+print("mushaf_pages SQL:")
+print(cur.execute("SELECT sql FROM sqlite_master WHERE name='mushaf_pages'").fetchone()[0])
+print()
+print("words SQL:")
+print(cur.execute("SELECT sql FROM sqlite_master WHERE name='words'").fetchone()[0])
+print()
+print("ayahs SQL:")
+print(cur.execute("SELECT sql FROM sqlite_master WHERE name='ayahs'").fetchone()[0])
+print()
+print("meanings SQL:")
+print(cur.execute("SELECT sql FROM sqlite_master WHERE name='meanings'").fetchone()[0])
+print()
+print("surahs SQL:")
+print(cur.execute("SELECT sql FROM sqlite_master WHERE name='surahs'").fetchone()[0])
+print()
+print("divisions SQL:")
+print(cur.execute("SELECT sql FROM sqlite_master WHERE name='divisions'").fetchone()[0])
+print()
+print("mushaf_editions SQL:")
+print(cur.execute("SELECT sql FROM sqlite_master WHERE name='mushaf_editions'").fetchone()[0])
+print()
+print("unique indexes:")
+for row in cur.execute(
+    "SELECT name, sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL"
+):
+    print(row)
+
+print("\nayahs count", cur.execute("SELECT COUNT(*) FROM ayahs").fetchone())
+print("words count", cur.execute("SELECT COUNT(*) FROM words").fetchone())
+print("pages lines", cur.execute("SELECT COUNT(*) FROM mushaf_pages").fetchone())
+print("meanings", cur.execute("SELECT COUNT(*) FROM meanings").fetchone())
+print("edition", cur.execute("SELECT * FROM mushaf_editions").fetchone())
+print("surah 1", cur.execute("SELECT * FROM surahs LIMIT 1").fetchone())
+print("sample page 1", cur.execute("SELECT * FROM mushaf_pages WHERE page_number=1 LIMIT 5").fetchall())
+con.close()
+
+print("\n--- tafsir ---")
+con = sqlite3.connect(r"d:\HolyQuran-Native\app\src\main\assets\db\quran_tafsir.db")
+cur = con.cursor()
+print(cur.execute("SELECT sql FROM sqlite_master WHERE type='table'").fetchall())
+con.close()
+
+print("\n--- markers ---")
+con = sqlite3.connect(r"d:\HolyQuran-Native\app\src\main\assets\db\quran-markers.sqlite")
+cur = con.cursor()
+print(cur.execute("SELECT sql FROM sqlite_master WHERE type='table'").fetchall())
+print("rub sample", cur.execute("SELECT rub_number, first_verse_key, label FROM rub LIMIT 4").fetchall())
+print("sajda sample", cur.execute("SELECT * FROM sajda LIMIT 3").fetchall())
+con.close()

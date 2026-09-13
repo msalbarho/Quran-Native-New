@@ -1,0 +1,427 @@
+--------- beginning of main
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): Dead object in unregisterCallback.
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): android.os.DeadObjectException
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at android.os.BinderProxy.transactNative(Native Method)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at android.os.BinderProxy.transact(BinderProxy.java:662)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at android.support.v4.media.session.IMediaSession$Stub$Proxy.unregisterCallbackListener(IMediaSession.java:727)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at android.support.v4.media.session.MediaControllerCompat$MediaControllerImplApi21.unregisterCallback(MediaControllerCompat.java:2057)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at android.support.v4.media.session.MediaControllerCompat.unregisterCallback(MediaControllerCompat.java:589)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at com.android.bluetooth.audio_util.PlayerSettingsManager.activePlayerChanged(PlayerSettingsManager.java:97)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at com.android.bluetooth.audio_util.PlayerSettingsManager.lambda$new$0(PlayerSettingsManager.java:53)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at com.android.bluetooth.audio_util.PlayerSettingsManager.$r8$lambda$-fLcIDEM7wRNmT1VPKptBzgiQwY(PlayerSettingsManager.java:0)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at com.android.bluetooth.audio_util.PlayerSettingsManager$$ExternalSyntheticLambda0.onActivePlayerChanged(R8$$SyntheticClass:0)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at com.android.bluetooth.audio_util.MediaPlayerList.removeMediaPlayer(MediaPlayerList.java:730)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at com.android.bluetooth.audio_util.MediaPlayerList$4.sessionUpdatedCallback(MediaPlayerList.java:1048)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at com.android.bluetooth.audio_util.MediaPlayerWrapper$MediaControllerListener.onSessionDestroyed(MediaPlayerWrapper.java:613)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at android.media.session.MediaController$MessageHandler.handleMessage(MediaController.java:1235)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at android.os.Handler.dispatchMessage(Handler.java:106)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at android.os.Looper.loopOnce(Looper.java:230)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at android.os.Looper.loop(Looper.java:319)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at android.app.ActivityThread.main(ActivityThread.java:8919)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at java.lang.reflect.Method.invoke(Native Method)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:578)
+09-11 05:28:53.322 E/MediaControllerCompat( 2767): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1103)
+09-11 05:28:53.630 E/SemDvfsManager_JNI( 7773): SemDvfsManager: registerfunction enter
+09-11 05:28:53.631 E/SemAffinityControl( 7773): SemAffinityControl: registerfunction enter
+09-11 05:28:53.637 E/audit   (  939): type=1400 audit(1789097333.632:180493): avc:  denied  { read } for  pid=7773 comm="main" name="u:object_r:build_attestation_prop:s0" dev="tmpfs" ino=9119 scontext=u:r:shell:s0 tcontext=u:object_r:build_attestation_prop:s0 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:28:53.637 E/audit   (  939): type=1400 audit(1789097333.636:180494): avc:  denied  { read } for  pid=7773 comm="main" name="u:object_r:build_attestation_prop:s0" dev="tmpfs" ino=9119 scontext=u:r:shell:s0 tcontext=u:object_r:build_attestation_prop:s0 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:28:53.637 E/audit   (  939): type=1400 audit(1789097333.636:180495): avc:  denied  { read } for  pid=7773 comm="main" name="u:object_r:build_attestation_prop:s0" dev="tmpfs" ino=9119 scontext=u:r:shell:s0 tcontext=u:object_r:build_attestation_prop:s0 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:28:53.861 E/ANDR-PERF-UTIL( 1051): Failed to update node /proc/2832/sched_low_latency with value 1
+09-11 05:28:53.861 E/ANDR-PERF-OPTSHANDLER( 1051): can't set low latency for tid 2832
+09-11 05:28:53.861 E/ANDR-PERF-RESOURCEQS( 1051): Failed to apply optimization [3, 52]
+09-11 05:28:53.861 E/ANDR-PERF-UTIL( 1051): Failed to read /proc/sys/kernel/walt_low_latency_task_threshold
+09-11 05:28:53.861 E/ANDR-PERF-OPTSHANDLER( 1051): Failed to read /proc/sys/kernel/walt_low_latency_task_threshold
+09-11 05:28:53.861 E/ANDR-PERF-RESOURCEQS( 1051): Failed to apply optimization [3, 54]
+09-11 05:28:53.893 E/pageboostd( 3617): Received HALT command code 2
+09-11 05:28:55.035 E/audit   (  939): type=1400 audit(1789097335.032:180496): avc:  denied  { ioctl } for  pid=7794 comm="arch_disk_io_0" path="/data/data/com.quransunah.app.debug/databases/quran_unified.db" dev="dm-52" ino=48282 ioctlcmd=0xf522 scontext=u:r:untrusted_app:s0:c81,c257,c512,c768 tcontext=u:object_r:app_data_file:s0:c81,c257,c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:28:55.042 I/ExoPlayerImpl( 7794): Init 20b643f [AndroidXMedia3/1.5.1] [a72q, SM-A725F, samsung, 34]
+09-11 05:28:55.044 E/audit   (  939): type=1400 audit(1789097335.040:180497): avc:  denied  { ioctl } for  pid=7794 comm="arch_disk_io_0" path="/data/data/com.quransunah.app.debug/databases/quran_unified.db" dev="dm-52" ino=48282 ioctlcmd=0xf522 scontext=u:r:untrusted_app:s0:c81,c257,c512,c768 tcontext=u:object_r:app_data_file:s0:c81,c257,c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:28:55.050 E/audit   (  939): type=1400 audit(1789097335.048:180498): avc:  denied  { ioctl } for  pid=7794 comm="arch_disk_io_0" path="/data/data/com.quransunah.app.debug/databases/quran_unified.db" dev="dm-52" ino=48282 ioctlcmd=0xf522 scontext=u:r:untrusted_app:s0:c81,c257,c512,c768 tcontext=u:object_r:app_data_file:s0:c81,c257,c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:28:55.174 E/MediaPlayerWrapper( 2767): The callback queue isn't the current queue
+09-11 05:28:55.241 E/audit   (  939): type=1400 audit(1789097335.240:180499): avc:  denied  { ioctl } for  pid=23574 comm="lowpool[1503]" path="/data/data/com.google.android.gms/databases/metadata.db" dev="dm-52" ino=10246 ioctlcmd=0xf522 scontext=u:r:gmscore_app:s0:c512,c768 tcontext=u:object_r:privapp_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:28:55.255 E/audit   (  939): type=1400 audit(1789097335.252:180500): avc:  denied  { ioctl } for  pid=7794 comm="arch_disk_io_3" path="/data/data/com.quransunah.app.debug/databases/quran_unified.db" dev="dm-52" ino=48282 ioctlcmd=0xf522 scontext=u:r:untrusted_app:s0:c81,c257,c512,c768 tcontext=u:object_r:app_data_file:s0:c81,c257,c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:28:55.295 E/pageboostd( 3617): Received HALT command code 2
+09-11 05:28:55.347 E/AtomicFile( 5316): Failed to rename /data/user_de/0/com.samsung.android.honeyboard/files/selected.json.new to /data/user_de/0/com.samsung.android.honeyboard/files/selected.json
+--------- beginning of system
+09-11 05:28:55.360 E/WindowManager( 1591): win=Window{39e5674 u0 GoogleDiscoverWindow} destroySurfaces: appStopped=true cleanupOnResume=false win.mWindowRemovalAllowed=false win.mRemoveOnExit=false win.mViewVisibility=8 caller=com.android.server.wm.ActivityRecord.destroySurfaces:6952 com.android.server.wm.ActivityRecord.destroySurfaces:6933 com.android.server.wm.ActivityRecord.activityStopped:7633 com.android.server.wm.ActivityClientController.activityStopped:321 android.app.IActivityClientController$Stub.onTransact:702 com.android.server.wm.ActivityClientController.onTransact:186 android.os.Binder.execTransactInternal:1380 
+09-11 05:28:55.362 E/WindowManager( 1591): win=Window{69f317f u0 com.sec.android.app.launcher/com.sec.android.app.launcher.activities.LauncherActivity} destroySurfaces: appStopped=true cleanupOnResume=false win.mWindowRemovalAllowed=false win.mRemoveOnExit=false win.mViewVisibility=8 caller=com.android.server.wm.ActivityRecord.destroySurfaces:6952 com.android.server.wm.ActivityRecord.destroySurfaces:6933 com.android.server.wm.ActivityRecord.activityStopped:7633 com.android.server.wm.ActivityClientController.activityStopped:321 android.app.IActivityClientController$Stub.onTransact:702 com.android.server.wm.ActivityClientController.onTransact:186 android.os.Binder.execTransactInternal:1380 
+09-11 05:28:55.369 E/ANDR-PERF-UTIL( 1051): Failed to update node /proc/2832/sched_low_latency with value 1
+09-11 05:28:55.369 E/ANDR-PERF-OPTSHANDLER( 1051): can't set low latency for tid 2832
+09-11 05:28:55.369 E/ANDR-PERF-RESOURCEQS( 1051): Failed to apply optimization [3, 52]
+09-11 05:28:55.369 E/ANDR-PERF-UTIL( 1051): Failed to read /proc/sys/kernel/walt_low_latency_task_threshold
+09-11 05:28:55.369 E/ANDR-PERF-OPTSHANDLER( 1051): Failed to read /proc/sys/kernel/walt_low_latency_task_threshold
+09-11 05:28:55.370 E/ANDR-PERF-RESOURCEQS( 1051): Failed to apply optimization [3, 54]
+09-11 05:28:55.448 E/audit   (  939): type=1400 audit(1789097335.444:180501): avc:  denied  { ioctl } for  pid=7794 comm="arch_disk_io_0" path="/data/data/com.quransunah.app.debug/databases/holy_quran_user.db" dev="dm-52" ino=38294 ioctlcmd=0xf522 scontext=u:r:untrusted_app:s0:c81,c257,c512,c768 tcontext=u:object_r:app_data_file:s0:c81,c257,c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:28:56.518 E/audit   (  939): type=1400 audit(1789097336.516:180504): avc:  denied  { ioctl } for  pid=7794 comm="arch_disk_io_3" path="/data/data/com.quransunah.app.debug/databases/holy_quran_user.db" dev="dm-52" ino=38294 ioctlcmd=0xf522 scontext=u:r:untrusted_app:s0:c81,c257,c512,c768 tcontext=u:object_r:app_data_file:s0:c81,c257,c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:28:58.810 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:28:58.862 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:29:07.331 E/audit   (  939): type=1400 audit(1789097347.328:180505): avc:  denied  { kill } for  pid=0 comm="swapper/2" capability=5  scontext=u:r:kernel:s0 tcontext=u:r:kernel:s0 tclass=capability permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:29:08.905 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:29:08.958 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:29:10.127 E/SemDvfsManager_JNI( 7903): SemDvfsManager: registerfunction enter
+09-11 05:29:10.127 E/SemAffinityControl( 7903): SemAffinityControl: registerfunction enter
+09-11 05:29:10.133 E/audit   (  939): type=1400 audit(1789097350.132:180506): avc:  denied  { read } for  pid=7903 comm="main" name="u:object_r:build_attestation_prop:s0" dev="tmpfs" ino=9119 scontext=u:r:shell:s0 tcontext=u:object_r:build_attestation_prop:s0 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:29:10.133 E/audit   (  939): type=1400 audit(1789097350.132:180507): avc:  denied  { read } for  pid=7903 comm="main" name="u:object_r:build_attestation_prop:s0" dev="tmpfs" ino=9119 scontext=u:r:shell:s0 tcontext=u:object_r:build_attestation_prop:s0 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:29:10.133 E/audit   (  939): type=1400 audit(1789097350.132:180508): avc:  denied  { read } for  pid=7903 comm="main" name="u:object_r:build_attestation_prop:s0" dev="tmpfs" ino=9119 scontext=u:r:shell:s0 tcontext=u:object_r:build_attestation_prop:s0 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:29:19.001 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:29:19.031 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:29:21.128 E/Watchdog( 1591): !@Sync: 10672 heap: 123 / 128 FD: 1013 [٢٠٢٦-٠٩-١١ ٠٥:٢٩:٢١.١٢٧]
+09-11 05:29:29.115 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:29:29.160 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:29:39.188 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:29:39.234 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:29:46.853 E/SemDvfsManager_JNI( 7974): SemDvfsManager: registerfunction enter
+09-11 05:29:46.853 E/SemAffinityControl( 7974): SemAffinityControl: registerfunction enter
+09-11 05:29:46.859 E/audit   (  939): type=1400 audit(1789097386.856:180509): avc:  denied  { read } for  pid=7974 comm="main" name="u:object_r:build_attestation_prop:s0" dev="tmpfs" ino=9119 scontext=u:r:shell:s0 tcontext=u:object_r:build_attestation_prop:s0 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:29:46.859 E/audit   (  939): type=1400 audit(1789097386.856:180510): avc:  denied  { read } for  pid=7974 comm="main" name="u:object_r:build_attestation_prop:s0" dev="tmpfs" ino=9119 scontext=u:r:shell:s0 tcontext=u:object_r:build_attestation_prop:s0 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:29:46.860 E/audit   (  939): type=1400 audit(1789097386.856:180511): avc:  denied  { read } for  pid=7974 comm="main" name="u:object_r:build_attestation_prop:s0" dev="tmpfs" ino=9119 scontext=u:r:shell:s0 tcontext=u:object_r:build_attestation_prop:s0 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:29:47.658 E/ocess.gservices( 8008): Not starting debugger since process cannot load the jdwp agent.
+09-11 05:29:47.804 E/audit   (  939): type=1400 audit(1789097387.800:180512): avc:  denied  { ioctl } for  pid=8008 comm="ocess.gservices" path="/data/data/com.google.android.gsf/databases/gservices.db" dev="dm-52" ino=1150 ioctlcmd=0xf522 scontext=u:r:priv_app:s0:c512,c768 tcontext=u:object_r:privapp_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:29:47.808 E/GmsClient( 8008): unable to connect to service: com.google.android.gms.gservices.START on com.google.android.gms
+09-11 05:29:48.030 E/audit   (  939): type=1400 audit(1789097388.028:180513): avc:  denied  { ioctl } for  pid=23574 comm="lowpool[1506]" path="/data/data/com.google.android.gms/databases/ns.db" dev="dm-52" ino=7621 ioctlcmd=0xf522 scontext=u:r:gmscore_app:s0:c512,c768 tcontext=u:object_r:privapp_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:29:49.273 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:29:49.310 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:29:51.145 E/Watchdog( 1591): !@Sync: 10673 heap: 107 / 122 FD: 1014 [٢٠٢٦-٠٩-١١ ٠٥:٢٩:٥١.١٤٤]
+09-11 05:29:59.366 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:29:59.394 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:30:07.339 E/audit   (  939): type=1400 audit(1789097407.336:180514): avc:  denied  { kill } for  pid=0 comm="swapper/2" capability=5  scontext=u:r:kernel:s0 tcontext=u:r:kernel:s0 tclass=capability permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:30:09.444 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:30:09.500 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:30:19.542 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:30:19.581 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:30:21.160 E/Watchdog( 1591): !@Sync: 10674 heap: 112 / 122 FD: 1022 [٢٠٢٦-٠٩-١١ ٠٥:٣٠:٢١.١٥٩]
+09-11 05:30:29.626 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:30:29.679 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:30:39.725 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:30:39.774 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:30:49.821 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:30:49.864 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:30:51.177 E/Watchdog( 1591): !@Sync: 10675 heap: 116 / 122 FD: 1023 [٢٠٢٦-٠٩-١١ ٠٥:٣٠:٥١.١٧٦]
+09-11 05:30:51.278 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90000, delta: -22086
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90001, delta: -900
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90002, delta: -217
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90003, delta: -4394
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90004, delta: -417
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90005, delta: -1276
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90006, delta: -39
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90007, delta: -5373
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90008, delta: -221
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90009, delta: -31
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90010, delta: -8537
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90011, delta: -15
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90012, delta: -60
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90013, delta: -634
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90014, delta: -128
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90015, delta: -252
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90016, delta: -253
+09-11 05:30:51.280 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90017, delta: -228
+09-11 05:30:59.908 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:30:59.952 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:31:07.347 E/audit   (  939): type=1400 audit(1789097467.344:180515): avc:  denied  { kill } for  pid=0 comm="swapper/3" capability=5  scontext=u:r:kernel:s0 tcontext=u:r:kernel:s0 tclass=capability permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:10.003 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:31:10.037 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:31:20.083 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:31:20.141 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:31:21.193 E/Watchdog( 1591): !@Sync: 10676 heap: 122 / 122 FD: 1024 [٢٠٢٦-٠٩-١١ ٠٥:٣١:٢١.١٩٢]
+09-11 05:31:30.188 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:31:30.235 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:31:34.908 E/MediaPlayerWrapper( 2767): The callback queue isn't the current queue
+09-11 05:31:34.935 E/wpa_sslib( 5614): Invalid freq band bitmask found 0
+09-11 05:31:34.936 E/SemSupplicantStaIfaceHalHidlImpl( 1591): ISehSupplicantStaIface.getExtendedInfomation failed: {.code = FAILURE_UNKNOWN, .debugMessage = }
+09-11 05:31:35.023 E/MediaPlayerWrapper( 2767): The callback queue isn't the current queue
+09-11 05:31:35.486 E/MediaPlayerWrapper( 2767): The callback queue isn't the current queue
+09-11 05:31:35.655 E/FMQ     ( 1046): grantorIdx must be less than 3
+09-11 05:31:35.655 E/FMQ     ( 1046): grantorIdx must be less than 3
+09-11 05:31:35.661 E/FMQ     ( 1046): grantorIdx must be less than 3
+09-11 05:31:35.665 E/FMQ     ( 1046): grantorIdx must be less than 3
+09-11 05:31:35.713 E/sm6150_platform( 1027): platform_check_backends_match: Invalid snd_device = 
+09-11 05:31:35.713 E/tas_spk_prot( 1027): call enable_sa_path
+09-11 05:31:35.714 E/voice   ( 1027): voice_is_in_call_rec_stream: input stream is NULL
+09-11 05:31:35.714 E/voice   ( 1027): voice_is_in_call_rec_stream: input stream is NULL
+09-11 05:31:35.759 E/.app.soundalive( 8141): Not starting debugger since process cannot load the jdwp agent.
+09-11 05:31:35.768 E/soundtrigger( 1027): audio_extn_sound_trigger_update_stream_status: invalid input device 0x0, for event 3
+09-11 05:31:35.829 E/id.gms.unstable( 8156): Not starting debugger since process cannot load the jdwp agent.
+09-11 05:31:36.034 E/audit   (  939): type=1400 audit(1789097496.032:180516): avc:  denied  { ioctl } for  pid=23574 comm="highpool[5515]" path="/data/data/com.google.android.gms/databases/phenotype.db" dev="dm-52" ino=6989 ioctlcmd=0xf522 scontext=u:r:gmscore_app:s0:c512,c768 tcontext=u:object_r:privapp_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:36.099 E/audit   (  939): type=1400 audit(1789097496.096:180517): avc:  denied  { ioctl } for  pid=8156 comm="binder:8156_5" path="/data/data/com.google.android.gms/databases/dg.db" dev="dm-52" ino=7448 ioctlcmd=0xf522 scontext=u:r:gmscore_app:s0:c512,c768 tcontext=u:object_r:privapp_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:36.111 E/audit   (  939): type=1400 audit(1789097496.108:180518): avc:  denied  { ioctl } for  pid=8156 comm="binder:8156_5" path="/data/data/com.google.android.gms/databases/dg.db" dev="dm-52" ino=7448 ioctlcmd=0xf522 scontext=u:r:gmscore_app:s0:c512,c768 tcontext=u:object_r:privapp_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:36.115 E/audit   (  939): type=1400 audit(1789097496.112:180519): avc:  denied  { ioctl } for  pid=8156 comm="binder:8156_5" path="/data/data/com.google.android.gms/databases/dg.db" dev="dm-52" ino=7448 ioctlcmd=0xf522 scontext=u:r:gmscore_app:s0:c512,c768 tcontext=u:object_r:privapp_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:36.211 E/audit   (  939): type=1400 audit(1789097496.208:180520): avc:  denied  { read } for  pid=8156 comm="binder:8156_5" name="u:object_r:system_adbd_prop:s0" dev="tmpfs" ino=14493 scontext=u:r:gmscore_app:s0:c512,c768 tcontext=u:object_r:system_adbd_prop:s0 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:36.211 E/audit   (  939): type=1400 audit(1789097496.208:180521): avc:  denied  { read } for  pid=8156 comm="binder:8156_5" name="u:object_r:adbd_prop:s0" dev="tmpfs" ino=9086 scontext=u:r:gmscore_app:s0:c512,c768 tcontext=u:object_r:adbd_prop:s0 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:36.369 E/RestrictModeUtil( 8141): isDexMode() : desktop mode manager is null, so it can't be decided
+09-11 05:31:36.387 E/RestrictModeUtil( 8141): isDexMode() : desktop mode manager is null, so it can't be decided
+09-11 05:31:36.663 E/jqrj    (23574): *~*~*~ Previous channel {0} was garbage collected without being shut down! ~*~*~*
+09-11 05:31:36.663 E/jqrj    (23574):     Make sure to call shutdown()/shutdownNow()
+09-11 05:31:36.663 E/jqrj    (23574): java.lang.RuntimeException: ManagedChannel allocation site
+09-11 05:31:36.663 E/jqrj    (23574): 	at jqri.<init>(:com.google.android.gms@263234029@26.32.34 (190400-968093310):21)
+09-11 05:31:36.663 E/jqrj    (23574): 	at jqrj.<init>(:com.google.android.gms@263234029@26.32.34 (190400-968093310):10)
+09-11 05:31:36.663 E/jqrj    (23574): 	at jqrh.a(:com.google.android.gms@263234029@26.32.34 (190400-968093310):300)
+09-11 05:31:36.663 E/jqrj    (23574): 	at jpyy.a(:com.google.android.gms@263234029@26.32.34 (190400-968093310):5)
+09-11 05:31:36.663 E/jqrj    (23574): 	at dfow.f(:com.google.android.gms@263234029@26.32.34 (190400-968093310):144)
+09-11 05:31:36.663 E/jqrj    (23574): 	at hwzb.a(:com.google.android.gms@263234029@26.32.34 (190400-968093310):177)
+09-11 05:31:36.663 E/jqrj    (23574): 	at hkhp.a(:com.google.android.gms@263234029@26.32.34 (190400-968093310):17)
+09-11 05:31:36.663 E/jqrj    (23574): 	at htgf.a(:com.google.android.gms@263234029@26.32.34 (190400-968093310):3)
+09-11 05:31:36.663 E/jqrj    (23574): 	at htfg.run(:com.google.android.gms@263234029@26.32.34 (190400-968093310):19)
+09-11 05:31:36.663 E/jqrj    (23574): 	at htgh.run(:com.google.android.gms@263234029@26.32.34 (190400-968093310):5)
+09-11 05:31:36.663 E/jqrj    (23574): 	at blzn.d(:com.google.android.gms@263234029@26.32.34 (190400-968093310):50)
+09-11 05:31:36.663 E/jqrj    (23574): 	at blzn.c(:com.google.android.gms@263234029@26.32.34 (190400-968093310):6)
+09-11 05:31:36.663 E/jqrj    (23574): 	at blzn.run(:com.google.android.gms@263234029@26.32.34 (190400-968093310):33)
+09-11 05:31:36.663 E/jqrj    (23574): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+09-11 05:31:36.663 E/jqrj    (23574): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+09-11 05:31:36.663 E/jqrj    (23574): 	at bmfk.run(:com.google.android.gms@263234029@26.32.34 (190400-968093310):8)
+09-11 05:31:36.663 E/jqrj    (23574): 	at java.lang.Thread.run(Thread.java:1012)
+09-11 05:31:36.995 E/MediaPlayerWrapper( 2767): The callback queue isn't the current queue
+09-11 05:31:40.168 E/soundtrigger( 1027): audio_extn_sound_trigger_update_stream_status: invalid input device 0x0, for event 2
+09-11 05:31:40.264 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:31:40.282 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:31:47.907 E/SecVibrator-HAL-AIDL-CORE( 1072): V_1_0: Vibrator on for timeoutMs: 45
+09-11 05:31:47.907 E/SecVibrator-HAL-AIDL-CORE( 1072): HW_API: do_on for timeoutMs: 45
+09-11 05:31:47.907 E/SecVibrator-HAL-AIDL-CORE( 1072): HW_API: >> writeNode node:/timed_output/vibrator/enable val:45
+09-11 05:31:47.908 E/SecVibrator-HAL-AIDL-CORE( 1072): HW_API: << writeNode node OK : 3
+09-11 05:31:47.953 E/SecVibrator-HAL-AIDL-CORE( 1072): V_1_0: Vibrator off
+09-11 05:31:47.953 E/SecVibrator-HAL-AIDL-CORE( 1072): HW_API: >> writeNode node:/timed_output/vibrator/enable val:0
+09-11 05:31:47.953 E/SecVibrator-HAL-AIDL-CORE( 1072): HW_API: << writeNode node OK : 2
+09-11 05:31:48.034 E/ANDR-PERF-UTIL( 1051): Failed to update node /proc/2832/sched_low_latency with value 1
+09-11 05:31:48.034 E/ANDR-PERF-OPTSHANDLER( 1051): can't set low latency for tid 2832
+09-11 05:31:48.034 E/ANDR-PERF-RESOURCEQS( 1051): Failed to apply optimization [3, 52]
+09-11 05:31:48.034 E/ANDR-PERF-UTIL( 1051): Failed to read /proc/sys/kernel/walt_low_latency_task_threshold
+09-11 05:31:48.034 E/ANDR-PERF-OPTSHANDLER( 1051): Failed to read /proc/sys/kernel/walt_low_latency_task_threshold
+09-11 05:31:48.034 E/ANDR-PERF-RESOURCEQS( 1051): Failed to apply optimization [3, 54]
+09-11 05:31:48.045 E/ANDR-PERF-UTIL( 1051): Failed to update node /proc/7672/sched_low_latency with value 1
+09-11 05:31:48.045 E/ANDR-PERF-OPTSHANDLER( 1051): can't set low latency for tid 7672
+09-11 05:31:48.045 E/ANDR-PERF-RESOURCEQS( 1051): Failed to apply optimization [3, 52]
+09-11 05:31:48.045 E/ANDR-PERF-UTIL( 1051): Failed to update node /proc/7955/sched_low_latency with value 1
+09-11 05:31:48.045 E/ANDR-PERF-OPTSHANDLER( 1051): can't set low latency for tid 7955
+09-11 05:31:48.045 E/ANDR-PERF-RESOURCEQS( 1051): Failed to apply optimization [3, 52]
+09-11 05:31:48.045 E/ANDR-PERF-UTIL( 1051): Failed to update node /proc/7954/sched_low_latency with value 1
+09-11 05:31:48.045 E/ANDR-PERF-OPTSHANDLER( 1051): can't set low latency for tid 7954
+09-11 05:31:48.045 E/ANDR-PERF-RESOURCEQS( 1051): Failed to apply optimization [3, 52]
+09-11 05:31:48.045 E/ANDR-PERF-UTIL( 1051): Failed to update node /proc/7856/sched_low_latency with value 1
+09-11 05:31:48.045 E/ANDR-PERF-OPTSHANDLER( 1051): can't set low latency for tid 7856
+09-11 05:31:48.045 E/ANDR-PERF-RESOURCEQS( 1051): Failed to apply optimization [3, 52]
+09-11 05:31:48.045 E/ANDR-PERF-UTIL( 1051): Failed to read /proc/sys/kernel/walt_low_latency_task_threshold
+09-11 05:31:48.045 E/ANDR-PERF-OPTSHANDLER( 1051): Failed to read /proc/sys/kernel/walt_low_latency_task_threshold
+09-11 05:31:48.045 E/ANDR-PERF-RESOURCEQS( 1051): Failed to apply optimization [3, 54]
+09-11 05:31:48.140 E/NativeCustomFrequencyManager( 1097): [NativeCFMS] BpCustomFrequencyManager::acquire()
+09-11 05:31:48.567 E/AtomicFile( 5316): Failed to rename /data/user_de/0/com.samsung.android.honeyboard/files/selected.json.new to /data/user_de/0/com.samsung.android.honeyboard/files/selected.json
+09-11 05:31:48.572 E/AtomicFile( 5316): Failed to rename /data/user_de/0/com.samsung.android.honeyboard/files/selected.json.new to /data/user_de/0/com.samsung.android.honeyboard/files/selected.json
+09-11 05:31:48.662 E/WindowManager( 1591): win=Window{2ad08a8 u0 com.quransunah.app.debug/com.quransunah.app.MainActivity} destroySurfaces: appStopped=true cleanupOnResume=false win.mWindowRemovalAllowed=false win.mRemoveOnExit=false win.mViewVisibility=8 caller=com.android.server.wm.ActivityRecord.destroySurfaces:6952 com.android.server.wm.ActivityRecord.destroySurfaces:6933 com.android.server.wm.ActivityRecord.activityStopped:7633 com.android.server.wm.ActivityClientController.activityStopped:321 android.app.IActivityClientController$Stub.onTransact:702 com.android.server.wm.ActivityClientController.onTransact:186 android.os.Binder.execTransactInternal:1380 
+09-11 05:31:48.911 E/SecVibrator-HAL-AIDL-CORE( 1072): V_1_0: Vibrator on for timeoutMs: 45
+09-11 05:31:48.911 E/SecVibrator-HAL-AIDL-CORE( 1072): HW_API: do_on for timeoutMs: 45
+09-11 05:31:48.911 E/SecVibrator-HAL-AIDL-CORE( 1072): HW_API: >> writeNode node:/timed_output/vibrator/enable val:45
+09-11 05:31:48.911 E/SecVibrator-HAL-AIDL-CORE( 1072): HW_API: << writeNode node OK : 3
+09-11 05:31:48.956 E/SecVibrator-HAL-AIDL-CORE( 1072): V_1_0: Vibrator off
+09-11 05:31:48.956 E/SecVibrator-HAL-AIDL-CORE( 1072): HW_API: >> writeNode node:/timed_output/vibrator/enable val:0
+09-11 05:31:48.956 E/SecVibrator-HAL-AIDL-CORE( 1072): HW_API: << writeNode node OK : 2
+09-11 05:31:49.239 E/pageboostd( 3617): Received HALT command code 2
+09-11 05:31:49.277 E/NetworkErrorMessage( 7210): (REDACTED) Invalid connectivity state: %s
+09-11 05:31:49.378 E/mediaserver( 1370): unlinkToDeath: removed reference to death recipient but unlink failed: DEAD_OBJECT
+09-11 05:31:49.378 E/IPCThreadState( 1370): attemptIncStrongHandle(6): Not supported
+09-11 05:31:49.633 E/WindowManager( 1591): win=Window{dd48967 u0 com.sec.android.app.launcher/com.android.quickstep.RecentsActivity} destroySurfaces: appStopped=true cleanupOnResume=false win.mWindowRemovalAllowed=false win.mRemoveOnExit=false win.mViewVisibility=8 caller=com.android.server.wm.ActivityRecord.destroySurfaces:6952 com.android.server.wm.ActivityRecord.destroySurfaces:6933 com.android.server.wm.ActivityRecord.activityStopped:7633 com.android.server.wm.ActivityClientController.activityStopped:321 android.app.IActivityClientController$Stub.onTransact:702 com.android.server.wm.ActivityClientController.onTransact:186 android.os.Binder.execTransactInternal:1380 
+09-11 05:31:50.324 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:31:50.349 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:31:50.646 E/PocketProximityManager( 1591): onSensorChanged : proxVal: 10.0
+09-11 05:31:51.082 E/WindowManager( 1591): win=Window{39e5674 u0 GoogleDiscoverWindow} destroySurfaces: appStopped=true cleanupOnResume=false win.mWindowRemovalAllowed=false win.mRemoveOnExit=false win.mViewVisibility=8 caller=com.android.server.wm.ActivityRecord.destroySurfaces:6952 com.android.server.wm.ActivityRecord.destroySurfaces:6933 com.android.server.wm.ActivityRecord.activityStopped:7633 com.android.server.wm.ActivityClientController.activityStopped:321 android.app.IActivityClientController$Stub.onTransact:702 com.android.server.wm.ActivityClientController.onTransact:186 android.os.Binder.execTransactInternal:1380 
+09-11 05:31:51.084 E/WindowManager( 1591): win=Window{69f317f u0 com.sec.android.app.launcher/com.sec.android.app.launcher.activities.LauncherActivity} destroySurfaces: appStopped=true cleanupOnResume=false win.mWindowRemovalAllowed=false win.mRemoveOnExit=false win.mViewVisibility=8 caller=com.android.server.wm.ActivityRecord.destroySurfaces:6952 com.android.server.wm.ActivityRecord.destroySurfaces:6933 com.android.server.wm.ActivityRecord.activityStopped:7633 com.android.server.wm.ActivityClientController.activityStopped:321 android.app.IActivityClientController$Stub.onTransact:702 com.android.server.wm.ActivityClientController.onTransact:186 android.os.Binder.execTransactInternal:1380 
+09-11 05:31:51.099 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:51.134 E/BtGatt.GattService( 2767): [GSIM LOG]: gsimLogHandler, msg: MESSAGE_SCAN_STOP, appName: com.google.uid.shared, scannerId: 3, reportDelayMillis=0
+09-11 05:31:51.164 E/BtGatt.GattService( 2767): [GSIM LOG]: gsimLogHandler, msg: MESSAGE_SCAN_STOP, appName: com.google.uid.shared, scannerId: 2, reportDelayMillis=0
+09-11 05:31:51.204 E/Watchdog( 1591): !@Sync: 10677 heap: 118 / 122 FD: 1025 [٢٠٢٦-٠٩-١١ ٠٥:٣١:٥١.٢٠٤]
+09-11 05:31:51.282 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:51.338 E/Edge.CocktailBarPanelVisibilityManager( 7672): updateActivePanelView: invalid null panel
+09-11 05:31:51.347 E/audit   (  939): type=1400 audit(1789097511.344:180522): avc:  denied  { ioctl } for  pid=2501 comm="ndroid.systemui" path="/data/data/com.samsung.android.app.aodservice/databases/logs" dev="dm-52" ino=3848 ioctlcmd=0xf522 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:app_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:51.360 E/audit   (  939): type=1400 audit(1789097511.356:180523): avc:  denied  { ioctl } for  pid=2501 comm="ndroid.systemui" path="/data/data/com.samsung.android.app.aodservice/databases/logs" dev="dm-52" ino=3848 ioctlcmd=0xf522 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:app_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:51.363 E/WindowManager( 1591): win=Window{55b2190 u0 com.sec.android.app.launcher/com.samsung.app.honeyspace.edge.CocktailBarService} destroySurfaces: appStopped=true cleanupOnResume=false win.mWindowRemovalAllowed=false win.mRemoveOnExit=false win.mViewVisibility=8 caller=com.android.server.wm.WindowManagerService.tryStartExitingAnimation:2980 com.android.server.wm.WindowManagerService.relayoutWindow:2685 com.android.server.wm.Session.relayout:282 android.view.IWindowSession$Stub.onTransact:782 com.android.server.wm.Session.onTransact:204 android.os.Binder.execTransactInternal:1375 android.os.Binder.execTransact:1311 
+09-11 05:31:51.364 E/AbsSettings( 2501): refreshInner: refreshedSettingsDBItem key CLOCK_VERSION val = 300000
+09-11 05:31:51.365 E/AbsSettings( 2501): refreshInner: refreshedSettingsDBItem key PALETTE_VERSION val = 90000
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90000, delta: -22086
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90001, delta: -900
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90002, delta: -217
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90003, delta: -4394
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90004, delta: -417
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90005, delta: -1276
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90006, delta: -39
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90007, delta: -5373
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90008, delta: -221
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90009, delta: -31
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90010, delta: -8537
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90011, delta: -15
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90012, delta: -60
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90013, delta: -634
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90014, delta: -128
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90015, delta: -252
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90016, delta: -253
+09-11 05:31:51.383 E/KernelCpuUidFullTimeReader( 1591): Negative delta from freq time for uid: 90017, delta: -228
+09-11 05:31:51.453 E/engmode_world(  943): Unknown token(00/00/00)
+09-11 05:31:51.453 E/engmode_hidl_service(  691): error to server(0xd0060012)
+09-11 05:31:51.551 E/ClockPackSettingsUtils( 2501): isRoamingState: android.provider.Settings$SettingNotFoundException: easy_mode_switch
+09-11 05:31:51.629 E/PocketModeEvent( 1591): ACTION_SCREEN_OFF
+09-11 05:31:51.630 E/PocketModeEvent( 1591): currentState : 1
+09-11 05:31:51.633 E/SUI_svcsock( 4648): svc_sock_send_message(suisvc): invalid remote socket suitch
+09-11 05:31:51.634 E/PocketModeEvent( 1591): MSG_TYPE_STOP_SENSING
+09-11 05:31:51.634 E/SUI_svcsock( 4648): svc_sock_send_message(suisvc): invalid remote socket suilst
+09-11 05:31:51.680 E/AbsSettings( 2501): refreshInner: refreshedSettingsDBItem key CLOCK_VERSION val = 300000
+09-11 05:31:51.680 E/AbsSettings( 2501): refreshInner: refreshedSettingsDBItem key PALETTE_VERSION val = 400000
+09-11 05:31:51.681 E/AbsSettings( 2501): refreshInner: refreshedSettingsDBItem key lock_clock_scale_rate val = 1.0
+09-11 05:31:51.681 E/AbsSettings( 2501): refreshInner: refreshedSettingsDBItem key lock_clock_font_type val = 0
+09-11 05:31:51.682 E/AbsSettings( 2501): refreshInner: refreshedSettingsDBItem key lock_clock_font_path val = 
+09-11 05:31:51.682 E/AbsSettings( 2501): refreshInner: refreshedSettingsDBItem key lock_clock_visibility val = 0
+09-11 05:31:51.683 E/AbsSettings( 2501): refreshInner: refreshedSettingsDBItem key profile_id val = 0
+09-11 05:31:51.684 E/AbsSettings( 2501): refreshInner: refreshedSettingsDBItem key clock_gravity val = 0
+09-11 05:31:51.684 E/AbsSettings( 2501): refreshInner: refreshedSettingsDBItem key clock_bottom_margin_ratio val = 0.14208333
+09-11 05:31:51.685 E/AbsSettings( 2501): refreshInner: refreshedSettingsDBItem key clock_horizontal_margin_ratio val = 0.0
+09-11 05:31:51.685 E/AbsSettings( 2501): refreshInner: refreshedSettingsDBItem key clock_show_weather_info val = 0
+09-11 05:31:51.686 E/AbsSettings( 2501): refreshInner: refreshedSettingsDBItem key lock_world_clock_city_list val = 
+09-11 05:31:51.686 E/AbsSettings( 2501): refreshInner: refreshedSettingsDBItem key SELECTED_CLOCK_TYPE val = 2
+09-11 05:31:51.688 E/ClockPackSettingsUtils( 2501): isRoamingState: android.provider.Settings$SettingNotFoundException: easy_mode_switch
+09-11 05:31:51.729 E/audit   (  939): type=1400 audit(1789097511.724:180524): avc:  denied  { ioctl } for  pid=8318 comm="arch_disk_io_0" path="/data/data/com.sec.android.daemonapp/databases/WeatherClock" dev="dm-52" ino=5191 ioctlcmd=0xf522 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:app_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:51.746 E/BtGatt.GattService( 2767): [GSIM LOG]: gsimLogHandler, msg: MESSAGE_SCAN_STOP, appName: android.uid.system, scannerId: 7, reportDelayMillis=0
+09-11 05:31:51.761 E/audit   (  939): type=1400 audit(1789097511.760:180525): avc:  denied  { ioctl } for  pid=8318 comm="arch_disk_io_0" path="/data/data/com.sec.android.daemonapp/databases/WeatherClock" dev="dm-52" ino=5191 ioctlcmd=0xf522 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:app_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:51.769 E/libnfc_nci( 2816): [ERROR:NativeNfcTag.cpp(1141)] nativeNfcTag_doDisconnect: tag already deactivated
+09-11 05:31:51.771 E/audit   (  939): type=1400 audit(1789097511.768:180526): avc:  denied  { ioctl } for  pid=8318 comm="arch_disk_io_0" path="/data/data/com.sec.android.daemonapp/databases/WeatherClock" dev="dm-52" ino=5191 ioctlcmd=0xf522 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:app_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:51.778 E/BtGatt.GattService( 2767): [GSIM LOG]: gsimLogHandler, msg: MESSAGE_SCAN_STOP, appName: com.samsung.android.mcfserver, scannerId: 1, reportDelayMillis=0
+09-11 05:31:51.797 E/BtGatt.GattService( 2767): [GSIM LOG]: gsimLogHandler, msg: MESSAGE_SCAN_STOP, appName: com.samsung.android.mcfserver, scannerId: 4, reportDelayMillis=0
+09-11 05:31:51.826 E/LoadedApk(23574): Exception : java.lang.NullPointerException: Attempt to invoke virtual method 'boolean android.os.Looper.isPerfLogEnable()' on a null object reference
+09-11 05:31:51.840 E/BtGatt.GattService( 2767): [GSIM LOG]: gsimLogHandler, msg: MESSAGE_SCAN_STOP, appName: android.uid.mdxkit, scannerId: 6, reportDelayMillis=0
+09-11 05:31:51.853 E/LoadedApk(23574): Exception : java.lang.NullPointerException: Attempt to invoke virtual method 'boolean android.os.Looper.isPerfLogEnable()' on a null object reference
+09-11 05:31:51.861 E/[MCFSDK_fmm_1.0.2039]_McfContext(19270): getBleAdapter -return instance created 100603684
+09-11 05:31:51.863 E/BtGatt.GattService( 2767): [GSIM LOG]: gsimLogHandler, msg: MESSAGE_SCAN_STOP, appName: android.uid.bcmgr, scannerId: 5, reportDelayMillis=0
+09-11 05:31:51.867 E/bluetooth( 2767): packages/modules/Bluetooth/system/gd/hci/le_scanning_manager.cc:943 scan_filter_parameter_setup: Remove passive filterScan. filter_index=7, uuid=0000fd69-0000-1000-8000-00805f9b34fb
+09-11 05:31:51.870 E/bluetooth( 2767): packages/modules/Bluetooth/system/gd/hci/le_scanning_manager.cc:943 scan_filter_parameter_setup: Remove passive filterScan. filter_index=28, uuid=0000fd5a-0000-1000-8000-00805f9b34fb
+09-11 05:31:51.873 E/BtGatt.GattService( 2767): [GSIM LOG]: gsimLogHandler, msg: MESSAGE_SCAN_STOP, appName: com.samsung.android.mcfserver, scannerId: 8, reportDelayMillis=0
+09-11 05:31:51.900 E/LoadedApk(23574): Exception : java.lang.NullPointerException: Attempt to invoke virtual method 'boolean android.os.Looper.isPerfLogEnable()' on a null object reference
+09-11 05:31:51.915 E/audit   (  939): type=1400 audit(1789097511.912:180527): avc:  denied  { ioctl } for  pid=8318 comm="arch_disk_io_1" path="/data/data/com.sec.android.daemonapp/databases/WeatherClock" dev="dm-52" ino=5191 ioctlcmd=0xf522 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:app_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:51.925 E/BtGatt.GattService( 2767): [GSIM LOG]: gsimLogHandler, msg: MESSAGE_SCAN_START, appName: android.uid.mdxkit, scannerId: 1, reportDelayMillis=0
+09-11 05:31:51.926 E/audit   (  939): type=1400 audit(1789097511.924:180528): avc:  denied  { ioctl } for  pid=23574 comm="lowpool[1510]" path="/data/data/com.google.android.gms/databases/ns.db" dev="dm-52" ino=7621 ioctlcmd=0xf522 scontext=u:r:gmscore_app:s0:c512,c768 tcontext=u:object_r:privapp_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:51.953 E/AppWidgetXmlUtil( 1591): Label is empty in ComponentInfo{com.samsung.android.lool/com.samsung.android.sm.widgetapp.SMGlanceWidgetProvider}
+09-11 05:31:51.954 E/AppWidgetXmlUtil( 1591): Label is empty in ComponentInfo{com.samsung.android.app.spage/com.samsung.android.app.spage.news.ui.widget.NewsWidgetReceiverCard}
+09-11 05:31:51.954 E/AppWidgetXmlUtil( 1591): Label is empty in ComponentInfo{com.samsung.android.app.spage/com.samsung.android.app.spage.news.ui.widget.NewsWidgetReceiverCover}
+09-11 05:31:52.051 E/[WEATHER]( 8318): {[7D230D78D0ABBDBE948CE80A15B2E91DFF802913D1AF381467573614C6FCCC8E5E0D6DEDEBC87AFC603B483EACFD12E6]}
+09-11 05:31:52.123 E/AOD_CONFIG@AODConfigurationController( 2501): Skipping unregisterMonitor MONITOR_SEMCONTEXT - no registered monitor
+09-11 05:31:52.123 E/AOD_CONFIG@AODConfigurationController( 2501): Skipping unregisterMonitor MONITOR_BROADCAST_PSM - no registered monitor
+09-11 05:31:52.123 E/AOD_CONFIG@AODConfigurationController( 2501): Skipping unregisterMonitor MONITOR_BROADCAST_WALLPAPER - no registered monitor
+09-11 05:31:52.123 E/AOD_CONFIG@AODConfigurationController( 2501): Skipping unregisterMonitor MONITOR_BROADCAST_ROAMING - no registered monitor
+09-11 05:31:52.123 E/AOD_CONFIG@AODConfigurationController( 2501): Skipping unregisterMonitor MONITOR_WEATHER_INFO_ENABLED - no registered monitor
+09-11 05:31:52.138 E/AODUiController( 2501): removeBottomUI: container is null
+09-11 05:31:52.147 E/ANDR-PERF-OPTSHANDLER( 1051): perf_lock_rel: failed for /proc/sys/kernel/walt_low_latency_task_threshold as previous value is not stored
+09-11 05:31:52.148 E/ANDR-PERF-UTIL( 1051): Failed to update node /proc/2832/sched_low_latency with value 0
+09-11 05:31:52.148 E/ANDR-PERF-OPTSHANDLER( 1051): can't reset low latency for tid 2832
+09-11 05:31:52.148 E/ANDR-PERF-RESOURCEQS( 1051): Failed to reset optimization [3, 52]
+09-11 05:31:52.188 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:52.259 E/SemWifiApSmartBleScanner( 1591): mGuidScanFilterBluetoothLeScanFilter [mDeviceName=null, mDeviceAddress=null, mUuid=null, mUuidMask=null, mServiceSolicitationUuid=null, mServiceSolicitationUuidMask=null, mServiceDataUuid=null, mServiceData=null, mServiceDataMask=null, mManufacturerId=117, mManufacturerData=[1, 18, -64, 10, -70, -30, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], mManufacturerDataMask=[0, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], mAdvertisingDataType=-1, mAdvertisingData=null, mAdvertisingDataMask=null, mTransportBlockFilter=null]
+09-11 05:31:52.284 E/BtGatt.GattService( 2767): [GSIM LOG]: gsimLogHandler, msg: MESSAGE_SCAN_START, appName: android.uid.system, scannerId: 2, reportDelayMillis=0
+09-11 05:31:52.296 E/.app.aodservice( 8414): Not starting debugger since process cannot load the jdwp agent.
+09-11 05:31:52.427 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:52.616 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.616 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.617 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.617 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.617 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.617 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.617 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.617 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.617 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.617 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.617 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.617 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.617 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.617 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.617 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.617 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.617 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.618 E/getBitmap : FileNotFoundException( 8414): /data/user/0/com.samsung.android.app.aodservice/files/sub_home_wallpaper_bitmap: open failed: ENOENT (No such file or directory)
+09-11 05:31:52.618 E/getBitmap : FileNotFoundException( 8414): /data/user/0/com.samsung.android.app.aodservice/files/sub_home_theme_wallpaper_bitmap: open failed: ENOENT (No such file or directory)
+09-11 05:31:52.618 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.618 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.618 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.618 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.618 E/DBManager( 8414): query: mDBAdapter is null. please init first.
+09-11 05:31:52.664 E/AbsSettings( 8414): refreshInner: refreshedSettingsDBItem key CLOCK_VERSION val = 300000
+09-11 05:31:52.664 E/AbsSettings( 8414): refreshInner: refreshedSettingsDBItem key PALETTE_VERSION val = 400000
+09-11 05:31:52.664 E/AbsSettings( 8414): refreshInner: refreshedSettingsDBItem key lock_clock_scale_rate val = 1.0
+09-11 05:31:52.664 E/AbsSettings( 8414): refreshInner: refreshedSettingsDBItem key lock_clock_font_type val = 0
+09-11 05:31:52.665 E/AbsSettings( 8414): refreshInner: refreshedSettingsDBItem key lock_clock_font_path val = 
+09-11 05:31:52.665 E/AbsSettings( 8414): refreshInner: refreshedSettingsDBItem key lock_clock_visibility val = 0
+09-11 05:31:52.665 E/AbsSettings( 8414): refreshInner: refreshedSettingsDBItem key profile_id val = 0
+09-11 05:31:52.665 E/AbsSettings( 8414): refreshInner: refreshedSettingsDBItem key clock_gravity val = 0
+09-11 05:31:52.665 E/AbsSettings( 8414): refreshInner: refreshedSettingsDBItem key clock_bottom_margin_ratio val = 0.14208333
+09-11 05:31:52.666 E/AbsSettings( 8414): refreshInner: refreshedSettingsDBItem key clock_horizontal_margin_ratio val = 0.0
+09-11 05:31:52.666 E/AbsSettings( 8414): refreshInner: refreshedSettingsDBItem key clock_show_weather_info val = 0
+09-11 05:31:52.666 E/AbsSettings( 8414): refreshInner: refreshedSettingsDBItem key lock_world_clock_city_list val = 
+09-11 05:31:52.666 E/AbsSettings( 8414): refreshInner: refreshedSettingsDBItem key SELECTED_CLOCK_TYPE val = 2
+09-11 05:31:52.670 E/AbsSettings( 8414): refreshInner: refreshedSettingsDBItem key CLOCK_VERSION val = 300000
+09-11 05:31:52.670 E/AbsSettings( 8414): refreshInner: refreshedSettingsDBItem key PALETTE_VERSION val = 90000
+09-11 05:31:52.753 E/audit   (  939): type=1400 audit(1789097512.752:180558): avc:  denied  { ioctl } for  pid=8283 comm="arch_disk_io_0" path="/data/data/com.quransunah.app.debug/databases/quran_unified.db" dev="dm-52" ino=48282 ioctlcmd=0xf522 scontext=u:r:untrusted_app:s0:c81,c257,c512,c768 tcontext=u:object_r:app_data_file:s0:c81,c257,c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:52.769 I/ExoPlayerImpl( 8283): Init edef071 [AndroidXMedia3/1.5.1] [a72q, SM-A725F, samsung, 34]
+09-11 05:31:52.774 E/audit   (  939): type=1400 audit(1789097512.772:180559): avc:  denied  { ioctl } for  pid=8283 comm="arch_disk_io_0" path="/data/data/com.quransunah.app.debug/databases/quran_unified.db" dev="dm-52" ino=48282 ioctlcmd=0xf522 scontext=u:r:untrusted_app:s0:c81,c257,c512,c768 tcontext=u:object_r:app_data_file:s0:c81,c257,c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:53.207 E/MediaPlayerWrapper( 2767): The callback queue isn't the current queue
+09-11 05:31:53.300 I/ExoPlayerImpl( 8283): Release edef071 [AndroidXMedia3/1.5.1] [a72q, SM-A725F, samsung, 34] [media3.common, media3.exoplayer, media3.decoder, media3.session]
+09-11 05:31:55.153 E/[WEATHER]( 8318): {[0678F1412CABF0A91BE0DDDCC12FDE214001CE8BFA109F9F7C3BB63D0B17CA2A8CAB17714AEE16E59B4BB941F8443A35]}
+09-11 05:31:57.442 E/audit   (  939): type=1400 audit(1789097517.440:180560): avc:  denied  { ioctl } for  pid=8318 comm="arch_disk_io_1" path="/data/data/com.sec.android.daemonapp/databases/WeatherClock" dev="dm-52" ino=5191 ioctlcmd=0xf522 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:app_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A725F_12_0001 audit_filtered
+09-11 05:31:57.702 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:57.758 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:58.058 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:58.075 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:58.164 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:58.215 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:58.439 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:58.455 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:58.555 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:58.608 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:59.238 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:59.248 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:59.348 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:59.397 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:59.651 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:59.679 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:59.763 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:31:59.817 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:00.187 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:00.199 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:00.345 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:00.399 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:00.441 E/android.hardware.health@2.1-service-samsung( 1036): Could not open /sys/class/power_supply/battery/lrp
+09-11 05:32:00.463 E/SecPowerUI.Notification( 2501): no saved value, so we do nothing !!
+09-11 05:32:00.850 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:00.867 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:00.964 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:01.023 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:01.447 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:01.467 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:01.562 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:01.619 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:02.130 E/BtGatt.GattService( 2767): [GSIM LOG]: gsimLogHandler, msg: MESSAGE_ADV_SET_STOP, appName: com.google.android.gms, id: 0, isLegacy: true
+09-11 05:32:02.199 E/BtGatt.GattService( 2767): [GSIM LOG]: gsimLogHandler, msg: MESSAGE_ADV_SET_START, appName: com.google.android.gms, id: 0, isLegacy: true
+09-11 05:32:02.243 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:02.252 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:02.351 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:02.402 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:02.848 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:02.867 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:02.956 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:03.007 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:03.448 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:03.456 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:03.560 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:03.624 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:04.047 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:04.074 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:04.160 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:04.218 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:04.652 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:04.665 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:04.759 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:04.812 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:05.647 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:05.660 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:05.761 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:05.814 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:05.854 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:05.864 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:05.965 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:06.028 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:06.848 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:06.863 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:06.956 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:07.011 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:07.250 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
+09-11 05:32:07.271 E/FileReal( 1069): Exist:85, /sys/class/sec/tsp/enabled failed: 2, No such file or directory
