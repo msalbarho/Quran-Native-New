@@ -153,6 +153,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
     val chrome by viewModel.chromeVisible.collectAsStateWithLifecycle()
     val surahsByNumber by viewModel.surahsByNumber.collectAsStateWithLifecycle()
     val pageNumber by viewModel.currentPage.collectAsStateWithLifecycle()
+    val textSizeSp by viewModel.textSizeSp.collectAsStateWithLifecycle()
     val page by viewModel.page.collectAsStateWithLifecycle()
     val selectedWord by viewModel.selectedWord.collectAsStateWithLifecycle()
     val overlay by viewModel.overlay.collectAsStateWithLifecycle()
@@ -403,6 +404,11 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
             picker = picker,
             indexTab = indexTab,
             pageNumber = pageNumber,
+            page = page,
+            medinaMode = settings.medinaMode,
+            nightMode = settings.nightMode,
+            fontSizeSp = textSizeSp,
+            surahsByNumber = surahsByNumber,
             currentJuz = page?.juzNumber ?: 1,
             currentHizb = page?.hizbNumber ?: 1,
             currentSurah = page?.primarySurahNumber() ?: 1,
@@ -411,6 +417,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
             indexViewModel = indexViewModel,
             onClose = viewModel::closePicker,
             onSelectIndexPage = viewModel::jumpToIndexPage,
+            onJumpPage = viewModel::jumpToPageNumber,
             onJumpBookmark = viewModel::jumpToBookmark,
             onStartReading = {
                 viewModel.selectTab(AppTab.Reading)

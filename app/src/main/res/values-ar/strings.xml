@@ -126,6 +126,13 @@
     <string name="bookmarks_title">آخر موضع</string>
     <string name="saved_content_title">محفوظاتي وتدريبي</string>
     <string name="training_title">التدريب والتحفيظ</string>
+    <string name="training_mushaf_mode_title">جلسة حفظ على صفحة المصحف</string>
+    <string name="training_mushaf_mode_hint">أخفِ الآيات، حاول التسميع، ثم أظهرها للمراجعة.</string>
+    <string name="training_mushaf_loading">جارٍ تجهيز صفحة التدريب…</string>
+    <string name="training_show_ayahs">إظهار الآيات</string>
+    <string name="training_hide_ayahs">إخفاء الآيات</string>
+    <string name="training_previous_page">الصفحة السابقة</string>
+    <string name="training_next_page">الصفحة التالية</string>
     <string name="last_position_title">آخر موضع</string>
     <string name="saved_places_tab">مواضعي</string>
     <string name="training_tab">تدريبي</string>

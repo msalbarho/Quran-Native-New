@@ -90,6 +90,7 @@ fun MedinaCanvasPage(
     highlightColor: Color = Color(0x246D5843),
     highlightWordId: Int? = null,
     highlightAyah: Pair<Int, Int>? = null,
+    hideAyahText: Boolean = false,
     chromeVisible: Boolean = true,
     surahsByNumber: Map<Int, SurahInfo> = emptyMap(),
     quarter: QuarterMarker? = null,
@@ -124,6 +125,7 @@ fun MedinaCanvasPage(
                     highlightColor = highlightColor,
                     highlightWordId = highlightWordId,
                     highlightAyah = highlightAyah,
+                    hideAyahText = hideAyahText,
                     chromeVisible = chromeVisible,
                     surahsByNumber = surahsByNumber,
                     quarter = quarter,
@@ -147,6 +149,7 @@ fun MedinaCanvasPage(
                 highlightColor = highlightColor,
                 highlightWordId = highlightWordId,
                 highlightAyah = highlightAyah,
+                hideAyahText = hideAyahText,
                 chromeVisible = chromeVisible,
                 surahsByNumber = surahsByNumber,
                 quarter = quarter,
@@ -170,6 +173,7 @@ private fun MedinaCanvasPageBody(
     highlightColor: Color,
     highlightWordId: Int?,
     highlightAyah: Pair<Int, Int>?,
+    hideAyahText: Boolean,
     chromeVisible: Boolean,
     surahsByNumber: Map<Int, SurahInfo>,
     quarter: QuarterMarker?,
@@ -388,7 +392,7 @@ private fun MedinaCanvasPageBody(
                         }
                         pagePaint.applyGlyphColor(
                             highlighted = highlighted,
-                            glyph = glyph,
+                            glyph = if (hideAyahText && !word.word.isAyahMarker) Color.Transparent.toArgb() else glyph,
                             playbackBlue = playbackBlue,
                         )
                         if (word.body.isNotEmpty()) {
@@ -403,7 +407,7 @@ private fun MedinaCanvasPageBody(
                             nativeCanvas.drawText(marker, word.markerX, word.baseline, pagePaint)
                         }
                         pagePaint.colorFilter = null
-                        if (!word.word.isAyahMarker && word.word.id in meaningWordIds) {
+                        if (!hideAyahText && !word.word.isAyahMarker && word.word.id in meaningWordIds) {
                             pagePaint.style = Paint.Style.STROKE
                             pagePaint.strokeWidth = 1.6f
                             pagePaint.color = if (highlighted) playbackBlue else meaningLine

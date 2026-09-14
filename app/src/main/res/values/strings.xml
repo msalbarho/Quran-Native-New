@@ -125,7 +125,14 @@
     <string name="meaning_location">Surah %1$s · ayah %2$s</string>
     <string name="bookmarks_title">Last position</string>
     <string name="saved_content_title">My saved items and training</string>
-    <string name="training_title">Training and memorization</string>
+    <string name="training_title">Training &amp; memorization</string>
+    <string name="training_mushaf_mode_title">Memorize from the Mushaf page</string>
+    <string name="training_mushaf_mode_hint">Hide the ayahs, recite from memory, then reveal them to review.</string>
+    <string name="training_mushaf_loading">Preparing the training page…</string>
+    <string name="training_show_ayahs">Show ayahs</string>
+    <string name="training_hide_ayahs">Hide ayahs</string>
+    <string name="training_previous_page">Previous page</string>
+    <string name="training_next_page">Next page</string>
     <string name="last_position_title">Last position</string>
     <string name="saved_places_tab">Saved places</string>
     <string name="training_tab">Training</string>
