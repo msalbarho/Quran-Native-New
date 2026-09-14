@@ -1,7 +1,12 @@
 package com.quransunah.app.ui.shell
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.app.Activity
 import android.view.WindowManager
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -22,11 +27,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -42,19 +50,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.core.content.ContextCompat
 import com.quransunah.app.R
 import com.quransunah.app.core.AppConstants
+import com.quransunah.app.core.EasternArabic
 import com.quransunah.app.domain.model.AyahRef
 import com.quransunah.app.domain.model.PlaybackDomain
 import com.quransunah.app.hydration.HydrationState
@@ -76,6 +89,8 @@ import com.quransunah.app.ui.mushaf.PageNumberBadge
 import com.quransunah.app.ui.mushaf.PagePickerDialog
 import com.quransunah.app.ui.mushaf.TextMushafPage
 import com.quransunah.app.ui.mushaf.toLineRecords
+import com.quransunah.app.ui.memorization.MemorizationViewModel
+import com.quransunah.app.data.audio.RecordingState
 import com.quransunah.app.ui.search.SearchPane
 import com.quransunah.app.ui.study.MeaningPopover
 import com.quransunah.app.ui.study.StudyViewModel
@@ -103,7 +118,7 @@ fun HolyQuranApp(viewModel: HolyQuranViewModel) {
             HydrationState.Pending, HydrationState.Ready -> {
                 val showBrandSplash = state is HydrationState.Pending || !brandMinElapsed
                 if (showBrandSplash) {
-                    BrandSplash()
+                    BrandSplash(isPreparing = state is HydrationState.Pending)
                 } else {
                     ReadyShell(viewModel)
                 }
@@ -113,7 +128,7 @@ fun HolyQuranApp(viewModel: HolyQuranViewModel) {
 }
 
 @Composable
-private fun BrandSplash() {
+private fun BrandSplash(isPreparing: Boolean) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -127,6 +142,35 @@ private fun BrandSplash() {
             modifier = Modifier.fillMaxHeight(),
             contentScale = ContentScale.FillHeight,
         )
+        if (isPreparing) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = 24.dp, vertical = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                CircularProgressIndicator(
+                    color = androidx.compose.ui.graphics.Color(0xFFD4A017),
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(28.dp),
+                )
+                Text(
+                    text = stringResource(R.string.hydration_preparing_title),
+                    color = androidx.compose.ui.graphics.Color.White,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    fontSize = 15.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 10.dp),
+                )
+                Text(
+                    text = stringResource(R.string.hydration_preparing_hint),
+                    color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.82f),
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
+        }
     }
 }
 
@@ -171,8 +215,27 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
     val bookmarksViewModel: BookmarksViewModel = hiltViewModel()
     val listeningViewModel: ListeningViewModel = hiltViewModel()
     val studyViewModel: StudyViewModel = hiltViewModel()
+    val memorizationViewModel: MemorizationViewModel = hiltViewModel()
+    val recordingState by memorizationViewModel.recordingState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val recordingPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) memorizationViewModel.startRecording()
+    }
     val indexViewModel: QuranIndexViewModel = hiltViewModel()
     val preferredAyah = jumpHighlight ?: selectedWord?.let { AyahRef(it.surah, it.ayah) }
+    val currentLocationWord = remember(page) {
+        page?.lines
+            ?.asSequence()
+            ?.flatMap { it.words.asSequence() }
+            ?.firstOrNull { !it.isAyahMarker }
+    }
+    val currentSurahName = currentLocationWord?.let { word ->
+        surahsByNumber[word.surah]?.nameArabic
+            ?: stringResource(R.string.surah_fallback, EasternArabic.format(word.surah))
+    } ?: stringResource(R.string.surah_fallback, EasternArabic.format(1))
+    val currentAyah = currentLocationWord?.ayah ?: 1
     LaunchedEffect(page, preferredAyah) {
         bookmarksViewModel.bindContext(page, preferredAyah)
     }
@@ -193,7 +256,8 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
         }
     }
     val restoreBar = tab == AppTab.Reading
-    val navVisible = chrome || tab == AppTab.Listening || tab == AppTab.Training
+    val navVisible = tab != AppTab.Home &&
+        (chrome || tab == AppTab.Listening || tab == AppTab.Training)
     var pagePickerOpen by remember { mutableStateOf(false) }
     val highlight by viewModel.mushafHighlight.collectAsStateWithLifecycle()
 
@@ -201,6 +265,14 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
         initialPage = pageNumber - 1,
         pageCount = { AppConstants.TOTAL_PAGES },
     )
+    BackHandler(
+        enabled = tab != AppTab.Home &&
+            overlay == StudyOverlay.None &&
+            !searchOpen &&
+            picker == ShellPicker.None,
+    ) {
+        viewModel.selectTab(AppTab.Home)
+    }
     LaunchedEffect(pagerState.currentPage, pendingPagerPage) {
         if (pendingPagerPage != null) return@LaunchedEffect
         viewModel.onUserPagerSettled(pagerState.currentPage + 1)
@@ -217,6 +289,18 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
             .background(paper.pageBackground),
     ) {
         when (tab) {
+            AppTab.Home -> HomeScreen(
+                pageNumber = pageNumber,
+                currentSurah = currentSurahName,
+                currentAyah = currentAyah,
+                onOpenReading = { viewModel.selectTab(AppTab.Reading) },
+                onOpenTraining = { viewModel.selectTab(AppTab.Training) },
+                onOpenListening = { viewModel.selectTab(AppTab.Listening) },
+                onOpenIndex = { viewModel.openIndexPicker(QuranIndexTab.Surah) },
+                onOpenSavedPlaces = viewModel::openLastPositionPicker,
+                onOpenSettings = viewModel::openSettingsPicker,
+                modifier = Modifier.fillMaxSize(),
+            )
             AppTab.Reading, AppTab.Training -> {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     HorizontalPager(
@@ -366,6 +450,18 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
         if (tab == AppTab.Training) {
             TrainingControlBar(
                 hidden = trainingHidden,
+                onOpenProgress = viewModel::openProgressPicker,
+                recording = recordingState is RecordingState.Recording,
+                onStartRecording = {
+                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                        memorizationViewModel.startRecording()
+                    } else {
+                        recordingPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                    }
+                },
+                onStopRecording = memorizationViewModel::stopRecording,
+                onPrevious = { if (pageNumber > 1) viewModel.jumpToPageNumber(pageNumber - 1) },
+                onNext = { if (pageNumber < AppConstants.TOTAL_PAGES) viewModel.jumpToPageNumber(pageNumber + 1) },
                 onToggle = {
                     if (!trainingHidden) revealedAyahs = emptySet()
                     trainingHidden = !trainingHidden
@@ -392,6 +488,10 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                 onBookmarkPress = { viewModel.selectTab(AppTab.Training) },
                 onSettingsPress = viewModel::openSettingsPicker,
             )
+        }
+
+        if (tab == AppTab.Training && !settings.trainingHintDone) {
+            TrainingHintOverlay(onDismiss = viewModel::markTrainingHintDone)
         }
 
         if (overlay == StudyOverlay.Meaning && selectedWord != null) {
@@ -460,32 +560,241 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
 }
 
 @Composable
+private fun TrainingHintOverlay(onDismiss: () -> Unit) {
+    val paper = LocalPaperColors.current
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(androidx.compose.ui.graphics.Color(0x990F172A))
+            .clickable(onClick = onDismiss),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .shadow(18.dp, RoundedCornerShape(22.dp))
+                .clip(RoundedCornerShape(22.dp))
+                .background(paper.pageBody)
+                .clickable(onClick = {})
+                .padding(horizontal = 22.dp, vertical = 22.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_visibility_off_eye),
+                contentDescription = null,
+                tint = paper.accent,
+                modifier = Modifier.size(48.dp),
+            )
+            Text(
+                text = stringResource(R.string.training_hint_title),
+                color = paper.textStrong,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                fontSize = 22.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 10.dp),
+            )
+            Text(
+                text = stringResource(R.string.training_hint_subtitle),
+                color = paper.textMuted,
+                fontSize = 14.sp,
+                lineHeight = 21.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+            TrainingHintStep(1, R.string.training_hint_step_read)
+            TrainingHintStep(2, R.string.training_hint_step_recite)
+            TrainingHintStep(3, R.string.training_hint_step_check)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 18.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.training_hint_skip),
+                    color = paper.textMuted,
+                    fontSize = 13.sp,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable(onClick = onDismiss)
+                        .padding(vertical = 12.dp),
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    text = stringResource(R.string.training_hint_start),
+                    color = paper.pageBody,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .weight(1.25f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(paper.accent)
+                        .clickable(onClick = onDismiss)
+                        .padding(vertical = 12.dp),
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TrainingHintStep(number: Int, textRes: Int) {
+    val paper = LocalPaperColors.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(androidx.compose.foundation.shape.CircleShape)
+                .background(paper.accent.copy(alpha = 0.16f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = EasternArabic.format(number),
+                color = paper.accent,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                fontSize = 14.sp,
+            )
+        }
+        Text(
+            text = stringResource(textRes),
+            color = paper.textStrong,
+            fontSize = 14.sp,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
 private fun TrainingControlBar(
     hidden: Boolean,
+    onOpenProgress: () -> Unit,
+    recording: Boolean,
+    onStartRecording: () -> Unit,
+    onStopRecording: () -> Unit,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(paper.pageBody.copy(alpha = 0.97f))
             .padding(horizontal = 8.dp, vertical = 7.dp),
-        horizontalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        val label = stringResource(if (hidden) R.string.training_show_ayahs else R.string.training_hide_ayahs)
+        val accessibilityLabel = stringResource(
+            if (hidden) R.string.training_show_ayahs_accessibility
+            else R.string.training_hide_ayahs_accessibility,
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            TrainingSmallControl(
+                label = stringResource(R.string.training_previous_short),
+                onClick = onPrevious,
+                modifier = Modifier.weight(0.72f),
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1.05f)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(paper.accent)
+                    .clickable(onClick = onToggle)
+                    .padding(vertical = 7.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    painter = painterResource(
+                        if (hidden) R.drawable.ic_visibility_off_eye else R.drawable.ic_visibility_eye,
+                    ),
+                    contentDescription = accessibilityLabel,
+                    tint = paper.pageBody,
+                    modifier = Modifier.size(34.dp),
+                )
+                Text(
+                    text = label,
+                    color = paper.pageBody,
+                    textAlign = TextAlign.Center,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(top = 1.dp),
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1.35f)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(if (recording) paper.darkAccent else paper.accent)
+                    .clickable(onClick = if (recording) onStopRecording else onStartRecording)
+                    .padding(vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_record_voice_over),
+                    contentDescription = stringResource(
+                        if (recording) R.string.training_stop_record else R.string.training_record,
+                    ),
+                    tint = paper.pageBody,
+                    modifier = Modifier.size(30.dp),
+                )
+                Text(
+                    text = stringResource(if (recording) R.string.training_stop_record else R.string.training_record),
+                    color = paper.pageBody,
+                    textAlign = TextAlign.Center,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    fontSize = 12.sp,
+                )
+            }
+            TrainingSmallControl(
+                label = stringResource(R.string.training_next_short),
+                onClick = onNext,
+                modifier = Modifier.weight(0.72f),
+            )
+        }
         Text(
-            text = stringResource(if (hidden) R.string.training_show_ayahs else R.string.training_hide_ayahs),
-            color = paper.pageBody,
-            textAlign = TextAlign.Center,
+            text = stringResource(R.string.training_progress_summary),
+            color = paper.textMuted,
+            fontSize = 11.sp,
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(paper.accent)
-                .clickable(onClick = onToggle)
-                .padding(vertical = 10.dp),
+                .clip(RoundedCornerShape(10.dp))
+                .clickable(onClick = onOpenProgress)
+                .padding(horizontal = 12.dp, vertical = 5.dp),
         )
     }
+}
+
+@Composable
+private fun TrainingSmallControl(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val paper = LocalPaperColors.current
+    Text(
+        text = label,
+        color = paper.textMuted,
+        fontSize = 11.sp,
+        textAlign = TextAlign.Center,
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 14.dp),
+    )
 }
 
 @Composable

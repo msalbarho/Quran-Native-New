@@ -20,10 +20,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -149,6 +151,32 @@ fun ShellPickerHost(
                 modifier = Modifier.fillMaxWidth().weight(1f),
             )
         }
+        ShellPicker.Progress -> CenteredPickerCard(
+            title = stringResource(R.string.training_progress_summary),
+            onClose = onClose,
+            minHeight = 560.dp,
+            maxHeight = 760.dp,
+        ) {
+            MemorizationScreen(
+                fontManager = fontManager,
+                onJump = { item ->
+                    onJumpBookmark(
+                        ReadingBookmark(
+                            id = item.id,
+                            surah = item.surah,
+                            ayah = item.ayah,
+                            pageNumber = item.pageNumber,
+                            wordId = 0,
+                            wordIndex = 0,
+                            ayahText = item.ayahText,
+                            savedAt = item.updatedAt,
+                        ),
+                    )
+                },
+                onStartReading = onStartReading,
+                modifier = Modifier.fillMaxWidth().weight(1f),
+            )
+        }
         ShellPicker.Settings -> SettingsSideSheet(onClose = onClose)
         ShellPicker.None -> Unit
     }
@@ -259,19 +287,34 @@ private fun TrainingMushafSurface(
                     .clickable(enabled = pageNumber > 1) { onJumpPage(pageNumber - 1) }
                     .padding(horizontal = 7.dp, vertical = 8.dp),
             )
-            Text(
-                text = stringResource(if (hidden) R.string.training_show_ayahs else R.string.training_hide_ayahs),
-                color = paper.pageBody,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            Column(
                 modifier = Modifier
                     .weight(1f)
                     .clip(TrainingControlShape)
                     .background(paper.accent)
                     .clickable { hidden = !hidden }
-                    .padding(horizontal = 8.dp, vertical = 10.dp),
-            )
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    painter = androidx.compose.ui.res.painterResource(
+                        if (hidden) R.drawable.ic_visibility_off_eye else R.drawable.ic_visibility_eye,
+                    ),
+                    contentDescription = stringResource(
+                        if (hidden) R.string.training_show_ayahs_accessibility
+                        else R.string.training_hide_ayahs_accessibility,
+                    ),
+                    tint = paper.pageBody,
+                    modifier = Modifier.size(30.dp),
+                )
+                Text(
+                    text = stringResource(if (hidden) R.string.training_show_ayahs else R.string.training_hide_ayahs),
+                    color = paper.pageBody,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+            }
             Text(
                 text = stringResource(R.string.training_next_page),
                 color = if (pageNumber < AppConstants.TOTAL_PAGES) paper.textStrong else paper.textMuted.copy(alpha = 0.45f),

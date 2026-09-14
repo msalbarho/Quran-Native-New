@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -463,6 +464,7 @@ private fun TranscriptCheckCard(
 ) {
     val paper = LocalPaperColors.current
     var transcript by remember { mutableStateOf("") }
+    var resultAcknowledged by remember { mutableStateOf(false) }
     LaunchedEffect(transcriptionState) {
         when (transcriptionState) {
             is TranscriptionState.Completed -> transcript = transcriptionState.text
@@ -530,16 +532,34 @@ private fun TranscriptCheckCard(
         MemorizationButton(
             label = stringResource(R.string.memorization_check_button),
             emphasized = true,
-            onClick = { onCheck(transcript) },
+            onClick = {
+                resultAcknowledged = false
+                onCheck(transcript)
+            },
             enabled = transcript.isNotBlank(),
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
         )
-        if (result != null) {
+        if (result != null && !resultAcknowledged) {
             Text(
                 stringResource(R.string.memorization_check_score, EasternArabic.format(result.scorePercent)),
                 color = paper.accent,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 8.dp),
+            )
+            Text(
+                text = when {
+                    result.passed -> stringResource(R.string.memorization_feedback_excellent)
+                    result.scorePercent >= 60 -> stringResource(
+                        R.string.memorization_feedback_close,
+                        EasternArabic.format(result.differences.size),
+                    )
+                    result.scorePercent >= 35 -> stringResource(R.string.memorization_feedback_review)
+                    else -> stringResource(R.string.memorization_feedback_practice)
+                },
+                color = paper.textStrong,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(top = 5.dp),
             )
             Text(
                 stringResource(
@@ -551,19 +571,63 @@ private fun TranscriptCheckCard(
                 color = paper.textMuted,
                 fontSize = 12.sp,
             )
-            Text(
-                text = when {
-                    result.passed -> stringResource(R.string.memorization_result_next)
-                    result.scorePercent >= 60 -> stringResource(R.string.memorization_result_retry)
-                    else -> stringResource(R.string.memorization_result_practice)
-                },
-                color = paper.accent,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(top = 6.dp),
-            )
+            Column(modifier = Modifier.padding(top = 7.dp)) {
+                result.differences.take(18).forEach { difference ->
+                    RecitationDifferenceChip(difference)
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                MemorizationButton(
+                    label = stringResource(R.string.memorization_retry),
+                    onClick = {
+                        resultAcknowledged = true
+                        transcript = ""
+                    },
+                    modifier = Modifier.weight(1f),
+                )
+                MemorizationButton(
+                    label = stringResource(R.string.memorization_mastered_action),
+                    emphasized = true,
+                    onClick = { resultAcknowledged = true },
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun RecitationDifferenceChip(difference: com.quransunah.app.core.WordDifference) {
+    val paper = LocalPaperColors.current
+    val color = when (difference.type) {
+        com.quransunah.app.core.WordDifferenceType.MISSING -> Color(0xFFC0392B)
+        com.quransunah.app.core.WordDifferenceType.DIFFERENT -> Color(0xFFD97706)
+        com.quransunah.app.core.WordDifferenceType.EXTRA -> Color(0xFFC0392B)
+    }
+    val label = when (difference.type) {
+        com.quransunah.app.core.WordDifferenceType.MISSING -> stringResource(
+            R.string.memorization_word_missing,
+            difference.expected.orEmpty(),
+        )
+        com.quransunah.app.core.WordDifferenceType.DIFFERENT -> stringResource(
+            R.string.memorization_word_different,
+            difference.expected.orEmpty(),
+            difference.actual.orEmpty(),
+        )
+        com.quransunah.app.core.WordDifferenceType.EXTRA -> stringResource(
+            R.string.memorization_word_extra,
+            difference.actual.orEmpty(),
+        )
+    }
+    Text(
+        text = label,
+        color = color,
+        fontSize = 13.sp,
+        modifier = Modifier.padding(top = 3.dp),
+    )
 }
 
 @Composable
