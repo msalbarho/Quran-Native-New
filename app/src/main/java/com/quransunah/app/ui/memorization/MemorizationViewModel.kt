@@ -8,6 +8,7 @@ import com.quransunah.app.domain.model.MemorizationSession
 import com.quransunah.app.domain.model.MemorizationPlan
 import com.quransunah.app.domain.model.isValidAyahRange
 import com.quransunah.app.domain.model.isDueForReview
+import com.quransunah.app.core.SurahAyahCounts
 import com.quransunah.app.data.audio.MemorizationRecorder
 import com.quransunah.app.data.audio.RecordingState
 import com.quransunah.app.data.audio.OnDeviceSpeechTranscriber
@@ -52,7 +53,7 @@ data class MemorizationUiState(
 @HiltViewModel
 class MemorizationViewModel @Inject constructor(
     private val memorizationRepository: MemorizationRepository,
-    mushafRepository: MushafRepository,
+    private val mushafRepository: MushafRepository,
     private val recorder: MemorizationRecorder,
     private val transcriber: OnDeviceSpeechTranscriber,
 ) : ViewModel() {
@@ -146,6 +147,46 @@ class MemorizationViewModel @Inject constructor(
                 updatedAt = now,
             )
             if (isValidAyahRange(plan)) memorizationRepository.savePlan(plan)
+        }
+    }
+
+    fun startSequentialPlan() {
+        viewModelScope.launch {
+            if (memorizationRepository.observeItems().first().isNotEmpty()) return@launch
+            val now = System.currentTimeMillis()
+            val endAyah = SurahAyahCounts.ayahCount(114)
+            val dailyTarget = 3
+            val plan = MemorizationPlan(
+                id = MemorizationPlan.idFor(1, 1, 114, endAyah),
+                name = "الحفظ بالتسلسل",
+                startSurah = 1,
+                startAyah = 1,
+                endSurah = 114,
+                endAyah = endAyah,
+                dailyTarget = dailyTarget,
+                createdAt = now,
+                updatedAt = now,
+            )
+            memorizationRepository.savePlan(plan)
+            SurahAyahCounts.range(1, 1, 1, dailyTarget).forEach { (surah, ayah) ->
+                val words = mushafRepository.getAyahWords(surah, ayah)
+                val text = words.filterNot { it.isAyahMarker }.joinToString(" ") { it.textHafs }.trim()
+                if (text.isNotBlank()) {
+                    memorizationRepository.track(
+                        MemorizationItem(
+                            id = MemorizationItem.idFor(surah, ayah),
+                            surah = surah,
+                            ayah = ayah,
+                            pageNumber = mushafRepository.getPageForAyah(surah, ayah),
+                            ayahText = text,
+                            state = MemorizationState.LEARNING,
+                            reviewCount = 0,
+                            createdAt = now,
+                            updatedAt = now,
+                        ),
+                    )
+                }
+            }
         }
     }
 
