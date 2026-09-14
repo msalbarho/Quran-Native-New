@@ -110,6 +110,7 @@ class MemorizationViewModel @Inject constructor(
     fun markMastered(id: String) {
         viewModelScope.launch {
             memorizationRepository.setState(id, MemorizationState.MASTERED, System.currentTimeMillis())
+            advanceSequentialQueue()
         }
     }
 
@@ -186,6 +187,37 @@ class MemorizationViewModel @Inject constructor(
                         ),
                     )
                 }
+            }
+        }
+    }
+
+    private suspend fun advanceSequentialQueue() {
+        val plan = memorizationRepository.observePlans().first().firstOrNull { it.name == "الحفظ بالتسلسل" } ?: return
+        val items = memorizationRepository.observeItems().first()
+        if (items.isEmpty() || items.any { it.state == MemorizationState.LEARNING }) return
+        val lastIndex = items.maxOf { SurahAyahCounts.ayahId(it.surah, it.ayah) }
+        val endIndex = SurahAyahCounts.ayahId(plan.endSurah, plan.endAyah)
+        if (lastIndex >= endIndex) return
+        val now = System.currentTimeMillis()
+        val nextEnd = (lastIndex + plan.dailyTarget).coerceAtMost(endIndex)
+        (lastIndex + 1..nextEnd).forEach { globalIndex ->
+            val (surah, ayah) = SurahAyahCounts.fromAyahId(globalIndex) ?: return@forEach
+            val words = mushafRepository.getAyahWords(surah, ayah)
+            val text = words.filterNot { it.isAyahMarker }.joinToString(" ") { it.textHafs }.trim()
+            if (text.isNotBlank()) {
+                memorizationRepository.track(
+                    MemorizationItem(
+                        id = MemorizationItem.idFor(surah, ayah),
+                        surah = surah,
+                        ayah = ayah,
+                        pageNumber = mushafRepository.getPageForAyah(surah, ayah),
+                        ayahText = text,
+                        state = MemorizationState.LEARNING,
+                        reviewCount = 0,
+                        createdAt = now,
+                        updatedAt = now,
+                    ),
+                )
             }
         }
     }
