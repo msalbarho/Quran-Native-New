@@ -212,6 +212,15 @@
     <string name="settings_theme_light">Day</string>
     <string name="settings_theme_dark">Night</string>
     <string name="settings_app_color">App color</string>
+    <string name="settings_selected_palette">Selected palette: %1$s</string>
+    <string name="settings_palette_white">White</string>
+    <string name="settings_palette_beige">Manuscript</string>
+    <string name="settings_palette_blue">Sky</string>
+    <string name="settings_palette_green">Olive</string>
+    <string name="settings_palette_purple">Lilac</string>
+    <string name="settings_palette_rose">Quiet rose</string>
+    <string name="settings_palette_teal">Teal</string>
+    <string name="settings_palette_amber">Amber</string>
     <string name="settings_page_display">Page display</string>
     <string name="settings_pages_madina">Madinah mushaf</string>
     <string name="settings_pages_text">Text mushaf</string>

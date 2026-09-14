@@ -212,6 +212,15 @@
     <string name="settings_theme_light">نهاري</string>
     <string name="settings_theme_dark">ليلي</string>
     <string name="settings_app_color">لون التطبيق</string>
+    <string name="settings_selected_palette">اللون المختار: %1$s</string>
+    <string name="settings_palette_white">أبيض</string>
+    <string name="settings_palette_beige">مخطوط</string>
+    <string name="settings_palette_blue">سماوي</string>
+    <string name="settings_palette_green">زيتوني</string>
+    <string name="settings_palette_purple">ليلكي</string>
+    <string name="settings_palette_rose">وردي هادئ</string>
+    <string name="settings_palette_teal">فيروزي</string>
+    <string name="settings_palette_amber">عنبر</string>
     <string name="settings_page_display">نوع عرض الصفحات</string>
     <string name="settings_pages_madina">مصحف المدينة</string>
     <string name="settings_pages_text">المصحف النصي</string>

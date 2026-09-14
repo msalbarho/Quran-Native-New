@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -124,26 +126,27 @@ fun SettingsScreenContent(
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(9.dp),
                 verticalArrangement = Arrangement.spacedBy(9.dp),
+                maxItemsInEachRow = 4,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 PaperPaletteId.entries.forEach { id ->
                     val active = id == settings.palette
                     val (start, end) = PaperPalettes.swatchGradient(id)
-                    Box(
-                        modifier = Modifier
-                            .size(38.dp)
-                            .shadow(if (active) 6.dp else 2.dp, RoundedCornerShape(9.dp), clip = false)
-                            .clip(RoundedCornerShape(9.dp))
-                            .background(Brush.linearGradient(listOf(start, end)))
-                            .border(
-                                width = if (active) 2.dp else 2.dp,
-                                color = if (active) paper.accent else paper.tone500.copy(alpha = 0.75f),
-                                shape = RoundedCornerShape(9.dp),
-                            )
-                            .clickable { onPalette(id) },
+                    PaletteOption(
+                        label = stringResource(id.paletteLabelRes()),
+                        start = start,
+                        end = end,
+                        active = active,
+                        onClick = { onPalette(id) },
                     )
                 }
             }
+            Text(
+                text = stringResource(R.string.settings_selected_palette, stringResource(settings.palette.paletteLabelRes())),
+                color = paper.textMuted,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 3.dp),
+            )
         }
         SettingsSection(title = stringResource(R.string.settings_page_display)) {
             SegmentedTwoOptions(
@@ -192,6 +195,72 @@ fun SettingsScreenContent(
     }
     if (aboutOpen) {
         AboutAppDialog(onClose = { aboutOpen = false })
+    }
+}
+
+private fun PaperPaletteId.paletteLabelRes(): Int = when (this) {
+    PaperPaletteId.White -> R.string.settings_palette_white
+    PaperPaletteId.Beige -> R.string.settings_palette_beige
+    PaperPaletteId.Blue -> R.string.settings_palette_blue
+    PaperPaletteId.Green -> R.string.settings_palette_green
+    PaperPaletteId.Purple -> R.string.settings_palette_purple
+    PaperPaletteId.Rose -> R.string.settings_palette_rose
+    PaperPaletteId.Teal -> R.string.settings_palette_teal
+    PaperPaletteId.Amber -> R.string.settings_palette_amber
+}
+
+@Composable
+private fun PaletteOption(
+    label: String,
+    start: Color,
+    end: Color,
+    active: Boolean,
+    onClick: () -> Unit,
+) {
+    val paper = LocalPaperColors.current
+    val shape = RoundedCornerShape(12.dp)
+    Column(
+        modifier = Modifier
+            .width(76.dp)
+            .clip(shape)
+            .background(if (active) paper.accent.copy(alpha = 0.09f) else Color.Transparent)
+            .border(
+                width = if (active) 1.7.dp else 1.dp,
+                color = if (active) paper.accent else paper.tone500.copy(alpha = 0.78f),
+                shape = shape,
+            )
+            .clickable(onClick = onClick)
+            .padding(5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(32.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .shadow(if (active) 4.dp else 1.dp, RoundedCornerShape(8.dp), clip = false)
+                .background(Brush.linearGradient(listOf(start, end))),
+            contentAlignment = Alignment.TopEnd,
+        ) {
+            if (active) {
+                Text(
+                    text = "✓",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp),
+                )
+            }
+        }
+        Text(
+            text = label,
+            color = paper.textStrong,
+            fontSize = 11.sp,
+            fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            modifier = Modifier.padding(top = 4.dp),
+        )
     }
 }
 
