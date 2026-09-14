@@ -144,6 +144,14 @@
     <string name="training_mushaf_mode_title">جلسة حفظ على صفحة المصحف</string>
     <string name="training_mushaf_mode_hint">أخفِ الآيات، حاول التسميع، ثم أظهرها للمراجعة.</string>
     <string name="training_mushaf_loading">جارٍ تجهيز صفحة التدريب…</string>
+    <string name="training_hint_title">ابدأ التدريب الآن</string>
+    <string name="training_hint_subtitle">صفحة المصحف أمامك، والآيات مخفية لتسترجعها من حفظك.</string>
+    <string name="training_hint_step_read">اقرأ الآية وأخفها.</string>
+    <string name="training_hint_step_recite">سمّع من حفظك.</string>
+    <string name="training_hint_step_check">أظهرها وراجع أخطاءك.</string>
+    <string name="training_hint_skip">تخطي الشرح</string>
+    <string name="training_hint_start">فهمت، ابدأ</string>
+    <string name="training_progress_summary">ملخص التقدم</string>
     <string name="training_show_ayahs">إظهار الآية</string>
     <string name="training_hide_ayahs">إخفاء الآية</string>
     <string name="training_show_ayahs_accessibility">إظهار الآية، العين مغلقة</string>

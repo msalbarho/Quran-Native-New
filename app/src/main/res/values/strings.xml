@@ -144,6 +144,14 @@
     <string name="training_mushaf_mode_title">Memorize from the Mushaf page</string>
     <string name="training_mushaf_mode_hint">Hide the ayahs, recite from memory, then reveal them to review.</string>
     <string name="training_mushaf_loading">Preparing the training page…</string>
+    <string name="training_hint_title">Start training now</string>
+    <string name="training_hint_subtitle">The Mushaf page is ready, with ayahs hidden so you can recall them from memory.</string>
+    <string name="training_hint_step_read">Read the ayah, then hide it.</string>
+    <string name="training_hint_step_recite">Recite it from memory.</string>
+    <string name="training_hint_step_check">Reveal it and review your mistakes.</string>
+    <string name="training_hint_skip">Skip explanation</string>
+    <string name="training_hint_start">Got it, start</string>
+    <string name="training_progress_summary">Progress summary</string>
     <string name="training_show_ayahs">Show ayah</string>
     <string name="training_hide_ayahs">Hide ayah</string>
     <string name="training_show_ayahs_accessibility">Show ayah, eye closed</string>

@@ -61,6 +61,7 @@ enum class ShellPicker {
     Index,
     Bookmarks,
     LastPosition,
+    Progress,
     Settings,
 }
 
@@ -286,6 +287,15 @@ class HolyQuranViewModel @Inject constructor(
     fun openSettingsPicker() {
         _searchOpen.value = false
         _picker.value = ShellPicker.Settings
+    }
+
+    fun openProgressPicker() {
+        _searchOpen.value = false
+        _picker.value = ShellPicker.Progress
+    }
+
+    fun markTrainingHintDone() {
+        viewModelScope.launch { preferences.setTrainingHintDone() }
     }
 
     fun closePicker() {

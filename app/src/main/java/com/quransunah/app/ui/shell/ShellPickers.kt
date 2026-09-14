@@ -151,6 +151,32 @@ fun ShellPickerHost(
                 modifier = Modifier.fillMaxWidth().weight(1f),
             )
         }
+        ShellPicker.Progress -> CenteredPickerCard(
+            title = stringResource(R.string.training_progress_summary),
+            onClose = onClose,
+            minHeight = 560.dp,
+            maxHeight = 760.dp,
+        ) {
+            MemorizationScreen(
+                fontManager = fontManager,
+                onJump = { item ->
+                    onJumpBookmark(
+                        ReadingBookmark(
+                            id = item.id,
+                            surah = item.surah,
+                            ayah = item.ayah,
+                            pageNumber = item.pageNumber,
+                            wordId = 0,
+                            wordIndex = 0,
+                            ayahText = item.ayahText,
+                            savedAt = item.updatedAt,
+                        ),
+                    )
+                },
+                onStartReading = onStartReading,
+                modifier = Modifier.fillMaxWidth().weight(1f),
+            )
+        }
         ShellPicker.Settings -> SettingsSideSheet(onClose = onClose)
         ShellPicker.None -> Unit
     }

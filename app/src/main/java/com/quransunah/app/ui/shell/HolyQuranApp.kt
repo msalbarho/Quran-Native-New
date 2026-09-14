@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
@@ -403,6 +404,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
         if (tab == AppTab.Training) {
             TrainingControlBar(
                 hidden = trainingHidden,
+                onOpenProgress = viewModel::openProgressPicker,
                 onToggle = {
                     if (!trainingHidden) revealedAyahs = emptySet()
                     trainingHidden = !trainingHidden
@@ -429,6 +431,10 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                 onBookmarkPress = { viewModel.selectTab(AppTab.Training) },
                 onSettingsPress = viewModel::openSettingsPicker,
             )
+        }
+
+        if (tab == AppTab.Training && !settings.trainingHintDone) {
+            TrainingHintOverlay(onDismiss = viewModel::markTrainingHintDone)
         }
 
         if (overlay == StudyOverlay.Meaning && selectedWord != null) {
@@ -497,8 +503,123 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
 }
 
 @Composable
+private fun TrainingHintOverlay(onDismiss: () -> Unit) {
+    val paper = LocalPaperColors.current
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(androidx.compose.ui.graphics.Color(0x990F172A))
+            .clickable(onClick = onDismiss),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .shadow(18.dp, RoundedCornerShape(22.dp))
+                .clip(RoundedCornerShape(22.dp))
+                .background(paper.pageBody)
+                .clickable(onClick = {})
+                .padding(horizontal = 22.dp, vertical = 22.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_visibility_off_eye),
+                contentDescription = null,
+                tint = paper.accent,
+                modifier = Modifier.size(48.dp),
+            )
+            Text(
+                text = stringResource(R.string.training_hint_title),
+                color = paper.textStrong,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                fontSize = 22.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 10.dp),
+            )
+            Text(
+                text = stringResource(R.string.training_hint_subtitle),
+                color = paper.textMuted,
+                fontSize = 14.sp,
+                lineHeight = 21.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+            TrainingHintStep(1, R.string.training_hint_step_read)
+            TrainingHintStep(2, R.string.training_hint_step_recite)
+            TrainingHintStep(3, R.string.training_hint_step_check)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 18.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.training_hint_skip),
+                    color = paper.textMuted,
+                    fontSize = 13.sp,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable(onClick = onDismiss)
+                        .padding(vertical = 12.dp),
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    text = stringResource(R.string.training_hint_start),
+                    color = paper.pageBody,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .weight(1.25f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(paper.accent)
+                        .clickable(onClick = onDismiss)
+                        .padding(vertical = 12.dp),
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TrainingHintStep(number: Int, textRes: Int) {
+    val paper = LocalPaperColors.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(androidx.compose.foundation.shape.CircleShape)
+                .background(paper.accent.copy(alpha = 0.16f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = EasternArabic.format(number),
+                color = paper.accent,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                fontSize = 14.sp,
+            )
+        }
+        Text(
+            text = stringResource(textRes),
+            color = paper.textStrong,
+            fontSize = 14.sp,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
 private fun TrainingControlBar(
     hidden: Boolean,
+    onOpenProgress: () -> Unit,
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -542,6 +663,15 @@ private fun TrainingControlBar(
                 modifier = Modifier.padding(top = 2.dp),
             )
         }
+        Text(
+            text = stringResource(R.string.training_progress_summary),
+            color = paper.textMuted,
+            fontSize = 11.sp,
+            modifier = Modifier
+                .clip(RoundedCornerShape(10.dp))
+                .clickable(onClick = onOpenProgress)
+                .padding(horizontal = 12.dp, vertical = 5.dp),
+        )
     }
 }
 
