@@ -4,8 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quransunah.app.domain.model.MemorizationItem
 import com.quransunah.app.domain.model.MemorizationState
+import com.quransunah.app.domain.model.MemorizationSession
 import com.quransunah.app.domain.model.MemorizationPlan
 import com.quransunah.app.domain.model.isValidAyahRange
+import com.quransunah.app.data.audio.MemorizationRecorder
+import com.quransunah.app.data.audio.RecordingState
 import com.quransunah.app.domain.model.memorizationSummary
 import com.quransunah.app.domain.repository.MemorizationRepository
 import com.quransunah.app.domain.repository.MushafRepository
@@ -40,7 +43,9 @@ data class MemorizationUiState(
 class MemorizationViewModel @Inject constructor(
     private val memorizationRepository: MemorizationRepository,
     mushafRepository: MushafRepository,
+    private val recorder: MemorizationRecorder,
 ) : ViewModel() {
+    val recordingState: StateFlow<RecordingState> = recorder.state
     private val surahs = flow { emit(mushafRepository.getSurahs()) }
     private val _sessionId = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
 
@@ -133,6 +138,17 @@ class MemorizationViewModel @Inject constructor(
             memorizationRepository.finishSession(id, summary.total, summary.mastered, System.currentTimeMillis())
             _sessionId.value = null
         }
+    }
+
+    fun startRecording() { recorder.start() }
+    fun stopRecording() { recorder.stop() }
+    fun playRecording() { recorder.play() }
+    fun stopPlayback() { recorder.stopPlayback() }
+    fun deleteRecording() { recorder.delete() }
+
+    override fun onCleared() {
+        recorder.release()
+        super.onCleared()
     }
 
 }

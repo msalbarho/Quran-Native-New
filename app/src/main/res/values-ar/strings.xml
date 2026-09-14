@@ -158,6 +158,14 @@
     <string name="memorization_finish_session">إنهاء الجلسة وتسجيل التقدم</string>
     <string name="memorization_today_title">آيات اليوم</string>
     <string name="memorization_reveal_text">إظهار الآية</string>
+    <string name="memorization_recitation_title">تسجيل التسميع</string>
+    <string name="memorization_recording_hint">يبقى التسجيل على جهازك مؤقتًا ولا يُرفع إلى أي خادم.</string>
+    <string name="memorization_recording">جارٍ التسجيل…</string>
+    <string name="memorization_start_recording">بدء التسجيل</string>
+    <string name="memorization_stop_recording">إيقاف التسجيل</string>
+    <string name="memorization_play_recording">تشغيل التسجيل</string>
+    <string name="memorization_stop_playback">إيقاف التشغيل</string>
+    <string name="memorization_delete_recording">حذف التسجيل</string>
     <string name="share_ayah_title">آية من القرآن الكريم</string>
     <string name="share_via">مشاركة عبر</string>
     <string name="share_saved_image">تم حفظ الصورة في المعرض بنجاح</string>

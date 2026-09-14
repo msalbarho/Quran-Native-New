@@ -1,5 +1,10 @@
 package com.quransunah.app.ui.memorization
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quransunah.app.R
 import com.quransunah.app.core.EasternArabic
@@ -57,6 +63,11 @@ fun MemorizationScreen(
     viewModel: MemorizationViewModel = hiltViewModel(),
 ) {
     val ui by viewModel.uiState.collectAsStateWithLifecycle()
+    val recordingState by viewModel.recordingState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) viewModel.startRecording()
+    }
     MemorizationScreenContent(
         ui = ui,
         fontManager = fontManager,
@@ -68,6 +79,18 @@ fun MemorizationScreen(
         onCreatePlan = viewModel::createPlanFromTrackedItems,
         onStartSession = viewModel::startSession,
         onFinishSession = viewModel::finishSession,
+        recordingState = recordingState,
+        onStartRecording = {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                viewModel.startRecording()
+            } else {
+                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            }
+        },
+        onStopRecording = viewModel::stopRecording,
+        onPlayRecording = viewModel::playRecording,
+        onStopPlayback = viewModel::stopPlayback,
+        onDeleteRecording = viewModel::deleteRecording,
         onStartReading = onStartReading,
         modifier = modifier,
     )
@@ -85,6 +108,12 @@ fun MemorizationScreenContent(
     onCreatePlan: () -> Unit,
     onStartSession: (String) -> Unit,
     onFinishSession: () -> Unit,
+    recordingState: com.quransunah.app.data.audio.RecordingState,
+    onStartRecording: () -> Unit,
+    onStopRecording: () -> Unit,
+    onPlayRecording: () -> Unit,
+    onStopPlayback: () -> Unit,
+    onDeleteRecording: () -> Unit,
     onStartReading: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -140,6 +169,53 @@ fun MemorizationScreenContent(
                         onDelete = { onDelete(entry.item.id) },
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecordingCard(
+    state: com.quransunah.app.data.audio.RecordingState,
+    onStart: () -> Unit,
+    onStop: () -> Unit,
+    onPlay: () -> Unit,
+    onStopPlayback: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    val paper = LocalPaperColors.current
+    val recording = state is com.quransunah.app.data.audio.RecordingState.Recording
+    val ready = state is com.quransunah.app.data.audio.RecordingState.Ready
+    val playing = state is com.quransunah.app.data.audio.RecordingState.Playing
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(top = 10.dp).clip(MemorizationCard)
+            .background(paper.pageBody).border(1.dp, paper.tone500, MemorizationCard).padding(12.dp),
+    ) {
+        Text(stringResource(R.string.memorization_recitation_title), color = paper.textStrong, fontWeight = FontWeight.Bold)
+        Text(
+            stringResource(if (recording) R.string.memorization_recording else R.string.memorization_recording_hint),
+            color = paper.textMuted,
+            fontSize = 12.sp,
+            modifier = Modifier.padding(top = 3.dp),
+        )
+        Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            MemorizationButton(
+                label = stringResource(if (recording) R.string.memorization_stop_recording else R.string.memorization_start_recording),
+                emphasized = recording,
+                onClick = if (recording) onStop else onStart,
+                modifier = Modifier.weight(1f),
+            )
+            if (ready || playing) {
+                MemorizationButton(
+                    label = stringResource(if (playing) R.string.memorization_stop_playback else R.string.memorization_play_recording),
+                    onClick = if (playing) onStopPlayback else onPlay,
+                    modifier = Modifier.weight(1f),
+                )
+                MemorizationButton(
+                    label = stringResource(R.string.memorization_delete_recording),
+                    onClick = onDelete,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
     }

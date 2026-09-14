@@ -158,6 +158,14 @@
     <string name="memorization_finish_session">Finish session and save progress</string>
     <string name="memorization_today_title">Today’s ayahs</string>
     <string name="memorization_reveal_text">Reveal ayah</string>
+    <string name="memorization_recitation_title">Recitation recording</string>
+    <string name="memorization_recording_hint">The recording stays temporarily on your device and is not uploaded.</string>
+    <string name="memorization_recording">Recording…</string>
+    <string name="memorization_start_recording">Start recording</string>
+    <string name="memorization_stop_recording">Stop recording</string>
+    <string name="memorization_play_recording">Play recording</string>
+    <string name="memorization_stop_playback">Stop playback</string>
+    <string name="memorization_delete_recording">Delete recording</string>
     <string name="share_ayah_title">An ayah from the Holy Quran</string>
     <string name="share_via">Share via</string>
     <string name="share_saved_image">Image saved to gallery</string>
