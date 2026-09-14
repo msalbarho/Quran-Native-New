@@ -153,10 +153,12 @@ fun MemorizationScreenContent(
             plans = ui.plans,
             dailyCount = ui.dailyItems.size,
             reviewDueCount = ui.reviewDueCount,
+            trackedCount = ui.items.size,
             activeSession = ui.activeSessionId != null,
             onCreatePlan = onCreatePlan,
             onStartSession = onStartSession,
             onFinishSession = onFinishSession,
+            onStartReading = onStartReading,
         )
         ReviewSuggestionCard(items = ui.reviewItems, onJump = onJump)
         RecitationToolsSection(
@@ -911,10 +913,12 @@ private fun MemorizationPlanCard(
     plans: List<com.quransunah.app.domain.model.MemorizationPlan>,
     dailyCount: Int,
     reviewDueCount: Int,
+    trackedCount: Int,
     activeSession: Boolean,
     onCreatePlan: () -> Unit,
     onStartSession: (String) -> Unit,
     onFinishSession: () -> Unit,
+    onStartReading: () -> Unit,
 ) {
     val paper = LocalPaperColors.current
     val plan = plans.firstOrNull()
@@ -935,11 +939,21 @@ private fun MemorizationPlanCard(
             fontSize = 15.sp,
         )
         if (plan == null) {
-            Text(stringResource(R.string.memorization_plan_empty), color = paper.textMuted, fontSize = 12.sp)
+            Text(
+                stringResource(
+                    if (trackedCount == 0) R.string.memorization_first_step_hint
+                    else R.string.memorization_ready_to_plan_hint,
+                ),
+                color = paper.textMuted,
+                fontSize = 12.sp,
+            )
             MemorizationButton(
-                label = stringResource(R.string.memorization_create_plan),
+                label = stringResource(
+                    if (trackedCount == 0) R.string.memorization_add_first_ayah
+                    else R.string.memorization_create_plan,
+                ),
                 emphasized = true,
-                onClick = onCreatePlan,
+                onClick = if (trackedCount == 0) onStartReading else onCreatePlan,
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )
         } else {
