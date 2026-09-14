@@ -1,8 +1,12 @@
 package com.quransunah.app.ui.shell
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.app.Activity
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -48,6 +52,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -58,6 +63,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.core.content.ContextCompat
 import com.quransunah.app.R
 import com.quransunah.app.core.AppConstants
 import com.quransunah.app.core.EasternArabic
@@ -82,6 +88,8 @@ import com.quransunah.app.ui.mushaf.PageNumberBadge
 import com.quransunah.app.ui.mushaf.PagePickerDialog
 import com.quransunah.app.ui.mushaf.TextMushafPage
 import com.quransunah.app.ui.mushaf.toLineRecords
+import com.quransunah.app.ui.memorization.MemorizationViewModel
+import com.quransunah.app.data.audio.RecordingState
 import com.quransunah.app.ui.search.SearchPane
 import com.quransunah.app.ui.study.MeaningPopover
 import com.quransunah.app.ui.study.StudyViewModel
@@ -177,6 +185,14 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
     val bookmarksViewModel: BookmarksViewModel = hiltViewModel()
     val listeningViewModel: ListeningViewModel = hiltViewModel()
     val studyViewModel: StudyViewModel = hiltViewModel()
+    val memorizationViewModel: MemorizationViewModel = hiltViewModel()
+    val recordingState by memorizationViewModel.recordingState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val recordingPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) memorizationViewModel.startRecording()
+    }
     val indexViewModel: QuranIndexViewModel = hiltViewModel()
     val preferredAyah = jumpHighlight ?: selectedWord?.let { AyahRef(it.surah, it.ayah) }
     val currentLocationWord = remember(page) {
@@ -405,6 +421,17 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
             TrainingControlBar(
                 hidden = trainingHidden,
                 onOpenProgress = viewModel::openProgressPicker,
+                recording = recordingState is RecordingState.Recording,
+                onStartRecording = {
+                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                        memorizationViewModel.startRecording()
+                    } else {
+                        recordingPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                    }
+                },
+                onStopRecording = memorizationViewModel::stopRecording,
+                onPrevious = { if (pageNumber > 1) viewModel.jumpToPageNumber(pageNumber - 1) },
+                onNext = { if (pageNumber < AppConstants.TOTAL_PAGES) viewModel.jumpToPageNumber(pageNumber + 1) },
                 onToggle = {
                     if (!trainingHidden) revealedAyahs = emptySet()
                     trainingHidden = !trainingHidden
@@ -620,6 +647,11 @@ private fun TrainingHintStep(number: Int, textRes: Int) {
 private fun TrainingControlBar(
     hidden: Boolean,
     onOpenProgress: () -> Unit,
+    recording: Boolean,
+    onStartRecording: () -> Unit,
+    onStopRecording: () -> Unit,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -637,30 +669,71 @@ private fun TrainingControlBar(
             if (hidden) R.string.training_show_ayahs_accessibility
             else R.string.training_hide_ayahs_accessibility,
         )
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(paper.accent)
-                .clickable(onClick = onToggle)
-                .padding(vertical = 9.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                painter = painterResource(
-                    if (hidden) R.drawable.ic_visibility_off_eye else R.drawable.ic_visibility_eye,
-                ),
-                contentDescription = accessibilityLabel,
-                tint = paper.pageBody,
-                modifier = Modifier.size(38.dp),
+            TrainingSmallControl(
+                label = stringResource(R.string.training_previous_short),
+                onClick = onPrevious,
+                modifier = Modifier.weight(0.72f),
             )
-            Text(
-                text = label,
-                color = paper.pageBody,
-                textAlign = TextAlign.Center,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                fontSize = 15.sp,
-                modifier = Modifier.padding(top = 2.dp),
+            Column(
+                modifier = Modifier
+                    .weight(1.05f)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(paper.accent)
+                    .clickable(onClick = onToggle)
+                    .padding(vertical = 7.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    painter = painterResource(
+                        if (hidden) R.drawable.ic_visibility_off_eye else R.drawable.ic_visibility_eye,
+                    ),
+                    contentDescription = accessibilityLabel,
+                    tint = paper.pageBody,
+                    modifier = Modifier.size(34.dp),
+                )
+                Text(
+                    text = label,
+                    color = paper.pageBody,
+                    textAlign = TextAlign.Center,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(top = 1.dp),
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1.35f)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(if (recording) paper.darkAccent else paper.accent)
+                    .clickable(onClick = if (recording) onStopRecording else onStartRecording)
+                    .padding(vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_record_voice_over),
+                    contentDescription = stringResource(
+                        if (recording) R.string.training_stop_record else R.string.training_record,
+                    ),
+                    tint = paper.pageBody,
+                    modifier = Modifier.size(30.dp),
+                )
+                Text(
+                    text = stringResource(if (recording) R.string.training_stop_record else R.string.training_record),
+                    color = paper.pageBody,
+                    textAlign = TextAlign.Center,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    fontSize = 12.sp,
+                )
+            }
+            TrainingSmallControl(
+                label = stringResource(R.string.training_next_short),
+                onClick = onNext,
+                modifier = Modifier.weight(0.72f),
             )
         }
         Text(
@@ -673,6 +746,25 @@ private fun TrainingControlBar(
                 .padding(horizontal = 12.dp, vertical = 5.dp),
         )
     }
+}
+
+@Composable
+private fun TrainingSmallControl(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val paper = LocalPaperColors.current
+    Text(
+        text = label,
+        color = paper.textMuted,
+        fontSize = 11.sp,
+        textAlign = TextAlign.Center,
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 14.dp),
+    )
 }
 
 @Composable
