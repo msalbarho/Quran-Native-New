@@ -91,6 +91,7 @@ fun MedinaCanvasPage(
     highlightWordId: Int? = null,
     highlightAyah: Pair<Int, Int>? = null,
     hideAyahText: Boolean = false,
+    revealedAyahs: Set<Pair<Int, Int>> = emptySet(),
     chromeVisible: Boolean = true,
     surahsByNumber: Map<Int, SurahInfo> = emptyMap(),
     quarter: QuarterMarker? = null,
@@ -174,6 +175,7 @@ private fun MedinaCanvasPageBody(
     highlightWordId: Int?,
     highlightAyah: Pair<Int, Int>?,
     hideAyahText: Boolean,
+    revealedAyahs: Set<Pair<Int, Int>>,
     chromeVisible: Boolean,
     surahsByNumber: Map<Int, SurahInfo>,
     quarter: QuarterMarker?,
@@ -392,7 +394,7 @@ private fun MedinaCanvasPageBody(
                         }
                         pagePaint.applyGlyphColor(
                             highlighted = highlighted,
-                            glyph = if (hideAyahText && !word.word.isAyahMarker) Color.Transparent.toArgb() else glyph,
+                            glyph = if (hideAyahText && !word.word.isAyahMarker && (word.word.surah to word.word.ayah) !in revealedAyahs) Color.Transparent.toArgb() else glyph,
                             playbackBlue = playbackBlue,
                         )
                         if (word.body.isNotEmpty()) {

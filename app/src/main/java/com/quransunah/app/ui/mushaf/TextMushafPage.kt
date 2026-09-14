@@ -94,6 +94,7 @@ fun TextMushafPage(
     highlightWordId: Int? = null,
     highlightAyah: Pair<Int, Int>? = null,
     hideAyahText: Boolean = false,
+    revealedAyahs: Set<Pair<Int, Int>> = emptySet(),
     chromeVisible: Boolean = true,
     surahsByNumber: Map<Int, SurahInfo> = emptyMap(),
     quarter: QuarterMarker? = null,
@@ -218,6 +219,7 @@ fun TextMushafPage(
                         TextMushafParagraph(
                             words = segment.words,
                             hideAyahText = hideAyahText,
+                            revealedAyahs = revealedAyahs,
                             pageNumber = pageNumber,
                             fontManager = fontManager,
                             pageFace = pageFace,
@@ -249,6 +251,7 @@ fun TextMushafPage(
 @Composable
 private fun TextMushafParagraph(
     hideAyahText: Boolean,
+    revealedAyahs: Set<Pair<Int, Int>>,
     words: List<WordRecord>,
     pageNumber: Int,
     fontManager: QcfFontManager?,
@@ -301,6 +304,7 @@ private fun TextMushafParagraph(
         ) {
             TextMushafWordGroups(
                 hideAyahText = hideAyahText,
+                revealedAyahs = revealedAyahs,
                 words = words,
                 pageNumber = pageNumber,
                 fontManager = fontManager,
@@ -465,6 +469,7 @@ private fun CenteredWordFlow(
 @Composable
 private fun TextMushafWordGroups(
     hideAyahText: Boolean,
+    revealedAyahs: Set<Pair<Int, Int>>,
     words: List<WordRecord>,
     pageNumber: Int,
     fontManager: QcfFontManager?,
@@ -507,6 +512,7 @@ private fun TextMushafWordGroups(
             group.forEachIndexed { index, word ->
                     TextMushafWord(
                         hideAyahText = hideAyahText,
+                        revealedAyahs = revealedAyahs,
                         word = word,
                     previous = group.getOrNull(index - 1) ?: previousBefore,
                     next = group.getOrNull(index + 1)
@@ -535,6 +541,7 @@ private fun TextMushafWordGroups(
 @Composable
 private fun TextMushafWord(
     hideAyahText: Boolean,
+    revealedAyahs: Set<Pair<Int, Int>>,
     word: WordRecord,
     previous: WordRecord?,
     next: WordRecord?,
@@ -581,7 +588,7 @@ private fun TextMushafWord(
     val size = if (word.isAyahMarker) fontSize * 0.92f else fontSize
     val shape = RoundedCornerShape(6.dp)
     val paintColor = when {
-        hideAyahText && !word.isAyahMarker -> Color.Transparent
+        hideAyahText && !word.isAyahMarker && (word.surah to word.ayah) !in revealedAyahs -> Color.Transparent
         ayahHighlighted -> ChromeTokens.PlaybackAyahBlue
         word.isAyahMarker -> glyphColor
         else -> glyphColor

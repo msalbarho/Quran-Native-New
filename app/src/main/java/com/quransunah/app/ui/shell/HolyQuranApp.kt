@@ -167,6 +167,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
     val picker by viewModel.picker.collectAsStateWithLifecycle()
     val indexTab by viewModel.indexTab.collectAsStateWithLifecycle()
     var trainingHidden by remember { mutableStateOf(true) }
+    var revealedAyahs by remember(pageNumber) { mutableStateOf(emptySet<Pair<Int, Int>>()) }
     val bookmarksViewModel: BookmarksViewModel = hiltViewModel()
     val listeningViewModel: ListeningViewModel = hiltViewModel()
     val studyViewModel: StudyViewModel = hiltViewModel()
@@ -257,13 +258,16 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                                 highlightWordId = highlight.wordId,
                                 highlightAyah = highlight.ayah?.let { it.surah to it.ayah },
                                 hideAyahText = tab == AppTab.Training && trainingHidden,
+                                revealedAyahs = revealedAyahs,
                                 chromeVisible = chrome,
                                 surahsByNumber = surahsByNumber,
                                 quarter = pageData?.quarter,
                                 sajda = pageData?.sajda,
                                 onWordTap = { word ->
-                                    if (tab == AppTab.Training) trainingHidden = !trainingHidden
-                                    else viewModel.onMushafWordTap(word)
+                                    if (tab == AppTab.Training) {
+                                        val key = word.surah to word.ayah
+                                        revealedAyahs = if (key in revealedAyahs) revealedAyahs - key else revealedAyahs + key
+                                    } else viewModel.onMushafWordTap(word)
                                 },
                                 onWordLongPress = { word -> viewModel.onWordLongPress(word) },
                                 onEmptyTap = { viewModel.toggleChrome() },
@@ -284,7 +288,11 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                                 highlightWordId = highlight.wordId,
                                 highlightAyah = highlight.ayah?.let { it.surah to it.ayah },
                                 hideAyahText = tab == AppTab.Training && trainingHidden,
-                                onTrainingTap = if (tab == AppTab.Training) { { trainingHidden = !trainingHidden } } else null,
+                                revealedAyahs = revealedAyahs,
+                                onTrainingTap = if (tab == AppTab.Training) { { word ->
+                                    val key = word.surah to word.ayah
+                                    revealedAyahs = if (key in revealedAyahs) revealedAyahs - key else revealedAyahs + key
+                                } } else null,
                                 chromeVisible = chrome,
                                 surahsByNumber = surahsByNumber,
                                 quarter = pageData?.quarter,
@@ -358,7 +366,10 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
         if (tab == AppTab.Training) {
             TrainingControlBar(
                 hidden = trainingHidden,
-                onToggle = { trainingHidden = !trainingHidden },
+                onToggle = {
+                    if (!trainingHidden) revealedAyahs = emptySet()
+                    trainingHidden = !trainingHidden
+                },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
@@ -529,7 +540,8 @@ private fun LiveTextMushafPage(
     highlightWordId: Int?,
     highlightAyah: Pair<Int, Int>?,
     hideAyahText: Boolean,
-    onTrainingTap: (() -> Unit)?,
+    revealedAyahs: Set<Pair<Int, Int>>,
+    onTrainingTap: ((com.quransunah.app.ui.mushaf.WordRecord) -> Unit)?,
     chromeVisible: Boolean,
     surahsByNumber: Map<Int, SurahInfo>,
     quarter: QuarterMarker?,
@@ -546,11 +558,12 @@ private fun LiveTextMushafPage(
         highlightWordId = highlightWordId,
         highlightAyah = highlightAyah,
         hideAyahText = hideAyahText,
+        revealedAyahs = revealedAyahs,
         chromeVisible = chromeVisible,
         surahsByNumber = surahsByNumber,
         quarter = quarter,
         sajda = sajda,
-        onWordTap = { word -> onTrainingTap?.invoke() ?: viewModel.onMushafWordTap(word) },
+        onWordTap = { word -> onTrainingTap?.invoke(word) ?: viewModel.onMushafWordTap(word) },
         onWordLongPress = { word -> viewModel.onWordLongPress(word) },
         onEmptyTap = { viewModel.toggleChrome() },
         onSurahNameLongPress = { viewModel.openIndexPicker(QuranIndexTab.Surah) },
