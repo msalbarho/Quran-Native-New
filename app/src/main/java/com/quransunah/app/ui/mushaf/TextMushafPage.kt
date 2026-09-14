@@ -231,7 +231,6 @@ fun TextMushafPage(
                             accent = paper.accent,
                             highlightWordId = highlightWordId,
                             highlightAyah = highlightAyah,
-                            hideAyahText = hideAyahText,
                             hizbAnchorId = segment.hizbAnchorId,
                             sajdaAnchorId = segment.sajdaAnchorId,
                             quarterLines = quarterLines,
