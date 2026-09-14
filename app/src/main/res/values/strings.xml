@@ -23,6 +23,8 @@
     <string name="home_settings">Settings</string>
     <string name="home_secondary_hint">Saved positions and settings are available here when needed.</string>
     <string name="hydration_retry">Retry</string>
+    <string name="hydration_preparing_title">Preparing the Mushaf pages for the first time</string>
+    <string name="hydration_preparing_hint">The Mushaf will appear automatically when ready.</string>
     <string name="notification_channel_playback">Recitation</string>
     <string name="auto_root_reciters">Reciters</string>
     <string name="auto_root_surahs">Surahs</string>
@@ -189,9 +191,9 @@
     <string name="memorization_return_learning">Return to learning</string>
     <string name="memorization_open_ayah">Continue</string>
     <string name="memorization_delete">Remove from memorization</string>
-    <string name="memorization_empty_title">Start your memorization plan</string>
-    <string name="memorization_empty_hint">Long-press a word in an ayah, then select “Add to memorization” to see it here.</string>
-    <string name="memorization_start_reading">Open the mushaf</string>
+    <string name="memorization_empty_title">Begin your journey with Al-Fatihah</string>
+    <string name="memorization_empty_hint">We will arrange the ayahs in sequence and help you review them day by day.</string>
+    <string name="memorization_start_reading">Start with Al-Fatihah</string>
     <string name="memorization_plan_title">Memorization plan</string>
     <string name="memorization_today_step">Your next step</string>
     <string name="memorization_flow_title">How a session works</string>

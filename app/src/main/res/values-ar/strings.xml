@@ -23,6 +23,8 @@
     <string name="home_settings">الإعدادات</string>
     <string name="home_secondary_hint">تظهر المواضع المحفوظة والإعدادات هنا عند الحاجة.</string>
     <string name="hydration_retry">إعادة المحاولة</string>
+    <string name="hydration_preparing_title">يتم تجهيز صفحات المصحف لأول مرة</string>
+    <string name="hydration_preparing_hint">سيظهر المصحف تلقائيًا عند اكتمال التجهيز.</string>
     <string name="notification_channel_playback">التلاوة</string>
     <string name="auto_root_reciters">القراء</string>
     <string name="auto_root_surahs">السور</string>
@@ -189,9 +191,9 @@
     <string name="memorization_return_learning">إعادة للحفظ</string>
     <string name="memorization_open_ayah">متابعة</string>
     <string name="memorization_delete">إزالة من التحفيظ</string>
-    <string name="memorization_empty_title">ابدأ خطة تحفيظك</string>
-    <string name="memorization_empty_hint">اضغط مطوّلاً على كلمة في الآية، ثم اختر «أضف إلى التحفيظ» لتظهر هنا.</string>
-    <string name="memorization_start_reading">الانتقال إلى المصحف</string>
+    <string name="memorization_empty_title">ابدأ رحلتك من سورة الفاتحة</string>
+    <string name="memorization_empty_hint">سنرتب لك الآيات بالتسلسل ونساعدك على مراجعتها يومًا بعد يوم.</string>
+    <string name="memorization_start_reading">ابدأ من الفاتحة</string>
     <string name="memorization_plan_title">خطة الحفظ</string>
     <string name="memorization_today_step">خطوتك التالية</string>
     <string name="memorization_flow_title">طريقة الجلسة</string>

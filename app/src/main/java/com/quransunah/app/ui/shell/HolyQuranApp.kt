@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -117,7 +118,7 @@ fun HolyQuranApp(viewModel: HolyQuranViewModel) {
             HydrationState.Pending, HydrationState.Ready -> {
                 val showBrandSplash = state is HydrationState.Pending || !brandMinElapsed
                 if (showBrandSplash) {
-                    BrandSplash()
+                    BrandSplash(isPreparing = state is HydrationState.Pending)
                 } else {
                     ReadyShell(viewModel)
                 }
@@ -127,7 +128,7 @@ fun HolyQuranApp(viewModel: HolyQuranViewModel) {
 }
 
 @Composable
-private fun BrandSplash() {
+private fun BrandSplash(isPreparing: Boolean) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -141,6 +142,35 @@ private fun BrandSplash() {
             modifier = Modifier.fillMaxHeight(),
             contentScale = ContentScale.FillHeight,
         )
+        if (isPreparing) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = 24.dp, vertical = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                CircularProgressIndicator(
+                    color = androidx.compose.ui.graphics.Color(0xFFD4A017),
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(28.dp),
+                )
+                Text(
+                    text = stringResource(R.string.hydration_preparing_title),
+                    color = androidx.compose.ui.graphics.Color.White,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    fontSize = 15.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 10.dp),
+                )
+                Text(
+                    text = stringResource(R.string.hydration_preparing_hint),
+                    color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.82f),
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
+        }
     }
 }
 
