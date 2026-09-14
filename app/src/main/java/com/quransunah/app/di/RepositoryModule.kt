@@ -1,11 +1,13 @@
 package com.quransunah.app.di
 
 import com.quransunah.app.data.repository.BookmarkRepositoryImpl
+import com.quransunah.app.data.repository.MemorizationRepositoryImpl
 import com.quransunah.app.data.repository.MushafRepositoryImpl
 import com.quransunah.app.data.repository.SearchRepositoryImpl
 import com.quransunah.app.data.repository.TafsirRepositoryImpl
 import com.quransunah.app.domain.repository.AudioPlayerRepository
 import com.quransunah.app.domain.repository.BookmarkRepository
+import com.quransunah.app.domain.repository.MemorizationRepository
 import com.quransunah.app.domain.repository.MushafRepository
 import com.quransunah.app.domain.repository.SearchRepository
 import com.quransunah.app.domain.repository.TafsirRepository
@@ -30,6 +32,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindBookmarkRepository(impl: BookmarkRepositoryImpl): BookmarkRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindMemorizationRepository(impl: MemorizationRepositoryImpl): MemorizationRepository
 
     @Binds
     @Singleton

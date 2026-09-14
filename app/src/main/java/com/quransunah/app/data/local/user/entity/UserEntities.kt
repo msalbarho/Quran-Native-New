@@ -29,6 +29,31 @@ data class BookmarkEntity(
     val savedAt: Long,
 )
 
+@Entity(
+    tableName = "memorization_progress",
+    indices = [
+        Index(value = ["surah", "ayah"], unique = true),
+        Index(value = ["state", "updated_at"]),
+    ],
+)
+data class MemorizationEntity(
+    @PrimaryKey
+    val id: String,
+    val surah: Int,
+    val ayah: Int,
+    @ColumnInfo(name = "page_number")
+    val pageNumber: Int,
+    @ColumnInfo(name = "ayah_text")
+    val ayahText: String,
+    val state: String,
+    @ColumnInfo(name = "review_count")
+    val reviewCount: Int,
+    @ColumnInfo(name = "created_at")
+    val createdAt: Long,
+    @ColumnInfo(name = "updated_at")
+    val updatedAt: Long,
+)
+
 @Entity(tableName = "page_meta")
 data class PageMetaEntity(
     @PrimaryKey

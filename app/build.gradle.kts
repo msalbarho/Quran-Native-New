@@ -23,8 +23,8 @@ android {
         applicationId = "com.quransunah.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 25
-        versionName = "4.2.0"
+        versionCode = 26
+        versionName = "4.2.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
@@ -277,6 +277,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.room.testing)
     androidTestImplementation("androidx.media:media:1.7.0")
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
@@ -288,4 +289,3 @@ ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
     arg("room.incremental", "true")
 }
-

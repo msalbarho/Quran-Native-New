@@ -51,6 +51,7 @@ import com.quransunah.app.ui.bookmarks.BookmarksScreen
 import com.quransunah.app.ui.index.QuranIndexPicker
 import com.quransunah.app.ui.index.QuranIndexTab
 import com.quransunah.app.ui.index.QuranIndexViewModel
+import com.quransunah.app.ui.memorization.MemorizationScreen
 import com.quransunah.app.ui.settings.SettingsScreen
 import com.quransunah.app.ui.theme.LocalPaperColors
 
@@ -103,15 +104,14 @@ fun ShellPickerHost(
             title = stringResource(R.string.bookmarks_title),
             onClose = onClose,
             minHeight = 420.dp,
-            maxHeight = 560.dp,
+            maxHeight = 640.dp,
         ) {
-            BookmarksScreen(
+            SavedPlacesHub(
                 pageNumber = pageNumber,
                 preferredAyah = preferredAyah,
                 fontManager = fontManager,
-                onJump = onJumpBookmark,
+                onJumpBookmark = onJumpBookmark,
                 onStartReading = onStartReading,
-                showTitle = false,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
@@ -119,6 +119,102 @@ fun ShellPickerHost(
         }
         ShellPicker.Settings -> SettingsSideSheet(onClose = onClose)
         ShellPicker.None -> Unit
+    }
+}
+
+private enum class SavedPlacesTab {
+    Bookmarks,
+    Memorization,
+}
+
+@Composable
+private fun SavedPlacesHub(
+    pageNumber: Int,
+    preferredAyah: AyahRef?,
+    fontManager: QcfFontManager?,
+    onJumpBookmark: (ReadingBookmark) -> Unit,
+    onStartReading: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val paper = LocalPaperColors.current
+    var selectedTab by remember { mutableStateOf(SavedPlacesTab.Bookmarks) }
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(paper.tone400.copy(alpha = 0.48f)),
+        ) {
+            SavedPlacesTabLabel(
+                text = stringResource(R.string.bookmarks_saved),
+                selected = selectedTab == SavedPlacesTab.Bookmarks,
+                onClick = { selectedTab = SavedPlacesTab.Bookmarks },
+                modifier = Modifier.weight(1f),
+            )
+            SavedPlacesTabLabel(
+                text = stringResource(R.string.memorization_title),
+                selected = selectedTab == SavedPlacesTab.Memorization,
+                onClick = { selectedTab = SavedPlacesTab.Memorization },
+                modifier = Modifier.weight(1f),
+            )
+        }
+        when (selectedTab) {
+            SavedPlacesTab.Bookmarks -> BookmarksScreen(
+                pageNumber = pageNumber,
+                preferredAyah = preferredAyah,
+                fontManager = fontManager,
+                onJump = onJumpBookmark,
+                onStartReading = onStartReading,
+                showTitle = false,
+                modifier = Modifier.weight(1f),
+            )
+            SavedPlacesTab.Memorization -> MemorizationScreen(
+                fontManager = fontManager,
+                onJump = { item ->
+                    onJumpBookmark(
+                        ReadingBookmark(
+                            id = item.id,
+                            surah = item.surah,
+                            ayah = item.ayah,
+                            pageNumber = item.pageNumber,
+                            wordId = 0,
+                            wordIndex = 0,
+                            ayahText = item.ayahText,
+                            savedAt = item.updatedAt,
+                        ),
+                    )
+                },
+                onStartReading = onStartReading,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SavedPlacesTabLabel(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val paper = LocalPaperColors.current
+    Box(
+        modifier = modifier
+            .padding(3.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (selected) paper.pageBody else Color.Transparent)
+            .clickable(onClick = onClick)
+            .padding(vertical = 7.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            color = if (selected) paper.textStrong else paper.textMuted,
+            fontSize = 12.sp,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+        )
     }
 }
 

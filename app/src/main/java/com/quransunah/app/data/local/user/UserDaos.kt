@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.quransunah.app.data.local.user.entity.AyahSearchEntity
 import com.quransunah.app.data.local.user.entity.BookmarkEntity
+import com.quransunah.app.data.local.user.entity.MemorizationEntity
 import com.quransunah.app.data.local.user.entity.PageMetaEntity
 import com.quransunah.app.data.local.user.entity.WordMeaningEntity
 import kotlinx.coroutines.flow.Flow
@@ -26,6 +27,38 @@ interface BookmarkDao {
 
     @Query("SELECT * FROM bookmarks WHERE id = :id LIMIT 1")
     suspend fun get(id: String): BookmarkEntity?
+}
+
+@Dao
+interface MemorizationDao {
+    @Query(
+        """
+        SELECT * FROM memorization_progress
+        ORDER BY CASE state WHEN 'LEARNING' THEN 0 ELSE 1 END, updated_at DESC
+        """,
+    )
+    fun observeItems(): Flow<List<MemorizationEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(item: MemorizationEntity)
+
+    @Query("DELETE FROM memorization_progress WHERE id = :id")
+    suspend fun delete(id: String)
+
+    @Query("SELECT * FROM memorization_progress WHERE id = :id LIMIT 1")
+    suspend fun get(id: String): MemorizationEntity?
+
+    @Query("UPDATE memorization_progress SET state = :state, updated_at = :updatedAt WHERE id = :id")
+    suspend fun updateState(id: String, state: String, updatedAt: Long)
+
+    @Query(
+        """
+        UPDATE memorization_progress
+        SET review_count = review_count + 1, updated_at = :updatedAt
+        WHERE id = :id
+        """,
+    )
+    suspend fun incrementReviewCount(id: String, updatedAt: Long)
 }
 
 @Dao

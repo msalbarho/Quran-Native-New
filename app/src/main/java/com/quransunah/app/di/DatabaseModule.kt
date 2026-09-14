@@ -14,9 +14,11 @@ import com.quransunah.app.data.local.mushaf.MushafDao
 import com.quransunah.app.data.local.quran.QuranDatabase
 import com.quransunah.app.data.local.tafsir.TafsirDao
 import com.quransunah.app.data.local.user.BookmarkDao
+import com.quransunah.app.data.local.user.MemorizationDao
 import com.quransunah.app.data.local.user.PageMetaDao
 import com.quransunah.app.data.local.user.SearchDao
 import com.quransunah.app.data.local.user.UserDatabase
+import com.quransunah.app.data.local.user.UserDatabaseMigrations
 import com.quransunah.app.data.local.user.WordMeaningDao
 import com.quransunah.app.data.packaged.PackagedStoreManager
 import dagger.Module
@@ -62,7 +64,7 @@ object DatabaseModule {
     @Singleton
     fun provideUserDatabase(@ApplicationContext context: Context): UserDatabase {
         return Room.databaseBuilder(context, UserDatabase::class.java, AppConstants.USER_DB_FILE)
-            .fallbackToDestructiveMigration()
+            .addMigrations(UserDatabaseMigrations.MIGRATION_1_2)
             .build()
     }
 
@@ -77,6 +79,9 @@ object DatabaseModule {
 
     @Provides
     fun provideBookmarkDao(db: UserDatabase): BookmarkDao = db.bookmarkDao()
+
+    @Provides
+    fun provideMemorizationDao(db: UserDatabase): MemorizationDao = db.memorizationDao()
 
     @Provides
     fun providePageMetaDao(db: UserDatabase): PageMetaDao = db.pageMetaDao()

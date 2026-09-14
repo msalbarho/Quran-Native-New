@@ -8,6 +8,8 @@ import com.quransunah.app.data.catalog.AyahReciter
 import com.quransunah.app.data.catalog.ReciterCatalog
 import com.quransunah.app.data.catalog.SurahReciter
 import com.quransunah.app.data.prefs.UserPreferences
+import com.quransunah.app.domain.model.MemorizationItem
+import com.quransunah.app.domain.model.MemorizationState
 import com.quransunah.app.domain.model.PlaybackDomain
 import com.quransunah.app.domain.model.PlaybackSnapshot
 import com.quransunah.app.domain.model.QuranWord
@@ -15,6 +17,7 @@ import com.quransunah.app.domain.model.ReadingBookmark
 import com.quransunah.app.domain.model.SurahRepeatMode
 import com.quransunah.app.domain.repository.AudioPlayerRepository
 import com.quransunah.app.domain.repository.BookmarkRepository
+import com.quransunah.app.domain.repository.MemorizationRepository
 import com.quransunah.app.domain.repository.MushafRepository
 import com.quransunah.app.domain.repository.TafsirRepository
 import com.quransunah.app.fonts.QcfFontManager
@@ -42,6 +45,7 @@ data class StudyUiState(
     val ayahText: String = "",
     val pageNumber: Int = 1,
     val bookmarked: Boolean = false,
+    val trackedForMemorization: Boolean = false,
     val reciters: List<AyahReciter> = emptyList(),
     val surahReciters: List<SurahReciter> = emptyList(),
     val selectedReciterId: String = AppConstants.DEFAULT_AYAH_RECITER_ID,
@@ -62,6 +66,7 @@ data class StudyUiState(
 class StudyViewModel @Inject constructor(
     private val mushafRepository: MushafRepository,
     private val bookmarkRepository: BookmarkRepository,
+    private val memorizationRepository: MemorizationRepository,
     private val tafsirRepository: TafsirRepository,
     private val reciterCatalog: ReciterCatalog,
     private val preferences: UserPreferences,
@@ -92,6 +97,15 @@ class StudyViewModel @Inject constructor(
                 val saved = list.any { bookmark -> bookmark.surah == word.surah && bookmark.ayah == word.ayah }
                 if (_ui.value.bookmarked != saved) {
                     _ui.update { it.copy(bookmarked = saved) }
+                }
+            }
+        }
+        viewModelScope.launch {
+            memorizationRepository.observeItems().collect { list ->
+                val word = _ui.value.word ?: return@collect
+                val tracked = list.any { item -> item.surah == word.surah && item.ayah == word.ayah }
+                if (_ui.value.trackedForMemorization != tracked) {
+                    _ui.update { it.copy(trackedForMemorization = tracked) }
                 }
             }
         }
@@ -134,6 +148,7 @@ class StudyViewModel @Inject constructor(
                 ?: words.firstOrNull { !it.isAyahMarker }?.toWordRecord()
                 ?: word
             val bookmarked = bookmarkRepository.isSaved(word.surah, word.ayah)
+            val trackedForMemorization = memorizationRepository.isTracked(word.surah, word.ayah)
             _ui.update {
                 it.copy(
                     word = resolved,
@@ -142,6 +157,7 @@ class StudyViewModel @Inject constructor(
                     ayahText = text,
                     pageNumber = page,
                     bookmarked = bookmarked,
+                    trackedForMemorization = trackedForMemorization,
                     reciters = reciters,
                     surahReciters = surahReciters,
                     selectedReciterId = ayahReciter,
@@ -256,6 +272,8 @@ class StudyViewModel @Inject constructor(
             } ?: return null
             val text = words.filter { !it.isAyahMarker }.joinToString(" ") { it.textHafs }.trim()
             val page = mushafRepository.getPageForAyah(adjacent.first, adjacent.second)
+            val bookmarked = bookmarkRepository.isSaved(adjacent.first, adjacent.second)
+            val trackedForMemorization = memorizationRepository.isTracked(adjacent.first, adjacent.second)
             val nextRecord = pick.toWordRecord()
             _ui.update {
                 it.copy(
@@ -263,6 +281,8 @@ class StudyViewModel @Inject constructor(
                     ayahWords = words,
                     ayahText = text,
                     pageNumber = page,
+                    bookmarked = bookmarked,
+                    trackedForMemorization = trackedForMemorization,
                     videoFromAyah = nextRecord.ayah,
                     videoToAyah = nextRecord.ayah,
                 )
@@ -298,6 +318,30 @@ class StudyViewModel @Inject constructor(
                 )
                 _ui.update { it.copy(bookmarked = true) }
             }
+        }
+    }
+
+    fun addCurrentAyahToMemorization() {
+        val ui = _ui.value
+        val word = ui.word ?: return
+        if (ui.trackedForMemorization) return
+        viewModelScope.launch {
+            val id = MemorizationItem.idFor(word.surah, word.ayah)
+            val now = System.currentTimeMillis()
+            memorizationRepository.track(
+                MemorizationItem(
+                    id = id,
+                    surah = word.surah,
+                    ayah = word.ayah,
+                    pageNumber = ui.pageNumber,
+                    ayahText = ui.ayahText,
+                    state = MemorizationState.LEARNING,
+                    reviewCount = 0,
+                    createdAt = now,
+                    updatedAt = now,
+                ),
+            )
+            _ui.update { it.copy(trackedForMemorization = true) }
         }
     }
 
