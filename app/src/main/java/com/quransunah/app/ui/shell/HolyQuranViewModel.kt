@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 enum class AppTab(val route: String) {
+    Home("home"),
     Reading("reading"),
     Listening("listening"),
     Training("training"),
@@ -47,6 +48,7 @@ enum class AppTab(val route: String) {
 
     companion object {
         fun fromStored(route: String): AppTab = when (route) {
+            Home.route -> Home
             Listening.route, "audio" -> Listening
             Training.route -> Training
             else -> Reading
@@ -139,7 +141,7 @@ class HolyQuranViewModel @Inject constructor(
     private val _surahsByNumber = MutableStateFlow<Map<Int, SurahInfo>>(emptyMap())
     val surahsByNumber: StateFlow<Map<Int, SurahInfo>> = _surahsByNumber.asStateFlow()
 
-    private val _tab = MutableStateFlow(AppTab.Reading)
+    private val _tab = MutableStateFlow(AppTab.Home)
     val tab: StateFlow<AppTab> = _tab.asStateFlow()
 
     private val _picker = MutableStateFlow(ShellPicker.None)
@@ -158,7 +160,6 @@ class HolyQuranViewModel @Inject constructor(
         viewModelScope.launch {
             val restored = preferences.settings.first()
             _currentPage.value = restored.lastPage
-            _tab.value = AppTab.fromStored(restored.lastTab)
             launch(Dispatchers.IO) {
                 runCatching {
                     fontManager.ensureMaps()
@@ -203,7 +204,9 @@ class HolyQuranViewModel @Inject constructor(
         if (tab != AppTab.Reading) {
             closeStudyOverlays()
         }
-        viewModelScope.launch { preferences.setLastTab(tab.route) }
+        if (tab != AppTab.Home) {
+            viewModelScope.launch { preferences.setLastTab(tab.route) }
+        }
         if (tab == AppTab.Reading) {
             lastFollowedAyahKey = null
             followPlaybackIfNeeded(playback.value)

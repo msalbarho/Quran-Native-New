@@ -2,6 +2,7 @@ package com.quransunah.app.ui.shell
 
 import android.app.Activity
 import android.view.WindowManager
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -193,7 +194,8 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
         }
     }
     val restoreBar = tab == AppTab.Reading
-    val navVisible = chrome || tab == AppTab.Listening || tab == AppTab.Training
+    val navVisible = tab != AppTab.Home &&
+        (chrome || tab == AppTab.Listening || tab == AppTab.Training)
     var pagePickerOpen by remember { mutableStateOf(false) }
     val highlight by viewModel.mushafHighlight.collectAsStateWithLifecycle()
 
@@ -201,6 +203,14 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
         initialPage = pageNumber - 1,
         pageCount = { AppConstants.TOTAL_PAGES },
     )
+    BackHandler(
+        enabled = tab != AppTab.Home &&
+            overlay == StudyOverlay.None &&
+            !searchOpen &&
+            picker == ShellPicker.None,
+    ) {
+        viewModel.selectTab(AppTab.Home)
+    }
     LaunchedEffect(pagerState.currentPage, pendingPagerPage) {
         if (pendingPagerPage != null) return@LaunchedEffect
         viewModel.onUserPagerSettled(pagerState.currentPage + 1)
@@ -217,6 +227,16 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
             .background(paper.pageBackground),
     ) {
         when (tab) {
+            AppTab.Home -> HomeScreen(
+                pageNumber = pageNumber,
+                onOpenReading = { viewModel.selectTab(AppTab.Reading) },
+                onOpenTraining = { viewModel.selectTab(AppTab.Training) },
+                onOpenListening = { viewModel.selectTab(AppTab.Listening) },
+                onOpenIndex = { viewModel.openIndexPicker(QuranIndexTab.Surah) },
+                onOpenSavedPlaces = viewModel::openLastPositionPicker,
+                onOpenSettings = viewModel::openSettingsPicker,
+                modifier = Modifier.fillMaxSize(),
+            )
             AppTab.Reading, AppTab.Training -> {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     HorizontalPager(
