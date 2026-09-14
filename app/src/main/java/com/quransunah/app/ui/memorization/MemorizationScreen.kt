@@ -138,6 +138,14 @@ fun MemorizationScreenContent(
             onStartSession = onStartSession,
             onFinishSession = onFinishSession,
         )
+        RecordingCard(
+            state = recordingState,
+            onStart = onStartRecording,
+            onStop = onStopRecording,
+            onPlay = onPlayRecording,
+            onStopPlayback = onStopPlayback,
+            onDelete = onDeleteRecording,
+        )
         if (ui.dailyItems.isNotEmpty()) {
             Text(
                 text = stringResource(R.string.memorization_today_title),

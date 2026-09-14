@@ -7,6 +7,7 @@ import androidx.room.Query
 import com.quransunah.app.data.local.user.entity.MemorizationPlanEntity
 import com.quransunah.app.data.local.user.entity.MemorizationSessionEntity
 import com.quransunah.app.data.local.user.entity.MemorizationRecordingEntity
+import com.quransunah.app.data.local.user.entity.RecitationAttemptEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -37,4 +38,10 @@ interface MemorizationPlanDao {
 
     @Query("DELETE FROM memorization_recordings WHERE id = :id")
     suspend fun deleteRecording(id: String)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAttempt(attempt: RecitationAttemptEntity)
+
+    @Query("SELECT * FROM recitation_attempts WHERE session_id = :sessionId ORDER BY created_at DESC")
+    fun observeAttempts(sessionId: String): Flow<List<RecitationAttemptEntity>>
 }

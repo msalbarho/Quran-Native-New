@@ -6,11 +6,13 @@ import com.quransunah.app.data.local.user.entity.MemorizationEntity
 import com.quransunah.app.data.local.user.entity.MemorizationPlanEntity
 import com.quransunah.app.data.local.user.entity.MemorizationSessionEntity
 import com.quransunah.app.data.local.user.entity.MemorizationRecordingEntity
+import com.quransunah.app.data.local.user.entity.RecitationAttemptEntity
 import com.quransunah.app.domain.model.MemorizationItem
 import com.quransunah.app.domain.model.MemorizationState
 import com.quransunah.app.domain.model.MemorizationPlan
 import com.quransunah.app.domain.model.MemorizationSession
 import com.quransunah.app.domain.model.MemorizationRecording
+import com.quransunah.app.domain.model.RecitationAttempt
 import com.quransunah.app.domain.model.isValidAyahRange
 import com.quransunah.app.domain.model.hasValidReference
 import com.quransunah.app.domain.repository.MemorizationRepository
@@ -84,6 +86,19 @@ class MemorizationRepositoryImpl @Inject constructor(
 
     override suspend fun deleteRecording(id: String) = planDao.deleteRecording(id)
 
+    override suspend fun saveAttempt(attempt: RecitationAttempt) {
+        planDao.insertAttempt(
+            RecitationAttemptEntity(
+                attempt.id, attempt.sessionId, attempt.recordingId, attempt.scorePercent.coerceIn(0, 100),
+                attempt.missingCount.coerceAtLeast(0), attempt.extraCount.coerceAtLeast(0),
+                attempt.differentCount.coerceAtLeast(0), attempt.createdAt,
+            ),
+        )
+    }
+
+    override fun observeAttempts(sessionId: String): Flow<List<RecitationAttempt>> =
+        planDao.observeAttempts(sessionId).map { rows -> rows.map { it.toDomain() } }
+
     private fun MemorizationEntity.toDomain() = MemorizationItem(
         id = id,
         surah = surah,
@@ -122,5 +137,9 @@ class MemorizationRepositoryImpl @Inject constructor(
 
     private fun MemorizationRecordingEntity.toDomain() = MemorizationRecording(
         id, sessionId, filePath, createdAt, durationMs,
+    )
+
+    private fun RecitationAttemptEntity.toDomain() = RecitationAttempt(
+        id, sessionId, recordingId, scorePercent, missingCount, extraCount, differentCount, createdAt,
     )
 }

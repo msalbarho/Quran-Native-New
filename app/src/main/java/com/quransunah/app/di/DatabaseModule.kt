@@ -68,6 +68,7 @@ object DatabaseModule {
             .addMigrations(UserDatabaseMigrations.MIGRATION_1_2)
             .addMigrations(UserDatabaseMigrations.MIGRATION_2_3)
             .addMigrations(UserDatabaseMigrations.MIGRATION_3_4)
+            .addMigrations(UserDatabaseMigrations.MIGRATION_4_5)
             .build()
     }
 

@@ -86,4 +86,25 @@ object UserDatabaseMigrations {
             db.execSQL("CREATE INDEX IF NOT EXISTS `index_memorization_recordings_session_id_created_at` ON `memorization_recordings` (`session_id`, `created_at`)")
         }
     }
+
+    val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `recitation_attempts` (
+                    `id` TEXT NOT NULL,
+                    `session_id` TEXT NOT NULL,
+                    `recording_id` TEXT,
+                    `score_percent` INTEGER NOT NULL,
+                    `missing_count` INTEGER NOT NULL,
+                    `extra_count` INTEGER NOT NULL,
+                    `different_count` INTEGER NOT NULL,
+                    `created_at` INTEGER NOT NULL,
+                    PRIMARY KEY(`id`)
+                )
+                """.trimIndent(),
+            )
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_recitation_attempts_session_id_created_at` ON `recitation_attempts` (`session_id`, `created_at`)")
+        }
+    }
 }
