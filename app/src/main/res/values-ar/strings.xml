@@ -166,6 +166,11 @@
     <string name="memorization_play_recording">تشغيل التسجيل</string>
     <string name="memorization_stop_playback">إيقاف التشغيل</string>
     <string name="memorization_delete_recording">حذف التسجيل</string>
+    <string name="memorization_check_title">تدقيق التسميع النصي</string>
+    <string name="memorization_transcript_hint">ألصق أو اكتب النص المحول من التسجيل</string>
+    <string name="memorization_check_button">تدقيق النص</string>
+    <string name="memorization_check_score">نسبة التطابق: %1$s٪</string>
+    <string name="memorization_check_differences">ناقص: %1$s · زائد: %2$s · مختلف: %3$s</string>
     <string name="share_ayah_title">آية من القرآن الكريم</string>
     <string name="share_via">مشاركة عبر</string>
     <string name="share_saved_image">تم حفظ الصورة في المعرض بنجاح</string>

@@ -166,6 +166,11 @@
     <string name="memorization_play_recording">Play recording</string>
     <string name="memorization_stop_playback">Stop playback</string>
     <string name="memorization_delete_recording">Delete recording</string>
+    <string name="memorization_check_title">Recitation text check</string>
+    <string name="memorization_transcript_hint">Paste or type the transcript from the recording</string>
+    <string name="memorization_check_button">Check text</string>
+    <string name="memorization_check_score">Match score: %1$s%%</string>
+    <string name="memorization_check_differences">Missing: %1$s · Extra: %2$s · Different: %3$s</string>
     <string name="share_ayah_title">An ayah from the Holy Quran</string>
     <string name="share_via">Share via</string>
     <string name="share_saved_image">Image saved to gallery</string>

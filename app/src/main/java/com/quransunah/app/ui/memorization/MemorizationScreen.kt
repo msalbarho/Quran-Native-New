@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -64,6 +65,7 @@ fun MemorizationScreen(
 ) {
     val ui by viewModel.uiState.collectAsStateWithLifecycle()
     val recordingState by viewModel.recordingState.collectAsStateWithLifecycle()
+    val checkResult by viewModel.checkResult.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) viewModel.startRecording()
@@ -91,6 +93,8 @@ fun MemorizationScreen(
         onPlayRecording = viewModel::playRecording,
         onStopPlayback = viewModel::stopPlayback,
         onDeleteRecording = viewModel::deleteRecording,
+        checkResult = checkResult,
+        onCheckTranscript = viewModel::checkTranscript,
         onStartReading = onStartReading,
         modifier = modifier,
     )
@@ -114,6 +118,8 @@ fun MemorizationScreenContent(
     onPlayRecording: () -> Unit,
     onStopPlayback: () -> Unit,
     onDeleteRecording: () -> Unit,
+    checkResult: com.quransunah.app.core.RecitationCheckResult?,
+    onCheckTranscript: (String) -> Unit,
     onStartReading: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -146,6 +152,7 @@ fun MemorizationScreenContent(
             onStopPlayback = onStopPlayback,
             onDelete = onDeleteRecording,
         )
+        TranscriptCheckCard(result = checkResult, onCheck = onCheckTranscript)
         if (ui.dailyItems.isNotEmpty()) {
             Text(
                 text = stringResource(R.string.memorization_today_title),
@@ -178,6 +185,52 @@ fun MemorizationScreenContent(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun TranscriptCheckCard(
+    result: com.quransunah.app.core.RecitationCheckResult?,
+    onCheck: (String) -> Unit,
+) {
+    val paper = LocalPaperColors.current
+    var transcript by remember { mutableStateOf("") }
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(top = 10.dp).clip(MemorizationCard)
+            .background(paper.pageBody).border(1.dp, paper.tone500, MemorizationCard).padding(12.dp),
+    ) {
+        Text(stringResource(R.string.memorization_check_title), color = paper.textStrong, fontWeight = FontWeight.Bold)
+        OutlinedTextField(
+            value = transcript,
+            onValueChange = { transcript = it },
+            label = { Text(stringResource(R.string.memorization_transcript_hint)) },
+            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+            minLines = 2,
+        )
+        MemorizationButton(
+            label = stringResource(R.string.memorization_check_button),
+            emphasized = true,
+            onClick = { onCheck(transcript) },
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        )
+        if (result != null) {
+            Text(
+                stringResource(R.string.memorization_check_score, EasternArabic.format(result.scorePercent)),
+                color = paper.accent,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+            Text(
+                stringResource(
+                    R.string.memorization_check_differences,
+                    EasternArabic.format(result.differences.count { it.type == com.quransunah.app.core.WordDifferenceType.MISSING }),
+                    EasternArabic.format(result.differences.count { it.type == com.quransunah.app.core.WordDifferenceType.EXTRA }),
+                    EasternArabic.format(result.differences.count { it.type == com.quransunah.app.core.WordDifferenceType.DIFFERENT }),
+                ),
+                color = paper.textMuted,
+                fontSize = 12.sp,
+            )
         }
     }
 }

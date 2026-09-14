@@ -9,6 +9,9 @@ import com.quransunah.app.domain.model.MemorizationPlan
 import com.quransunah.app.domain.model.isValidAyahRange
 import com.quransunah.app.data.audio.MemorizationRecorder
 import com.quransunah.app.data.audio.RecordingState
+import com.quransunah.app.core.RecitationCheckResult
+import com.quransunah.app.core.RecitationTextChecker
+import com.quransunah.app.core.WordDifferenceType
 import com.quransunah.app.domain.model.memorizationSummary
 import com.quransunah.app.domain.repository.MemorizationRepository
 import com.quransunah.app.domain.repository.MushafRepository
@@ -47,6 +50,8 @@ class MemorizationViewModel @Inject constructor(
     private val recorder: MemorizationRecorder,
 ) : ViewModel() {
     private var lastRecordingId: String? = null
+    private val _checkResult = kotlinx.coroutines.flow.MutableStateFlow<RecitationCheckResult?>(null)
+    val checkResult: StateFlow<RecitationCheckResult?> = _checkResult
     val recordingState: StateFlow<RecordingState> = recorder.state
     private val surahs = flow { emit(mushafRepository.getSurahs()) }
     private val _sessionId = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
@@ -168,6 +173,28 @@ class MemorizationViewModel @Inject constructor(
         recorder.delete()
         if (id != null) viewModelScope.launch { memorizationRepository.deleteRecording(id) }
         lastRecordingId = null
+    }
+
+    fun checkTranscript(transcript: String) {
+        val expected = uiState.value.dailyItems.joinToString(" ") { it.item.ayahText }
+        if (expected.isBlank() || transcript.isBlank()) return
+        val result = RecitationTextChecker.compare(expected, transcript)
+        _checkResult.value = result
+        val sessionId = _sessionId.value ?: return
+        viewModelScope.launch {
+            memorizationRepository.saveAttempt(
+                com.quransunah.app.domain.model.RecitationAttempt(
+                    id = "attempt:${UUID.randomUUID()}",
+                    sessionId = sessionId,
+                    recordingId = lastRecordingId,
+                    scorePercent = result.scorePercent,
+                    missingCount = result.differences.count { it.type == WordDifferenceType.MISSING },
+                    extraCount = result.differences.count { it.type == WordDifferenceType.EXTRA },
+                    differentCount = result.differences.count { it.type == WordDifferenceType.DIFFERENT },
+                    createdAt = System.currentTimeMillis(),
+                ),
+            )
+        }
     }
 
     override fun onCleared() {
