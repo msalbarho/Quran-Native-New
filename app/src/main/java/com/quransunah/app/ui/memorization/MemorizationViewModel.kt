@@ -240,6 +240,7 @@ class MemorizationViewModel @Inject constructor(
     }
 
     fun startRecording() {
+        _checkResult.value = null
         if (recorder.start()) transcriber.start()
     }
 

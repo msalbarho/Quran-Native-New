@@ -464,8 +464,10 @@ private fun TranscriptCheckCard(
     val paper = LocalPaperColors.current
     var transcript by remember { mutableStateOf("") }
     LaunchedEffect(transcriptionState) {
-        if (transcriptionState is TranscriptionState.Completed) {
-            transcript = transcriptionState.text
+        when (transcriptionState) {
+            is TranscriptionState.Completed -> transcript = transcriptionState.text
+            TranscriptionState.Starting -> transcript = ""
+            else -> Unit
         }
     }
     Column(
@@ -529,6 +531,7 @@ private fun TranscriptCheckCard(
             label = stringResource(R.string.memorization_check_button),
             emphasized = true,
             onClick = { onCheck(transcript) },
+            enabled = transcript.isNotBlank(),
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
         )
         if (result != null) {
@@ -835,6 +838,7 @@ private fun MemorizationButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     emphasized: Boolean = false,
+    enabled: Boolean = true,
 ) {
     val paper = LocalPaperColors.current
     val fill = if (emphasized) paper.accent else paper.pageBody
@@ -842,15 +846,15 @@ private fun MemorizationButton(
     Box(
         modifier = modifier
             .clip(MemorizationPill)
-            .background(fill)
-            .border(1.dp, if (emphasized) paper.accent else paper.tone500, MemorizationPill)
-            .clickable(onClick = onClick)
+            .background(fill.copy(alpha = if (enabled) 1f else 0.45f))
+            .border(1.dp, (if (emphasized) paper.accent else paper.tone500).copy(alpha = if (enabled) 1f else 0.45f), MemorizationPill)
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 8.dp, vertical = 9.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = label,
-            color = text,
+            color = text.copy(alpha = if (enabled) 1f else 0.45f),
             fontFamily = LocalAppFontFamily.current,
             fontWeight = FontWeight.SemiBold,
             fontSize = 12.sp,
