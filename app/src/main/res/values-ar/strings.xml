@@ -10,9 +10,9 @@
     <string name="home_title">القرآن الكريم</string>
     <string name="home_subtitle">مصحفك الهادئ للتلاوة والحفظ</string>
     <string name="home_choose_path">ابدأ من المسار الذي تريده</string>
-    <string name="home_reading_title">قراءة القرآن</string>
+    <string name="home_reading_title">متابعة القراءة</string>
     <string name="home_reading_description">اقرأ من حيث توقفت</string>
-    <string name="home_last_page">آخر موضع: الصفحة %1$s</string>
+    <string name="home_last_page">من سورة %1$s، الآية %2$s · الصفحة %3$s</string>
     <string name="home_training_title">التدريب والتحفيظ</string>
     <string name="home_training_description">اختبر حفظك من صفحة المصحف</string>
     <string name="home_listening_title">الاستماع</string>
@@ -144,8 +144,10 @@
     <string name="training_mushaf_mode_title">جلسة حفظ على صفحة المصحف</string>
     <string name="training_mushaf_mode_hint">أخفِ الآيات، حاول التسميع، ثم أظهرها للمراجعة.</string>
     <string name="training_mushaf_loading">جارٍ تجهيز صفحة التدريب…</string>
-    <string name="training_show_ayahs">إظهار الآيات</string>
-    <string name="training_hide_ayahs">إخفاء الآيات</string>
+    <string name="training_show_ayahs">إظهار الآية</string>
+    <string name="training_hide_ayahs">إخفاء الآية</string>
+    <string name="training_show_ayahs_accessibility">إظهار الآية، العين مغلقة</string>
+    <string name="training_hide_ayahs_accessibility">إخفاء الآية، العين مفتوحة</string>
     <string name="training_previous_page">الصفحة السابقة</string>
     <string name="training_next_page">الصفحة التالية</string>
     <string name="last_position_title">آخر موضع</string>

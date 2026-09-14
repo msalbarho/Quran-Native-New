@@ -23,11 +23,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -51,11 +53,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.quransunah.app.R
 import com.quransunah.app.core.AppConstants
+import com.quransunah.app.core.EasternArabic
 import com.quransunah.app.domain.model.AyahRef
 import com.quransunah.app.domain.model.PlaybackDomain
 import com.quransunah.app.hydration.HydrationState
@@ -174,6 +178,17 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
     val studyViewModel: StudyViewModel = hiltViewModel()
     val indexViewModel: QuranIndexViewModel = hiltViewModel()
     val preferredAyah = jumpHighlight ?: selectedWord?.let { AyahRef(it.surah, it.ayah) }
+    val currentLocationWord = remember(page) {
+        page?.lines
+            ?.asSequence()
+            ?.flatMap { it.words.asSequence() }
+            ?.firstOrNull { !it.isAyahMarker }
+    }
+    val currentSurahName = currentLocationWord?.let { word ->
+        surahsByNumber[word.surah]?.nameArabic
+            ?: stringResource(R.string.surah_fallback, EasternArabic.format(word.surah))
+    } ?: stringResource(R.string.surah_fallback, EasternArabic.format(1))
+    val currentAyah = currentLocationWord?.ayah ?: 1
     LaunchedEffect(page, preferredAyah) {
         bookmarksViewModel.bindContext(page, preferredAyah)
     }
@@ -229,6 +244,8 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
         when (tab) {
             AppTab.Home -> HomeScreen(
                 pageNumber = pageNumber,
+                currentSurah = currentSurahName,
+                currentAyah = currentAyah,
                 onOpenReading = { viewModel.selectTab(AppTab.Reading) },
                 onOpenTraining = { viewModel.selectTab(AppTab.Training) },
                 onOpenListening = { viewModel.selectTab(AppTab.Listening) },
@@ -486,25 +503,45 @@ private fun TrainingControlBar(
     modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(paper.pageBody.copy(alpha = 0.97f))
             .padding(horizontal = 8.dp, vertical = 7.dp),
-        horizontalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = stringResource(if (hidden) R.string.training_show_ayahs else R.string.training_hide_ayahs),
-            color = paper.pageBody,
-            textAlign = TextAlign.Center,
+        val label = stringResource(if (hidden) R.string.training_show_ayahs else R.string.training_hide_ayahs)
+        val accessibilityLabel = stringResource(
+            if (hidden) R.string.training_show_ayahs_accessibility
+            else R.string.training_hide_ayahs_accessibility,
+        )
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(14.dp))
                 .background(paper.accent)
                 .clickable(onClick = onToggle)
-                .padding(vertical = 10.dp),
-        )
+                .padding(vertical = 9.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                painter = painterResource(
+                    if (hidden) R.drawable.ic_visibility_off_eye else R.drawable.ic_visibility_eye,
+                ),
+                contentDescription = accessibilityLabel,
+                tint = paper.pageBody,
+                modifier = Modifier.size(38.dp),
+            )
+            Text(
+                text = label,
+                color = paper.pageBody,
+                textAlign = TextAlign.Center,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                fontSize = 15.sp,
+                modifier = Modifier.padding(top = 2.dp),
+            )
+        }
     }
 }
 

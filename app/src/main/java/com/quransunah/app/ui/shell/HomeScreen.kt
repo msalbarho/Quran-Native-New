@@ -53,6 +53,8 @@ private val HomeActionShape = RoundedCornerShape(14.dp)
 @Composable
 fun HomeScreen(
     pageNumber: Int,
+    currentSurah: String,
+    currentAyah: Int,
     onOpenReading: () -> Unit,
     onOpenTraining: () -> Unit,
     onOpenListening: () -> Unit,
@@ -118,7 +120,12 @@ fun HomeScreen(
         HomeRouteCard(
             title = stringResource(R.string.home_reading_title),
             description = stringResource(R.string.home_reading_description),
-            detail = stringResource(R.string.home_last_page, EasternArabic.format(pageNumber)),
+            detail = stringResource(
+                R.string.home_last_page,
+                currentSurah,
+                EasternArabic.format(currentAyah),
+                EasternArabic.format(pageNumber),
+            ),
             iconRes = R.drawable.ic_nav_quran,
             featured = true,
             onClick = onOpenReading,

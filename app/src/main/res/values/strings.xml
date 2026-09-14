@@ -10,9 +10,9 @@
     <string name="home_title">Holy Quran</string>
     <string name="home_subtitle">Your calm companion for recitation and memorization</string>
     <string name="home_choose_path">Choose where you would like to begin</string>
-    <string name="home_reading_title">Read the Quran</string>
+    <string name="home_reading_title">Continue reading</string>
     <string name="home_reading_description">Read from where you stopped</string>
-    <string name="home_last_page">Last position: page %1$s</string>
+    <string name="home_last_page">From %1$s, ayah %2$s · page %3$s</string>
     <string name="home_training_title">Training &amp; memorization</string>
     <string name="home_training_description">Test your memorization from the Mushaf page</string>
     <string name="home_listening_title">Listening</string>
@@ -144,8 +144,10 @@
     <string name="training_mushaf_mode_title">Memorize from the Mushaf page</string>
     <string name="training_mushaf_mode_hint">Hide the ayahs, recite from memory, then reveal them to review.</string>
     <string name="training_mushaf_loading">Preparing the training page…</string>
-    <string name="training_show_ayahs">Show ayahs</string>
-    <string name="training_hide_ayahs">Hide ayahs</string>
+    <string name="training_show_ayahs">Show ayah</string>
+    <string name="training_hide_ayahs">Hide ayah</string>
+    <string name="training_show_ayahs_accessibility">Show ayah, eye closed</string>
+    <string name="training_hide_ayahs_accessibility">Hide ayah, eye open</string>
     <string name="training_previous_page">Previous page</string>
     <string name="training_next_page">Next page</string>
     <string name="last_position_title">Last position</string>
