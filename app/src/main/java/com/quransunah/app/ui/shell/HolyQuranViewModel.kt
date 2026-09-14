@@ -42,11 +42,13 @@ import kotlinx.coroutines.launch
 enum class AppTab(val route: String) {
     Reading("reading"),
     Listening("listening"),
+    Training("training"),
     ;
 
     companion object {
         fun fromStored(route: String): AppTab = when (route) {
             Listening.route, "audio" -> Listening
+            Training.route -> Training
             else -> Reading
         }
     }
@@ -195,7 +197,7 @@ class HolyQuranViewModel @Inject constructor(
     fun selectTab(tab: AppTab) {
         _tab.value = tab
         closePicker()
-        if (tab == AppTab.Listening) {
+        if (tab == AppTab.Listening || tab == AppTab.Training) {
             _chromeVisible.value = true
         }
         if (tab != AppTab.Reading) {

@@ -11,9 +11,11 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
@@ -47,6 +50,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.quransunah.app.R
@@ -162,6 +166,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
     val pendingPagerPage by viewModel.pendingPagerPage.collectAsStateWithLifecycle()
     val picker by viewModel.picker.collectAsStateWithLifecycle()
     val indexTab by viewModel.indexTab.collectAsStateWithLifecycle()
+    var trainingHidden by remember { mutableStateOf(true) }
     val bookmarksViewModel: BookmarksViewModel = hiltViewModel()
     val listeningViewModel: ListeningViewModel = hiltViewModel()
     val studyViewModel: StudyViewModel = hiltViewModel()
@@ -187,7 +192,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
         }
     }
     val restoreBar = tab == AppTab.Reading
-    val navVisible = chrome || tab == AppTab.Listening
+    val navVisible = chrome || tab == AppTab.Listening || tab == AppTab.Training
     var pagePickerOpen by remember { mutableStateOf(false) }
     val highlight by viewModel.mushafHighlight.collectAsStateWithLifecycle()
 
@@ -211,7 +216,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
             .background(paper.pageBackground),
     ) {
         when (tab) {
-            AppTab.Reading -> {
+            AppTab.Reading, AppTab.Training -> {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     HorizontalPager(
                         state = pagerState,
@@ -251,11 +256,15 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                                 highlightColor = paper.ayahHighlight,
                                 highlightWordId = highlight.wordId,
                                 highlightAyah = highlight.ayah?.let { it.surah to it.ayah },
+                                hideAyahText = tab == AppTab.Training && trainingHidden,
                                 chromeVisible = chrome,
                                 surahsByNumber = surahsByNumber,
                                 quarter = pageData?.quarter,
                                 sajda = pageData?.sajda,
-                                onWordTap = { word -> viewModel.onMushafWordTap(word) },
+                                onWordTap = { word ->
+                                    if (tab == AppTab.Training) trainingHidden = !trainingHidden
+                                    else viewModel.onMushafWordTap(word)
+                                },
                                 onWordLongPress = { word -> viewModel.onWordLongPress(word) },
                                 onEmptyTap = { viewModel.toggleChrome() },
                                 onSurahNameLongPress = { viewModel.openIndexPicker(QuranIndexTab.Surah) },
@@ -274,6 +283,8 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                                 highlightColor = paper.ayahHighlight,
                                 highlightWordId = highlight.wordId,
                                 highlightAyah = highlight.ayah?.let { it.surah to it.ayah },
+                                hideAyahText = tab == AppTab.Training && trainingHidden,
+                                onTrainingTap = if (tab == AppTab.Training) { { trainingHidden = !trainingHidden } } else null,
                                 chromeVisible = chrome,
                                 surahsByNumber = surahsByNumber,
                                 quarter = pageData?.quarter,
@@ -295,7 +306,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
         }
 
         AnimatedVisibility(
-            visible = chrome && tab == AppTab.Reading,
+            visible = chrome && (tab == AppTab.Reading || tab == AppTab.Training),
             enter = fadeIn(tween(320, easing = FastOutSlowInEasing)) +
                 slideInVertically(tween(320, easing = FastOutSlowInEasing)) { -it / 3 },
             exit = fadeOut(tween(280, easing = FastOutSlowInEasing)) +
@@ -331,7 +342,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
             )
         }
 
-        if (tab == AppTab.Reading) {
+        if (tab == AppTab.Reading || tab == AppTab.Training) {
             PageNumberBadge(
                 pageNumber = pageNumber,
                 onClick = { pagePickerOpen = true },
@@ -341,6 +352,17 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                     )
                     .navigationBarsPadding()
                     .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+            )
+        }
+
+        if (tab == AppTab.Training) {
+            TrainingControlBar(
+                hidden = trainingHidden,
+                onToggle = { trainingHidden = !trainingHidden },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = 56.dp, start = 20.dp, end = 20.dp),
             )
         }
 
@@ -356,7 +378,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                 activeTab = tab,
                 onTabChange = viewModel::selectTab,
                 onIndexPress = viewModel::openIndexPicker,
-                onBookmarkPress = viewModel::openBookmarksPicker,
+                onBookmarkPress = { viewModel.selectTab(AppTab.Training) },
                 onSettingsPress = viewModel::openSettingsPicker,
             )
         }
@@ -427,6 +449,35 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
 }
 
 @Composable
+private fun TrainingControlBar(
+    hidden: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val paper = LocalPaperColors.current
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(paper.pageBody.copy(alpha = 0.97f))
+            .padding(horizontal = 8.dp, vertical = 7.dp),
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = stringResource(if (hidden) R.string.training_show_ayahs else R.string.training_hide_ayahs),
+            color = paper.pageBody,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(paper.accent)
+                .clickable(onClick = onToggle)
+                .padding(vertical = 10.dp),
+        )
+    }
+}
+
+@Composable
 private fun ReadingPlaybackBar(
     viewModel: HolyQuranViewModel,
     listeningViewModel: ListeningViewModel,
@@ -477,6 +528,8 @@ private fun LiveTextMushafPage(
     highlightColor: androidx.compose.ui.graphics.Color,
     highlightWordId: Int?,
     highlightAyah: Pair<Int, Int>?,
+    hideAyahText: Boolean,
+    onTrainingTap: (() -> Unit)?,
     chromeVisible: Boolean,
     surahsByNumber: Map<Int, SurahInfo>,
     quarter: QuarterMarker?,
@@ -492,11 +545,12 @@ private fun LiveTextMushafPage(
         highlightColor = highlightColor,
         highlightWordId = highlightWordId,
         highlightAyah = highlightAyah,
+        hideAyahText = hideAyahText,
         chromeVisible = chromeVisible,
         surahsByNumber = surahsByNumber,
         quarter = quarter,
         sajda = sajda,
-        onWordTap = { word -> viewModel.onMushafWordTap(word) },
+        onWordTap = { word -> onTrainingTap?.invoke() ?: viewModel.onMushafWordTap(word) },
         onWordLongPress = { word -> viewModel.onWordLongPress(word) },
         onEmptyTap = { viewModel.toggleChrome() },
         onSurahNameLongPress = { viewModel.openIndexPicker(QuranIndexTab.Surah) },

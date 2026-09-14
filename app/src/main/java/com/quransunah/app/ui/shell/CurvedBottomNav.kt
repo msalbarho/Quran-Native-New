@@ -103,7 +103,7 @@ fun CurvedBottomNav(
             labelRes = R.string.training_tab,
             iconSize = 26.dp,
             onClick = onBookmarkPress,
-            selected = false,
+            selected = activeTab == AppTab.Training,
         ),
         NavItemSpec(
             id = "audio",
@@ -132,7 +132,11 @@ fun CurvedBottomNav(
     )
 
     var centers by remember { mutableStateOf(FloatArray(items.size)) }
-    val activeIndex = if (activeTab == AppTab.Listening) 2 else 3
+    val activeIndex = when (activeTab) {
+        AppTab.Training -> 1
+        AppTab.Listening -> 2
+        else -> 3
+    }
     val targetCenter = centers.getOrElse(activeIndex) { 0f }
     val bubbleX by animateFloatAsState(
         targetValue = targetCenter,
