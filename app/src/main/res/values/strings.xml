@@ -150,6 +150,12 @@
     <string name="memorization_empty_title">Start your memorization plan</string>
     <string name="memorization_empty_hint">Long-press a word in an ayah, then select “Add to memorization” to see it here.</string>
     <string name="memorization_start_reading">Open the mushaf</string>
+    <string name="memorization_plan_title">Memorization plan</string>
+    <string name="memorization_plan_empty">Create a plan from the ayahs you added to memorization.</string>
+    <string name="memorization_create_plan">Create plan</string>
+    <string name="memorization_plan_target">%1$s · %2$s ayahs daily out of %3$s</string>
+    <string name="memorization_start_session">Start today’s session</string>
+    <string name="memorization_finish_session">Finish session and save progress</string>
     <string name="share_ayah_title">An ayah from the Holy Quran</string>
     <string name="share_via">Share via</string>
     <string name="share_saved_image">Image saved to gallery</string>

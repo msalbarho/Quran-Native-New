@@ -150,6 +150,12 @@
     <string name="memorization_empty_title">ابدأ خطة تحفيظك</string>
     <string name="memorization_empty_hint">اضغط مطوّلاً على كلمة في الآية، ثم اختر «أضف إلى التحفيظ» لتظهر هنا.</string>
     <string name="memorization_start_reading">الانتقال إلى المصحف</string>
+    <string name="memorization_plan_title">خطة الحفظ</string>
+    <string name="memorization_plan_empty">أنشئ خطة من الآيات المضافة للتحفيظ.</string>
+    <string name="memorization_create_plan">إنشاء خطة</string>
+    <string name="memorization_plan_target">%1$s · %2$s آيات يوميًا من أصل %3$s</string>
+    <string name="memorization_start_session">بدء جلسة اليوم</string>
+    <string name="memorization_finish_session">إنهاء الجلسة وتسجيل التقدم</string>
     <string name="share_ayah_title">آية من القرآن الكريم</string>
     <string name="share_via">مشاركة عبر</string>
     <string name="share_saved_image">تم حفظ الصورة في المعرض بنجاح</string>

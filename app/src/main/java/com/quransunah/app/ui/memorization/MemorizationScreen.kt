@@ -62,6 +62,9 @@ fun MemorizationScreen(
         onMarkLearning = viewModel::markLearning,
         onReview = viewModel::recordReview,
         onDelete = viewModel::delete,
+        onCreatePlan = viewModel::createPlanFromTrackedItems,
+        onStartSession = viewModel::startSession,
+        onFinishSession = viewModel::finishSession,
         onStartReading = onStartReading,
         modifier = modifier,
     )
@@ -76,6 +79,9 @@ fun MemorizationScreenContent(
     onMarkLearning: (String) -> Unit,
     onReview: (String) -> Unit,
     onDelete: (String) -> Unit,
+    onCreatePlan: () -> Unit,
+    onStartSession: (String) -> Unit,
+    onFinishSession: () -> Unit,
     onStartReading: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -91,6 +97,13 @@ fun MemorizationScreenContent(
             learning = ui.learning,
             mastered = ui.mastered,
             completionPercent = ui.completionPercent,
+        )
+        MemorizationPlanCard(
+            plans = ui.plans,
+            activeSession = ui.activeSessionId != null,
+            onCreatePlan = onCreatePlan,
+            onStartSession = onStartSession,
+            onFinishSession = onFinishSession,
         )
         if (ui.items.isEmpty()) {
             MemorizationEmptyState(onStartReading = onStartReading)
@@ -406,5 +419,55 @@ private fun MemorizationEmptyState(onStartReading: () -> Unit) {
                 .fillMaxWidth()
                 .padding(top = 18.dp),
         )
+    }
+}
+
+@Composable
+private fun MemorizationPlanCard(
+    plans: List<com.quransunah.app.domain.model.MemorizationPlan>,
+    activeSession: Boolean,
+    onCreatePlan: () -> Unit,
+    onStartSession: (String) -> Unit,
+    onFinishSession: () -> Unit,
+) {
+    val paper = LocalPaperColors.current
+    val plan = plans.firstOrNull()
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp)
+            .clip(MemorizationCard)
+            .background(paper.pageBody)
+            .border(1.dp, paper.tone500, MemorizationCard)
+            .padding(12.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.memorization_plan_title),
+            color = paper.textStrong,
+            fontFamily = LocalAppFontFamily.current,
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp,
+        )
+        if (plan == null) {
+            Text(stringResource(R.string.memorization_plan_empty), color = paper.textMuted, fontSize = 12.sp)
+            MemorizationButton(
+                label = stringResource(R.string.memorization_create_plan),
+                emphasized = true,
+                onClick = onCreatePlan,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            )
+        } else {
+            Text(
+                stringResource(R.string.memorization_plan_target, plan.name, EasternArabic.format(plan.dailyTarget), EasternArabic.format(plan.totalAyahs)),
+                color = paper.textMuted,
+                fontSize = 12.sp,
+            )
+            MemorizationButton(
+                label = stringResource(if (activeSession) R.string.memorization_finish_session else R.string.memorization_start_session),
+                emphasized = true,
+                onClick = if (activeSession) onFinishSession else { { onStartSession(plan.id) } },
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            )
+        }
     }
 }

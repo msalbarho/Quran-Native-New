@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quransunah.app.domain.model.MemorizationItem
 import com.quransunah.app.domain.model.MemorizationState
+import com.quransunah.app.domain.model.MemorizationPlan
+import com.quransunah.app.domain.model.isValidAyahRange
 import com.quransunah.app.domain.model.memorizationSummary
 import com.quransunah.app.domain.repository.MemorizationRepository
 import com.quransunah.app.domain.repository.MushafRepository
@@ -13,6 +15,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -28,6 +31,8 @@ data class MemorizationUiState(
     val mastered: Int = 0,
     val completionPercent: Int = 0,
     val loaded: Boolean = false,
+    val plans: List<MemorizationPlan> = emptyList(),
+    val activeSessionId: String? = null,
 )
 
 @HiltViewModel
@@ -36,11 +41,13 @@ class MemorizationViewModel @Inject constructor(
     mushafRepository: MushafRepository,
 ) : ViewModel() {
     private val surahs = flow { emit(mushafRepository.getSurahs()) }
+    private val _sessionId = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<MemorizationUiState> = combine(
-        memorizationRepository.observeItems(),
-        surahs,
-    ) { items, catalog ->
+        combine(memorizationRepository.observeItems(), surahs) { items, catalog -> items to catalog },
+        memorizationRepository.observePlans(),
+        _sessionId,
+    ) { (items, catalog), plans, sessionId ->
         val names = catalog.associate { it.number to it.nameArabic }
         val summary = items.memorizationSummary()
         MemorizationUiState(
@@ -52,6 +59,8 @@ class MemorizationViewModel @Inject constructor(
             mastered = summary.mastered,
             completionPercent = summary.completionPercent,
             loaded = true,
+            plans = plans,
+            activeSessionId = sessionId,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MemorizationUiState())
 
@@ -76,4 +85,43 @@ class MemorizationViewModel @Inject constructor(
     fun delete(id: String) {
         viewModelScope.launch { memorizationRepository.untrack(id) }
     }
+
+    fun createPlanFromTrackedItems() {
+        viewModelScope.launch {
+            val items = memorizationRepository.observeItems().first()
+            val first = items.minWithOrNull(compareBy<MemorizationItem> { it.surah }.thenBy { it.ayah }) ?: return@launch
+            val last = items.maxWithOrNull(compareBy<MemorizationItem> { it.surah }.thenBy { it.ayah }) ?: first
+            val now = System.currentTimeMillis()
+            val plan = MemorizationPlan(
+                id = MemorizationPlan.idFor(first.surah, first.ayah, last.surah, last.ayah),
+                name = "خطة التحفيظ",
+                startSurah = first.surah,
+                startAyah = first.ayah,
+                endSurah = last.surah,
+                endAyah = last.ayah,
+                dailyTarget = 5,
+                createdAt = now,
+                updatedAt = now,
+            )
+            if (isValidAyahRange(plan)) memorizationRepository.savePlan(plan)
+        }
+    }
+
+    fun startSession(planId: String) {
+        viewModelScope.launch {
+            val id = memorizationRepository.startSession(planId, System.currentTimeMillis())
+            // The id is kept only as UI state; session rows remain the source of truth.
+            _sessionId.value = id
+        }
+    }
+
+    fun finishSession() {
+        val id = _sessionId.value ?: return
+        val summary = uiState.value
+        viewModelScope.launch {
+            memorizationRepository.finishSession(id, summary.total, summary.mastered, System.currentTimeMillis())
+            _sessionId.value = null
+        }
+    }
+
 }

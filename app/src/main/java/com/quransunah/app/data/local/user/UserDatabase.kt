@@ -5,6 +5,8 @@ import androidx.room.RoomDatabase
 import com.quransunah.app.data.local.user.entity.AyahSearchEntity
 import com.quransunah.app.data.local.user.entity.BookmarkEntity
 import com.quransunah.app.data.local.user.entity.MemorizationEntity
+import com.quransunah.app.data.local.user.entity.MemorizationPlanEntity
+import com.quransunah.app.data.local.user.entity.MemorizationSessionEntity
 import com.quransunah.app.data.local.user.entity.PageMetaEntity
 import com.quransunah.app.data.local.user.entity.WordMeaningEntity
 
@@ -12,16 +14,19 @@ import com.quransunah.app.data.local.user.entity.WordMeaningEntity
     entities = [
         BookmarkEntity::class,
         MemorizationEntity::class,
+        MemorizationPlanEntity::class,
+        MemorizationSessionEntity::class,
         PageMetaEntity::class,
         AyahSearchEntity::class,
         WordMeaningEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class UserDatabase : RoomDatabase() {
     abstract fun bookmarkDao(): BookmarkDao
     abstract fun memorizationDao(): MemorizationDao
+    abstract fun memorizationPlanDao(): MemorizationPlanDao
     abstract fun pageMetaDao(): PageMetaDao
     abstract fun searchDao(): SearchDao
     abstract fun wordMeaningDao(): WordMeaningDao

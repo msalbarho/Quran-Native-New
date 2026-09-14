@@ -15,6 +15,7 @@ import com.quransunah.app.data.local.quran.QuranDatabase
 import com.quransunah.app.data.local.tafsir.TafsirDao
 import com.quransunah.app.data.local.user.BookmarkDao
 import com.quransunah.app.data.local.user.MemorizationDao
+import com.quransunah.app.data.local.user.MemorizationPlanDao
 import com.quransunah.app.data.local.user.PageMetaDao
 import com.quransunah.app.data.local.user.SearchDao
 import com.quransunah.app.data.local.user.UserDatabase
@@ -65,6 +66,7 @@ object DatabaseModule {
     fun provideUserDatabase(@ApplicationContext context: Context): UserDatabase {
         return Room.databaseBuilder(context, UserDatabase::class.java, AppConstants.USER_DB_FILE)
             .addMigrations(UserDatabaseMigrations.MIGRATION_1_2)
+            .addMigrations(UserDatabaseMigrations.MIGRATION_2_3)
             .build()
     }
 
@@ -82,6 +84,9 @@ object DatabaseModule {
 
     @Provides
     fun provideMemorizationDao(db: UserDatabase): MemorizationDao = db.memorizationDao()
+
+    @Provides
+    fun provideMemorizationPlanDao(db: UserDatabase): MemorizationPlanDao = db.memorizationPlanDao()
 
     @Provides
     fun providePageMetaDao(db: UserDatabase): PageMetaDao = db.pageMetaDao()

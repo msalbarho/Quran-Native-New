@@ -59,4 +59,29 @@ class UserDatabaseMigrationTest {
             close()
         }
     }
+
+    @Test
+    fun migrationFrom2To3CreatesPlansAndSessionsTables() {
+        helper.createDatabase("user-migration-test-v2", 2).close()
+        helper.runMigrationsAndValidate(
+            "user-migration-test-v2",
+            3,
+            true,
+            UserDatabaseMigrations.MIGRATION_2_3,
+        ).apply {
+            execSQL(
+                "INSERT INTO memorization_plans(id, name, start_surah, start_ayah, end_surah, end_ayah, daily_target, created_at, updated_at) " +
+                    "VALUES ('plan:1:1-1:7', 'الفاتحة', 1, 1, 1, 7, 2, 1, 1)",
+            )
+            execSQL(
+                "INSERT INTO memorization_sessions(id, plan_id, started_at, finished_at, reviewed_count, mastered_count) " +
+                    "VALUES ('session-1', 'plan:1:1-1:7', 1, NULL, 0, 0)",
+            )
+            query("SELECT COUNT(*) FROM memorization_plans").use { cursor ->
+                cursor.moveToFirst()
+                assertEquals(1, cursor.getInt(0))
+            }
+            close()
+        }
+    }
 }

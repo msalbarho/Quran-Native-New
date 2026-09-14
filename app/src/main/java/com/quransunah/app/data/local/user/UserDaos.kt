@@ -7,6 +7,8 @@ import androidx.room.Query
 import com.quransunah.app.data.local.user.entity.AyahSearchEntity
 import com.quransunah.app.data.local.user.entity.BookmarkEntity
 import com.quransunah.app.data.local.user.entity.MemorizationEntity
+import com.quransunah.app.data.local.user.entity.MemorizationPlanEntity
+import com.quransunah.app.data.local.user.entity.MemorizationSessionEntity
 import com.quransunah.app.data.local.user.entity.PageMetaEntity
 import com.quransunah.app.data.local.user.entity.WordMeaningEntity
 import kotlinx.coroutines.flow.Flow
