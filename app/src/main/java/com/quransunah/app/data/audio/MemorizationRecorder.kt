@@ -27,6 +27,9 @@ class MemorizationRecorder @Inject constructor(
     private var recorder: MediaRecorder? = null
     private var player: MediaPlayer? = null
     private var currentFile: File? = null
+    private var startedAt: Long = 0L
+    var lastDurationMs: Long = 0L
+        private set
     private val _state = MutableStateFlow<RecordingState>(RecordingState.Idle)
     val state: StateFlow<RecordingState> = _state.asStateFlow()
 
@@ -46,6 +49,7 @@ class MemorizationRecorder @Inject constructor(
             instance.start()
             recorder = instance
             currentFile = file
+            startedAt = System.currentTimeMillis()
             _state.value = RecordingState.Recording(file)
         }.onFailure {
             recorder?.release()
@@ -61,6 +65,7 @@ class MemorizationRecorder @Inject constructor(
             active.stop()
             active.release()
             recorder = null
+            lastDurationMs = (System.currentTimeMillis() - startedAt).coerceAtLeast(0L)
             if (file != null && file.exists() && file.length() > 0) {
                 _state.value = RecordingState.Ready(file)
             } else {

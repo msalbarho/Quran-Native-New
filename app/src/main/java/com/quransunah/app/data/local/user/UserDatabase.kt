@@ -7,6 +7,7 @@ import com.quransunah.app.data.local.user.entity.BookmarkEntity
 import com.quransunah.app.data.local.user.entity.MemorizationEntity
 import com.quransunah.app.data.local.user.entity.MemorizationPlanEntity
 import com.quransunah.app.data.local.user.entity.MemorizationSessionEntity
+import com.quransunah.app.data.local.user.entity.MemorizationRecordingEntity
 import com.quransunah.app.data.local.user.entity.PageMetaEntity
 import com.quransunah.app.data.local.user.entity.WordMeaningEntity
 
@@ -16,11 +17,12 @@ import com.quransunah.app.data.local.user.entity.WordMeaningEntity
         MemorizationEntity::class,
         MemorizationPlanEntity::class,
         MemorizationSessionEntity::class,
+        MemorizationRecordingEntity::class,
         PageMetaEntity::class,
         AyahSearchEntity::class,
         WordMeaningEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class UserDatabase : RoomDatabase() {

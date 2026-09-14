@@ -67,6 +67,7 @@ object DatabaseModule {
         return Room.databaseBuilder(context, UserDatabase::class.java, AppConstants.USER_DB_FILE)
             .addMigrations(UserDatabaseMigrations.MIGRATION_1_2)
             .addMigrations(UserDatabaseMigrations.MIGRATION_2_3)
+            .addMigrations(UserDatabaseMigrations.MIGRATION_3_4)
             .build()
     }
 

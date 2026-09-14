@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 data class MemorizationListItem(
     val item: MemorizationItem,
@@ -141,7 +142,22 @@ class MemorizationViewModel @Inject constructor(
     }
 
     fun startRecording() { recorder.start() }
-    fun stopRecording() { recorder.stop() }
+    fun stopRecording() {
+        if (!recorder.stop()) return
+        val sessionId = _sessionId.value ?: return
+        val file = (recorder.state.value as? RecordingState.Ready)?.file ?: return
+        viewModelScope.launch {
+            memorizationRepository.saveRecording(
+                com.quransunah.app.domain.model.MemorizationRecording(
+                    id = "recording:${UUID.randomUUID()}",
+                    sessionId = sessionId,
+                    filePath = file.absolutePath,
+                    createdAt = System.currentTimeMillis(),
+                    durationMs = recorder.lastDurationMs,
+                ),
+            )
+        }
+    }
     fun playRecording() { recorder.play() }
     fun stopPlayback() { recorder.stopPlayback() }
     fun deleteRecording() { recorder.delete() }

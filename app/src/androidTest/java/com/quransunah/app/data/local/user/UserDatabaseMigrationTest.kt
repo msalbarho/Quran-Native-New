@@ -84,4 +84,25 @@ class UserDatabaseMigrationTest {
             close()
         }
     }
+
+    @Test
+    fun migrationFrom3To4CreatesRecordingsTable() {
+        helper.createDatabase("user-migration-test-v3", 3).close()
+        helper.runMigrationsAndValidate(
+            "user-migration-test-v3",
+            4,
+            true,
+            UserDatabaseMigrations.MIGRATION_3_4,
+        ).apply {
+            execSQL(
+                "INSERT INTO memorization_recordings(id, session_id, file_path, created_at, duration_ms) " +
+                    "VALUES ('recording-1', 'plan:1:1-1:7:session:1', '/cache/recording.m4a', 1, 1200)",
+            )
+            query("SELECT COUNT(*) FROM memorization_recordings").use { cursor ->
+                cursor.moveToFirst()
+                assertEquals(1, cursor.getInt(0))
+            }
+            close()
+        }
+    }
 }
