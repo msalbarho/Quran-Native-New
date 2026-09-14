@@ -11,14 +11,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -26,6 +25,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,12 +44,14 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quransunah.app.R
 import com.quransunah.app.core.EasternArabic
+import com.quransunah.app.data.audio.TranscriptionState
 import com.quransunah.app.domain.model.MemorizationItem
 import com.quransunah.app.domain.model.MemorizationState
 import com.quransunah.app.fonts.QcfFontManager
 import com.quransunah.app.ui.mushaf.QcfGlyphText
 import com.quransunah.app.ui.mushaf.UthmanicText
 import com.quransunah.app.ui.theme.LocalAppFontFamily
+import com.quransunah.app.ui.theme.LocalDisplayFontFamily
 import com.quransunah.app.ui.theme.LocalPaperColors
 
 private val MemorizationPill = RoundedCornerShape(999.dp)
@@ -65,6 +67,7 @@ fun MemorizationScreen(
 ) {
     val ui by viewModel.uiState.collectAsStateWithLifecycle()
     val recordingState by viewModel.recordingState.collectAsStateWithLifecycle()
+    val transcriptionState by viewModel.transcriptionState.collectAsStateWithLifecycle()
     val checkResult by viewModel.checkResult.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -93,6 +96,7 @@ fun MemorizationScreen(
         onPlayRecording = viewModel::playRecording,
         onStopPlayback = viewModel::stopPlayback,
         onDeleteRecording = viewModel::deleteRecording,
+        transcriptionState = transcriptionState,
         checkResult = checkResult,
         onCheckTranscript = viewModel::checkTranscript,
         onStartReading = onStartReading,
@@ -118,6 +122,7 @@ fun MemorizationScreenContent(
     onPlayRecording: () -> Unit,
     onStopPlayback: () -> Unit,
     onDeleteRecording: () -> Unit,
+    transcriptionState: TranscriptionState,
     checkResult: com.quransunah.app.core.RecitationCheckResult?,
     onCheckTranscript: (String) -> Unit,
     onStartReading: () -> Unit,
@@ -129,7 +134,8 @@ fun MemorizationScreenContent(
         modifier = modifier
             .fillMaxSize()
             .background(paper.pageBody)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .verticalScroll(rememberScrollState()),
     ) {
         MemorizationProgressCard(
             total = ui.total,
@@ -137,13 +143,17 @@ fun MemorizationScreenContent(
             mastered = ui.mastered,
             completionPercent = ui.completionPercent,
         )
+        TrainingFlowCard()
         MemorizationPlanCard(
             plans = ui.plans,
+            dailyCount = ui.dailyItems.size,
+            reviewDueCount = ui.reviewDueCount,
             activeSession = ui.activeSessionId != null,
             onCreatePlan = onCreatePlan,
             onStartSession = onStartSession,
             onFinishSession = onFinishSession,
         )
+        ReviewSuggestionCard(items = ui.reviewItems, onJump = onJump)
         RecordingCard(
             state = recordingState,
             onStart = onStartRecording,
@@ -152,7 +162,11 @@ fun MemorizationScreenContent(
             onStopPlayback = onStopPlayback,
             onDelete = onDeleteRecording,
         )
-        TranscriptCheckCard(result = checkResult, onCheck = onCheckTranscript)
+        TranscriptCheckCard(
+            transcriptionState = transcriptionState,
+            result = checkResult,
+            onCheck = onCheckTranscript,
+        )
         if (ui.dailyItems.isNotEmpty()) {
             Text(
                 text = stringResource(R.string.memorization_today_title),
@@ -164,14 +178,16 @@ fun MemorizationScreenContent(
             )
         }
         if (ui.items.isEmpty()) {
-            MemorizationEmptyState(onStartReading = onStartReading)
+            MemorizationEmptyState(
+                onStartReading = onStartReading,
+                modifier = Modifier.fillMaxWidth(),
+            )
         } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(top = 14.dp, bottom = 20.dp),
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(top = 14.dp, bottom = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                items(ui.items, key = { it.item.id }, contentType = { "memorization-item" }) { entry ->
+                ui.items.forEach { entry ->
                     MemorizationCard(
                         entry = entry,
                         fontManager = fontManager,
@@ -190,17 +206,248 @@ fun MemorizationScreenContent(
 }
 
 @Composable
+private fun TrainingFlowCard() {
+    val paper = LocalPaperColors.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp)
+            .clip(MemorizationCard)
+            .background(paper.pageBody)
+            .border(1.dp, paper.tone500, MemorizationCard)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.memorization_flow_title),
+            color = paper.textStrong,
+            fontFamily = LocalDisplayFontFamily.current,
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp,
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 9.dp),
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
+        ) {
+            TrainingFlowStep(
+                number = "١",
+                label = stringResource(R.string.memorization_flow_read),
+                modifier = Modifier.weight(1f),
+            )
+            TrainingFlowStep(
+                number = "٢",
+                label = stringResource(R.string.memorization_flow_recite),
+                modifier = Modifier.weight(1f),
+            )
+            TrainingFlowStep(
+                number = "٣",
+                label = stringResource(R.string.memorization_flow_check),
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun TrainingFlowStep(
+    number: String,
+    label: String,
+    modifier: Modifier = Modifier,
+) {
+    val paper = LocalPaperColors.current
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .clip(CircleShape)
+                .background(paper.tone300.copy(alpha = 0.8f))
+                .border(1.dp, paper.accent.copy(alpha = 0.45f), CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(number, color = paper.accent, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+        }
+        Text(
+            text = label,
+            color = paper.textMuted,
+            fontSize = 11.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+    }
+}
+
+@Composable
+private fun ReviewSuggestionCard(
+    items: List<MemorizationListItem>,
+    onJump: (MemorizationItem) -> Unit,
+) {
+    if (items.isEmpty()) return
+    val paper = LocalPaperColors.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp)
+            .clip(MemorizationCard)
+            .background(paper.tone300.copy(alpha = 0.45f))
+            .border(1.dp, paper.tone500, MemorizationCard)
+            .padding(12.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.memorization_review_queue_title),
+                    color = paper.textStrong,
+                    fontFamily = LocalDisplayFontFamily.current,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                )
+                Text(
+                    text = stringResource(R.string.memorization_review_queue_hint),
+                    color = paper.textMuted,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 2.dp),
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .clip(MemorizationPill)
+                    .background(paper.accent.copy(alpha = 0.14f))
+                    .padding(horizontal = 10.dp, vertical = 5.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = EasternArabic.format(items.size),
+                    color = paper.accent,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                )
+            }
+        }
+        items.forEachIndexed { index, entry ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(paper.pageBody.copy(alpha = 0.7f))
+                    .border(1.dp, paper.tone500.copy(alpha = 0.72f), RoundedCornerShape(12.dp))
+                    .clickable { onJump(entry.item) }
+                    .padding(horizontal = 10.dp, vertical = 9.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clip(CircleShape)
+                        .background(paper.tone400.copy(alpha = 0.75f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = EasternArabic.format(index + 1),
+                        color = paper.accent,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                    )
+                }
+                Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
+                    Text(
+                        text = entry.surahName.ifBlank {
+                            stringResource(R.string.surah_fallback, EasternArabic.format(entry.item.surah))
+                        },
+                        color = paper.textStrong,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 13.sp,
+                    )
+                    Text(
+                        text = stringResource(
+                            R.string.memorization_review_queue_item,
+                            entry.surahName.ifBlank { stringResource(R.string.surah_fallback, EasternArabic.format(entry.item.surah)) },
+                            EasternArabic.format(entry.item.ayah),
+                        ),
+                        color = paper.textMuted,
+                        fontSize = 11.sp,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.memorization_review_queue_open),
+                    color = paper.accent,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 11.sp,
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun TranscriptCheckCard(
+    transcriptionState: TranscriptionState,
     result: com.quransunah.app.core.RecitationCheckResult?,
     onCheck: (String) -> Unit,
 ) {
     val paper = LocalPaperColors.current
     var transcript by remember { mutableStateOf("") }
+    LaunchedEffect(transcriptionState) {
+        if (transcriptionState is TranscriptionState.Completed) {
+            transcript = transcriptionState.text
+        }
+    }
     Column(
         modifier = Modifier.fillMaxWidth().padding(top = 10.dp).clip(MemorizationCard)
             .background(paper.pageBody).border(1.dp, paper.tone500, MemorizationCard).padding(12.dp),
     ) {
         Text(stringResource(R.string.memorization_check_title), color = paper.textStrong, fontWeight = FontWeight.Bold)
+        Text(
+            stringResource(R.string.memorization_transcription_local_note),
+            color = paper.textMuted,
+            fontSize = 12.sp,
+            modifier = Modifier.padding(top = 3.dp),
+        )
+        when (transcriptionState) {
+            is TranscriptionState.Starting,
+            is TranscriptionState.Listening,
+            -> Text(
+                text = if (transcriptionState is TranscriptionState.Listening && transcriptionState.partialText.isNotBlank()) {
+                    stringResource(R.string.memorization_transcription_partial, transcriptionState.partialText)
+                } else {
+                    stringResource(R.string.memorization_transcribing)
+                },
+                color = paper.accent,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 6.dp),
+            )
+            is TranscriptionState.Completed -> Text(
+                text = stringResource(R.string.memorization_transcription_ready),
+                color = paper.accent,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 6.dp),
+            )
+            TranscriptionState.NoSpeech -> Text(
+                text = stringResource(R.string.memorization_transcription_no_speech),
+                color = paper.textMuted,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 6.dp),
+            )
+            TranscriptionState.Unavailable -> Text(
+                text = stringResource(R.string.memorization_transcription_unavailable),
+                color = paper.textMuted,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 6.dp),
+            )
+            TranscriptionState.Failed -> Text(
+                text = stringResource(R.string.memorization_transcription_failed),
+                color = paper.textMuted,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 6.dp),
+            )
+            TranscriptionState.Idle -> Unit
+        }
         OutlinedTextField(
             value = transcript,
             onValueChange = { transcript = it },
@@ -230,6 +477,17 @@ private fun TranscriptCheckCard(
                 ),
                 color = paper.textMuted,
                 fontSize = 12.sp,
+            )
+            Text(
+                text = when {
+                    result.passed -> stringResource(R.string.memorization_result_next)
+                    result.scorePercent >= 60 -> stringResource(R.string.memorization_result_retry)
+                    else -> stringResource(R.string.memorization_result_practice)
+                },
+                color = paper.accent,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 6.dp),
             )
         }
     }
@@ -533,11 +791,13 @@ private fun MemorizationButton(
 }
 
 @Composable
-private fun MemorizationEmptyState(onStartReading: () -> Unit) {
+private fun MemorizationEmptyState(
+    onStartReading: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val paper = LocalPaperColors.current
     Column(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = modifier
             .padding(top = 30.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -586,6 +846,8 @@ private fun MemorizationEmptyState(onStartReading: () -> Unit) {
 @Composable
 private fun MemorizationPlanCard(
     plans: List<com.quransunah.app.domain.model.MemorizationPlan>,
+    dailyCount: Int,
+    reviewDueCount: Int,
     activeSession: Boolean,
     onCreatePlan: () -> Unit,
     onStartSession: (String) -> Unit,
@@ -603,7 +865,7 @@ private fun MemorizationPlanCard(
             .padding(12.dp),
     ) {
         Text(
-            text = stringResource(R.string.memorization_plan_title),
+            text = stringResource(R.string.memorization_today_step),
             color = paper.textStrong,
             fontFamily = LocalAppFontFamily.current,
             fontWeight = FontWeight.Bold,
@@ -622,6 +884,19 @@ private fun MemorizationPlanCard(
                 stringResource(R.string.memorization_plan_target, plan.name, EasternArabic.format(plan.dailyTarget), EasternArabic.format(plan.totalAyahs)),
                 color = paper.textMuted,
                 fontSize = 12.sp,
+            )
+            Text(
+                stringResource(R.string.memorization_today_count, EasternArabic.format(dailyCount)),
+                color = paper.accent,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+            Text(
+                stringResource(R.string.memorization_review_due, EasternArabic.format(reviewDueCount)),
+                color = paper.textMuted,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 3.dp),
             )
             MemorizationButton(
                 label = stringResource(if (activeSession) R.string.memorization_finish_session else R.string.memorization_start_session),
