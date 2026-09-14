@@ -12,7 +12,7 @@
     <string name="home_choose_path">ابدأ من المسار الذي تريده</string>
     <string name="home_reading_title">متابعة القراءة</string>
     <string name="home_reading_description">اقرأ من حيث توقفت</string>
-    <string name="home_last_page">من سورة %1$s، الآية %2$s · الصفحة %3$s</string>
+    <string name="home_last_page">سورة %1$s · الصفحة %3$s</string>
     <string name="home_training_title">التدريب والتحفيظ</string>
     <string name="home_training_description">اختبر حفظك من صفحة المصحف</string>
     <string name="home_listening_title">الاستماع</string>
@@ -156,6 +156,10 @@
     <string name="training_progress_summary">ملخص التقدم</string>
     <string name="training_rate_mastered">تمكنت منها</string>
     <string name="training_rate_review">تحتاج مراجعة</string>
+    <string name="training_repeat">تكرار</string>
+    <string name="training_repeat_active">جارٍ التكرار</string>
+    <string name="training_repeat_option">%1$d مرات</string>
+    <string name="training_repeat_no_ayah">اكشف آية أولاً</string>
     <string name="training_record">بدء التسميع</string>
     <string name="training_stop_record">إيقاف التسجيل</string>
     <string name="training_previous_short">السابق</string>

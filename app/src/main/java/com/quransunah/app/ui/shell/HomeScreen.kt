@@ -31,7 +31,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -109,14 +108,6 @@ fun HomeScreen(
             }
         }
 
-        Text(
-            text = stringResource(R.string.home_choose_path),
-            color = paper.textMuted,
-            fontFamily = LocalAppFontFamily.current,
-            fontSize = 13.sp,
-            modifier = Modifier.padding(top = 28.dp, bottom = 10.dp),
-        )
-
         HomeRouteCard(
             title = stringResource(R.string.home_reading_title),
             description = stringResource(R.string.home_reading_description),
@@ -168,16 +159,6 @@ fun HomeScreen(
             compact = true,
         )
 
-        Text(
-            text = stringResource(R.string.home_secondary_hint),
-            color = paper.textMuted,
-            fontFamily = LocalAppFontFamily.current,
-            fontSize = 12.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp, bottom = 6.dp),
-        )
     }
 }
 
@@ -199,7 +180,7 @@ private fun HomeRouteCard(
     val descriptionColor = if (featured) Color.White.copy(alpha = 0.9f) else paper.textMuted
     val iconSurface = if (featured) Color.White.copy(alpha = 0.16f) else paper.tone300
     val iconTint = if (featured) Color.White else if (nightMode) paper.textStrong else paper.accent
-    val minHeight = if (compact) 112.dp else if (featured) 144.dp else 162.dp
+    val minHeight = if (compact) 104.dp else if (featured) 156.dp else 148.dp
     val cardDescription = "$title، $description"
 
     Row(
@@ -221,7 +202,7 @@ private fun HomeRouteCard(
     ) {
         Box(
             modifier = Modifier
-                .size(if (featured) 58.dp else 46.dp)
+                .size(if (featured) 62.dp else 46.dp)
                 .clip(CircleShape)
                 .background(iconSurface),
             contentAlignment = Alignment.Center,
@@ -230,7 +211,7 @@ private fun HomeRouteCard(
                 painter = painterResource(iconRes),
                 contentDescription = null,
                 tint = iconTint,
-                modifier = Modifier.size(if (featured) 31.dp else 25.dp),
+                modifier = Modifier.size(if (featured) 33.dp else 25.dp),
             )
         }
         Column(
@@ -242,7 +223,7 @@ private fun HomeRouteCard(
                 color = titleColor,
                 fontFamily = LocalDisplayFontFamily.current,
                 fontWeight = FontWeight.Bold,
-                fontSize = if (featured) 20.sp else if (compact) 17.sp else 16.sp,
+                fontSize = if (featured) 21.sp else if (compact) 17.sp else 16.sp,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -252,7 +233,7 @@ private fun HomeRouteCard(
                 fontFamily = LocalAppFontFamily.current,
                 fontSize = if (featured) 14.sp else 12.sp,
                 lineHeight = if (featured) 21.sp else 18.sp,
-                maxLines = if (compact) 1 else 3,
+                maxLines = if (compact) 1 else 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(top = 4.dp),
             )
