@@ -153,6 +153,7 @@ fun MemorizationScreenContent(
         )
         MemorizationPlanCard(
             plans = ui.plans,
+            todayItems = ui.dailyItems,
             dailyCount = ui.dailyItems.size,
             reviewDueCount = ui.reviewDueCount,
             trackedCount = ui.items.size,
@@ -162,6 +163,7 @@ fun MemorizationScreenContent(
             onStartSession = onStartSession,
             onFinishSession = onFinishSession,
             onStartReading = onStartReading,
+            onOpenToday = onJump,
         )
         ReviewSuggestionCard(items = ui.reviewItems, onJump = onJump)
         RecitationToolsSection(
@@ -914,6 +916,7 @@ private fun MemorizationEmptyState(
 @Composable
 private fun MemorizationPlanCard(
     plans: List<com.quransunah.app.domain.model.MemorizationPlan>,
+    todayItems: List<MemorizationListItem>,
     dailyCount: Int,
     reviewDueCount: Int,
     trackedCount: Int,
@@ -923,6 +926,7 @@ private fun MemorizationPlanCard(
     onStartSession: (String) -> Unit,
     onFinishSession: () -> Unit,
     onStartReading: () -> Unit,
+    onOpenToday: (MemorizationItem) -> Unit,
 ) {
     val paper = LocalPaperColors.current
     val plan = plans.firstOrNull()
@@ -979,6 +983,39 @@ private fun MemorizationPlanCard(
                 fontSize = 12.sp,
                 modifier = Modifier.padding(top = 3.dp),
             )
+            todayItems.firstOrNull()?.let { first ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 9.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(paper.tone300)
+                        .clickable { onOpenToday(first.item) }
+                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.memorization_today_focus),
+                            color = paper.textMuted,
+                            fontSize = 11.sp,
+                        )
+                        Text(
+                            text = "${first.surahName.ifBlank { stringResource(R.string.surah_fallback, EasternArabic.format(first.item.surah)) }} · ${stringResource(R.string.memorization_item_meta, EasternArabic.format(first.item.ayah), EasternArabic.format(first.item.pageNumber))}",
+                            color = paper.textStrong,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(top = 2.dp),
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.memorization_review_queue_open),
+                        color = paper.accent,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp,
+                    )
+                }
+            }
             MemorizationButton(
                 label = stringResource(if (activeSession) R.string.memorization_finish_session else R.string.memorization_start_session),
                 emphasized = true,

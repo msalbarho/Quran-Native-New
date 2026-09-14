@@ -177,6 +177,7 @@
     <string name="memorization_start_session">Start today’s session</string>
     <string name="memorization_finish_session">Finish session and save progress</string>
     <string name="memorization_today_title">Today’s ayahs</string>
+    <string name="memorization_today_focus">Start here</string>
     <string name="memorization_reveal_text">Reveal ayah</string>
     <string name="memorization_recitation_title">Recitation recording</string>
     <string name="memorization_recitation_tools">Recitation and check</string>
