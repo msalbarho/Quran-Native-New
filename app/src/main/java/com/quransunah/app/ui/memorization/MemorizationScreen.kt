@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -130,6 +131,11 @@ fun MemorizationScreenContent(
 ) {
     val paper = LocalPaperColors.current
     var revealedIds by remember { mutableStateOf(emptySet<String>()) }
+    var recitationToolsOpen by remember {
+        mutableStateOf(
+            recordingState !is com.quransunah.app.data.audio.RecordingState.Idle || checkResult != null,
+        )
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -143,7 +149,6 @@ fun MemorizationScreenContent(
             mastered = ui.mastered,
             completionPercent = ui.completionPercent,
         )
-        TrainingFlowCard()
         MemorizationPlanCard(
             plans = ui.plans,
             dailyCount = ui.dailyItems.size,
@@ -154,19 +159,24 @@ fun MemorizationScreenContent(
             onFinishSession = onFinishSession,
         )
         ReviewSuggestionCard(items = ui.reviewItems, onJump = onJump)
-        RecordingCard(
-            state = recordingState,
-            onStart = onStartRecording,
-            onStop = onStopRecording,
-            onPlay = onPlayRecording,
-            onStopPlayback = onStopPlayback,
-            onDelete = onDeleteRecording,
-        )
-        TranscriptCheckCard(
-            transcriptionState = transcriptionState,
-            result = checkResult,
-            onCheck = onCheckTranscript,
-        )
+        RecitationToolsSection(
+            open = recitationToolsOpen,
+            onToggle = { recitationToolsOpen = !recitationToolsOpen },
+        ) {
+            RecordingCard(
+                state = recordingState,
+                onStart = onStartRecording,
+                onStop = onStopRecording,
+                onPlay = onPlayRecording,
+                onStopPlayback = onStopPlayback,
+                onDelete = onDeleteRecording,
+            )
+            TranscriptCheckCard(
+                transcriptionState = transcriptionState,
+                result = checkResult,
+                onCheck = onCheckTranscript,
+            )
+        }
         if (ui.dailyItems.isNotEmpty()) {
             Text(
                 text = stringResource(R.string.memorization_today_title),
@@ -275,6 +285,59 @@ private fun TrainingFlowStep(
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 4.dp),
         )
+    }
+}
+
+@Composable
+private fun RecitationToolsSection(
+    open: Boolean,
+    onToggle: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val paper = LocalPaperColors.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp)
+            .clip(MemorizationCard)
+            .background(paper.pageBody)
+            .border(1.dp, paper.tone500, MemorizationCard),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onToggle)
+                .padding(horizontal = 12.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.memorization_recitation_tools),
+                    color = paper.textStrong,
+                    fontFamily = LocalDisplayFontFamily.current,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
+                )
+                Text(
+                    text = stringResource(R.string.memorization_recitation_tools_hint),
+                    color = paper.textMuted,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(top = 2.dp),
+                )
+            }
+            Text(
+                text = if (open) "−" else "+",
+                color = paper.accent,
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp,
+            )
+        }
+        if (open) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                content = content,
+            )
+        }
     }
 }
 

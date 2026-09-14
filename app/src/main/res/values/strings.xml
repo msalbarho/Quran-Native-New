@@ -176,6 +176,8 @@
     <string name="memorization_today_title">Today’s ayahs</string>
     <string name="memorization_reveal_text">Reveal ayah</string>
     <string name="memorization_recitation_title">Recitation recording</string>
+    <string name="memorization_recitation_tools">Recitation and check</string>
+    <string name="memorization_recitation_tools_hint">Record your recitation and review the result</string>
     <string name="memorization_recording_hint">The recording stays temporarily on your device and is not uploaded.</string>
     <string name="memorization_recording">Recording…</string>
     <string name="memorization_start_recording">Start recording</string>
