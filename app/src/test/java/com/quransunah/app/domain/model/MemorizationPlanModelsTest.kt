@@ -30,4 +30,14 @@ class MemorizationPlanModelsTest {
             MemorizationPlan.idFor(2, 1, 2, 5),
         )
     }
+
+    @Test
+    fun dailyTargetCannotExceedPlanRange() {
+        val plan = MemorizationPlan(
+            id = "p", name = "test", startSurah = 1, startAyah = 1,
+            endSurah = 1, endAyah = 7, dailyTarget = 7, createdAt = 1, updatedAt = 1,
+        )
+        assertTrue(isValidAyahRange(plan))
+        assertEquals(7, plan.totalAyahs)
+    }
 }

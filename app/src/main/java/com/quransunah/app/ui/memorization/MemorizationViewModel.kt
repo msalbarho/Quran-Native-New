@@ -26,6 +26,7 @@ data class MemorizationListItem(
 
 data class MemorizationUiState(
     val items: List<MemorizationListItem> = emptyList(),
+    val dailyItems: List<MemorizationListItem> = emptyList(),
     val total: Int = 0,
     val learning: Int = 0,
     val mastered: Int = 0,
@@ -50,10 +51,20 @@ class MemorizationViewModel @Inject constructor(
     ) { (items, catalog), plans, sessionId ->
         val names = catalog.associate { it.number to it.nameArabic }
         val summary = items.memorizationSummary()
+        val listItems = items.map { item ->
+            MemorizationListItem(item = item, surahName = names[item.surah].orEmpty())
+        }
+        val plan = plans.firstOrNull()
+        val dailyItems = plan?.let { selected ->
+            listItems.filter { entry ->
+                com.quransunah.app.core.SurahAyahCounts.ayahId(entry.item.surah, entry.item.ayah) in
+                    com.quransunah.app.core.SurahAyahCounts.range(selected.startSurah, selected.startAyah, selected.endSurah, selected.endAyah)
+                        .map { (surah, ayah) -> com.quransunah.app.core.SurahAyahCounts.ayahId(surah, ayah) }
+            }.take(selected.dailyTarget)
+        }.orEmpty()
         MemorizationUiState(
-            items = items.map { item ->
-                MemorizationListItem(item = item, surahName = names[item.surah].orEmpty())
-            },
+            items = listItems,
+            dailyItems = dailyItems,
             total = summary.total,
             learning = summary.learning,
             mastered = summary.mastered,

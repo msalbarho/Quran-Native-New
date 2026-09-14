@@ -156,6 +156,8 @@
     <string name="memorization_plan_target">%1$s · %2$s آيات يوميًا من أصل %3$s</string>
     <string name="memorization_start_session">بدء جلسة اليوم</string>
     <string name="memorization_finish_session">إنهاء الجلسة وتسجيل التقدم</string>
+    <string name="memorization_today_title">آيات اليوم</string>
+    <string name="memorization_reveal_text">إظهار الآية</string>
     <string name="share_ayah_title">آية من القرآن الكريم</string>
     <string name="share_via">مشاركة عبر</string>
     <string name="share_saved_image">تم حفظ الصورة في المعرض بنجاح</string>

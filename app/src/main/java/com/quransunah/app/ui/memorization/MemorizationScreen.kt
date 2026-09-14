@@ -21,6 +21,9 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -86,6 +89,7 @@ fun MemorizationScreenContent(
     modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
+    var revealedIds by remember { mutableStateOf(emptySet<String>()) }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -105,6 +109,16 @@ fun MemorizationScreenContent(
             onStartSession = onStartSession,
             onFinishSession = onFinishSession,
         )
+        if (ui.dailyItems.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.memorization_today_title),
+                color = paper.textStrong,
+                fontFamily = LocalAppFontFamily.current,
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                modifier = Modifier.padding(top = 12.dp),
+            )
+        }
         if (ui.items.isEmpty()) {
             MemorizationEmptyState(onStartReading = onStartReading)
         } else {
@@ -117,6 +131,8 @@ fun MemorizationScreenContent(
                     MemorizationCard(
                         entry = entry,
                         fontManager = fontManager,
+                        revealed = entry.item.id in revealedIds,
+                        onReveal = { revealedIds = revealedIds + entry.item.id },
                         onJump = { onJump(entry.item) },
                         onMarkMastered = { onMarkMastered(entry.item.id) },
                         onMarkLearning = { onMarkLearning(entry.item.id) },
@@ -218,6 +234,8 @@ private fun MemorizationCount(label: String, count: Int, suffix: String = "") {
 private fun MemorizationCard(
     entry: MemorizationListItem,
     fontManager: QcfFontManager?,
+    revealed: Boolean,
+    onReveal: () -> Unit,
     onJump: () -> Unit,
     onMarkMastered: () -> Unit,
     onMarkLearning: () -> Unit,
@@ -262,16 +280,22 @@ private fun MemorizationCard(
             }
             StateBadge(isMastered = isMastered)
         }
-        UthmanicText(
-            text = item.ayahText,
-            fontManager = fontManager,
-            color = paper.textPrimary,
-            fontSize = 18.sp,
-            maxLines = 3,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp),
-        )
+        if (isMastered || revealed) {
+            UthmanicText(
+                text = item.ayahText,
+                fontManager = fontManager,
+                color = paper.textPrimary,
+                fontSize = 18.sp,
+                maxLines = 3,
+                modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+            )
+        } else {
+            MemorizationButton(
+                label = stringResource(R.string.memorization_reveal_text),
+                onClick = onReveal,
+                modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+            )
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
