@@ -46,6 +46,7 @@ class MemorizationViewModel @Inject constructor(
     mushafRepository: MushafRepository,
     private val recorder: MemorizationRecorder,
 ) : ViewModel() {
+    private var lastRecordingId: String? = null
     val recordingState: StateFlow<RecordingState> = recorder.state
     private val surahs = flow { emit(mushafRepository.getSurahs()) }
     private val _sessionId = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
@@ -147,9 +148,11 @@ class MemorizationViewModel @Inject constructor(
         val sessionId = _sessionId.value ?: return
         val file = (recorder.state.value as? RecordingState.Ready)?.file ?: return
         viewModelScope.launch {
+            val recordingId = "recording:${UUID.randomUUID()}"
+            lastRecordingId = recordingId
             memorizationRepository.saveRecording(
                 com.quransunah.app.domain.model.MemorizationRecording(
-                    id = "recording:${UUID.randomUUID()}",
+                    id = recordingId,
                     sessionId = sessionId,
                     filePath = file.absolutePath,
                     createdAt = System.currentTimeMillis(),
@@ -160,7 +163,12 @@ class MemorizationViewModel @Inject constructor(
     }
     fun playRecording() { recorder.play() }
     fun stopPlayback() { recorder.stopPlayback() }
-    fun deleteRecording() { recorder.delete() }
+    fun deleteRecording() {
+        val id = lastRecordingId
+        recorder.delete()
+        if (id != null) viewModelScope.launch { memorizationRepository.deleteRecording(id) }
+        lastRecordingId = null
+    }
 
     override fun onCleared() {
         recorder.release()
