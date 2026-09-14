@@ -169,9 +169,9 @@
     <string name="memorization_review_queue_item">%1$s · ayah %2$s</string>
     <string name="memorization_review_queue_open">Open</string>
     <string name="memorization_plan_empty">Create a plan from the ayahs you added to memorization.</string>
-    <string name="memorization_first_step_hint">Add your first ayah from the mushaf, then build your session calmly.</string>
-    <string name="memorization_ready_to_plan_hint">Your ayahs are ready. Create a plan to start today’s session.</string>
-    <string name="memorization_add_first_ayah">Add your first ayah</string>
+    <string name="memorization_first_step_hint">Start with Al-Fatihah, then continue through the surahs and ayahs in order.</string>
+    <string name="memorization_ready_to_plan_hint">Your ayahs are in order. Create a plan to continue from your current place.</string>
+    <string name="memorization_add_first_ayah">Start from Al-Fatihah</string>
     <string name="memorization_create_plan">Create plan</string>
     <string name="memorization_plan_target">%1$s · %2$s ayahs daily out of %3$s</string>
     <string name="memorization_start_session">Start today’s session</string>

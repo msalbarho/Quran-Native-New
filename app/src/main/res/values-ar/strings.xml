@@ -169,9 +169,9 @@
     <string name="memorization_review_queue_item">%1$s · الآية %2$s</string>
     <string name="memorization_review_queue_open">فتح</string>
     <string name="memorization_plan_empty">أنشئ خطة من الآيات المضافة للتحفيظ.</string>
-    <string name="memorization_first_step_hint">ابدأ بإضافة أول آية من المصحف، ثم ابنِ جلسة حفظك بهدوء.</string>
-    <string name="memorization_ready_to_plan_hint">لديك آيات جاهزة. أنشئ منها خطة لتبدأ جلسة اليوم.</string>
-    <string name="memorization_add_first_ayah">إضافة أول آية</string>
+    <string name="memorization_first_step_hint">ابدأ من سورة الفاتحة، ثم واصل السور والآيات بالترتيب في رحلة حفظ هادئة.</string>
+    <string name="memorization_ready_to_plan_hint">آياتك مرتبة. أنشئ خطة لتتابع الحفظ من موضعك الحالي وبالتسلسل.</string>
+    <string name="memorization_add_first_ayah">بدء الحفظ من الفاتحة</string>
     <string name="memorization_create_plan">إنشاء خطة</string>
     <string name="memorization_plan_target">%1$s · %2$s آيات يوميًا من أصل %3$s</string>
     <string name="memorization_start_session">بدء جلسة اليوم</string>
