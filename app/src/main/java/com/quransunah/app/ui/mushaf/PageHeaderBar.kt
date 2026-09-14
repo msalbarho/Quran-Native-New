@@ -80,6 +80,7 @@ fun PageHeaderBar(
     onThemeToggle: () -> Unit,
     onOpenSurahIndex: () -> Unit,
     onOpenJuzIndex: () -> Unit,
+    onOpenBookmarks: () -> Unit,
     surahNames: Map<Int, String> = emptyMap(),
     modifier: Modifier = Modifier,
 ) {
@@ -169,6 +170,16 @@ fun PageHeaderBar(
                 SearchChip(
                     night = night,
                     onClick = onSearch,
+                )
+                Icon(
+                    painter = painterResource(R.drawable.ic_bookmark),
+                    contentDescription = stringResource(R.string.last_position_title),
+                    tint = if (night) Color.White else paper.textStrong,
+                    modifier = Modifier
+                        .size(26.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable(onClick = onOpenBookmarks)
+                        .padding(4.dp),
                 )
                 ThemeToggle(
                     night = night,
@@ -346,6 +357,7 @@ private fun PageHeaderBarPreview() {
             onThemeToggle = {},
             onOpenSurahIndex = {},
             onOpenJuzIndex = {},
+            onOpenBookmarks = {},
         )
     }
 }

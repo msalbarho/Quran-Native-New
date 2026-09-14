@@ -100,7 +100,7 @@ fun CurvedBottomNav(
         NavItemSpec(
             id = "bookmarks",
             painter = R.drawable.ic_bookmark,
-            labelRes = R.string.tab_bookmarks,
+            labelRes = R.string.training_tab,
             iconSize = 26.dp,
             onClick = onBookmarkPress,
             selected = false,

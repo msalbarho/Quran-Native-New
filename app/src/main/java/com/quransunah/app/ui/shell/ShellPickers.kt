@@ -101,20 +101,47 @@ fun ShellPickerHost(
             )
         }
         ShellPicker.Bookmarks -> CenteredPickerCard(
-            title = stringResource(R.string.bookmarks_title),
+            title = stringResource(R.string.training_title),
             onClose = onClose,
             minHeight = 420.dp,
             maxHeight = 640.dp,
         ) {
-            SavedPlacesHub(
-                pageNumber = pageNumber,
-                preferredAyah = preferredAyah,
+            MemorizationScreen(
                 fontManager = fontManager,
-                onJumpBookmark = onJumpBookmark,
+                onJump = { item ->
+                    onJumpBookmark(
+                        ReadingBookmark(
+                            id = item.id,
+                            surah = item.surah,
+                            ayah = item.ayah,
+                            pageNumber = item.pageNumber,
+                            wordId = 0,
+                            wordIndex = 0,
+                            ayahText = item.ayahText,
+                            savedAt = item.updatedAt,
+                        ),
+                    )
+                },
                 onStartReading = onStartReading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
+            )
+        }
+        ShellPicker.LastPosition -> CenteredPickerCard(
+            title = stringResource(R.string.last_position_title),
+            onClose = onClose,
+            minHeight = 420.dp,
+            maxHeight = 640.dp,
+        ) {
+            BookmarksScreen(
+                pageNumber = pageNumber,
+                preferredAyah = preferredAyah,
+                fontManager = fontManager,
+                onJump = onJumpBookmark,
+                onStartReading = onStartReading,
+                showTitle = false,
+                modifier = Modifier.fillMaxWidth().weight(1f),
             )
         }
         ShellPicker.Settings -> SettingsSideSheet(onClose = onClose)
@@ -147,13 +174,13 @@ private fun SavedPlacesHub(
                 .background(paper.tone400.copy(alpha = 0.48f)),
         ) {
             SavedPlacesTabLabel(
-                text = stringResource(R.string.bookmarks_saved),
+                text = stringResource(R.string.saved_places_tab),
                 selected = selectedTab == SavedPlacesTab.Bookmarks,
                 onClick = { selectedTab = SavedPlacesTab.Bookmarks },
                 modifier = Modifier.weight(1f),
             )
             SavedPlacesTabLabel(
-                text = stringResource(R.string.memorization_title),
+                text = stringResource(R.string.training_tab),
                 selected = selectedTab == SavedPlacesTab.Memorization,
                 onClick = { selectedTab = SavedPlacesTab.Memorization },
                 modifier = Modifier.weight(1f),

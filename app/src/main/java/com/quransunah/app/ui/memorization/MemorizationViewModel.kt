@@ -7,8 +7,11 @@ import com.quransunah.app.domain.model.MemorizationState
 import com.quransunah.app.domain.model.MemorizationSession
 import com.quransunah.app.domain.model.MemorizationPlan
 import com.quransunah.app.domain.model.isValidAyahRange
+import com.quransunah.app.domain.model.isDueForReview
 import com.quransunah.app.data.audio.MemorizationRecorder
 import com.quransunah.app.data.audio.RecordingState
+import com.quransunah.app.data.audio.OnDeviceSpeechTranscriber
+import com.quransunah.app.data.audio.TranscriptionState
 import com.quransunah.app.core.RecitationCheckResult
 import com.quransunah.app.core.RecitationTextChecker
 import com.quransunah.app.core.WordDifferenceType
@@ -19,6 +22,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.first
@@ -41,6 +45,8 @@ data class MemorizationUiState(
     val loaded: Boolean = false,
     val plans: List<MemorizationPlan> = emptyList(),
     val activeSessionId: String? = null,
+    val reviewDueCount: Int = 0,
+    val reviewItems: List<MemorizationListItem> = emptyList(),
 )
 
 @HiltViewModel
@@ -48,13 +54,23 @@ class MemorizationViewModel @Inject constructor(
     private val memorizationRepository: MemorizationRepository,
     mushafRepository: MushafRepository,
     private val recorder: MemorizationRecorder,
+    private val transcriber: OnDeviceSpeechTranscriber,
 ) : ViewModel() {
     private var lastRecordingId: String? = null
     private val _checkResult = kotlinx.coroutines.flow.MutableStateFlow<RecitationCheckResult?>(null)
     val checkResult: StateFlow<RecitationCheckResult?> = _checkResult
     val recordingState: StateFlow<RecordingState> = recorder.state
+    val transcriptionState: StateFlow<TranscriptionState> = transcriber.state
     private val surahs = flow { emit(mushafRepository.getSurahs()) }
     private val _sessionId = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+
+    init {
+        viewModelScope.launch {
+            transcriber.state.collect { state ->
+                if (state is TranscriptionState.Completed) checkTranscript(state.text)
+            }
+        }
+    }
 
     val uiState: StateFlow<MemorizationUiState> = combine(
         combine(memorizationRepository.observeItems(), surahs) { items, catalog -> items to catalog },
@@ -63,6 +79,7 @@ class MemorizationViewModel @Inject constructor(
     ) { (items, catalog), plans, sessionId ->
         val names = catalog.associate { it.number to it.nameArabic }
         val summary = items.memorizationSummary()
+        val reviewDueCount = items.count { it.isDueForReview() }
         val listItems = items.map { item ->
             MemorizationListItem(item = item, surahName = names[item.surah].orEmpty())
         }
@@ -84,6 +101,8 @@ class MemorizationViewModel @Inject constructor(
             loaded = true,
             plans = plans,
             activeSessionId = sessionId,
+            reviewDueCount = reviewDueCount,
+            reviewItems = listItems.filter { it.item.isDueForReview() }.take(5),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MemorizationUiState())
 
@@ -147,9 +166,14 @@ class MemorizationViewModel @Inject constructor(
         }
     }
 
-    fun startRecording() { recorder.start() }
+    fun startRecording() {
+        if (recorder.start()) transcriber.start()
+    }
+
     fun stopRecording() {
-        if (!recorder.stop()) return
+        val finished = recorder.stop()
+        transcriber.stop()
+        if (!finished) return
         val sessionId = _sessionId.value ?: return
         val file = (recorder.state.value as? RecordingState.Ready)?.file ?: return
         viewModelScope.launch {
@@ -170,6 +194,7 @@ class MemorizationViewModel @Inject constructor(
     fun stopPlayback() { recorder.stopPlayback() }
     fun deleteRecording() {
         val id = lastRecordingId
+        transcriber.cancel()
         recorder.delete()
         if (id != null) viewModelScope.launch { memorizationRepository.deleteRecording(id) }
         lastRecordingId = null
@@ -198,6 +223,7 @@ class MemorizationViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        transcriber.release()
         recorder.release()
         super.onCleared()
     }

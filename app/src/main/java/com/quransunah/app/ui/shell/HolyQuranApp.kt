@@ -310,6 +310,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                 onThemeToggle = { viewModel.setNightMode(!settings.nightMode) },
                 onOpenSurahIndex = { viewModel.openIndexPicker(QuranIndexTab.Surah) },
                 onOpenJuzIndex = { viewModel.openIndexPicker(QuranIndexTab.Juz) },
+                onOpenBookmarks = viewModel::openLastPositionPicker,
                 modifier = Modifier.statusBarsPadding(),
                 surahNames = remember(surahsByNumber) {
                     surahsByNumber.mapValues { it.value.nameArabic }

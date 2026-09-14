@@ -39,6 +39,20 @@ class MemorizationModelsTest {
         )
     }
 
+    @Test
+    fun learningAyahsAreAlwaysSuggestedForReview() {
+        assertEquals(true, item(1, MemorizationState.LEARNING).copy(updatedAt = Long.MAX_VALUE).isDueForReview(2L))
+    }
+
+    @Test
+    fun masteredAyahsUseOneThreeAndSevenDayIntervals() {
+        val day = 24 * 60 * 60 * 1000L
+        assertEquals(true, item(1, MemorizationState.MASTERED).copy(reviewCount = 1).isDueForReview(day + 1))
+        assertEquals(false, item(2, MemorizationState.MASTERED).copy(reviewCount = 1).isDueForReview(day))
+        assertEquals(true, item(3, MemorizationState.MASTERED).copy(reviewCount = 2).isDueForReview(3 * day + 1))
+        assertEquals(true, item(4, MemorizationState.MASTERED).copy(reviewCount = 3).isDueForReview(7 * day + 1))
+    }
+
     private fun item(ayah: Int, state: MemorizationState) = MemorizationItem(
         id = MemorizationItem.idFor(1, ayah),
         surah = 1,

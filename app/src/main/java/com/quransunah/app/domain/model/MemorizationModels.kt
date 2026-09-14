@@ -48,3 +48,17 @@ fun List<MemorizationItem>.memorizationSummary(): MemorizationSummary = Memoriza
 
 fun MemorizationItem.hasValidReference(): Boolean =
     SurahAyahCounts.ayahId(surah, ayah) > 0 && pageNumber in 1..AppConstants.TOTAL_PAGES
+
+/** Keeps review suggestions simple and predictable: 1, 3, then 7 days after each review. */
+fun MemorizationItem.isDueForReview(now: Long = System.currentTimeMillis()): Boolean {
+    if (state == MemorizationState.LEARNING) return true
+    val interval = when (reviewCount) {
+        0 -> 0L
+        1 -> DAY_MS
+        2 -> 3 * DAY_MS
+        else -> 7 * DAY_MS
+    }
+    return now - updatedAt >= interval
+}
+
+private const val DAY_MS = 24 * 60 * 60 * 1000L

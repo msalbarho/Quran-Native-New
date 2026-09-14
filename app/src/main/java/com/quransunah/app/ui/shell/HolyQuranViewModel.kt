@@ -56,6 +56,7 @@ enum class ShellPicker {
     None,
     Index,
     Bookmarks,
+    LastPosition,
     Settings,
 }
 
@@ -270,6 +271,11 @@ class HolyQuranViewModel @Inject constructor(
     fun openBookmarksPicker() {
         _searchOpen.value = false
         _picker.value = ShellPicker.Bookmarks
+    }
+
+    fun openLastPositionPicker() {
+        _searchOpen.value = false
+        _picker.value = ShellPicker.LastPosition
     }
 
     fun openSettingsPicker() {
