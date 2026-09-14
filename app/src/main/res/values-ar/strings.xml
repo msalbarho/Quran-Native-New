@@ -154,6 +154,8 @@
     <string name="training_hint_skip">تخطي الشرح</string>
     <string name="training_hint_start">فهمت، ابدأ</string>
     <string name="training_progress_summary">ملخص التقدم</string>
+    <string name="training_rate_mastered">تمكنت منها</string>
+    <string name="training_rate_review">تحتاج مراجعة</string>
     <string name="training_record">بدء التسميع</string>
     <string name="training_stop_record">إيقاف التسجيل</string>
     <string name="training_previous_short">السابق</string>

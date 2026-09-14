@@ -154,6 +154,8 @@
     <string name="training_hint_skip">Skip explanation</string>
     <string name="training_hint_start">Got it, start</string>
     <string name="training_progress_summary">Progress summary</string>
+    <string name="training_rate_mastered">I got it</string>
+    <string name="training_rate_review">Needs review</string>
     <string name="training_record">Start recitation</string>
     <string name="training_stop_record">Stop recording</string>
     <string name="training_previous_short">Previous</string>

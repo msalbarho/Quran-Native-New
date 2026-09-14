@@ -59,7 +59,6 @@ enum class AppTab(val route: String) {
 enum class ShellPicker {
     None,
     Index,
-    Bookmarks,
     LastPosition,
     Progress,
     Settings,
@@ -274,11 +273,6 @@ class HolyQuranViewModel @Inject constructor(
         viewModelScope.launch { preferences.setLastTab(AppTab.Reading.route) }
     }
 
-    fun openBookmarksPicker() {
-        _searchOpen.value = false
-        _picker.value = ShellPicker.Bookmarks
-    }
-
     fun openLastPositionPicker() {
         _searchOpen.value = false
         _picker.value = ShellPicker.LastPosition
@@ -439,7 +433,9 @@ class HolyQuranViewModel @Inject constructor(
     }
 
     fun jumpToPageNumber(page: Int) {
-        selectTab(AppTab.Reading)
+        if (_tab.value != AppTab.Reading && _tab.value != AppTab.Training) {
+            selectTab(AppTab.Reading)
+        }
         followAudio = false
         _chromeVisible.value = true
         val clamped = page.coerceIn(1, AppConstants.TOTAL_PAGES)

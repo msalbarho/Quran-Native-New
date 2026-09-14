@@ -1,12 +1,8 @@
 package com.quransunah.app.ui.shell
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.app.Activity
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -53,7 +49,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -64,7 +59,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.core.content.ContextCompat
 import com.quransunah.app.R
 import com.quransunah.app.core.AppConstants
 import com.quransunah.app.core.EasternArabic
@@ -90,7 +84,6 @@ import com.quransunah.app.ui.mushaf.PagePickerDialog
 import com.quransunah.app.ui.mushaf.TextMushafPage
 import com.quransunah.app.ui.mushaf.toLineRecords
 import com.quransunah.app.ui.memorization.MemorizationViewModel
-import com.quransunah.app.data.audio.RecordingState
 import com.quransunah.app.ui.search.SearchPane
 import com.quransunah.app.ui.study.MeaningPopover
 import com.quransunah.app.ui.study.StudyViewModel
@@ -210,19 +203,13 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
     val pendingPagerPage by viewModel.pendingPagerPage.collectAsStateWithLifecycle()
     val picker by viewModel.picker.collectAsStateWithLifecycle()
     val indexTab by viewModel.indexTab.collectAsStateWithLifecycle()
-    var trainingHidden by remember { mutableStateOf(true) }
-    var revealedAyahs by remember(pageNumber) { mutableStateOf(emptySet<Pair<Int, Int>>()) }
+    var trainingTextHidden by remember { mutableStateOf(true) }
+    var revealedTrainingAyahs by remember(pageNumber) { mutableStateOf(emptySet<Pair<Int, Int>>()) }
+    var revealedTrainingAyah by remember(pageNumber) { mutableStateOf<Pair<Int, Int>?>(null) }
     val bookmarksViewModel: BookmarksViewModel = hiltViewModel()
     val listeningViewModel: ListeningViewModel = hiltViewModel()
     val studyViewModel: StudyViewModel = hiltViewModel()
     val memorizationViewModel: MemorizationViewModel = hiltViewModel()
-    val recordingState by memorizationViewModel.recordingState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    val recordingPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { granted ->
-        if (granted) memorizationViewModel.startRecording()
-    }
     val indexViewModel: QuranIndexViewModel = hiltViewModel()
     val preferredAyah = jumpHighlight ?: selectedWord?.let { AyahRef(it.surah, it.ayah) }
     val currentLocationWord = remember(page) {
@@ -238,6 +225,13 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
     val currentAyah = currentLocationWord?.ayah ?: 1
     LaunchedEffect(page, preferredAyah) {
         bookmarksViewModel.bindContext(page, preferredAyah)
+    }
+    LaunchedEffect(tab) {
+        if (tab == AppTab.Training) {
+            trainingTextHidden = true
+            revealedTrainingAyahs = emptySet()
+            revealedTrainingAyah = null
+        }
     }
     val view = LocalView.current
     DisposableEffect(settings.keepScreenOn) {
@@ -341,8 +335,8 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                                 highlightColor = paper.ayahHighlight,
                                 highlightWordId = highlight.wordId,
                                 highlightAyah = highlight.ayah?.let { it.surah to it.ayah },
-                                hideAyahText = tab == AppTab.Training && trainingHidden,
-                                revealedAyahs = revealedAyahs,
+                                hideAyahText = tab == AppTab.Training && trainingTextHidden,
+                                revealedAyahs = revealedTrainingAyahs,
                                 chromeVisible = chrome,
                                 surahsByNumber = surahsByNumber,
                                 quarter = pageData?.quarter,
@@ -350,7 +344,12 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                                 onWordTap = { word ->
                                     if (tab == AppTab.Training) {
                                         val key = word.surah to word.ayah
-                                        revealedAyahs = if (key in revealedAyahs) revealedAyahs - key else revealedAyahs + key
+                                        revealedTrainingAyahs = if (key in revealedTrainingAyahs) {
+                                            revealedTrainingAyahs - key
+                                        } else {
+                                            revealedTrainingAyahs + key
+                                        }
+                                        revealedTrainingAyah = key.takeIf { it in revealedTrainingAyahs }
                                     } else viewModel.onMushafWordTap(word)
                                 },
                                 onWordLongPress = { word -> viewModel.onWordLongPress(word) },
@@ -371,11 +370,16 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                                 highlightColor = paper.ayahHighlight,
                                 highlightWordId = highlight.wordId,
                                 highlightAyah = highlight.ayah?.let { it.surah to it.ayah },
-                                hideAyahText = tab == AppTab.Training && trainingHidden,
-                                revealedAyahs = revealedAyahs,
-                                onTrainingTap = if (tab == AppTab.Training) { { word ->
+                                hideAyahText = tab == AppTab.Training && trainingTextHidden,
+                                revealedAyahs = revealedTrainingAyahs,
+                                onRevealTrainingText = if (tab == AppTab.Training) { { word ->
                                     val key = word.surah to word.ayah
-                                    revealedAyahs = if (key in revealedAyahs) revealedAyahs - key else revealedAyahs + key
+                                    revealedTrainingAyahs = if (key in revealedTrainingAyahs) {
+                                        revealedTrainingAyahs - key
+                                    } else {
+                                        revealedTrainingAyahs + key
+                                    }
+                                    revealedTrainingAyah = key.takeIf { it in revealedTrainingAyahs }
                                 } } else null,
                                 chromeVisible = chrome,
                                 surahsByNumber = surahsByNumber,
@@ -449,22 +453,26 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
 
         if (tab == AppTab.Training) {
             TrainingControlBar(
-                hidden = trainingHidden,
+                textHidden = trainingTextHidden,
+                ratedAyah = revealedTrainingAyah,
                 onOpenProgress = viewModel::openProgressPicker,
-                recording = recordingState is RecordingState.Recording,
-                onStartRecording = {
-                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-                        memorizationViewModel.startRecording()
-                    } else {
-                        recordingPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                    }
-                },
-                onStopRecording = memorizationViewModel::stopRecording,
                 onPrevious = { if (pageNumber > 1) viewModel.jumpToPageNumber(pageNumber - 1) },
                 onNext = { if (pageNumber < AppConstants.TOTAL_PAGES) viewModel.jumpToPageNumber(pageNumber + 1) },
-                onToggle = {
-                    if (!trainingHidden) revealedAyahs = emptySet()
-                    trainingHidden = !trainingHidden
+                onToggleTextVisibility = {
+                    if (!trainingTextHidden) revealedTrainingAyahs = emptySet()
+                    trainingTextHidden = !trainingTextHidden
+                },
+                onMarkMastered = { (surah, ayah) ->
+                    memorizationViewModel.markTrainingAyahMastered(surah, ayah)
+                    revealedTrainingAyahs = revealedTrainingAyahs - (surah to ayah)
+                    revealedTrainingAyah = null
+                    trainingTextHidden = true
+                },
+                onMarkNeedsReview = { (surah, ayah) ->
+                    memorizationViewModel.markTrainingAyahForReview(surah, ayah)
+                    revealedTrainingAyahs = revealedTrainingAyahs - (surah to ayah)
+                    revealedTrainingAyah = null
+                    trainingTextHidden = true
                 },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -485,7 +493,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                 activeTab = tab,
                 onTabChange = viewModel::selectTab,
                 onIndexPress = viewModel::openIndexPicker,
-                onBookmarkPress = { viewModel.selectTab(AppTab.Training) },
+                onTrainingPress = { viewModel.selectTab(AppTab.Training) },
                 onSettingsPress = viewModel::openSettingsPicker,
             )
         }
@@ -675,14 +683,14 @@ private fun TrainingHintStep(number: Int, textRes: Int) {
 
 @Composable
 private fun TrainingControlBar(
-    hidden: Boolean,
+    textHidden: Boolean,
+    ratedAyah: Pair<Int, Int>?,
     onOpenProgress: () -> Unit,
-    recording: Boolean,
-    onStartRecording: () -> Unit,
-    onStopRecording: () -> Unit,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
-    onToggle: () -> Unit,
+    onToggleTextVisibility: () -> Unit,
+    onMarkMastered: (Pair<Int, Int>) -> Unit,
+    onMarkNeedsReview: (Pair<Int, Int>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
@@ -694,9 +702,9 @@ private fun TrainingControlBar(
             .padding(horizontal = 8.dp, vertical = 7.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        val label = stringResource(if (hidden) R.string.training_show_ayahs else R.string.training_hide_ayahs)
+        val label = stringResource(if (textHidden) R.string.training_show_ayahs else R.string.training_hide_ayahs)
         val accessibilityLabel = stringResource(
-            if (hidden) R.string.training_show_ayahs_accessibility
+            if (textHidden) R.string.training_show_ayahs_accessibility
             else R.string.training_hide_ayahs_accessibility,
         )
         Row(
@@ -714,13 +722,13 @@ private fun TrainingControlBar(
                     .weight(1.05f)
                     .clip(RoundedCornerShape(14.dp))
                     .background(paper.accent)
-                    .clickable(onClick = onToggle)
+                    .clickable(onClick = onToggleTextVisibility)
                     .padding(vertical = 7.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Icon(
                     painter = painterResource(
-                        if (hidden) R.drawable.ic_visibility_off_eye else R.drawable.ic_visibility_eye,
+                        if (textHidden) R.drawable.ic_visibility_off_eye else R.drawable.ic_visibility_eye,
                     ),
                     contentDescription = accessibilityLabel,
                     tint = paper.pageBody,
@@ -735,36 +743,30 @@ private fun TrainingControlBar(
                     modifier = Modifier.padding(top = 1.dp),
                 )
             }
-            Column(
-                modifier = Modifier
-                    .weight(1.35f)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(if (recording) paper.darkAccent else paper.accent)
-                    .clickable(onClick = if (recording) onStopRecording else onStartRecording)
-                    .padding(vertical = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_record_voice_over),
-                    contentDescription = stringResource(
-                        if (recording) R.string.training_stop_record else R.string.training_record,
-                    ),
-                    tint = paper.pageBody,
-                    modifier = Modifier.size(30.dp),
-                )
-                Text(
-                    text = stringResource(if (recording) R.string.training_stop_record else R.string.training_record),
-                    color = paper.pageBody,
-                    textAlign = TextAlign.Center,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                    fontSize = 12.sp,
-                )
-            }
             TrainingSmallControl(
                 label = stringResource(R.string.training_next_short),
                 onClick = onNext,
                 modifier = Modifier.weight(0.72f),
             )
+        }
+        if (!textHidden && ratedAyah != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 5.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                TrainingRatingControl(
+                    label = "✓  ${stringResource(R.string.training_rate_mastered)}",
+                    onClick = { onMarkMastered(ratedAyah) },
+                    modifier = Modifier.weight(1f),
+                )
+                TrainingRatingControl(
+                    label = "↻  ${stringResource(R.string.training_rate_review)}",
+                    onClick = { onMarkNeedsReview(ratedAyah) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
         Text(
             text = stringResource(R.string.training_progress_summary),
@@ -776,6 +778,26 @@ private fun TrainingControlBar(
                 .padding(horizontal = 12.dp, vertical = 5.dp),
         )
     }
+}
+
+@Composable
+private fun TrainingRatingControl(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val paper = LocalPaperColors.current
+    Text(
+        text = label,
+        color = paper.textStrong,
+        fontSize = 11.sp,
+        textAlign = TextAlign.Center,
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(paper.tone300.copy(alpha = 0.72f))
+            .clickable(onClick = onClick)
+            .padding(vertical = 7.dp),
+    )
 }
 
 @Composable
@@ -850,7 +872,7 @@ private fun LiveTextMushafPage(
     highlightAyah: Pair<Int, Int>?,
     hideAyahText: Boolean,
     revealedAyahs: Set<Pair<Int, Int>>,
-    onTrainingTap: ((com.quransunah.app.ui.mushaf.WordRecord) -> Unit)?,
+    onRevealTrainingText: ((com.quransunah.app.ui.mushaf.WordRecord) -> Unit)?,
     chromeVisible: Boolean,
     surahsByNumber: Map<Int, SurahInfo>,
     quarter: QuarterMarker?,
@@ -872,7 +894,7 @@ private fun LiveTextMushafPage(
         surahsByNumber = surahsByNumber,
         quarter = quarter,
         sajda = sajda,
-        onWordTap = { word -> onTrainingTap?.invoke(word) ?: viewModel.onMushafWordTap(word) },
+        onWordTap = { word -> onRevealTrainingText?.invoke(word) ?: viewModel.onMushafWordTap(word) },
         onWordLongPress = { word -> viewModel.onWordLongPress(word) },
         onEmptyTap = { viewModel.toggleChrome() },
         onSurahNameLongPress = { viewModel.openIndexPicker(QuranIndexTab.Surah) },

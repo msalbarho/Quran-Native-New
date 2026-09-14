@@ -76,7 +76,7 @@ fun CurvedBottomNav(
     activeTab: AppTab,
     onTabChange: (AppTab) -> Unit,
     onIndexPress: () -> Unit,
-    onBookmarkPress: () -> Unit,
+    onTrainingPress: () -> Unit,
     onSettingsPress: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -98,11 +98,11 @@ fun CurvedBottomNav(
             selected = false,
         ),
         NavItemSpec(
-            id = "bookmarks",
-            painter = R.drawable.ic_bookmark,
+            id = "training",
+            painter = R.drawable.ic_record_voice_over,
             labelRes = R.string.training_tab,
             iconSize = 26.dp,
-            onClick = onBookmarkPress,
+            onClick = onTrainingPress,
             selected = activeTab == AppTab.Training,
         ),
         NavItemSpec(
@@ -282,7 +282,7 @@ private fun CurvedBottomNavPreview() {
                 activeTab = AppTab.Reading,
                 onTabChange = {},
                 onIndexPress = {},
-                onBookmarkPress = {},
+                onTrainingPress = {},
                 onSettingsPress = {},
             )
         }

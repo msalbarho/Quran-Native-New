@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.quransunah.app.R
-import com.quransunah.app.core.AppConstants
 import com.quransunah.app.domain.model.AyahRef
 import com.quransunah.app.domain.model.IndexJump
 import com.quransunah.app.domain.model.MushafPage
@@ -57,9 +56,6 @@ import com.quransunah.app.ui.index.QuranIndexPicker
 import com.quransunah.app.ui.index.QuranIndexTab
 import com.quransunah.app.ui.index.QuranIndexViewModel
 import com.quransunah.app.ui.memorization.MemorizationScreen
-import com.quransunah.app.ui.mushaf.MedinaCanvasPage
-import com.quransunah.app.ui.mushaf.TextMushafPage
-import com.quransunah.app.ui.mushaf.toLineRecords
 import com.quransunah.app.ui.settings.SettingsScreen
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
@@ -116,25 +112,6 @@ fun ShellPickerHost(
                     .weight(1f),
             )
         }
-        ShellPicker.Bookmarks -> CenteredPickerCard(
-            title = stringResource(R.string.training_title),
-            onClose = onClose,
-            minHeight = 560.dp,
-            maxHeight = 760.dp,
-        ) {
-            TrainingMushafSurface(
-                page = page,
-                pageNumber = pageNumber,
-                fontManager = fontManager,
-                medinaMode = medinaMode,
-                nightMode = nightMode,
-                fontSizeSp = fontSizeSp,
-                surahsByNumber = surahsByNumber,
-                onClose = onClose,
-                onJumpPage = onJumpPage,
-                modifier = Modifier.fillMaxWidth().weight(1f),
-            )
-        }
         ShellPicker.LastPosition -> CenteredPickerCard(
             title = stringResource(R.string.last_position_title),
             onClose = onClose,
@@ -179,153 +156,6 @@ fun ShellPickerHost(
         }
         ShellPicker.Settings -> SettingsSideSheet(onClose = onClose)
         ShellPicker.None -> Unit
-    }
-}
-
-@Composable
-private fun TrainingMushafSurface(
-    page: MushafPage?,
-    pageNumber: Int,
-    fontManager: QcfFontManager?,
-    medinaMode: Boolean,
-    nightMode: Boolean,
-    fontSizeSp: Float,
-    surahsByNumber: Map<Int, com.quransunah.app.domain.model.SurahInfo>,
-    onClose: () -> Unit,
-    onJumpPage: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val paper = LocalPaperColors.current
-    var hidden by remember(pageNumber) { mutableStateOf(true) }
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.training_mushaf_mode_title),
-                    color = paper.textStrong,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                )
-                Text(
-                    text = stringResource(R.string.training_mushaf_mode_hint),
-                    color = paper.textMuted,
-                    fontSize = 11.sp,
-                    modifier = Modifier.padding(top = 2.dp),
-                )
-            }
-            Text(
-                text = stringResource(R.string.close),
-                color = if (nightMode) Color.White else PickerCloseRed,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 13.sp,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .clickable(onClick = onClose)
-                    .padding(horizontal = 6.dp, vertical = 4.dp),
-            )
-        }
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .background(paper.pageBackground),
-        ) {
-            val lines = page?.toLineRecords().orEmpty()
-            if (page != null && lines.isNotEmpty()) {
-                if (medinaMode) {
-                    MedinaCanvasPage(
-                        pageNumber = pageNumber,
-                        lines = lines,
-                        fontManager = fontManager,
-                        glyphColor = if (nightMode) Color.White else Color.Black,
-                        hideAyahText = hidden,
-                        surahsByNumber = surahsByNumber,
-                        onWordLongPress = {},
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                } else {
-                    TextMushafPage(
-                        pageNumber = pageNumber,
-                        lines = lines,
-                        fontManager = fontManager,
-                        fontSizeSp = fontSizeSp,
-                        glyphColor = if (nightMode) Color.White else Color.Black,
-                        hideAyahText = hidden,
-                        surahsByNumber = surahsByNumber,
-                        onWordLongPress = {},
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
-            } else {
-                Text(
-                    text = stringResource(R.string.training_mushaf_loading),
-                    color = paper.textMuted,
-                    modifier = Modifier.align(Alignment.Center),
-                )
-            }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(paper.pageBody)
-                .padding(horizontal = 10.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(R.string.training_previous_page),
-                color = if (pageNumber > 1) paper.textStrong else paper.textMuted.copy(alpha = 0.45f),
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 11.sp,
-                modifier = Modifier
-                    .clip(TrainingControlShape)
-                    .clickable(enabled = pageNumber > 1) { onJumpPage(pageNumber - 1) }
-                    .padding(horizontal = 7.dp, vertical = 8.dp),
-            )
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(TrainingControlShape)
-                    .background(paper.accent)
-                    .clickable { hidden = !hidden }
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Icon(
-                    painter = androidx.compose.ui.res.painterResource(
-                        if (hidden) R.drawable.ic_visibility_off_eye else R.drawable.ic_visibility_eye,
-                    ),
-                    contentDescription = stringResource(
-                        if (hidden) R.string.training_show_ayahs_accessibility
-                        else R.string.training_hide_ayahs_accessibility,
-                    ),
-                    tint = paper.pageBody,
-                    modifier = Modifier.size(30.dp),
-                )
-                Text(
-                    text = stringResource(if (hidden) R.string.training_show_ayahs else R.string.training_hide_ayahs),
-                    color = paper.pageBody,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                )
-            }
-            Text(
-                text = stringResource(R.string.training_next_page),
-                color = if (pageNumber < AppConstants.TOTAL_PAGES) paper.textStrong else paper.textMuted.copy(alpha = 0.45f),
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 11.sp,
-                modifier = Modifier
-                    .clip(TrainingControlShape)
-                    .clickable(enabled = pageNumber < AppConstants.TOTAL_PAGES) { onJumpPage(pageNumber + 1) }
-                    .padding(horizontal = 7.dp, vertical = 8.dp),
-            )
-        }
     }
 }
 

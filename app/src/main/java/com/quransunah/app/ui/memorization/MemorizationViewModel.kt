@@ -120,6 +120,37 @@ class MemorizationViewModel @Inject constructor(
         }
     }
 
+    fun markTrainingAyahMastered(surah: Int, ayah: Int) = rateTrainingAyah(surah, ayah, MemorizationState.MASTERED)
+
+    fun markTrainingAyahForReview(surah: Int, ayah: Int) = rateTrainingAyah(surah, ayah, MemorizationState.LEARNING)
+
+    private fun rateTrainingAyah(surah: Int, ayah: Int, state: MemorizationState) {
+        viewModelScope.launch {
+            val id = MemorizationItem.idFor(surah, ayah)
+            val now = System.currentTimeMillis()
+            if (memorizationRepository.get(id) == null) {
+                val words = mushafRepository.getAyahWords(surah, ayah)
+                val text = words.filterNot { it.isAyahMarker }.joinToString(" ") { it.textHafs }.trim()
+                if (text.isBlank()) return@launch
+                memorizationRepository.track(
+                    MemorizationItem(
+                        id = id,
+                        surah = surah,
+                        ayah = ayah,
+                        pageNumber = mushafRepository.getPageForAyah(surah, ayah),
+                        ayahText = text,
+                        state = state,
+                        reviewCount = 0,
+                        createdAt = now,
+                        updatedAt = now,
+                    ),
+                )
+            } else {
+                memorizationRepository.setState(id, state, now)
+            }
+        }
+    }
+
     fun recordReview(id: String) {
         viewModelScope.launch {
             memorizationRepository.recordReview(id, System.currentTimeMillis())
