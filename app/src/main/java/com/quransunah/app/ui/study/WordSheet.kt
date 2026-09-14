@@ -88,7 +88,6 @@ import com.quransunah.app.ui.preview.PreviewFixtures
 import com.quransunah.app.ui.preview.PreviewTheme
 import com.quransunah.app.ui.shell.ChromeTokens
 import com.quransunah.app.ui.theme.LocalAppFontFamily
-import com.quransunah.app.ui.theme.LocalDisplayFontFamily
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 import com.quransunah.app.ui.theme.PaperPalettes
@@ -269,9 +268,6 @@ fun WordSheetContent(
         playback.surah == word.surah &&
         playback.ayah == word.ayah
     val ayahPlaying = ayahActive && playback.isPlaying
-    val selectedMeaning = ui.ayahWords.firstOrNull { it.id == word.id }?.meaning ?: word.meaning
-    val selectedHafs = ui.ayahWords.firstOrNull { it.id == word.id }?.textHafs?.ifBlank { null }
-        ?: word.uthmanic
     val maxAyah = SurahAyahCounts.ayahCount(word.surah)
 
     Column(
@@ -340,48 +336,6 @@ fun WordSheetContent(
                     .fillMaxWidth()
                     .padding(vertical = 12.dp),
             )
-        }
-
-        if (!selectedMeaning.isNullOrBlank()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(paper.tone300)
-                    .padding(horizontal = 14.dp, vertical = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = stringResource(R.string.word_meaning_title),
-                    color = paper.textMuted,
-                    fontFamily = LocalDisplayFontFamily.current,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
-                )
-                UthmanicText(
-                    text = selectedHafs,
-                    fontManager = fontManager,
-                    color = paper.textStrong,
-                    fontSize = 22.sp,
-                    lineHeight = 36.sp,
-                    maxLines = 2,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp),
-                )
-                Text(
-                    text = selectedMeaning,
-                    color = paper.textPrimary,
-                    fontFamily = LocalAppFontFamily.current,
-                    fontSize = 16.sp,
-                    lineHeight = 26.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 6.dp),
-                )
-            }
         }
 
         Column(
