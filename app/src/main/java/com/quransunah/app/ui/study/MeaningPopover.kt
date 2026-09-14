@@ -31,6 +31,7 @@ import com.quransunah.app.ui.preview.PreviewFixtures
 import com.quransunah.app.ui.preview.PreviewTheme
 import com.quransunah.app.ui.theme.LocalAppFontFamily
 import com.quransunah.app.ui.theme.LocalDisplayFontFamily
+import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 
 @Composable
@@ -101,7 +102,7 @@ fun MeaningPopoverCard(
         )
         Text(
             text = stringResource(R.string.close),
-            color = Color(0xFFD10000),
+            color = if (LocalNightMode.current) Color.White else Color(0xFFD10000),
             fontFamily = LocalAppFontFamily.current,
             fontWeight = FontWeight.SemiBold,
             fontSize = 14.sp,

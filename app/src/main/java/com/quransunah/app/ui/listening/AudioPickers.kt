@@ -136,7 +136,7 @@ fun AudioSurahPicker(
                 )
                 Text(
                     text = stringResource(R.string.close),
-                    color = CloseRed,
+                    color = if (LocalNightMode.current) Color.White else CloseRed,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp,
                     modifier = Modifier

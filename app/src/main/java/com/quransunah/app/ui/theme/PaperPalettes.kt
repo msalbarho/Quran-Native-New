@@ -181,9 +181,9 @@ object PaperPalettes {
             bg = 0xFF120A05,
             surface = 0xFF22140C,
             elevated = 0xFF2C1A10,
-            accent = 0xFFC86218,
+            accent = 0xFFAA713B,
             secondary = 0xFF5C2D0C,
-            text = 0xFFF6EADB,
+            text = 0xFFEFE4D7,
             muted = 0xFFB8A08D,
         )
         PaperPaletteId.Blue -> luxuryNight(
@@ -191,9 +191,9 @@ object PaperPalettes {
             bg = 0xFF040D1A,
             surface = 0xFF0A192F,
             elevated = 0xFF10243F,
-            accent = 0xFF1876D3,
+            accent = 0xFF4B82B8,
             secondary = 0xFF0D3A66,
-            text = 0xFFEBF3FA,
+            text = 0xFFE4ECF4,
             muted = 0xFF8CA8C6,
         )
         PaperPaletteId.Purple -> luxuryNight(
@@ -201,9 +201,9 @@ object PaperPalettes {
             bg = 0xFF0F0619,
             surface = 0xFF1D0E30,
             elevated = 0xFF281440,
-            accent = 0xFF7B1FA2,
+            accent = 0xFF8968A8,
             secondary = 0xFF4A158D,
-            text = 0xFFF5EAFB,
+            text = 0xFFECE5F3,
             muted = 0xFFB59EC9,
         )
         PaperPaletteId.White -> luxuryNight(
@@ -213,18 +213,18 @@ object PaperPalettes {
             elevated = 0xFF282C34,
             accent = 0xFF818180,
             secondary = 0xFF4C4D4C,
-            text = 0xFFFFFFFF,
+            text = 0xFFE9EAEC,
             muted = 0xFFA0A5AD,
-            accentHover = 0xFFE7E6E7,
+            accentHover = 0xFFB8B9BA,
         )
         PaperPaletteId.Green -> luxuryNight(
             id = id,
             bg = 0xFF05130E,
             surface = 0xFF0C241B,
             elevated = 0xFF123028,
-            accent = 0xFF1B8F67,
+            accent = 0xFF4B967D,
             secondary = 0xFF006165,
-            text = 0xFFE8F5F1,
+            text = 0xFFE2EFEA,
             muted = 0xFF8DBDAF,
         )
         PaperPaletteId.Rose -> luxuryNight(
@@ -232,9 +232,9 @@ object PaperPalettes {
             bg = 0xFF14080E,
             surface = 0xFF261018,
             elevated = 0xFF321820,
-            accent = 0xFFC2185B,
+            accent = 0xFFB06B82,
             secondary = 0xFF6D1F3A,
-            text = 0xFFFBEAF0,
+            text = 0xFFF0E4E8,
             muted = 0xFFC49AAC,
         )
         PaperPaletteId.Teal -> luxuryNight(
@@ -242,9 +242,9 @@ object PaperPalettes {
             bg = 0xFF041210,
             surface = 0xFF0A2422,
             elevated = 0xFF10302C,
-            accent = 0xFF00897B,
+            accent = 0xFF4B9A91,
             secondary = 0xFF004D47,
-            text = 0xFFE6F7F5,
+            text = 0xFFE1EFED,
             muted = 0xFF8DBDB8,
         )
         PaperPaletteId.Amber -> luxuryNight(
@@ -252,9 +252,9 @@ object PaperPalettes {
             bg = 0xFF120E05,
             surface = 0xFF221C0C,
             elevated = 0xFF2C2412,
-            accent = 0xFFD4A017,
+            accent = 0xFFC09A4C,
             secondary = 0xFF6B4E0C,
-            text = 0xFFFBF3E0,
+            text = 0xFFF0E8D5,
             muted = 0xFFB8A878,
         )
     }
@@ -294,9 +294,9 @@ object PaperPalettes {
             chromeFill = chrome,
             darkAccent = secondaryColor,
             darkAccentInner = lerp(secondaryColor, accentColor, 0.45f),
-            decorPattern = goldMix.copy(alpha = 0.16f),
+            decorPattern = goldMix.copy(alpha = 0.10f),
             navBubble = Color(elevated),
-            ayahHighlight = accentColor.copy(alpha = 0.22f),
+            ayahHighlight = accentColor.copy(alpha = 0.16f),
             surface = Color(elevated),
         )
     }

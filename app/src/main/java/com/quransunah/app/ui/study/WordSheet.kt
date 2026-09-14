@@ -94,7 +94,7 @@ import com.quransunah.app.ui.theme.PaperPalettes
 import kotlinx.coroutines.launch
 
 private val CloseRedLight = Color(0xFFC53030)
-private val CloseRedDark = Color(0xFFFC8181)
+private val CloseRedDark = Color.White
 private val WordSheetShape = RoundedCornerShape(ChromeTokens.SidePanelCorner)
 
 @OptIn(ExperimentalMaterial3Api::class)

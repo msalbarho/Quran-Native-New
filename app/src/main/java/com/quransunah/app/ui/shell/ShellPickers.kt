@@ -53,6 +53,7 @@ import com.quransunah.app.ui.index.QuranIndexTab
 import com.quransunah.app.ui.index.QuranIndexViewModel
 import com.quransunah.app.ui.memorization.MemorizationScreen
 import com.quransunah.app.ui.settings.SettingsScreen
+import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 
 private val PickerCloseRed = Color(0xFFD10000)
@@ -354,6 +355,7 @@ private fun SettingsSideSheet(
 @Composable
 private fun SettingsPickerHeader(onClose: () -> Unit) {
     val paper = LocalPaperColors.current
+    val closeColor = if (LocalNightMode.current) Color.White else PickerCloseRed
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -369,7 +371,7 @@ private fun SettingsPickerHeader(onClose: () -> Unit) {
         )
         Text(
             text = stringResource(R.string.close),
-            color = PickerCloseRed,
+            color = closeColor,
             fontWeight = FontWeight.SemiBold,
             fontSize = 14.sp,
             modifier = Modifier
@@ -384,6 +386,7 @@ private fun SettingsPickerHeader(onClose: () -> Unit) {
 @Composable
 private fun PickerHeader(title: String, onClose: () -> Unit) {
     val paper = LocalPaperColors.current
+    val closeColor = if (LocalNightMode.current) Color.White else PickerCloseRed
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -400,7 +403,7 @@ private fun PickerHeader(title: String, onClose: () -> Unit) {
         )
         Text(
             text = stringResource(R.string.close),
-            color = PickerCloseRed,
+            color = closeColor,
             fontWeight = FontWeight.SemiBold,
             fontSize = 14.sp,
             modifier = Modifier

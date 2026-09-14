@@ -414,7 +414,7 @@ private fun AboutAppDialog(onClose: () -> Unit) {
                 )
                 Text(
                     text = stringResource(R.string.close),
-                    color = Color(0xFFD10000),
+                    color = if (LocalNightMode.current) Color.White else Color(0xFFD10000),
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp,
                     modifier = Modifier
