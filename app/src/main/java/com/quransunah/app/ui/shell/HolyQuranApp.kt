@@ -273,8 +273,8 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
         }
     }
     val restoreBar = tab == AppTab.Reading
-    val navVisible = tab != AppTab.Home &&
-        (chrome || tab == AppTab.Listening || tab == AppTab.Training)
+    val navVisible = tab != AppTab.Home && tab != AppTab.Training &&
+        (chrome || tab == AppTab.Listening)
     var pagePickerOpen by remember { mutableStateOf(false) }
     val highlight by viewModel.mushafHighlight.collectAsStateWithLifecycle()
 
@@ -330,8 +330,10 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                             .statusBarsPadding()
                             .navigationBarsPadding()
                             .padding(
-                                top = ChromeTokens.MushafHeaderReserve,
-                                bottom = ChromeTokens.MushafNavReserve,
+                                top = if (chrome) ChromeTokens.MushafHeaderReserve else 8.dp,
+                                bottom = if (tab == AppTab.Training && !chrome) 8.dp else {
+                                    ChromeTokens.MushafNavReserve
+                                },
                             )
                             .clipToBounds(),
                     ) { index ->
@@ -449,7 +451,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
             )
         }
 
-        if (restoreBar) {
+        if (restoreBar && chrome) {
             ReadingPlaybackBar(
                 viewModel = viewModel,
                 listeningViewModel = listeningViewModel,
@@ -461,7 +463,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
             )
         }
 
-        if (tab == AppTab.Reading || tab == AppTab.Training) {
+        if (chrome && (tab == AppTab.Reading || tab == AppTab.Training)) {
             PageNumberBadge(
                 pageNumber = pageNumber,
                 onClick = { pagePickerOpen = true },
@@ -474,7 +476,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
             )
         }
 
-        if (tab == AppTab.Training) {
+        if (tab == AppTab.Training && chrome) {
             TrainingControlBar(
                 textHidden = trainingTextHidden,
                 ratedAyah = revealedTrainingAyah,

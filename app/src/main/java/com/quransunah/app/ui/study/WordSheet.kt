@@ -153,7 +153,6 @@ fun WordSheet(
             onSelectReciter = viewModel::selectReciter,
             onOpenTafsir = viewModel::openTafsir,
             onToggleBookmark = viewModel::toggleBookmark,
-            onToggleMemorization = viewModel::addCurrentAyahToMemorization,
             onShareImage = viewModel::shareImage,
             onVideoFrom = viewModel::setVideoFrom,
             onVideoTo = viewModel::setVideoTo,
@@ -244,7 +243,6 @@ fun WordSheetContent(
     onSelectReciter: (String) -> Unit,
     onOpenTafsir: () -> Unit,
     onToggleBookmark: () -> Unit,
-    onToggleMemorization: () -> Unit,
     onShareImage: () -> Unit,
     onVideoFrom: (Int) -> Unit,
     onVideoTo: (Int) -> Unit,
@@ -423,18 +421,6 @@ fun WordSheetContent(
                     modifier = Modifier.weight(1f),
                 )
             }
-            SheetChipButton(
-                label = stringResource(
-                    if (ui.trackedForMemorization) {
-                        R.string.word_memorization_tracked
-                    } else {
-                        R.string.word_add_to_memorization
-                    },
-                ),
-                onClick = onToggleMemorization,
-                emphasized = ui.trackedForMemorization,
-                modifier = Modifier.fillMaxWidth(),
-            )
 
             Column(
                 modifier = Modifier
@@ -842,7 +828,6 @@ private fun WordSheetPreview() {
             onSelectReciter = {},
             onOpenTafsir = {},
             onToggleBookmark = {},
-            onToggleMemorization = {},
             onShareImage = {},
             onVideoFrom = {},
             onVideoTo = {},

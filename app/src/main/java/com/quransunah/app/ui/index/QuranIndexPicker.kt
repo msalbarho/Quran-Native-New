@@ -394,13 +394,14 @@ private fun IndexTabRow(
                 modifier = Modifier
                     .weight(1f)
                     .clip(ChipShape)
-                    .background(if (active) paper.darkAccent.copy(alpha = 0.16f) else Color.Transparent)
+                    .background(if (active) paper.darkAccent.copy(alpha = 0.20f) else Color.Transparent)
                     .border(
                         width = if (active) 1.dp else 0.dp,
                         color = if (active) paper.darkAccent.copy(alpha = 0.72f) else Color.Transparent,
                         shape = ChipShape,
                     )
                     .clickable { onTab(tab) }
+                    .heightIn(min = 40.dp)
                     .padding(horizontal = 4.dp, vertical = 8.dp),
             )
         }
@@ -844,6 +845,7 @@ private fun DivisionRow(
                 },
             )
             .clickable(onClick = onClick)
+            .heightIn(min = 48.dp)
             .padding(
                 start = if (compact) 18.dp else 10.dp,
                 end = 10.dp,
