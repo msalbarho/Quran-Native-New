@@ -160,13 +160,10 @@
     <string name="training_repeat_no_ayah">اكشف آية أولاً</string>
     <string name="training_record">بدء التسميع</string>
     <string name="training_stop_record">إيقاف التسجيل</string>
-    <string name="training_minimize">تصغير أدوات التدريب</string>
     <string name="training_show_ayahs">إظهار الآية</string>
     <string name="training_hide_ayahs">إخفاء الآية</string>
     <string name="training_show_ayahs_accessibility">إظهار الآية، العين مغلقة</string>
     <string name="training_hide_ayahs_accessibility">إخفاء الآية، العين مفتوحة</string>
-    <string name="training_previous_page">الصفحة السابقة</string>
-    <string name="training_next_page">الصفحة التالية</string>
     <string name="last_position_title">آخر موضع</string>
     <string name="saved_places_tab">مواضعي</string>
     <string name="training_tab">تدريبي</string>

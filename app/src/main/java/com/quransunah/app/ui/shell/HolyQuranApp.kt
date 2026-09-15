@@ -332,10 +332,8 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                             .statusBarsPadding()
                             .navigationBarsPadding()
                             .padding(
-                                top = if (chrome) ChromeTokens.MushafHeaderReserve else 8.dp,
-                                bottom = if (tab == AppTab.Training && !chrome) 8.dp else {
-                                    ChromeTokens.MushafNavReserve
-                                },
+                                top = ChromeTokens.MushafHeaderReserve,
+                                bottom = ChromeTokens.MushafNavReserve,
                             )
                             .clipToBounds(),
                     ) { index ->
@@ -478,7 +476,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
             )
         }
 
-        if (tab == AppTab.Training && chrome) {
+        if (tab == AppTab.Training) {
             TrainingControlBar(
                 textHidden = trainingTextHidden,
                 ratedAyah = revealedTrainingAyah,
@@ -527,11 +525,19 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                         }
                     }
                 },
-                onMinimize = viewModel::toggleChrome,
+                onExit = {
+                    trainingRepeatJob?.cancel()
+                    trainingRepeatJob = null
+                    trainingRepeatActive = false
+                    revealedTrainingAyahs = emptySet()
+                    revealedTrainingAyah = null
+                    trainingTextHidden = true
+                    viewModel.selectTab(AppTab.Reading)
+                },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
-                    .padding(bottom = 56.dp, start = 20.dp, end = 20.dp),
+                    .padding(horizontal = 12.dp),
             )
         }
 
@@ -745,122 +751,114 @@ private fun TrainingControlBar(
     onMarkMastered: (Pair<Int, Int>) -> Unit,
     onMarkNeedsReview: (Pair<Int, Int>) -> Unit,
     onRepeat: (Pair<Int, Int>, Int) -> Unit,
-    onMinimize: () -> Unit,
+    onExit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
     var repeatMenuOpen by remember { mutableStateOf(false) }
-    val minimizeContentDescription = stringResource(R.string.training_minimize)
-    Column(
+    val closeContentDescription = stringResource(R.string.close)
+    Row(
         modifier = modifier
             .fillMaxWidth()
+            .height(50.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(paper.pageBody.copy(alpha = 0.97f))
-            .padding(horizontal = 8.dp, vertical = 7.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+            .padding(horizontal = 6.dp, vertical = 5.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         val label = stringResource(if (textHidden) R.string.training_show_ayahs else R.string.training_hide_ayahs)
         val accessibilityLabel = stringResource(
             if (textHidden) R.string.training_show_ayahs_accessibility
             else R.string.training_hide_ayahs_accessibility,
         )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = Modifier
+                .weight(1.05f)
+                .clip(RoundedCornerShape(14.dp))
+                .background(paper.accent)
+                .clickable(onClick = onToggleTextVisibility)
+                .padding(vertical = 5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(1.05f)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(paper.accent)
-                    .clickable(onClick = onToggleTextVisibility)
-                    .padding(vertical = 7.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Icon(
-                    painter = painterResource(
-                        if (textHidden) R.drawable.ic_visibility_off_eye else R.drawable.ic_visibility_eye,
-                    ),
-                    contentDescription = accessibilityLabel,
-                    tint = paper.pageBody,
-                    modifier = Modifier.size(34.dp),
-                )
-                Text(
-                    text = label,
-                    color = paper.pageBody,
-                    textAlign = TextAlign.Center,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                    fontSize = 13.sp,
-                    modifier = Modifier.padding(top = 1.dp),
-                )
-            }
-            Box(modifier = Modifier.weight(0.9f)) {
-                TrainingSmallControl(
-                    label = when {
-                        repeatActive -> "• ${stringResource(R.string.training_repeat_active)}"
-                        ratedAyah == null -> stringResource(R.string.training_repeat_no_ayah)
-                        else -> stringResource(R.string.training_repeat)
-                    },
-                    onClick = { if (ratedAyah != null && !repeatActive) repeatMenuOpen = true },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                DropdownMenu(
-                    expanded = repeatMenuOpen,
-                    onDismissRequest = { repeatMenuOpen = false },
-                ) {
-                    listOf(1, 3, 5).forEach { count ->
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.training_repeat_option, count)) },
-                            onClick = {
-                                repeatMenuOpen = false
-                                ratedAyah?.let { onRepeat(it, count) }
-                            },
-                        )
-                    }
-                }
-            }
+            Icon(
+                painter = painterResource(
+                    if (textHidden) R.drawable.ic_visibility_off_eye else R.drawable.ic_visibility_eye,
+                ),
+                contentDescription = accessibilityLabel,
+                tint = paper.pageBody,
+                modifier = Modifier.size(24.dp),
+            )
             Text(
-                text = "—",
-                color = paper.textMuted,
-                fontSize = 18.sp,
+                text = label,
+                color = paper.pageBody,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable(onClick = onMinimize)
-                    .semantics {
-                        contentDescription = minimizeContentDescription
-                    },
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                fontSize = 10.sp,
+                modifier = Modifier.padding(top = 1.dp),
             )
         }
-        if (!textHidden && ratedAyah != null) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 5.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+        Box(modifier = Modifier.weight(0.9f)) {
+            TrainingSmallControl(
+                label = when {
+                    repeatActive -> "• ${stringResource(R.string.training_repeat_active)}"
+                    ratedAyah == null -> stringResource(R.string.training_repeat_no_ayah)
+                    else -> stringResource(R.string.training_repeat)
+                },
+                onClick = { if (ratedAyah != null && !repeatActive) repeatMenuOpen = true },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            DropdownMenu(
+                expanded = repeatMenuOpen,
+                onDismissRequest = { repeatMenuOpen = false },
             ) {
-                TrainingRatingControl(
-                    label = "✓  ${stringResource(R.string.training_rate_mastered)}",
-                    onClick = { onMarkMastered(ratedAyah) },
-                    modifier = Modifier.weight(1f),
-                )
-                TrainingRatingControl(
-                    label = "↻  ${stringResource(R.string.training_rate_review)}",
-                    onClick = { onMarkNeedsReview(ratedAyah) },
-                    modifier = Modifier.weight(1f),
-                )
+                listOf(1, 3, 5).forEach { count ->
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.training_repeat_option, count)) },
+                        onClick = {
+                            repeatMenuOpen = false
+                            ratedAyah?.let { onRepeat(it, count) }
+                        },
+                    )
+                }
             }
         }
         Text(
             text = stringResource(R.string.training_progress_summary),
             color = paper.textMuted,
-            fontSize = 11.sp,
+            fontSize = 10.sp,
+            textAlign = TextAlign.Center,
             modifier = Modifier
+                .weight(0.9f)
                 .clip(RoundedCornerShape(10.dp))
                 .clickable(onClick = onOpenProgress)
-                .padding(horizontal = 12.dp, vertical = 5.dp),
+                .padding(horizontal = 2.dp, vertical = 8.dp),
+        )
+        if (!textHidden && ratedAyah != null) {
+            TrainingRatingControl(
+                label = "✓ ${stringResource(R.string.training_rate_mastered)}",
+                onClick = { onMarkMastered(ratedAyah) },
+                modifier = Modifier.weight(0.55f),
+            )
+            TrainingRatingControl(
+                label = "↻ ${stringResource(R.string.training_rate_review)}",
+                onClick = { onMarkNeedsReview(ratedAyah) },
+                modifier = Modifier.weight(0.55f),
+            )
+        }
+        Text(
+            text = "✕",
+            color = paper.textMuted,
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .size(34.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .clickable(onClick = onExit)
+                .semantics {
+                    contentDescription = closeContentDescription
+                }
+                .padding(vertical = 5.dp),
         )
     }
 }
