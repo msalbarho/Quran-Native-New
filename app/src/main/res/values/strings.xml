@@ -160,8 +160,7 @@
     <string name="training_repeat_no_ayah">Reveal an ayah first</string>
     <string name="training_record">Start recitation</string>
     <string name="training_stop_record">Stop recording</string>
-    <string name="training_previous_short">Previous</string>
-    <string name="training_next_short">Next</string>
+    <string name="training_minimize">Minimize training controls</string>
     <string name="training_show_ayahs">Show ayah</string>
     <string name="training_hide_ayahs">Hide ayah</string>
     <string name="training_show_ayahs_accessibility">Show ayah, eye closed</string>

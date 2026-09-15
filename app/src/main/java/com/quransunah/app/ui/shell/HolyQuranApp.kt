@@ -55,6 +55,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -482,8 +484,6 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                 ratedAyah = revealedTrainingAyah,
                 repeatActive = trainingRepeatActive,
                 onOpenProgress = viewModel::openProgressPicker,
-                onPrevious = { if (pageNumber > 1) viewModel.jumpToPageNumber(pageNumber - 1) },
-                onNext = { if (pageNumber < AppConstants.TOTAL_PAGES) viewModel.jumpToPageNumber(pageNumber + 1) },
                 onToggleTextVisibility = {
                     if (!trainingTextHidden) revealedTrainingAyahs = emptySet()
                     trainingTextHidden = !trainingTextHidden
@@ -527,6 +527,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                         }
                     }
                 },
+                onMinimize = viewModel::toggleChrome,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
@@ -740,12 +741,11 @@ private fun TrainingControlBar(
     ratedAyah: Pair<Int, Int>?,
     repeatActive: Boolean,
     onOpenProgress: () -> Unit,
-    onPrevious: () -> Unit,
-    onNext: () -> Unit,
     onToggleTextVisibility: () -> Unit,
     onMarkMastered: (Pair<Int, Int>) -> Unit,
     onMarkNeedsReview: (Pair<Int, Int>) -> Unit,
     onRepeat: (Pair<Int, Int>, Int) -> Unit,
+    onMinimize: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
@@ -768,11 +768,6 @@ private fun TrainingControlBar(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TrainingSmallControl(
-                label = stringResource(R.string.training_previous_short),
-                onClick = onPrevious,
-                modifier = Modifier.weight(0.72f),
-            )
             Column(
                 modifier = Modifier
                     .weight(1.05f)
@@ -799,11 +794,6 @@ private fun TrainingControlBar(
                     modifier = Modifier.padding(top = 1.dp),
                 )
             }
-            TrainingSmallControl(
-                label = stringResource(R.string.training_next_short),
-                onClick = onNext,
-                modifier = Modifier.weight(0.72f),
-            )
             Box(modifier = Modifier.weight(0.9f)) {
                 TrainingSmallControl(
                     label = when {
@@ -829,6 +819,19 @@ private fun TrainingControlBar(
                     }
                 }
             }
+            Text(
+                text = "—",
+                color = paper.textMuted,
+                fontSize = 18.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable(onClick = onMinimize)
+                    .semantics {
+                        contentDescription = stringResource(R.string.training_minimize)
+                    },
+            )
         }
         if (!textHidden && ratedAyah != null) {
             Row(
