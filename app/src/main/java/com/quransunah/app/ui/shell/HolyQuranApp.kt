@@ -750,6 +750,7 @@ private fun TrainingControlBar(
 ) {
     val paper = LocalPaperColors.current
     var repeatMenuOpen by remember { mutableStateOf(false) }
+    val minimizeContentDescription = stringResource(R.string.training_minimize)
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -829,7 +830,7 @@ private fun TrainingControlBar(
                     .clip(RoundedCornerShape(8.dp))
                     .clickable(onClick = onMinimize)
                     .semantics {
-                        contentDescription = stringResource(R.string.training_minimize)
+                        contentDescription = minimizeContentDescription
                     },
             )
         }
