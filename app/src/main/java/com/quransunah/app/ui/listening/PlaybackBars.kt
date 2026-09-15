@@ -89,6 +89,7 @@ fun ScreenAudioPlayer(
     snapshot: PlaybackSnapshot,
     surahNumber: Int,
     fallbackTitle: String,
+    reciterName: String? = null,
     repeatMode: SurahRepeatMode,
     fontManager: QcfFontManager?,
     isCurrentTrackActive: Boolean,
@@ -135,6 +136,15 @@ fun ScreenAudioPlayer(
             fallback = snapshot.surahName ?: fallbackTitle,
             fontSize = 28.sp,
         )
+        reciterName?.takeIf { it.isNotBlank() }?.let { name ->
+            Text(
+                text = name,
+                color = paper.textMuted,
+                fontSize = 12.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
         snapshot.errorMessage?.let { message ->
             Text(text = message, color = StopRed, fontSize = 12.sp)
         }

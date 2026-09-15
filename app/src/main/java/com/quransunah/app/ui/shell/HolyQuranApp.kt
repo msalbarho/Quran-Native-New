@@ -242,6 +242,10 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
             trainingTextHidden = true
             revealedTrainingAyahs = emptySet()
             revealedTrainingAyah = null
+        } else {
+            trainingTextHidden = true
+            revealedTrainingAyahs = emptySet()
+            revealedTrainingAyah = null
         }
     }
     LaunchedEffect(pageNumber, tab) {

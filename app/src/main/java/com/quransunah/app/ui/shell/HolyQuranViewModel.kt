@@ -196,6 +196,7 @@ class HolyQuranViewModel @Inject constructor(
     }
 
     fun selectTab(tab: AppTab) {
+        val previousTab = _tab.value
         _tab.value = tab
         closePicker()
         if (tab == AppTab.Listening || tab == AppTab.Training) {
@@ -209,7 +210,11 @@ class HolyQuranViewModel @Inject constructor(
         }
         if (tab == AppTab.Reading) {
             lastFollowedAyahKey = null
-            followPlaybackIfNeeded(playback.value)
+            if (previousTab != AppTab.Training) {
+                followPlaybackIfNeeded(playback.value)
+            } else {
+                followAudio = false
+            }
         }
     }
 

@@ -170,6 +170,7 @@ fun ListeningScreenContent(
                     snapshot = playback,
                     surahNumber = ui.selectedSurah,
                     fallbackTitle = surahName,
+                    reciterName = ui.selectedReciter?.name,
                     repeatMode = ui.repeatMode,
                     fontManager = fontManager,
                     isCurrentTrackActive = currentActive,
@@ -208,19 +209,13 @@ fun ListeningScreenContent(
                     )
                     Text(
                         text = playLabel,
-                        color = if (nightMode) paper.textStrong else Color.White,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        color = paper.textMuted,
+                        fontSize = 12.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 6.dp)
-                            .alpha(if (playEnabled) 1f else 0.55f)
-                            .shadow(8.dp, PlayShape, clip = false)
-                            .clip(PlayShape)
-                            .background(paper.accent)
-                            .clickable(enabled = playEnabled, onClick = onPlaySurah)
-                            .padding(vertical = 14.dp, horizontal = 16.dp),
+                            .padding(top = 2.dp)
+                            .alpha(if (playEnabled) 1f else 0.55f),
                     )
                     Text(
                         text = stringResource(R.string.audio_choose_download_surahs),
