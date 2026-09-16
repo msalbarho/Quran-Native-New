@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -152,6 +153,11 @@ class AudioController @Inject constructor(
         val verse = startAyah.coerceIn(1, SurahAyahCounts.ayahCount(surah).coerceAtLeast(1))
         val seekMs = ayatTimingStore.peek(moshaf.id, surah)?.startOf(verse)?.coerceAtLeast(0L) ?: 0L
         val items = surahPlaylistItems(moshaf, repeatMode, surah, verse)
+        diagnostic(
+            "timedRequest requestId=$requestId reciterId=$reciterId moshafId=${moshaf.id} " +
+                "surah=$surah requestedAyah=$verse seekMs=$seekMs startIndex=$startIndex " +
+                "itemUri=${items.getOrNull(startIndex)?.localConfiguration?.uri}",
+        )
         prefetchSurahTimings(moshaf.id, surah)
         playItems(
             items = items,
@@ -318,7 +324,9 @@ class AudioController @Inject constructor(
     }
 
     override fun seekTo(positionMs: Long) {
+        diagnostic("beforeSeek(public) positionMs=${positionMs.coerceAtLeast(0L)} ${playerState(controller)}")
         controller?.seekTo(positionMs.coerceAtLeast(0L))
+        diagnostic("afterSeek(public) ${playerState(controller)}")
     }
 
     override suspend fun seekToAyah(surah: Int, ayah: Int) {
@@ -383,7 +391,8 @@ class AudioController @Inject constructor(
 
     override fun skipNext() {
         val player = controller ?: return
-        beginPlaybackRequest()
+        val requestId = beginPlaybackRequest()
+        diagnostic("skipNext requestId=$requestId ${playerState(player)}")
         val current = _snapshot.value
         when (current.domain) {
             PlaybackDomain.AYAH -> {
@@ -404,7 +413,8 @@ class AudioController @Inject constructor(
 
     override fun skipPrevious() {
         val player = controller ?: return
-        beginPlaybackRequest()
+        val requestId = beginPlaybackRequest()
+        diagnostic("skipPrevious requestId=$requestId ${playerState(player)}")
         val current = _snapshot.value
         when (current.domain) {
             PlaybackDomain.AYAH -> {
@@ -456,18 +466,30 @@ class AudioController @Inject constructor(
                 rememberPendingSeek(index, position)
                 val reuse = reuseMoshafId != null &&
                     hasSurahPlaylist(player, reuseMoshafId, items.size)
+                diagnostic(
+                    "beforeMediaMutation requestId=$requestId reuse=$reuse targetIndex=$index " +
+                        "targetPositionMs=$position ${playerState(player)}",
+                )
                 if (reuse) {
+                    diagnostic("beforeSeek(reuse) requestId=$requestId index=$index positionMs=$position ${playerState(player)}")
                     player.seekTo(index, position)
+                    diagnostic("afterSeek(reuse) requestId=$requestId ${playerState(player)}")
                 } else {
+                    diagnostic("beforeSetMediaItems requestId=$requestId itemUri=${items.getOrNull(index)?.localConfiguration?.uri} ${playerState(player)}")
                     player.setMediaItems(items, index, position)
+                    diagnostic("afterSetMediaItems requestId=$requestId ${playerState(player)}")
                     player.prepare()
+                    diagnostic("afterPrepare requestId=$requestId ${playerState(player)}")
                 }
                 player.repeatMode = playerRepeatMode(repeatMode)
                 player.setPlaybackSpeed(playbackRate)
                 sessionPolicy.pauseAtEndOfItems = pauseAtEnd
                 player.play()
+                diagnostic("afterPlay requestId=$requestId ${playerState(player)}")
                 if (position > 0L) {
+                    diagnostic("beforeSeek(afterPlay) requestId=$requestId index=$index positionMs=$position ${playerState(player)}")
                     player.seekTo(index, position)
+                    diagnostic("afterSeek(afterPlay) requestId=$requestId ${playerState(player)}")
                 }
                 emitSnapshot(player)
             }
@@ -476,7 +498,7 @@ class AudioController @Inject constructor(
 
     private fun beginPlaybackRequest(): Long {
         clearPendingSeek()
-        return playbackGeneration.incrementAndGet()
+        return playbackGeneration.incrementAndGet().also { diagnostic("beginPlaybackRequest requestId=$it") }
     }
 
     private fun isCurrentPlaybackRequest(requestId: Long): Boolean =
@@ -486,12 +508,16 @@ class AudioController @Inject constructor(
         if (positionMs > 0L) {
             pendingSeekMediaIndex = index
             pendingSeekPositionMs = positionMs
+            diagnostic("pendingSeekCreated index=$index positionMs=$positionMs")
         } else {
             clearPendingSeek()
         }
     }
 
     private fun clearPendingSeek() {
+        if (pendingSeekMediaIndex != C.INDEX_UNSET || pendingSeekPositionMs != C.TIME_UNSET) {
+            diagnostic("pendingSeekCleared index=$pendingSeekMediaIndex positionMs=$pendingSeekPositionMs")
+        }
         pendingSeekMediaIndex = C.INDEX_UNSET
         pendingSeekPositionMs = C.TIME_UNSET
     }
@@ -506,13 +532,16 @@ class AudioController @Inject constructor(
         val currentPos = player.currentPosition.coerceAtLeast(0L)
         val closeEnough = currentIndex == index && kotlin.math.abs(currentPos - target) <= SEEK_MATCH_TOLERANCE_MS
         if (closeEnough && currentPos > 0L) {
+            diagnostic("pendingSeekApplied(alreadyAtTarget) index=$index targetMs=$target ${playerState(player)}")
             clearPendingSeek()
             return
         }
         val canSeek = state == Player.STATE_READY ||
             (player.duration != C.TIME_UNSET && player.duration > 0L)
         if (canSeek) {
+            diagnostic("beforeSeek(pending) index=$index positionMs=$target ${playerState(player)}")
             player.seekTo(index, target)
+            diagnostic("afterSeek(pending) ${playerState(player)}")
         }
     }
 
@@ -680,13 +709,23 @@ class AudioController @Inject constructor(
     }
 
     private val playerListener = object : Player.Listener {
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            diagnostic("onPlaybackStateChanged playbackState=$playbackState ${playerState(controller)}")
+        }
+
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            diagnostic("onMediaItemTransition reason=$reason itemUri=${mediaItem?.localConfiguration?.uri} ${playerState(controller)}")
+        }
+
         override fun onEvents(player: Player, events: Player.Events) {
+            diagnostic("onEvents events=$events ${playerState(player)}")
             applyPendingSeekIfNeeded(player)
             emitSnapshot(player)
             if (player.isPlaying) startTicker() else tickerJob?.cancel()
         }
 
         override fun onPlayerError(error: PlaybackException) {
+            diagnostic("onPlayerError code=${error.errorCode} ${playerState(controller)}")
             _snapshot.update { current ->
                 current.copy(
                     isPlaying = false,
@@ -695,6 +734,16 @@ class AudioController @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun playerState(player: Player?): String {
+        if (player == null) return "state=NO_PLAYER index=NA positionMs=NA itemUri=null"
+        return "state=${player.playbackState} index=${player.currentMediaItemIndex} " +
+            "positionMs=${player.currentPosition} itemUri=${player.currentMediaItem?.localConfiguration?.uri}"
+    }
+
+    private fun diagnostic(message: String) {
+        Log.d(DIAGNOSTIC_TAG, message)
     }
 
     private fun emitSnapshot(player: Player) {
@@ -803,6 +852,7 @@ class AudioController @Inject constructor(
     }
 
     private companion object {
+        const val DIAGNOSTIC_TAG = "QuranAyahSeek"
         const val SEEK_MATCH_TOLERANCE_MS = 800L
     }
 
