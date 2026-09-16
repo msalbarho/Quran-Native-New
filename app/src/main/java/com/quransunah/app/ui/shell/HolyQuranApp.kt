@@ -686,7 +686,7 @@ private fun TrainingControlBar(
             TrainingBarButton(
                 label = stringResource(R.string.training_show_ayahs),
                 contentDescription = stringResource(R.string.training_show_ayahs_accessibility),
-                iconRes = R.drawable.ic_visibility_eye,
+                iconRes = R.drawable.ic_training_show,
                 enabled = textHidden,
                 onClick = onShowText,
                 paper = paper,
@@ -695,7 +695,7 @@ private fun TrainingControlBar(
             TrainingBarButton(
                 label = stringResource(R.string.training_hide_ayahs),
                 contentDescription = stringResource(R.string.training_hide_ayahs_accessibility),
-                iconRes = R.drawable.ic_visibility_off_eye,
+                iconRes = R.drawable.ic_training_hidden,
                 enabled = !textHidden,
                 onClick = onHideText,
                 paper = paper,
@@ -732,10 +732,13 @@ private fun TrainingBarButton(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Icon(
+        Image(
             painter = painterResource(iconRes),
             contentDescription = null,
-            tint = paper.textMuted.copy(alpha = if (enabled) 1f else 0.42f),
+            colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(
+                paper.textMuted.copy(alpha = if (enabled) 1f else 0.42f),
+            ),
+            contentScale = ContentScale.Fit,
             modifier = Modifier.size(24.dp),
         )
         Text(

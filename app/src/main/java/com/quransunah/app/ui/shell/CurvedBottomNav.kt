@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -145,7 +147,7 @@ fun CurvedBottomNav(
         ),
         NavItemSpec(
             id = "training",
-            painter = R.drawable.ic_psychology,
+            painter = R.drawable.ic_training_brain,
             labelRes = R.string.training_tab,
             iconSize = 26.dp,
             onClick = onTrainingPress,
@@ -239,10 +241,11 @@ fun CurvedBottomNav(
                             val iconModifier = Modifier
                                 .size(item.iconSize)
                                 .graphicsLayer { scaleX = if (item.selected) 1.06f else 1f; scaleY = scaleX }
-                            Icon(
+                            Image(
                                 painter = painterResource(item.painter),
                                 contentDescription = stringResource(item.labelRes),
-                                tint = tint,
+                                colorFilter = ColorFilter.tint(tint),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Fit,
                                 modifier = iconModifier,
                             )
                             if (item.selected) {
