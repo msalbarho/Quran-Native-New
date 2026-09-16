@@ -132,7 +132,7 @@ fun HomeScreen(
             HomeRouteCard(
                 title = stringResource(R.string.home_training_title),
                 description = stringResource(R.string.home_training_description),
-                iconRes = R.drawable.ic_record_voice_over,
+                iconRes = R.drawable.ic_training_brain,
                 featured = false,
                 onClick = onOpenTraining,
                 modifier = Modifier.weight(1f),
