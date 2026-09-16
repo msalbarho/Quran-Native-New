@@ -16,6 +16,9 @@ data class UnifiedReciterJson(
     val image: String? = null,
     val supportsSurahPlayback: Boolean,
     val supportsAyahPlayback: Boolean,
+    val supportsAyahTiming: Boolean = false,
+    val timingReciterId: Int? = null,
+    val timingMoshafId: Int? = null,
     val surahAudio: SurahAudioJson? = null,
     val ayahAudio: AyahAudioJson? = null,
 )
@@ -47,6 +50,9 @@ enum class AyahAudioType {
 
     @SerialName("islamic-network")
     ISLAMIC_NETWORK,
+
+    @SerialName("mp3quran-timing")
+    MP3QURAN_TIMING,
 }
 
 data class SurahReciter(
@@ -83,6 +89,8 @@ data class AyahReciter(
     val baseUrl: String,
     val supportsSurahPlayback: Boolean = false,
     val supportsAyahPlayback: Boolean = true,
+    val timingReciterId: Int? = null,
+    val timingMoshafId: Int? = null,
 )
 
 data class UnifiedReciter(
@@ -92,6 +100,9 @@ data class UnifiedReciter(
     val image: String? = null,
     val supportsSurahPlayback: Boolean,
     val supportsAyahPlayback: Boolean,
+    val supportsAyahTiming: Boolean = false,
+    val timingReciterId: Int? = null,
+    val timingMoshafId: Int? = null,
     val surahAudio: SurahAudioConfig? = null,
     val ayahAudio: AyahAudioConfig? = null,
 ) {

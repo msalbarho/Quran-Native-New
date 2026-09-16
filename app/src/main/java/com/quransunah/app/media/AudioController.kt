@@ -19,6 +19,7 @@ import com.quransunah.app.data.audio.AudioUrls
 import com.quransunah.app.data.audio.AyatTimingStore
 import com.quransunah.app.data.audio.PlaybackNetwork
 import com.quransunah.app.data.audio.SurahAudioStore
+import com.quransunah.app.data.catalog.AyahAudioType
 import com.quransunah.app.data.catalog.AyahReciter
 import com.quransunah.app.data.catalog.ReciterCatalog
 import com.quransunah.app.data.prefs.UserPreferences
@@ -171,8 +172,20 @@ class AudioController @Inject constructor(
     }
 
     override suspend fun playAyah(reciterId: String, surah: Int, ayah: Int): Result<Unit> = runCatching {
-        stop()
         val reciter = reciterCatalog.ayahReciter(reciterId) ?: reciterCatalog.defaultAyahReciter()
+        if (reciter.type == AyahAudioType.MP3QURAN_TIMING) {
+            val timingMoshafId = reciter.timingMoshafId
+                ?: error(context.getString(R.string.error_reciter_missing))
+            val timingReciterId = reciter.timingReciterId ?: timingMoshafId
+            return@runCatching playSurah(
+                reciterId = timingReciterId,
+                moshafId = timingMoshafId,
+                surah = surah,
+                repeatMode = SurahRepeatMode.OFF,
+                startAyah = ayah,
+            ).getOrThrow()
+        }
+        stop()
         if (!PlaybackNetwork.isOnline(context)) {
             error(context.getString(R.string.error_offline))
         }

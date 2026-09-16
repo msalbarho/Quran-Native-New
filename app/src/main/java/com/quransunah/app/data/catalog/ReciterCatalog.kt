@@ -97,6 +97,9 @@ class ReciterCatalog @Inject constructor(
                 image = reciter.image,
                 supportsSurahPlayback = reciter.supportsSurahPlayback,
                 supportsAyahPlayback = reciter.supportsAyahPlayback,
+                supportsAyahTiming = reciter.supportsAyahTiming,
+                timingReciterId = reciter.timingReciterId,
+                timingMoshafId = reciter.timingMoshafId,
                 surahAudio = reciter.surahAudio?.let { audio ->
                     SurahAudioConfig(
                         moshafs = audio.moshafs.map { moshaf ->
@@ -146,14 +149,21 @@ class ReciterCatalog @Inject constructor(
     private fun loadAyahRecitersFromUnified(): List<AyahReciter> {
         val unified = loadUnifiedReciters()
         return unified.filter { it.supportsAyahPlayback }.map { reciter ->
-            val ayahAudio = reciter.ayahAudio ?: return@map null
+            val ayahAudio = reciter.ayahAudio
+            if (ayahAudio == null && !reciter.supportsAyahTiming) return@map null
             AyahReciter(
                 id = reciter.id,
                 name = reciter.name,
-                type = ayahAudio.type,
-                baseUrl = ayahAudio.baseUrl,
+                type = if (reciter.supportsAyahTiming) {
+                    AyahAudioType.MP3QURAN_TIMING
+                } else {
+                    ayahAudio!!.type
+                },
+                baseUrl = ayahAudio?.baseUrl.orEmpty(),
                 supportsSurahPlayback = reciter.supportsSurahPlayback,
                 supportsAyahPlayback = true,
+                timingReciterId = reciter.timingReciterId,
+                timingMoshafId = reciter.timingMoshafId,
             )
         }.filterNotNull().ifEmpty { listOf(FALLBACK_AYAH_RECITER) }
     }

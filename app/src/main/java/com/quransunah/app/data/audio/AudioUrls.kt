@@ -25,6 +25,8 @@ object AudioUrls {
                 "${SurahAyahCounts.globalAyahIndex(surah, ayah)}.mp3"
             AyahAudioType.EQURAN ->
                 "${SurahAyahCounts.pad3(surah)}${SurahAyahCounts.pad3(ayah)}.mp3"
+            AyahAudioType.MP3QURAN_TIMING ->
+                error("MP3Quran timing reciters use full-surah playback")
         }
         val base = when {
             quality == AudioQuality.SAVER && reciter.baseUrl.contains("/audio/128/") ->
