@@ -257,7 +257,7 @@ private fun MedinaCanvasPageBody(
             titleReady = titleTypeface != null,
             firstWordId = firstWordId,
             lastWordId = lastWordId,
-            lineFingerprint = lineCount,
+            lineFingerprint = linesFingerprint,
             extras = "sajdah-number-glyph",
         )
         MedinaPageLayoutStore.get(key)?.let {
