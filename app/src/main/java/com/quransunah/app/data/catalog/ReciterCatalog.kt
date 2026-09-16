@@ -80,7 +80,7 @@ class ReciterCatalog @Inject constructor(
     }
 
     fun getAyahCapableReciters(): List<AyahReciter> {
-        return ayahReciters().filter { it.supportsAyahPlayback }
+        return ayahReciters()
     }
 
     private fun loadUnifiedReciters(): List<UnifiedReciter> {
@@ -124,8 +124,7 @@ class ReciterCatalog @Inject constructor(
     }
 
     private fun loadSurahRecitersFromUnified(): List<SurahReciter> {
-        val unified = loadUnifiedReciters()
-        return unified.filter { it.supportsSurahPlayback }.mapIndexed { index, reciter ->
+        return canonicalUnifiedReciters().mapIndexed { index, reciter ->
             val surahAudio = reciter.surahAudio ?: return@mapIndexed null
             SurahReciter(
                 id = reciter.id.toIntOrNull() ?: (index + 100),
@@ -147,8 +146,7 @@ class ReciterCatalog @Inject constructor(
     }
 
     private fun loadAyahRecitersFromUnified(): List<AyahReciter> {
-        val unified = loadUnifiedReciters()
-        return unified.filter { it.supportsAyahPlayback }.map { reciter ->
+        return canonicalUnifiedReciters().map { reciter ->
             val ayahAudio = reciter.ayahAudio
             if (ayahAudio == null && !reciter.supportsAyahTiming) return@map null
             AyahReciter(
@@ -166,6 +164,12 @@ class ReciterCatalog @Inject constructor(
                 timingMoshafId = reciter.timingMoshafId,
             )
         }.filterNotNull().ifEmpty { listOf(FALLBACK_AYAH_RECITER) }
+    }
+
+    private fun canonicalUnifiedReciters(): List<UnifiedReciter> {
+        return loadUnifiedReciters().filter {
+            it.supportsSurahPlayback && it.supportsAyahPlayback && it.surahAudio != null
+        }
     }
 
     private fun parseSurahList(raw: String): Set<Int> {
