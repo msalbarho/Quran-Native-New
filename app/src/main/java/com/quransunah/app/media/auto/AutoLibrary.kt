@@ -134,7 +134,7 @@ class AutoLibrary(
     fun playbackQueue(mediaId: String?): MediaSession.MediaItemsWithStartPosition? {
         val request = PlaybackMediaIds.parsePlayRequest(mediaId) ?: return null
         val reciter = resolveReciter(request) ?: return null
-        val moshaf = reciter.preferredMoshaf() ?: return null
+        val moshaf = request.moshafId?.let(reciter::moshaf) ?: reciter.preferredMoshaf() ?: return null
         sessionPolicy.activate(reciter)
         val playlist = moshaf.surahNumbers.sorted().ifEmpty { (1..AppConstants.SURAH_COUNT).toList() }
         val startIndex = playlist.indexOf(request.surah).coerceAtLeast(0)

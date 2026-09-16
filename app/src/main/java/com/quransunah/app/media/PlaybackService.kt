@@ -796,7 +796,6 @@ class PlaybackService : MediaLibraryService() {
                             "onSetMediaItems Auto queue size=${queue.mediaItems.size} " +
                                 "start=${queue.startIndex} from=${describeController(controller)}"
                         }
-                        ensurePlaybackForeground()
                         return@libraryFuture MediaSession.MediaItemsWithStartPosition(
                             queue.mediaItems,
                             queue.startIndex,
@@ -805,7 +804,6 @@ class PlaybackService : MediaLibraryService() {
                     }
                 }
                 val resolved = mediaItems.map { autoLibrary.resolvePlayable(it) }
-                ensurePlaybackForeground()
                 MediaSession.MediaItemsWithStartPosition(resolved, startIndex, safePosition)
             }
         }
