@@ -196,7 +196,7 @@ class AudioController @Inject constructor(
                 startAyah = ayah,
             ).getOrThrow()
         }
-        stop()
+        clearCurrentPlayback()
         if (!PlaybackNetwork.isOnline(context)) {
             error(context.getString(R.string.error_offline))
         }
@@ -304,6 +304,10 @@ class AudioController @Inject constructor(
 
     override fun stop() {
         beginPlaybackRequest()
+        clearCurrentPlayback()
+    }
+
+    private fun clearCurrentPlayback() {
         controller?.let { player ->
             player.stop()
             player.clearMediaItems()

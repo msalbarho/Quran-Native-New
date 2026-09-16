@@ -6,8 +6,7 @@ import androidx.annotation.DrawableRes
 import com.quransunah.app.R
 
 /**
- * Maps the five main Auto-browse reciters to drawable avatar URIs
- * (`reciter_dosari`, `reciter_ajmi`, …).
+ * Maps the eight Auto-browse reciters to drawable avatar URIs.
  */
 object ReciterArtwork {
 
@@ -16,7 +15,10 @@ object ReciterArtwork {
         5 to R.drawable.reciter_ajmi,
         123 to R.drawable.reciter_afasy,
         102 to R.drawable.reciter_maher,
+        104 to R.drawable.reciter_hussary,
+        62 to R.drawable.reciter_aljuhani,
         54 to R.drawable.reciter_sudais,
+        31 to R.drawable.reciter_alshuraim,
     )
 
     fun drawableName(reciterId: Int): String? = when (reciterId) {
@@ -24,7 +26,10 @@ object ReciterArtwork {
         5 -> "reciter_ajmi"
         123 -> "reciter_afasy"
         102 -> "reciter_maher"
+        104 -> "reciter_hussary"
+        62 -> "reciter_aljuhani"
         54 -> "reciter_sudais"
+        31 -> "reciter_alshuraim"
         else -> null
     }
 
