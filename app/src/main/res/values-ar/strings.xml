@@ -36,6 +36,7 @@
     <string name="error_offline_no_cache">تعذّر التشغيل بدون اتصال. لا توجد نسخة محفوظة لهذه السورة.</string>
     <string name="error_missing_file">الملف الصوتي غير موجود.</string>
     <string name="error_playback_generic">تعذّر تشغيل التلاوة.</string>
+    <string name="error_ayah_playback_unsupported">التشغيل الدقيق للآية غير متاح لهذا القارئ.</string>
     <string name="error_reciter_missing">تعذّر العثور على القارئ المحدد.</string>
     <string name="audio_search_surah">ابحث برقم أو اسم السورة…</string>
     <string name="audio_range_from">من</string>

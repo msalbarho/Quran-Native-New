@@ -337,6 +337,15 @@ fun WordSheetContent(
             )
         }
 
+        playback.errorMessage?.let { message ->
+            Text(
+                text = message,
+                color = Color(0xFFB3261E),
+                fontSize = 13.sp,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()

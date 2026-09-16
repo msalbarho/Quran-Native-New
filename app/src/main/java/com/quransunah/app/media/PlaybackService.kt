@@ -13,7 +13,6 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
-import android.util.Log
 import android.view.KeyEvent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
@@ -184,36 +183,28 @@ class PlaybackService : MediaLibraryService() {
             .build()
         val listener = object : Player.Listener {
             override fun onEvents(player: Player, events: Player.Events) {
-                diagnostic("onEvents events=$events ${playerState()}")
             }
 
             override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
-                diagnostic("onPlayWhenReadyChanged playWhenReady=$playWhenReady reason=$reason ${playerState()}")
                 if (playWhenReady) ensurePlaybackForeground()
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
-                diagnostic("onPlaybackStateChanged playbackState=$playbackState ${playerState()}")
                 if (playbackState == Player.STATE_READY || playbackState == Player.STATE_BUFFERING) {
                     if (player.playWhenReady) ensurePlaybackForeground()
                 }
             }
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                diagnostic("onMediaItemTransition reason=$reason itemUri=${mediaItem?.localConfiguration?.uri} ${playerState()}")
                 if (sessionPolicy.pauseAtEndOfItems &&
                     reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO
                 ) {
                     player.pause()
                     if (player.hasPreviousMediaItem()) {
-                        diagnostic("beforeSeekToPreviousMediaItem ${playerState()}")
                         player.seekToPreviousMediaItem()
-                        diagnostic("afterSeekToPreviousMediaItem ${playerState()}")
                         val duration = player.duration
                         if (duration != C.TIME_UNSET && duration > 0L) {
-                            diagnostic("beforeSeek(previous-end) positionMs=$duration ${playerState()}")
                             player.seekTo(duration)
-                            diagnostic("afterSeek(previous-end) ${playerState()}")
                         }
                     }
                 }
@@ -365,11 +356,8 @@ class PlaybackService : MediaLibraryService() {
             autoLibrary.resolvePlayable(player.getMediaItemAt(i))
         }
         runCatching {
-            diagnostic("beforeSetMediaItems(refresh) index=$index positionMs=$position ${playerState()}")
             player.setMediaItems(refreshed, index, position)
-            diagnostic("afterSetMediaItems(refresh) ${playerState()}")
             player.prepare()
-            diagnostic("afterPrepare(refresh) ${playerState()}")
             player.playWhenReady = playWhenReady
             AppLog.i(TAG) { "refreshPlayerQueueTitles: items=${refreshed.size}" }
         }.onFailure { t ->
@@ -564,11 +552,8 @@ class PlaybackService : MediaLibraryService() {
         }
         val queue = autoLibrary.defaultQueue(progressTracker.last()) ?: return
         runCatching {
-            diagnostic("beforeSetMediaItems(autoResume) index=${queue.startIndex} positionMs=${queue.startPositionMs} ${playerState()}")
             player.setMediaItems(queue.mediaItems, queue.startIndex, queue.startPositionMs)
-            diagnostic("afterSetMediaItems(autoResume) ${playerState()}")
             player.prepare()
-            diagnostic("afterPrepare(autoResume) ${playerState()}")
             // Never auto-start on car attach — wait for explicit Play.
             player.playWhenReady = false
             AppLog.i(TAG) {
@@ -910,19 +895,8 @@ class PlaybackService : MediaLibraryService() {
         }
     }
 
-    private fun playerState(): String {
-        if (!::player.isInitialized) return "state=NO_PLAYER index=NA positionMs=NA itemUri=null"
-        return "state=${player.playbackState} index=${player.currentMediaItemIndex} " +
-            "positionMs=${player.currentPosition} itemUri=${player.currentMediaItem?.localConfiguration?.uri}"
-    }
-
-    private fun diagnostic(message: String) {
-        Log.d(DIAGNOSTIC_TAG, message)
-    }
-
     companion object {
         private const val TAG = "QuranAuto"
-        private const val DIAGNOSTIC_TAG = "QuranAyahSeek"
         private const val SEARCH_SUPPORTED = "android.media.browse.SEARCH_SUPPORTED"
         const val ACTION_KEEP_ALIVE = "com.quransunah.app.action.KEEP_ALIVE"
         const val ACTION_AUTO_SESSION = "com.quransunah.app.action.AUTO_SESSION"
