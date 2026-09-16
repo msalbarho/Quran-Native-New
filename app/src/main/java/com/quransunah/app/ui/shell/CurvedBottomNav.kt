@@ -145,7 +145,7 @@ fun CurvedBottomNav(
         ),
         NavItemSpec(
             id = "training",
-            painter = R.drawable.ic_record_voice_over,
+            painter = R.drawable.ic_psychology,
             labelRes = R.string.training_tab,
             iconSize = 26.dp,
             onClick = onTrainingPress,

@@ -33,8 +33,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -43,7 +41,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -88,7 +85,6 @@ import com.quransunah.app.ui.mushaf.PageNumberBadge
 import com.quransunah.app.ui.mushaf.PagePickerDialog
 import com.quransunah.app.ui.mushaf.TextMushafPage
 import com.quransunah.app.ui.mushaf.toLineRecords
-import com.quransunah.app.ui.memorization.MemorizationViewModel
 import com.quransunah.app.ui.search.SearchPane
 import com.quransunah.app.ui.study.MeaningPopover
 import com.quransunah.app.ui.study.StudyViewModel
@@ -96,10 +92,6 @@ import com.quransunah.app.ui.study.WordSheet
 import com.quransunah.app.ui.theme.HolyQuranTheme
 import com.quransunah.app.ui.theme.LocalPaperColors
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -214,15 +206,9 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
     val indexTab by viewModel.indexTab.collectAsStateWithLifecycle()
     var trainingTextHidden by remember { mutableStateOf(true) }
     var revealedTrainingAyahs by remember(pageNumber) { mutableStateOf(emptySet<Pair<Int, Int>>()) }
-    var revealedTrainingAyah by remember(pageNumber) { mutableStateOf<Pair<Int, Int>?>(null) }
     val bookmarksViewModel: BookmarksViewModel = hiltViewModel()
     val listeningViewModel: ListeningViewModel = hiltViewModel()
     val studyViewModel: StudyViewModel = hiltViewModel()
-    val studyUi by studyViewModel.uiState.collectAsStateWithLifecycle()
-    val memorizationViewModel: MemorizationViewModel = hiltViewModel()
-    val trainingRepeatScope = rememberCoroutineScope()
-    var trainingRepeatJob by remember { mutableStateOf<Job?>(null) }
-    var trainingRepeatActive by remember { mutableStateOf(false) }
     val indexViewModel: QuranIndexViewModel = hiltViewModel()
     val preferredAyah = jumpHighlight ?: selectedWord?.let { AyahRef(it.surah, it.ayah) }
     val currentLocationWord = remember(page) {
@@ -243,19 +229,9 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
         if (tab == AppTab.Training) {
             trainingTextHidden = true
             revealedTrainingAyahs = emptySet()
-            revealedTrainingAyah = null
         } else {
             trainingTextHidden = true
             revealedTrainingAyahs = emptySet()
-            revealedTrainingAyah = null
-        }
-    }
-    LaunchedEffect(pageNumber, tab) {
-        if (trainingRepeatJob != null) {
-            trainingRepeatJob?.cancel()
-            trainingRepeatJob = null
-            trainingRepeatActive = false
-            studyViewModel.audioPlayer.stop()
         }
     }
     val view = LocalView.current
@@ -374,7 +350,6 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                                         } else {
                                             revealedTrainingAyahs + key
                                         }
-                                        revealedTrainingAyah = key.takeIf { it in revealedTrainingAyahs }
                                     } else viewModel.onMushafWordTap(word)
                                 },
                                 onWordLongPress = { word -> viewModel.onWordLongPress(word) },
@@ -404,7 +379,6 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                                     } else {
                                         revealedTrainingAyahs + key
                                     }
-                                    revealedTrainingAyah = key.takeIf { it in revealedTrainingAyahs }
                                 } } else null,
                                 chromeVisible = chrome,
                                 surahsByNumber = surahsByNumber,
@@ -479,62 +453,17 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
         if (tab == AppTab.Training) {
             TrainingControlBar(
                 textHidden = trainingTextHidden,
-                ratedAyah = revealedTrainingAyah,
-                repeatActive = trainingRepeatActive,
-                onToggleTextVisibility = {
-                    if (!trainingTextHidden) revealedTrainingAyahs = emptySet()
-                    trainingTextHidden = !trainingTextHidden
-                },
-                onMarkMastered = { (surah, ayah) ->
-                    memorizationViewModel.markTrainingAyahMastered(surah, ayah)
-                    revealedTrainingAyahs = revealedTrainingAyahs - (surah to ayah)
-                    revealedTrainingAyah = null
+                onShowText = { trainingTextHidden = false },
+                onHideText = {
+                    revealedTrainingAyahs = emptySet()
                     trainingTextHidden = true
-                },
-                onMarkNeedsReview = { (surah, ayah) ->
-                    memorizationViewModel.markTrainingAyahForReview(surah, ayah)
-                    revealedTrainingAyahs = revealedTrainingAyahs - (surah to ayah)
-                    revealedTrainingAyah = null
-                    trainingTextHidden = true
-                },
-                onRepeat = { ayah, count ->
-                    val reciterId = studyUi.selectedReciterId
-                    trainingRepeatJob?.cancel()
-                    trainingRepeatJob = trainingRepeatScope.launch {
-                        trainingRepeatActive = true
-                        try {
-                            repeat(count) {
-                                if (!isActive) return@repeat
-                                val result = studyViewModel.audioPlayer.playAyah(reciterId, ayah.first, ayah.second)
-                                if (result.isFailure) return@repeat
-                                studyViewModel.playback.first { snapshot ->
-                                    snapshot.domain == PlaybackDomain.AYAH &&
-                                        snapshot.surah == ayah.first && snapshot.ayah == ayah.second &&
-                                        snapshot.isPlaying
-                                }
-                                studyViewModel.playback.first { snapshot ->
-                                    snapshot.domain == PlaybackDomain.AYAH &&
-                                        snapshot.surah == ayah.first && snapshot.ayah == ayah.second &&
-                                        !snapshot.isPlaying
-                                }
-                            }
-                        } finally {
-                            trainingRepeatActive = false
-                            trainingRepeatJob = null
-                        }
-                    }
                 },
                 onExit = {
-                    trainingRepeatJob?.cancel()
-                    trainingRepeatJob = null
-                    trainingRepeatActive = false
                     revealedTrainingAyahs = emptySet()
-                    revealedTrainingAyah = null
                     trainingTextHidden = true
                     viewModel.selectTab(AppTab.Reading)
                 },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
+                modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
 
@@ -741,138 +670,81 @@ private fun TrainingHintStep(number: Int, textRes: Int) {
 @Composable
 private fun TrainingControlBar(
     textHidden: Boolean,
-    ratedAyah: Pair<Int, Int>?,
-    repeatActive: Boolean,
-    onToggleTextVisibility: () -> Unit,
-    onMarkMastered: (Pair<Int, Int>) -> Unit,
-    onMarkNeedsReview: (Pair<Int, Int>) -> Unit,
-    onRepeat: (Pair<Int, Int>, Int) -> Unit,
+    onShowText: () -> Unit,
+    onHideText: () -> Unit,
     onExit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var repeatMenuOpen by remember { mutableStateOf(false) }
-    var ratingMenuOpen by remember { mutableStateOf(false) }
-    val accessibilityLabel = stringResource(
-        if (textHidden) R.string.training_show_ayahs_accessibility
-        else R.string.training_hide_ayahs_accessibility,
-    )
+    val paper = LocalPaperColors.current
     val closeContentDescription = stringResource(R.string.close)
-    LaunchedEffect(ratedAyah) {
-        ratingMenuOpen = ratedAyah != null
-    }
     BottomNavSurface(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(0.8f)
-                    .fillMaxHeight()
-                    .clickable(onClick = onExit)
-                    .semantics { contentDescription = closeContentDescription },
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_close),
-                    contentDescription = null,
-                    tint = LocalPaperColors.current.textMuted,
-                    modifier = Modifier.size(24.dp),
-                )
-            }
-            Column(
-                modifier = Modifier
-                    .weight(1.4f)
-                    .fillMaxHeight()
-                    .clickable(onClick = onToggleTextVisibility),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Icon(
-                    painter = painterResource(
-                        if (textHidden) R.drawable.ic_visibility_off_eye else R.drawable.ic_visibility_eye,
-                    ),
-                    contentDescription = accessibilityLabel,
-                    tint = LocalPaperColors.current.textMuted,
-                    modifier = Modifier.size(24.dp),
-                )
-                Text(
-                    text = stringResource(
-                        if (textHidden) R.string.training_show_ayahs else R.string.training_hide_ayahs,
-                    ),
-                    color = LocalPaperColors.current.textMuted,
-                    fontSize = 9.sp,
-                    textAlign = TextAlign.Center,
-                )
-            }
-            Box(modifier = Modifier.weight(1.4f)) {
-                TrainingSmallControl(
-                    label = when {
-                        repeatActive -> "• ${stringResource(R.string.training_repeat_active)}"
-                        ratedAyah == null -> stringResource(R.string.training_repeat_no_ayah)
-                        else -> stringResource(R.string.training_repeat)
-                    },
-                    onClick = { if (ratedAyah != null && !repeatActive) repeatMenuOpen = true },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                DropdownMenu(
-                    expanded = repeatMenuOpen,
-                    onDismissRequest = { repeatMenuOpen = false },
-                ) {
-                    listOf(1, 3, 5).forEach { count ->
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.training_repeat_option, count)) },
-                            onClick = {
-                                repeatMenuOpen = false
-                                ratedAyah?.let { onRepeat(it, count) }
-                            },
-                        )
-                    }
-                }
-                DropdownMenu(
-                    expanded = ratingMenuOpen && ratedAyah != null,
-                    onDismissRequest = { ratingMenuOpen = false },
-                ) {
-                    ratedAyah?.let { ayah ->
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.training_rate_mastered)) },
-                            onClick = {
-                                ratingMenuOpen = false
-                                onMarkMastered(ayah)
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.training_rate_review)) },
-                            onClick = {
-                                ratingMenuOpen = false
-                                onMarkNeedsReview(ayah)
-                            },
-                        )
-                    }
-                }
-            }
+            TrainingBarButton(
+                label = stringResource(R.string.training_show_ayahs),
+                contentDescription = stringResource(R.string.training_show_ayahs_accessibility),
+                iconRes = R.drawable.ic_visibility_eye,
+                enabled = textHidden,
+                onClick = onShowText,
+                paper = paper,
+                modifier = Modifier.weight(1f),
+            )
+            TrainingBarButton(
+                label = stringResource(R.string.training_hide_ayahs),
+                contentDescription = stringResource(R.string.training_hide_ayahs_accessibility),
+                iconRes = R.drawable.ic_visibility_off_eye,
+                enabled = !textHidden,
+                onClick = onHideText,
+                paper = paper,
+                modifier = Modifier.weight(1f),
+            )
+            TrainingBarButton(
+                label = stringResource(R.string.close),
+                contentDescription = closeContentDescription,
+                iconRes = R.drawable.ic_close,
+                enabled = true,
+                onClick = onExit,
+                paper = paper,
+                modifier = Modifier.weight(1f),
+            )
         }
     }
 }
 
 @Composable
-private fun TrainingSmallControl(
+private fun TrainingBarButton(
     label: String,
+    contentDescription: String,
+    iconRes: Int,
+    enabled: Boolean,
     onClick: () -> Unit,
+    paper: com.quransunah.app.ui.theme.PaperColors,
     modifier: Modifier = Modifier,
 ) {
-    val paper = LocalPaperColors.current
-    Text(
-        text = label,
-        color = paper.textMuted,
-        fontSize = 11.sp,
-        textAlign = TextAlign.Center,
+    Column(
         modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 14.dp),
-    )
+            .fillMaxHeight()
+            .clickable(enabled = enabled, onClick = onClick)
+            .semantics { this.contentDescription = contentDescription },
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            tint = paper.textMuted.copy(alpha = if (enabled) 1f else 0.42f),
+            modifier = Modifier.size(24.dp),
+        )
+        Text(
+            text = label,
+            color = paper.textMuted.copy(alpha = if (enabled) 1f else 0.42f),
+            fontSize = 9.sp,
+            textAlign = TextAlign.Center,
+        )
+    }
 }
 
 @Composable
