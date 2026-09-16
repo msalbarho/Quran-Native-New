@@ -39,6 +39,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
+private const val ALJUHANI_RECITER_ID = "62"
+
 data class StudyUiState(
     val word: WordRecord? = null,
     val surahName: String = "",
@@ -76,6 +78,9 @@ class StudyViewModel @Inject constructor(
     val fontManager: QcfFontManager,
 ) : ViewModel() {
 
+    private fun wordSheetAyahReciters(): List<AyahReciter> =
+        reciterCatalog.getAyahCapableReciters().filterNot { it.id == ALJUHANI_RECITER_ID }
+
     val playback: StateFlow<PlaybackSnapshot> = audioPlayer.snapshot
 
     private var bindJob: Job? = null
@@ -84,7 +89,7 @@ class StudyViewModel @Inject constructor(
 
     private val _ui = MutableStateFlow(
         StudyUiState(
-            reciters = reciterCatalog.getAyahCapableReciters(),
+            reciters = wordSheetAyahReciters(),
             surahReciters = reciterCatalog.surahReciters(),
         ),
     )
@@ -141,7 +146,7 @@ class StudyViewModel @Inject constructor(
         _ui.update { it.copy(tafsirOpen = false, tafsirLoading = false, tafsirText = null, tafsirError = null) }
         bindJob = viewModelScope.launch {
             val settings = preferences.settings.first()
-            val reciters = reciterCatalog.getAyahCapableReciters()
+            val reciters = wordSheetAyahReciters()
             val surahReciters = reciterCatalog.surahReciters()
             val ayahReciter = reciters.firstOrNull { it.id == settings.lastAyahReciterId }?.id
                 ?: reciterCatalog.defaultAyahReciter().id

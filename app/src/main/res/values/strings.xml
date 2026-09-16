@@ -36,7 +36,6 @@
     <string name="error_offline_no_cache">Playback needs a connection. This surah is not saved on the device.</string>
     <string name="error_missing_file">The recitation file could not be found.</string>
     <string name="error_playback_generic">Could not play the recitation.</string>
-    <string name="error_ayah_playback_unsupported">Exact ayah playback is unavailable for this reciter.</string>
     <string name="error_reciter_missing">The selected reciter is not available.</string>
     <string name="audio_search_surah">Search by number or name…</string>
     <string name="audio_range_from">From</string>

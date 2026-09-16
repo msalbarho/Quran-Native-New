@@ -184,10 +184,6 @@ class AudioController @Inject constructor(
         val requestId = beginPlaybackRequest()
         return runCatching {
         val reciter = reciterCatalog.ayahReciter(reciterId) ?: reciterCatalog.defaultAyahReciter()
-        if (reciter.id == "62") {
-            clearCurrentPlayback()
-            error(context.getString(R.string.error_ayah_playback_unsupported))
-        }
         if (reciter.type == AyahAudioType.MP3QURAN_TIMING) {
             val timingMoshafId = reciter.timingMoshafId
                 ?: error(context.getString(R.string.error_reciter_missing))
