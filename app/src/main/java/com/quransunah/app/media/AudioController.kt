@@ -50,6 +50,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.util.concurrent.atomic.AtomicLong
 
 @Singleton
 class AudioController @Inject constructor(
@@ -74,8 +75,9 @@ class AudioController @Inject constructor(
     private var lastTimingPrefetchKey: String? = null
     private var pendingSeekMediaIndex: Int = C.INDEX_UNSET
     private var pendingSeekPositionMs: Long = C.TIME_UNSET
-    private var cachedPlaylistMoshafId: Int? = null
+    private var cachedPlaylistKey: String? = null
     private var cachedPlaylistItems: List<MediaItem> = emptyList()
+    private val playbackGeneration = AtomicLong(0L)
     private val playbackMutex = Mutex()
     /** Black «القرآن الكريم» mark for notification / lockscreen artwork (not adaptive launcher). */
     private val artworkUri: Uri =
@@ -131,7 +133,9 @@ class AudioController @Inject constructor(
         surah: Int,
         repeatMode: SurahRepeatMode,
         startAyah: Int,
-    ): Result<Unit> = runCatching {
+    ): Result<Unit> {
+        val requestId = beginPlaybackRequest()
+        return runCatching {
         val reciter = reciterCatalog.surahReciter(reciterId)
             ?: error(context.getString(R.string.error_reciter_missing))
         val moshaf = reciter.moshaf(moshafId) ?: reciter.preferredMoshaf()
@@ -156,22 +160,29 @@ class AudioController @Inject constructor(
             pauseAtEnd = repeatMode == SurahRepeatMode.OFF,
             startPositionMs = seekMs,
             reuseMoshafId = moshaf.id,
+            requestId = requestId,
         )
-        if (verse > 1 && seekMs == 0L) {
+        if (verse > 1 && seekMs == 0L && isCurrentPlaybackRequest(requestId)) {
             scope.launch {
                 val loaded = ayatTimingStore.load(moshaf.id, surah)?.startOf(verse)?.coerceAtLeast(0L)
                     ?: return@launch
+                if (!isCurrentPlaybackRequest(requestId)) return@launch
                 rememberPendingSeek(startIndex, loaded)
                 withContext(Dispatchers.Main.immediate) {
-                    controller?.let { applyPendingSeekIfNeeded(it) }
+                    if (isCurrentPlaybackRequest(requestId)) {
+                        controller?.let { applyPendingSeekIfNeeded(it) }
+                    }
                 }
             }
         }
-    }.onFailure { error ->
-        publishError(error)
+        }.onFailure { error ->
+        if (isCurrentPlaybackRequest(requestId)) publishError(error)
+        }
     }
 
-    override suspend fun playAyah(reciterId: String, surah: Int, ayah: Int): Result<Unit> = runCatching {
+    override suspend fun playAyah(reciterId: String, surah: Int, ayah: Int): Result<Unit> {
+        val requestId = beginPlaybackRequest()
+        return runCatching {
         val reciter = reciterCatalog.ayahReciter(reciterId) ?: reciterCatalog.defaultAyahReciter()
         if (reciter.type == AyahAudioType.MP3QURAN_TIMING) {
             val timingMoshafId = reciter.timingMoshafId
@@ -197,9 +208,11 @@ class AudioController @Inject constructor(
             startIndex = ayah - 1,
             repeatMode = SurahRepeatMode.OFF,
             pauseAtEnd = false,
+            requestId = requestId,
         )
-    }.onFailure { error ->
-        publishError(error)
+        }.onFailure { error ->
+        if (isCurrentPlaybackRequest(requestId)) publishError(error)
+        }
     }
 
     override suspend fun playAyahRange(
@@ -208,7 +221,9 @@ class AudioController @Inject constructor(
         startAyah: Int,
         endSurah: Int,
         endAyah: Int,
-    ): Result<Unit> = runCatching {
+    ): Result<Unit> {
+        val requestId = beginPlaybackRequest()
+        return runCatching {
         val reciter = reciterCatalog.ayahReciter(reciterId) ?: reciterCatalog.defaultAyahReciter()
         if (!PlaybackNetwork.isOnline(context)) {
             error(context.getString(R.string.error_offline))
@@ -221,9 +236,11 @@ class AudioController @Inject constructor(
             startIndex = 0,
             repeatMode = SurahRepeatMode.OFF,
             pauseAtEnd = false,
+            requestId = requestId,
         )
-    }.onFailure { error ->
-        publishError(error)
+        }.onFailure { error ->
+        if (isCurrentPlaybackRequest(requestId)) publishError(error)
+        }
     }
 
     override suspend fun playWord(
@@ -231,7 +248,9 @@ class AudioController @Inject constructor(
         surah: Int,
         ayah: Int,
         wordPosition: Int,
-    ): Result<Unit> = runCatching {
+    ): Result<Unit> {
+        val requestId = beginPlaybackRequest()
+        return runCatching {
         val localPath = AudioUrls.wordAssetPath(wordId)
         val hasAsset = runCatching { context.assets.open(localPath).close() }.isSuccess
         val uri = if (hasAsset) {
@@ -263,9 +282,16 @@ class AudioController @Inject constructor(
             extras = extras,
             artwork = artworkUri,
         )
-        playItems(listOf(item), startIndex = 0, repeatMode = SurahRepeatMode.OFF, pauseAtEnd = true)
-    }.onFailure { error ->
-        publishError(error)
+        playItems(
+            listOf(item),
+            startIndex = 0,
+            repeatMode = SurahRepeatMode.OFF,
+            pauseAtEnd = true,
+            requestId = requestId,
+        )
+        }.onFailure { error ->
+        if (isCurrentPlaybackRequest(requestId)) publishError(error)
+        }
     }
 
     override fun pause() {
@@ -277,7 +303,7 @@ class AudioController @Inject constructor(
     }
 
     override fun stop() {
-        clearPendingSeek()
+        beginPlaybackRequest()
         controller?.let { player ->
             player.stop()
             player.clearMediaItems()
@@ -292,7 +318,9 @@ class AudioController @Inject constructor(
     }
 
     override suspend fun seekToAyah(surah: Int, ayah: Int) {
+        val requestId = beginPlaybackRequest()
         val player = runCatching { ensureController() }.getOrNull() ?: return
+        if (!isCurrentPlaybackRequest(requestId)) return
         val current = _snapshot.value
         when (current.domain) {
             PlaybackDomain.AYAH -> {
@@ -323,9 +351,12 @@ class AudioController @Inject constructor(
                         scope.launch {
                             val startMs = ayatTimingStore.load(moshafId, surah)?.startOf(ayah)
                                 ?: return@launch
+                            if (!isCurrentPlaybackRequest(requestId)) return@launch
                             rememberPendingSeek(index, startMs)
                             withContext(Dispatchers.Main.immediate) {
-                                applyPendingSeekIfNeeded(player)
+                                if (isCurrentPlaybackRequest(requestId)) {
+                                    applyPendingSeekIfNeeded(player)
+                                }
                             }
                         }
                     }
@@ -348,6 +379,7 @@ class AudioController @Inject constructor(
 
     override fun skipNext() {
         val player = controller ?: return
+        beginPlaybackRequest()
         val current = _snapshot.value
         when (current.domain) {
             PlaybackDomain.AYAH -> {
@@ -368,6 +400,7 @@ class AudioController @Inject constructor(
 
     override fun skipPrevious() {
         val player = controller ?: return
+        beginPlaybackRequest()
         val current = _snapshot.value
         when (current.domain) {
             PlaybackDomain.AYAH -> {
@@ -406,9 +439,11 @@ class AudioController @Inject constructor(
         pauseAtEnd: Boolean,
         startPositionMs: Long = 0L,
         reuseMoshafId: Int? = null,
+        requestId: Long = playbackGeneration.get(),
     ) {
         withContext(Dispatchers.Main.immediate) {
             playbackMutex.withLock {
+                if (!isCurrentPlaybackRequest(requestId)) return@withLock
                 val player = ensureController()
                 requestedRepeat = repeatMode
                 _snapshot.update { it.copy(errorMessage = null, isBuffering = true, repeatMode = repeatMode) }
@@ -434,6 +469,14 @@ class AudioController @Inject constructor(
             }
         }
     }
+
+    private fun beginPlaybackRequest(): Long {
+        clearPendingSeek()
+        return playbackGeneration.incrementAndGet()
+    }
+
+    private fun isCurrentPlaybackRequest(requestId: Long): Boolean =
+        playbackGeneration.get() == requestId
 
     private fun rememberPendingSeek(index: Int, positionMs: Long) {
         if (positionMs > 0L) {
@@ -475,8 +518,9 @@ class AudioController @Inject constructor(
         startSurah: Int,
         startAyah: Int,
     ): List<MediaItem> {
+        val cacheKey = "${moshaf.id}:$startSurah:$startAyah:$repeatMode"
         val cached = cachedPlaylistItems
-        if (cachedPlaylistMoshafId == moshaf.id && cached.size > 1) {
+        if (cachedPlaylistKey == cacheKey && cached.size > 1) {
             return cached
         }
         surahName(1)
@@ -490,7 +534,7 @@ class AudioController @Inject constructor(
                 ayah = if (number == startSurah) startAyah else 1,
             )
         }
-        cachedPlaylistMoshafId = moshaf.id
+        cachedPlaylistKey = cacheKey
         cachedPlaylistItems = items
         return items
     }
