@@ -253,11 +253,12 @@ class StudyViewModel @Inject constructor(
         }
     }
 
-    fun playAyah() {
+    fun playAyah(onStarted: () -> Unit = {}) {
         val word = _ui.value.word ?: return
         val reciterId = _ui.value.selectedReciterId
         viewModelScope.launch {
             audioPlayer.playAyah(reciterId, word.surah, word.ayah)
+                .onSuccess { onStarted() }
         }
     }
 

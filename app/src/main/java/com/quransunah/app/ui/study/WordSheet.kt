@@ -144,10 +144,11 @@ fun WordSheet(
             },
             onPlayWord = viewModel::playWord,
             onPlayAyah = {
-                viewModel.playAyah()
-                onAyahPlaybackStarted()
-                viewModel.onDismiss()
-                onDismiss()
+                viewModel.playAyah {
+                    onAyahPlaybackStarted()
+                    viewModel.onDismiss()
+                    onDismiss()
+                }
             },
             onReciterMenu = viewModel::setReciterMenuOpen,
             onSelectReciter = viewModel::selectReciter,
