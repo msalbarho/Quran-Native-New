@@ -435,7 +435,7 @@ private fun MedinaCanvasPageBody(
         if (slotHeightPx > 0f) {
             lines.forEachIndexed { index, line ->
                 val surahNumber = line.surahNumber
-                if (chromeVisible && line.lineType == LineType.SURAH_NAME && surahNumber != null && surahNumber > 0) {
+                if (line.lineType == LineType.SURAH_NAME && surahNumber != null && surahNumber > 0) {
                     val top = with(density) { (index * slotHeightPx).toDp() }
                     val frameHeight = with(density) { slotHeightPx.toDp() }
                     SurahNameFrame(
