@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 data class StudyUiState(
@@ -76,6 +77,10 @@ class StudyViewModel @Inject constructor(
 ) : ViewModel() {
 
     val playback: StateFlow<PlaybackSnapshot> = audioPlayer.snapshot
+
+    private var bindJob: Job? = null
+    private var tafsirJob: Job? = null
+    private var activeBindKey: Pair<Int, Int>? = null
 
     private val _ui = MutableStateFlow(
         StudyUiState(
@@ -118,6 +123,8 @@ class StudyViewModel @Inject constructor(
     )
 
     fun bind(word: WordRecord) {
+        bindJob?.cancel()
+        tafsirJob?.cancel()
         audioPlayer.warmup()
         val current = _ui.value
         if (current.word != null &&
@@ -129,7 +136,10 @@ class StudyViewModel @Inject constructor(
             _ui.update { it.copy(word = matched, shareError = null) }
             return
         }
-        viewModelScope.launch {
+        val bindKey = word.surah to word.ayah
+        activeBindKey = bindKey
+        _ui.update { it.copy(tafsirOpen = false, tafsirLoading = false, tafsirText = null, tafsirError = null) }
+        bindJob = viewModelScope.launch {
             val settings = preferences.settings.first()
             val reciters = reciterCatalog.getAyahCapableReciters()
             val surahReciters = reciterCatalog.surahReciters()
@@ -149,6 +159,7 @@ class StudyViewModel @Inject constructor(
                 ?: word
             val bookmarked = bookmarkRepository.isSaved(word.surah, word.ayah)
             val trackedForMemorization = memorizationRepository.isTracked(word.surah, word.ayah)
+            if (activeBindKey != bindKey) return@launch
             _ui.update {
                 it.copy(
                     word = resolved,
@@ -347,16 +358,20 @@ class StudyViewModel @Inject constructor(
 
     fun openTafsir() {
         val word = _ui.value.word ?: return
+        val key = word.surah to word.ayah
+        tafsirJob?.cancel()
         _ui.update { it.copy(tafsirOpen = true, tafsirLoading = true, tafsirError = null) }
-        viewModelScope.launch {
+        tafsirJob = viewModelScope.launch {
             val text = runCatching { tafsirRepository.getAyahTafsir(word.surah, word.ayah) }
                 .onFailure { error ->
-                    _ui.update {
-                        it.copy(tafsirLoading = false, tafsirError = error.message, tafsirText = null)
+                    if (_ui.value.tafsirOpen && _ui.value.word?.let { it.surah to it.ayah } == key) {
+                        _ui.update {
+                            it.copy(tafsirLoading = false, tafsirError = error.message, tafsirText = null)
+                        }
                     }
                 }
                 .getOrNull()
-            if (_ui.value.tafsirOpen) {
+            if (_ui.value.tafsirOpen && _ui.value.word?.let { it.surah to it.ayah } == key) {
                 _ui.update {
                     it.copy(
                         tafsirLoading = false,
@@ -369,6 +384,8 @@ class StudyViewModel @Inject constructor(
     }
 
     fun closeTafsir() {
+        tafsirJob?.cancel()
+        tafsirJob = null
         _ui.update { it.copy(tafsirOpen = false, tafsirText = null, tafsirError = null, tafsirLoading = false) }
         tafsirRepository.release()
     }
@@ -422,6 +439,9 @@ class StudyViewModel @Inject constructor(
     }
 
     fun onDismiss() {
+        bindJob?.cancel()
+        bindJob = null
+        activeBindKey = null
         closeTafsir()
         if (playback.value.domain == PlaybackDomain.WORD) {
             audioPlayer.stop()
@@ -471,6 +491,8 @@ class StudyViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        bindJob?.cancel()
+        tafsirJob?.cancel()
         tafsirRepository.release()
         super.onCleared()
     }
