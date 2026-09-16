@@ -144,7 +144,7 @@ fun WordSheet(
             },
             onPlayWord = viewModel::playWord,
             onPlayAyah = {
-                viewModel.playAyah {
+                viewModel.playAyah(target = selected) {
                     onAyahPlaybackStarted()
                     viewModel.onDismiss()
                     onDismiss()
