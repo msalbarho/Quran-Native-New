@@ -11,6 +11,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -70,6 +71,51 @@ private data class NavItemSpec(
     val onClick: () -> Unit,
     val selected: Boolean,
 )
+
+@Composable
+internal fun BottomNavSurface(
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    val paper = LocalPaperColors.current
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = ChromeTokens.HorizontalInset, vertical = 0.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(BottomNavBarHeight)
+                    .shadow(8.dp, RoundedCornerShape(NavCornerRadius), clip = false)
+                    .clip(RoundedCornerShape(NavCornerRadius))
+                    .background(paper.chromeFill)
+                    .border(1.6.dp, ChromeTokens.Gold, RoundedCornerShape(NavCornerRadius)),
+            ) {
+                Canvas(Modifier.fillMaxSize()) {
+                    val tile = 22.dp.toPx()
+                    val stroke = paper.decorPattern
+                    var y = 0f
+                    while (y < size.height + tile) {
+                        var x = 0f
+                        while (x < size.width + tile) {
+                            drawGirihStar(Offset(x + tile / 2f, y + tile / 2f), tile * 0.36f, stroke)
+                            x += tile
+                        }
+                        y += tile
+                    }
+                    drawRect(
+                        color = ChromeTokens.GoldInner,
+                        style = Stroke(width = 1.dp.toPx()),
+                    )
+                }
+                content()
+            }
+        }
+    }
+}
 
 @Composable
 fun CurvedBottomNav(
@@ -147,40 +193,8 @@ fun CurvedBottomNav(
         label = "nav-bubble",
     )
 
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        Box(
-            modifier = modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = ChromeTokens.HorizontalInset, vertical = 0.dp),
-        ) {
-            BoxWithConstraints(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(BottomNavBarHeight)
-                    .shadow(8.dp, RoundedCornerShape(NavCornerRadius), clip = false)
-                    .clip(RoundedCornerShape(NavCornerRadius))
-                    .background(paper.chromeFill)
-                    .border(1.6.dp, ChromeTokens.Gold, RoundedCornerShape(NavCornerRadius)),
-            ) {
-                Canvas(Modifier.fillMaxSize()) {
-                    val tile = 22.dp.toPx()
-                    val stroke = paper.decorPattern
-                    var y = 0f
-                    while (y < size.height + tile) {
-                        var x = 0f
-                        while (x < size.width + tile) {
-                            drawGirihStar(Offset(x + tile / 2f, y + tile / 2f), tile * 0.36f, stroke)
-                            x += tile
-                        }
-                        y += tile
-                    }
-                    drawRect(
-                        color = ChromeTokens.GoldInner,
-                        style = Stroke(width = 1.dp.toPx()),
-                    )
-                }
-
+    BottomNavSurface(modifier = modifier) {
+        BoxWithConstraints(Modifier.fillMaxSize()) {
                 if (bubbleX > 0f) {
                     Box(
                         modifier = Modifier
@@ -245,7 +259,6 @@ fun CurvedBottomNav(
                         }
                     }
                 }
-            }
         }
     }
 }
