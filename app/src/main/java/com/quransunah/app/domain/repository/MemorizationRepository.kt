@@ -3,8 +3,6 @@ package com.quransunah.app.domain.repository
 import com.quransunah.app.domain.model.MemorizationItem
 import com.quransunah.app.domain.model.MemorizationPlan
 import com.quransunah.app.domain.model.MemorizationSession
-import com.quransunah.app.domain.model.MemorizationRecording
-import com.quransunah.app.domain.model.RecitationAttempt
 import com.quransunah.app.domain.model.MemorizationState
 import kotlinx.coroutines.flow.Flow
 
@@ -21,9 +19,4 @@ interface MemorizationRepository {
     suspend fun startSession(planId: String, at: Long): String
     suspend fun finishSession(sessionId: String, reviewed: Int, mastered: Int, at: Long)
     fun observeSessions(planId: String): Flow<List<MemorizationSession>>
-    suspend fun saveRecording(recording: MemorizationRecording)
-    fun observeRecordings(sessionId: String): Flow<List<MemorizationRecording>>
-    suspend fun deleteRecording(id: String)
-    suspend fun saveAttempt(attempt: RecitationAttempt)
-    fun observeAttempts(sessionId: String): Flow<List<RecitationAttempt>>
 }

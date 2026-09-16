@@ -9,13 +9,6 @@ import com.quransunah.app.domain.model.MemorizationPlan
 import com.quransunah.app.domain.model.isValidAyahRange
 import com.quransunah.app.domain.model.isDueForReview
 import com.quransunah.app.core.SurahAyahCounts
-import com.quransunah.app.data.audio.MemorizationRecorder
-import com.quransunah.app.data.audio.RecordingState
-import com.quransunah.app.data.audio.OnDeviceSpeechTranscriber
-import com.quransunah.app.data.audio.TranscriptionState
-import com.quransunah.app.core.RecitationCheckResult
-import com.quransunah.app.core.RecitationTextChecker
-import com.quransunah.app.core.WordDifferenceType
 import com.quransunah.app.domain.model.memorizationSummary
 import com.quransunah.app.domain.repository.MemorizationRepository
 import com.quransunah.app.domain.repository.MushafRepository
@@ -29,7 +22,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 data class MemorizationListItem(
     val item: MemorizationItem,
@@ -54,24 +46,9 @@ data class MemorizationUiState(
 class MemorizationViewModel @Inject constructor(
     private val memorizationRepository: MemorizationRepository,
     private val mushafRepository: MushafRepository,
-    private val recorder: MemorizationRecorder,
-    private val transcriber: OnDeviceSpeechTranscriber,
 ) : ViewModel() {
-    private var lastRecordingId: String? = null
-    private val _checkResult = kotlinx.coroutines.flow.MutableStateFlow<RecitationCheckResult?>(null)
-    val checkResult: StateFlow<RecitationCheckResult?> = _checkResult
-    val recordingState: StateFlow<RecordingState> = recorder.state
-    val transcriptionState: StateFlow<TranscriptionState> = transcriber.state
     private val surahs = flow { emit(mushafRepository.getSurahs()) }
     private val _sessionId = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
-
-    init {
-        viewModelScope.launch {
-            transcriber.state.collect { state ->
-                if (state is TranscriptionState.Completed) checkTranscript(state.text)
-            }
-        }
-    }
 
     val uiState: StateFlow<MemorizationUiState> = combine(
         combine(memorizationRepository.observeItems(), surahs) { items, catalog -> items to catalog },
@@ -269,68 +246,4 @@ class MemorizationViewModel @Inject constructor(
             _sessionId.value = null
         }
     }
-
-    fun startRecording() {
-        _checkResult.value = null
-        if (recorder.start()) transcriber.start()
-    }
-
-    fun stopRecording() {
-        val finished = recorder.stop()
-        transcriber.stop()
-        if (!finished) return
-        val sessionId = _sessionId.value ?: return
-        val file = (recorder.state.value as? RecordingState.Ready)?.file ?: return
-        viewModelScope.launch {
-            val recordingId = "recording:${UUID.randomUUID()}"
-            lastRecordingId = recordingId
-            memorizationRepository.saveRecording(
-                com.quransunah.app.domain.model.MemorizationRecording(
-                    id = recordingId,
-                    sessionId = sessionId,
-                    filePath = file.absolutePath,
-                    createdAt = System.currentTimeMillis(),
-                    durationMs = recorder.lastDurationMs,
-                ),
-            )
-        }
-    }
-    fun playRecording() { recorder.play() }
-    fun stopPlayback() { recorder.stopPlayback() }
-    fun deleteRecording() {
-        val id = lastRecordingId
-        transcriber.cancel()
-        recorder.delete()
-        if (id != null) viewModelScope.launch { memorizationRepository.deleteRecording(id) }
-        lastRecordingId = null
-    }
-
-    fun checkTranscript(transcript: String) {
-        val expected = uiState.value.dailyItems.joinToString(" ") { it.item.ayahText }
-        if (expected.isBlank() || transcript.isBlank()) return
-        val result = RecitationTextChecker.compare(expected, transcript)
-        _checkResult.value = result
-        val sessionId = _sessionId.value ?: return
-        viewModelScope.launch {
-            memorizationRepository.saveAttempt(
-                com.quransunah.app.domain.model.RecitationAttempt(
-                    id = "attempt:${UUID.randomUUID()}",
-                    sessionId = sessionId,
-                    recordingId = lastRecordingId,
-                    scorePercent = result.scorePercent,
-                    missingCount = result.differences.count { it.type == WordDifferenceType.MISSING },
-                    extraCount = result.differences.count { it.type == WordDifferenceType.EXTRA },
-                    differentCount = result.differences.count { it.type == WordDifferenceType.DIFFERENT },
-                    createdAt = System.currentTimeMillis(),
-                ),
-            )
-        }
-    }
-
-    override fun onCleared() {
-        transcriber.release()
-        recorder.release()
-        super.onCleared()
-    }
-
 }
