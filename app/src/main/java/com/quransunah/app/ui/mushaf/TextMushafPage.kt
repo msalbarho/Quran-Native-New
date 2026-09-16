@@ -178,19 +178,24 @@ fun TextMushafPage(
                 when (segment) {
                     is TextMushafSegment.Surah -> {
                         val surah = segment.line.surahNumber ?: 1
-                        SurahNameFrame(
-                            surahNumber = surah,
-                            surah = surahsByNumber[surah],
-                            fontManager = fontManager,
-                            titleTypeface = titleFace,
-                            onTap = onEmptyTap,
-                            onLongPress = onSurahNameLongPress,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 6.dp, bottom = 4.dp)
-                                .aspectRatio(SURAH_FRAME_ASPECT)
-                                .heightIn(min = 38.dp),
-                        )
+                        val surahFrameModifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 6.dp, bottom = 4.dp)
+                            .aspectRatio(SURAH_FRAME_ASPECT)
+                            .heightIn(min = 38.dp)
+                        if (chromeVisible) {
+                            SurahNameFrame(
+                                surahNumber = surah,
+                                surah = surahsByNumber[surah],
+                                fontManager = fontManager,
+                                titleTypeface = titleFace,
+                                onTap = onEmptyTap,
+                                onLongPress = onSurahNameLongPress,
+                                modifier = surahFrameModifier,
+                            )
+                        } else {
+                            Spacer(modifier = surahFrameModifier)
+                        }
                         // Pages 1–2: two blank lines under the frame.
                         if (pageNumber == 1 || pageNumber == 2) {
                             Spacer(modifier = Modifier.height((layoutSizeSp * 1.35f * 2).dp))
