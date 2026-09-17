@@ -16,6 +16,8 @@ import com.quransunah.app.domain.model.PlaybackDomain
 import com.quransunah.app.domain.model.PlaybackSnapshot
 import com.quransunah.app.domain.model.SurahInfo
 import com.quransunah.app.domain.model.SurahRepeatMode
+import com.quransunah.app.domain.model.SleepTimerMode
+import com.quransunah.app.domain.model.SleepTimerState
 import com.quransunah.app.domain.repository.AudioPlayerRepository
 import com.quransunah.app.domain.repository.MushafRepository
 import com.quransunah.app.fonts.QcfFontManager
@@ -65,6 +67,10 @@ class ListeningViewModel @Inject constructor(
 ) : ViewModel() {
 
     val playback: StateFlow<PlaybackSnapshot> = audioPlayer.snapshot
+    val sleepTimer: StateFlow<SleepTimerState> = audioPlayer.sleepTimer
+    val playbackRate: StateFlow<Float> = preferences.settings
+        .map { it.playbackRate }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppConstants.DEFAULT_PLAYBACK_RATE)
 
     private val activePlayingSurah = playback
         .map { snapshot ->
@@ -258,6 +264,13 @@ class ListeningViewModel @Inject constructor(
     fun skipNext() = audioPlayer.skipNext()
     fun skipPrevious() = audioPlayer.skipPrevious()
     fun seekTo(positionMs: Long) = audioPlayer.seekTo(positionMs)
+
+    fun setPlaybackRate(rate: Float) {
+        audioPlayer.setPlaybackRate(rate)
+        viewModelScope.launch { preferences.setPlaybackRate(rate) }
+    }
+
+    fun setSleepTimer(mode: SleepTimerMode) = audioPlayer.setSleepTimer(mode)
 
     fun togglePlayPause() {
         val snapshot = playback.value

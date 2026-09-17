@@ -1,11 +1,14 @@
 package com.quransunah.app.domain.repository
 
 import com.quransunah.app.domain.model.PlaybackSnapshot
+import com.quransunah.app.domain.model.SleepTimerMode
+import com.quransunah.app.domain.model.SleepTimerState
 import com.quransunah.app.domain.model.SurahRepeatMode
 import kotlinx.coroutines.flow.StateFlow
 
 interface AudioPlayerRepository {
     val snapshot: StateFlow<PlaybackSnapshot>
+    val sleepTimer: StateFlow<SleepTimerState>
 
     fun warmup()
 
@@ -50,4 +53,5 @@ interface AudioPlayerRepository {
     fun skipPrevious()
     fun setRepeatMode(mode: SurahRepeatMode)
     fun setPlaybackRate(rate: Float)
+    fun setSleepTimer(mode: SleepTimerMode)
 }

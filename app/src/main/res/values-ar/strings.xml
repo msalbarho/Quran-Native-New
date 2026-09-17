@@ -46,6 +46,13 @@
     <string name="audio_repeat_off">عدم تكرار</string>
     <string name="audio_repeat_one">تكرار مرة</string>
     <string name="audio_repeat_all">تكرار الكل</string>
+    <string name="audio_playback_rate">السرعة</string>
+    <string name="audio_sleep_timer">مؤقت النوم</string>
+    <string name="audio_sleep_timer_off">إيقاف</string>
+    <string name="audio_sleep_timer_15">15 دقيقة</string>
+    <string name="audio_sleep_timer_30">30 دقيقة</string>
+    <string name="audio_sleep_timer_60">60 دقيقة</string>
+    <string name="audio_sleep_timer_end_surah">نهاية السورة</string>
     <string name="audio_play">تشغيل</string>
     <string name="audio_pause">إيقاف مؤقت</string>
     <string name="audio_stop">إيقاف</string>

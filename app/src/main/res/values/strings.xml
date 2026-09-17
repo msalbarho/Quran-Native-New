@@ -46,6 +46,13 @@
     <string name="audio_repeat_off">No repeat</string>
     <string name="audio_repeat_one">Repeat once</string>
     <string name="audio_repeat_all">Repeat all</string>
+    <string name="audio_playback_rate">Speed</string>
+    <string name="audio_sleep_timer">Sleep timer</string>
+    <string name="audio_sleep_timer_off">Off</string>
+    <string name="audio_sleep_timer_15">15 min</string>
+    <string name="audio_sleep_timer_30">30 min</string>
+    <string name="audio_sleep_timer_60">60 min</string>
+    <string name="audio_sleep_timer_end_surah">End of surah</string>
     <string name="audio_play">Play</string>
     <string name="audio_pause">Pause</string>
     <string name="audio_stop">Stop</string>

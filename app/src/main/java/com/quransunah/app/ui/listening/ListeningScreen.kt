@@ -16,6 +16,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +43,9 @@ import com.quransunah.app.core.EasternArabic
 import com.quransunah.app.data.catalog.SurahReciter
 import com.quransunah.app.domain.model.PlaybackDomain
 import com.quransunah.app.domain.model.PlaybackSnapshot
+import com.quransunah.app.domain.model.SleepTimerMode
+import com.quransunah.app.domain.model.SleepTimerState
+import com.quransunah.app.core.AppConstants
 import com.quransunah.app.fonts.QcfFontManager
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewFixtures
@@ -56,6 +61,8 @@ private enum class ListeningPicker {
     Reciter,
     DownloadFrom,
     DownloadTo,
+    PlaybackRate,
+    SleepTimer,
 }
 
 @Composable
@@ -67,10 +74,14 @@ fun ListeningScreen(
 ) {
     val ui by viewModel.uiState.collectAsStateWithLifecycle()
     val playback by viewModel.playback.collectAsStateWithLifecycle()
+    val sleepTimer by viewModel.sleepTimer.collectAsStateWithLifecycle()
+    val playbackRate by viewModel.playbackRate.collectAsStateWithLifecycle()
     val inspection = LocalInspectionMode.current
     ListeningScreenContent(
         ui = ui,
         playback = playback,
+        playbackRate = playbackRate,
+        sleepTimer = sleepTimer,
         fontManager = if (inspection) null else viewModel.fontManager,
         nightMode = nightMode,
         onThemeToggle = onThemeToggle,
@@ -85,6 +96,8 @@ fun ListeningScreen(
         onNext = viewModel::playNextSurah,
         onSeek = viewModel::seekTo,
         onCycleRepeat = viewModel::cycleRepeatMode,
+        onSetPlaybackRate = viewModel::setPlaybackRate,
+        onSetSleepTimer = viewModel::setSleepTimer,
         modifier = modifier,
     )
 }
@@ -93,6 +106,8 @@ fun ListeningScreen(
 fun ListeningScreenContent(
     ui: ListeningUiState,
     playback: PlaybackSnapshot,
+    playbackRate: Float,
+    sleepTimer: SleepTimerState,
     fontManager: QcfFontManager?,
     nightMode: Boolean,
     onThemeToggle: () -> Unit,
@@ -107,6 +122,8 @@ fun ListeningScreenContent(
     onNext: () -> Unit,
     onSeek: (Long) -> Unit,
     onCycleRepeat: () -> Unit,
+    onSetPlaybackRate: (Float) -> Unit,
+    onSetSleepTimer: (SleepTimerMode) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
@@ -185,6 +202,41 @@ fun ListeningScreenContent(
                     onCycleRepeat = onCycleRepeat,
                     modifier = Modifier.padding(bottom = 18.dp),
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    PlaybackOption(
+                        label = stringResource(R.string.audio_playback_rate),
+                        value = formatPlaybackRate(playbackRate),
+                        open = picker == ListeningPicker.PlaybackRate,
+                        onClick = { picker = ListeningPicker.PlaybackRate },
+                        onDismiss = { picker = null },
+                        modifier = Modifier.weight(1f),
+                    ) { dismiss ->
+                        AppConstants.PLAYBACK_RATES.forEach { rate ->
+                            DropdownMenuItem(
+                                text = { Text(formatPlaybackRate(rate)) },
+                                onClick = { onSetPlaybackRate(rate); dismiss() },
+                            )
+                        }
+                    }
+                    PlaybackOption(
+                        label = stringResource(R.string.audio_sleep_timer),
+                        value = stringResource(sleepTimerLabel(sleepTimer.mode)),
+                        open = picker == ListeningPicker.SleepTimer,
+                        onClick = { picker = ListeningPicker.SleepTimer },
+                        onDismiss = { picker = null },
+                        modifier = Modifier.weight(1f),
+                    ) { dismiss ->
+                        SleepTimerMode.entries.forEach { mode ->
+                            DropdownMenuItem(
+                                text = { Text(stringResource(sleepTimerLabel(mode))) },
+                                onClick = { onSetSleepTimer(mode); dismiss() },
+                            )
+                        }
+                    }
+                }
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -467,6 +519,8 @@ private fun ListeningScreenPreview() {
         ListeningScreenContent(
             ui = PreviewFixtures.listeningUi,
             playback = PreviewFixtures.playback,
+            playbackRate = AppConstants.DEFAULT_PLAYBACK_RATE,
+            sleepTimer = SleepTimerState(),
             fontManager = null,
             nightMode = false,
             onThemeToggle = {},
@@ -481,6 +535,52 @@ private fun ListeningScreenPreview() {
             onNext = {},
             onSeek = {},
             onCycleRepeat = {},
+            onSetPlaybackRate = {},
+            onSetSleepTimer = {},
         )
     }
+}
+
+@Composable
+private fun PlaybackOption(
+    label: String,
+    value: String,
+    open: Boolean,
+    onClick: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    menuContent: @Composable (dismiss: () -> Unit) -> Unit,
+) {
+    val paper = LocalPaperColors.current
+    Box(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(paper.pageBody)
+                .border(1.dp, paper.tone500, RoundedCornerShape(10.dp))
+                .clickable { onClick() }
+                .padding(horizontal = 10.dp, vertical = 8.dp),
+        ) {
+            Text(label, color = paper.textMuted, fontSize = 11.sp)
+            Text(value, color = paper.textStrong, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        }
+        DropdownMenu(
+            expanded = open,
+            onDismissRequest = onDismiss,
+        ) {
+            menuContent(onDismiss)
+        }
+    }
+}
+
+private fun formatPlaybackRate(rate: Float): String =
+    if (rate % 1f == 0f) "${rate.toInt()}x" else "${rate}x"
+
+private fun sleepTimerLabel(mode: SleepTimerMode): Int = when (mode) {
+    SleepTimerMode.OFF -> R.string.audio_sleep_timer_off
+    SleepTimerMode.MINUTES_15 -> R.string.audio_sleep_timer_15
+    SleepTimerMode.MINUTES_30 -> R.string.audio_sleep_timer_30
+    SleepTimerMode.MINUTES_60 -> R.string.audio_sleep_timer_60
+    SleepTimerMode.END_OF_SURAH -> R.string.audio_sleep_timer_end_surah
 }

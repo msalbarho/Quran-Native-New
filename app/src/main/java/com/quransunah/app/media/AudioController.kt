@@ -27,6 +27,8 @@ import com.quransunah.app.domain.model.AudioQuality
 import com.quransunah.app.domain.model.PlaybackDomain
 import com.quransunah.app.domain.model.PlaybackSnapshot
 import com.quransunah.app.domain.model.SurahRepeatMode
+import com.quransunah.app.domain.model.SleepTimerMode
+import com.quransunah.app.domain.model.SleepTimerState
 import com.quransunah.app.domain.repository.AudioPlayerRepository
 import com.quransunah.app.domain.repository.MushafRepository
 import com.quransunah.app.media.auto.SurahArabicNames
@@ -66,8 +68,10 @@ class AudioController @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val connectMutex = Mutex()
     private val _snapshot = MutableStateFlow(PlaybackSnapshot())
+    private val _sleepTimer = MutableStateFlow(SleepTimerState())
     private var controller: MediaController? = null
     private var tickerJob: Job? = null
+    private var sleepTimerJob: Job? = null
     private var requestedRepeat: SurahRepeatMode = SurahRepeatMode.OFF
     private var playbackRate: Float = AppConstants.DEFAULT_PLAYBACK_RATE
     private var audioQuality: AudioQuality = AudioQuality.HIGH
@@ -84,6 +88,7 @@ class AudioController @Inject constructor(
         Uri.parse("android.resource://${context.packageName}/${R.drawable.ic_media_artwork}")
 
     override val snapshot: StateFlow<PlaybackSnapshot> = _snapshot.asStateFlow()
+    override val sleepTimer: StateFlow<SleepTimerState> = _sleepTimer.asStateFlow()
 
     init {
         scope.launch {
@@ -303,6 +308,9 @@ class AudioController @Inject constructor(
     }
 
     override fun stop() {
+        sleepTimerJob?.cancel()
+        sleepTimerJob = null
+        _sleepTimer.value = SleepTimerState()
         beginPlaybackRequest()
         clearCurrentPlayback()
     }
@@ -434,6 +442,47 @@ class AudioController @Inject constructor(
         val nearest = AppConstants.PLAYBACK_RATES.minBy { kotlin.math.abs(it - rate) }
         playbackRate = nearest
         controller?.setPlaybackSpeed(nearest)
+    }
+
+    override fun setSleepTimer(mode: SleepTimerMode) {
+        sleepTimerJob?.cancel()
+        sleepTimerJob = null
+        if (mode == SleepTimerMode.OFF) {
+            _sleepTimer.value = SleepTimerState()
+            return
+        }
+        val durationMs = when (mode) {
+            SleepTimerMode.MINUTES_15 -> 15 * 60_000L
+            SleepTimerMode.MINUTES_30 -> 30 * 60_000L
+            SleepTimerMode.MINUTES_60 -> 60 * 60_000L
+            SleepTimerMode.END_OF_SURAH, SleepTimerMode.OFF -> 0L
+        }
+        _sleepTimer.value = SleepTimerState(
+            mode = mode,
+            endAtMs = if (durationMs > 0L) System.currentTimeMillis() + durationMs else 0L,
+        )
+        sleepTimerJob = scope.launch {
+            if (durationMs > 0L) {
+                delay(durationMs)
+            } else {
+                var targetSurah: Int? = null
+                while (isActive) {
+                    val current = _snapshot.value
+                    if (current.domain == PlaybackDomain.SURAH && current.surah != null) {
+                        targetSurah = targetSurah ?: current.surah
+                        val reachedEnd = current.surah != targetSurah ||
+                            (current.durationMs > 0L && current.positionMs >= current.durationMs - 500L)
+                        if (reachedEnd) break
+                    }
+                    delay(500L)
+                }
+            }
+            if (isActive) {
+                beginPlaybackRequest()
+                clearCurrentPlayback()
+                _sleepTimer.value = SleepTimerState()
+            }
+        }
     }
 
     private suspend fun playItems(

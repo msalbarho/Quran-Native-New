@@ -13,6 +13,19 @@ enum class SurahRepeatMode {
     REMAINING,
 }
 
+enum class SleepTimerMode {
+    OFF,
+    MINUTES_15,
+    MINUTES_30,
+    MINUTES_60,
+    END_OF_SURAH,
+}
+
+data class SleepTimerState(
+    val mode: SleepTimerMode = SleepTimerMode.OFF,
+    val endAtMs: Long = 0L,
+)
+
 enum class AudioQuality(val id: String) {
     HIGH("high"),
     SAVER("saver"),
