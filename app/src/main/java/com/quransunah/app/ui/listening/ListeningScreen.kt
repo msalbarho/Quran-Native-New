@@ -407,6 +407,7 @@ fun ListeningScreenContent(
                     picker = null
                 },
             )
+            ListeningPicker.PlaybackRate, ListeningPicker.SleepTimer -> Unit
             null -> Unit
         }
     }

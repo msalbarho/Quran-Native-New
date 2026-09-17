@@ -433,6 +433,16 @@ private fun AboutAppDialog(onClose: () -> Unit) {
                 Text(stringResource(R.string.settings_about_p1), color = paper.textPrimary, fontSize = 15.sp, lineHeight = 24.sp)
                 Text(stringResource(R.string.settings_about_p2), color = paper.textPrimary, fontSize = 15.sp, lineHeight = 24.sp)
                 Text(stringResource(R.string.settings_about_p3), color = paper.textStrong, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                HorizontalDivider(color = paper.tone500.copy(alpha = 0.45f))
+                Text(
+                    text = stringResource(R.string.settings_about_sources_title),
+                    color = paper.textStrong,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(stringResource(R.string.settings_about_source_text), color = paper.textPrimary, fontSize = 13.sp, lineHeight = 20.sp)
+                Text(stringResource(R.string.settings_about_source_fonts), color = paper.textPrimary, fontSize = 13.sp, lineHeight = 20.sp)
+                Text(stringResource(R.string.settings_about_source_audio), color = paper.textPrimary, fontSize = 13.sp, lineHeight = 20.sp)
                 Text(
                     text = stringResource(
                         R.string.settings_app_version,

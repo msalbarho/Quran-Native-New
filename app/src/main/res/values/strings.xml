@@ -253,6 +253,10 @@
     <string name="settings_about_p1">This app is offered for the sake of Allah as a gift to every Muslim, seeking reward for its maker, his parents, his family, and the ummah.</string>
     <string name="settings_about_p2">It was built with care to serve the Book of Allah. The project is open source; reuse in service of Islam is welcome, for the one who guides to good is like the one who does it.</string>
     <string name="settings_about_p3">We ask you for a quiet prayer.</string>
+    <string name="settings_about_sources_title">Sources &amp; Credits</string>
+    <string name="settings_about_source_text">Quran text, meanings, and Tafsir al-Muyassar are bundled in the repository database quran_unified.db (tables: quran_text, meanings, tafsir_muyassar).</string>
+    <string name="settings_about_source_fonts">Quran page and display fonts are bundled from the project font assets, including QCF4 Hafs faces, hafs.ttf, and qbsml.ttf.</string>
+    <string name="settings_about_source_audio">Surah recitation servers are listed in public/json/reciters.json and point to mp3quran.net. Word audio uses audio.qurancdn.com; ayah timing uses the mp3quran.net ayat_timing API.</string>
     <string name="settings_app_version">إصدار التطبيق: %1$d (%2$s)</string>
     <string name="settings_contact_email">m.s.albarho@gmail.com</string>
     <string name="settings_about_contact">Contact and suggestions: %1$s</string>

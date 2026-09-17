@@ -253,6 +253,10 @@
     <string name="settings_about_p1">هذا التطبيق عمل خالص لوجه الله تعالى، هديّة لكل مسلم ومسلمة، مبتغياً الأجر والثواب لي ولوالديّ ولعائلتي وللمسلمين أجمعين.</string>
     <string name="settings_about_p2">تم تطويره وبنائه بحب وشغف ليخدم كتاب الله. هذا المشروع مفتوح المصدر بالكامل، ومتاح لأي مطور أو مهتم تفكيكه، تعديله، أو إعادة استخدامه ونشره لتطوير تطبيقات تخدم الإسلام والمسلمين، فالدال على الخير كفاعله.</string>
     <string name="settings_about_p3">نسألكم الدعاء بظهر الغيب.</string>
+    <string name="settings_about_sources_title">المصادر والاعتمادات</string>
+    <string name="settings_about_source_text">نص القرآن والمعاني وتفسير الميسّر مضمّنة في قاعدة البيانات quran_unified.db الموجودة في المستودع، ضمن الجداول: quran_text و meanings و tafsir_muyassar.</string>
+    <string name="settings_about_source_fonts">خطوط صفحات القرآن والخطوط المساندة مضمّنة ضمن أصول المشروع، ومنها أوجه QCF4 Hafs والخطان hafs.ttf و qbsml.ttf.</string>
+    <string name="settings_about_source_audio">خوادم تلاوات السور مذكورة في الملف public/json/reciters.json وتشير إلى mp3quran.net. ويُستخدم audio.qurancdn.com للصوت الخاص بالكلمات، وواجهة mp3quran.net/ayat_timing لتوقيت الآيات.</string>
     <string name="settings_contact_email">m.s.albarho@gmail.com</string>
     <string name="settings_about_contact">للتواصل والمقترحات أو التعديلات: %1$s</string>
 </resources>
