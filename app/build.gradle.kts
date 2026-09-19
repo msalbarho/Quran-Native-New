@@ -1,5 +1,7 @@
 import java.util.Properties
 
+import org.gradle.api.tasks.util.PatternFilterable
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -220,14 +222,12 @@ val syncPackagedDatabases by tasks.registering(Copy::class) {
 
 android.sourceSets.getByName("main").assets.srcDir(generatedPublicAssets)
 // Never package the legacy duplicate tree, SQLite runtime sidecars, or source fonts.
-android.sourceSets.getByName("main").assets.setExcludes(
-    listOf(
-        "**/db/**/*",
-        "**/*.db-wal",
-        "**/*.db-shm",
-        "**/*.woff",
-        "**/*.woff2",
-    ),
+(android.sourceSets.getByName("main").assets as PatternFilterable).exclude(
+    "**/db/**/*",
+    "**/*.db-wal",
+    "**/*.db-shm",
+    "**/*.woff",
+    "**/*.woff2",
 )
 
 tasks.configureEach {
