@@ -1,10 +1,10 @@
-"""Regenerate launcher icons + a single lightweight splash from public/icon.png."""
+"""Regenerate launcher icons and splash resources from the final public artwork."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "public"
@@ -20,10 +20,6 @@ DENSITIES = {
 
 # Adaptive foreground is 108dp; keep the circular mark inside the 72dp safe zone.
 ADAPTIVE_SAFE_SCALE = 72 / 108
-
-# One nodpi splash — Android scales; avoids ~6 MB of port/land/density PNGs in the APK.
-SPLASH_MAX_EDGE = 512
-SPLASH_ICON_RATIO = 0.78
 
 GENERATED_STEMS = {
     "mipmap": ("ic_launcher", "ic_launcher_round"),
@@ -45,13 +41,6 @@ def fit_center(src: Image.Image, canvas: int, scale: float = 1.0) -> Image.Image
     return out
 
 
-def on_black(src: Image.Image, size: int, scale: float = 1.0) -> Image.Image:
-    layered = fit_center(src, size, scale)
-    bg = Image.new("RGBA", (size, size), (0, 0, 0, 255))
-    bg.alpha_composite(layered)
-    return bg
-
-
 def circular_mask(size: int) -> Image.Image:
     hi = size * 4
     circle = Image.new("L", (hi, hi), 0)
@@ -60,12 +49,10 @@ def circular_mask(size: int) -> Image.Image:
 
 
 def round_icon(src: Image.Image, size: int) -> Image.Image:
-    squared = on_black(src, size, scale=1.0)
+    squared = src.convert("RGBA").resize((size, size), Image.Resampling.LANCZOS)
     mask = circular_mask(size)
-    squared.putalpha(mask)
-    bg = Image.new("RGBA", (size, size), (0, 0, 0, 255))
-    bg.alpha_composite(squared)
-    return bg.convert("RGB")
+    squared.putalpha(ImageChops.multiply(squared.getchannel("A"), mask))
+    return squared
 
 
 def notification_white(src: Image.Image, size: int) -> Image.Image:
@@ -84,17 +71,6 @@ def notification_black(src: Image.Image, size: int) -> Image.Image:
     black = Image.new("L", rgba.size, 0)
     out = Image.merge("RGBA", (black, black, black, alpha))
     return out.resize((size, size), Image.Resampling.LANCZOS)
-
-
-def splash_frame(icon: Image.Image, width: int, height: int) -> Image.Image:
-    """Full-bleed #000000 canvas with a large centered emblem."""
-    canvas = Image.new("RGBA", (width, height), (0, 0, 0, 255))
-    side = max(1, int(round(min(width, height) * SPLASH_ICON_RATIO)))
-    mark = icon.convert("RGBA").resize((side, side), Image.Resampling.LANCZOS)
-    x = (width - side) // 2
-    y = (height - side) // 2
-    canvas.alpha_composite(mark, (x, y))
-    return canvas.convert("RGB")
 
 
 def save_webp(image: Image.Image, path: Path, *, lossless: bool = False) -> None:
@@ -136,21 +112,9 @@ def delete_legacy_assets() -> None:
     print(f"Removed {removed} legacy launcher/splash assets")
 
 
-def write_single_splash(icon: Image.Image) -> None:
-    """One nodpi WebP referenced by launch_splash + Compose brand overlay."""
-    base_w, base_h = 320, 480
-    if max(base_w, base_h) > SPLASH_MAX_EDGE:
-        scale = SPLASH_MAX_EDGE / max(base_w, base_h)
-        base_w = max(1, int(round(base_w * scale)))
-        base_h = max(1, int(round(base_h * scale)))
-    frame = splash_frame(icon, base_w, base_h)
-    out = RES / "drawable-nodpi" / "splash.webp"
-    save_webp(frame, out)
-    print(f"Wrote single splash {out.relative_to(ROOT)} ({out.stat().st_size // 1024} KB)")
-
-
 def main() -> None:
     icon = Image.open(PUBLIC / "icon.png")
+    splash = Image.open(PUBLIC / "splash.png")
     favicon_path = PUBLIC / "favicon.png"
     favicon = Image.open(favicon_path) if favicon_path.is_file() else icon
 
@@ -159,7 +123,10 @@ def main() -> None:
     write_density(
         "mipmap",
         "ic_launcher",
-        lambda s: on_black(icon, max(1, int(round(48 * s))), scale=1.0).convert("RGB"),
+        lambda s: icon.convert("RGBA").resize(
+            (max(1, int(round(48 * s))), max(1, int(round(48 * s)))),
+            Image.Resampling.LANCZOS,
+        ),
     )
     write_density(
         "mipmap",
@@ -175,7 +142,7 @@ def main() -> None:
     write_density(
         "drawable",
         "ic_launcher_monochrome",
-        lambda s: notification_white(favicon, max(1, int(round(108 * s)))),
+        lambda s: notification_white(icon, max(1, int(round(108 * s)))),
         lossless=True,
     )
     write_density(
@@ -190,8 +157,16 @@ def main() -> None:
         lambda s: notification_black(favicon, max(1, int(round(108 * s)))),
         lossless=True,
     )
-    write_single_splash(icon)
-    print("Generated WebP launcher icons and lightweight splash from public/icon.png")
+    write_density(
+        "drawable",
+        "splash",
+        lambda s: splash.convert("RGB").resize(
+            (max(1, int(round(360 * s))), max(1, int(round(360 * s)))),
+            Image.Resampling.LANCZOS,
+        ),
+        lossless=True,
+    )
+    print("Generated WebP launcher icons from public/icon.png and splash resources from public/splash.png")
 
 
 if __name__ == "__main__":
