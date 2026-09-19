@@ -219,14 +219,14 @@ val syncPackagedDatabases by tasks.registering(Copy::class) {
 }
 
 android.sourceSets.getByName("main").assets.srcDir(generatedPublicAssets)
-android.sourceSets.getByName("main").assets.apply {
-    // Never package the legacy duplicate tree or SQLite runtime sidecars.
-    exclude("db/**")
-    exclude("**/*.db-wal")
-    exclude("**/*.db-shm")
-    exclude("**/*.woff")
-    exclude("**/*.woff2")
-}
+// Never package the legacy duplicate tree, SQLite runtime sidecars, or source fonts.
+android.sourceSets.getByName("main").assets.exclude(
+    "**/db/**/*",
+    "**/*.db-wal",
+    "**/*.db-shm",
+    "**/*.woff",
+    "**/*.woff2",
+)
 
 tasks.configureEach {
     if (name.contains("merge", ignoreCase = true) && name.contains("Assets")) {
