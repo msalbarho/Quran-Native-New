@@ -23,8 +23,8 @@ android {
         applicationId = "com.quransunah.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 26
-        versionName = "4.2.1"
+        versionCode = 25
+        versionName = "4.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
