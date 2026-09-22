@@ -25,9 +25,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -186,7 +190,7 @@ private fun HomeRouteCard(
     val themeColor = MaterialTheme.colorScheme.primary
     val themedImage = featured || backgroundImageRes != null
     val themedContentColor = if (nightMode) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimary
-    val background = if (themedImage) Color.Transparent else paper.pageBody
+    val background = paper.pageBody
     val titleColor = if (themedImage) themedContentColor else paper.textStrong
     val descriptionColor = if (themedImage) themedContentColor.copy(alpha = 0.9f) else paper.textMuted
     val iconSurface = if (themedImage) themedContentColor.copy(alpha = 0.16f) else paper.tone300
@@ -209,18 +213,37 @@ private fun HomeRouteCard(
             .clickable(onClick = onClick),
     ) {
         if (themedImage) {
-            Image(
-                painter = painterResource(if (featured) R.drawable.home_continue_reading else backgroundImageRes!!),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                alignment = if (featured) Alignment.Center else Alignment.CenterStart,
-                modifier = Modifier.matchParentSize(),
-            )
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .background(themeColor.copy(alpha = 0.32f)),
-            )
+                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                    .drawWithContent {
+                        drawContent()
+                        drawRect(
+                            brush = Brush.horizontalGradient(
+                                colorStops = arrayOf(
+                                    0.0f to Color.White,
+                                    0.72f to Color.White.copy(alpha = 0.55f),
+                                    1.0f to Color.Transparent,
+                                ),
+                            ),
+                            blendMode = BlendMode.DstIn,
+                        )
+                    },
+            ) {
+                Image(
+                    painter = painterResource(if (featured) R.drawable.home_continue_reading else backgroundImageRes!!),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    alignment = if (featured) Alignment.Center else Alignment.CenterStart,
+                    modifier = Modifier.matchParentSize(),
+                )
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(themeColor.copy(alpha = 0.32f)),
+                )
+            }
             Box(
                 modifier = Modifier
                     .matchParentSize()
