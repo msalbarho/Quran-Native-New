@@ -43,9 +43,9 @@
     <string name="audio_download_count">Download %1$s surahs</string>
     <string name="audio_downloaded">Saved</string>
     <string name="audio_cached_of_total">%1$s of %2$s saved locally</string>
-    <string name="audio_repeat_off">No repeat</string>
-    <string name="audio_repeat_one">Repeat once</string>
-    <string name="audio_repeat_all">Repeat all</string>
+    <string name="audio_repeat_off">Once</string>
+    <string name="audio_repeat_one">Repeat surah</string>
+    <string name="audio_repeat_all">Continuous play</string>
     <string name="audio_playback_rate">Speed</string>
     <string name="audio_sleep_timer">Sleep timer</string>
     <string name="audio_sleep_timer_off">Off</string>

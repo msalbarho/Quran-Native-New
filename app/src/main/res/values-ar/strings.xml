@@ -43,9 +43,9 @@
     <string name="audio_download_count">تحميل %1$s سور</string>
     <string name="audio_downloaded">تم التحميل</string>
     <string name="audio_cached_of_total">%1$s من %2$s محفوظة</string>
-    <string name="audio_repeat_off">عدم تكرار</string>
-    <string name="audio_repeat_one">تكرار مرة</string>
-    <string name="audio_repeat_all">تكرار الكل</string>
+    <string name="audio_repeat_off">مرة واحدة</string>
+    <string name="audio_repeat_one">إعادة السورة</string>
+    <string name="audio_repeat_all">تشغيل مستمر</string>
     <string name="audio_playback_rate">السرعة</string>
     <string name="audio_sleep_timer">مؤقت النوم</string>
     <string name="audio_sleep_timer_off">إيقاف</string>

@@ -45,7 +45,7 @@ data class ListeningUiState(
     val availableSurahs: List<Int> = emptyList(),
     val surahs: List<SurahInfo> = emptyList(),
     val query: String = "",
-    val repeatMode: SurahRepeatMode = SurahRepeatMode.OFF,
+    val repeatMode: SurahRepeatMode = SurahRepeatMode.REMAINING,
     val downloadFrom: Int = 1,
     val downloadTo: Int = 1,
     val download: DownloadProgress? = null,
@@ -83,7 +83,7 @@ class ListeningViewModel @Inject constructor(
     private val selectedReciterId = MutableStateFlow(AppConstants.DEFAULT_SURAH_RECITER_ID)
     private val selectedSurah = MutableStateFlow(1)
     private val query = MutableStateFlow("")
-    private val repeatMode = MutableStateFlow(SurahRepeatMode.OFF)
+    private val repeatMode = MutableStateFlow(SurahRepeatMode.REMAINING)
     private val downloadFrom = MutableStateFlow(1)
     private val downloadTo = MutableStateFlow(1)
     private val download = MutableStateFlow<DownloadProgress?>(null)
@@ -142,7 +142,7 @@ class ListeningViewModel @Inject constructor(
             downloadFrom.value = restored.lastListeningSurah
             downloadTo.value = restored.lastListeningSurah
             repeatMode.value = runCatching { SurahRepeatMode.valueOf(restored.lastRepeatMode) }
-                .getOrDefault(SurahRepeatMode.OFF)
+                .getOrDefault(SurahRepeatMode.REMAINING)
         }
         viewModelScope.launch {
             preferences.settings.collect { settings ->
@@ -218,9 +218,9 @@ class ListeningViewModel @Inject constructor(
 
     fun cycleRepeatMode() {
         val next = when (repeatMode.value) {
+            SurahRepeatMode.REMAINING -> SurahRepeatMode.OFF
             SurahRepeatMode.OFF -> SurahRepeatMode.ONE
             SurahRepeatMode.ONE -> SurahRepeatMode.REMAINING
-            SurahRepeatMode.REMAINING -> SurahRepeatMode.OFF
         }
         repeatMode.value = next
         audioPlayer.setRepeatMode(next)

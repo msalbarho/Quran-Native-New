@@ -52,7 +52,7 @@ data class PlaybackSnapshot(
     val wordPosition: Int? = null,
     val positionMs: Long = 0L,
     val durationMs: Long = 0L,
-    val repeatMode: SurahRepeatMode = SurahRepeatMode.OFF,
+    val repeatMode: SurahRepeatMode = SurahRepeatMode.REMAINING,
     val ayahId: Int? = null,
     val errorMessage: String? = null,
 )
