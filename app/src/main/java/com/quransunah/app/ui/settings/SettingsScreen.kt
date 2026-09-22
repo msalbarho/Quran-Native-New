@@ -389,6 +389,7 @@ private fun AboutAppDialog(onClose: () -> Unit) {
     val paper = LocalPaperColors.current
     val context = LocalContext.current
     val email = stringResource(R.string.settings_contact_email)
+    val githubUrl = stringResource(R.string.settings_about_github_url)
     val displayedVersionName = BuildConfig.VERSION_NAME.removeSuffix("-debug")
     Dialog(onDismissRequest = onClose) {
         Column(
@@ -435,14 +436,36 @@ private fun AboutAppDialog(onClose: () -> Unit) {
                 Text(stringResource(R.string.settings_about_p3), color = paper.textStrong, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 HorizontalDivider(color = paper.tone500.copy(alpha = 0.45f))
                 Text(
-                    text = stringResource(R.string.settings_about_sources_title),
+                    text = stringResource(R.string.settings_about_open_source_title),
                     color = paper.textStrong,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                 )
-                Text(stringResource(R.string.settings_about_source_text), color = paper.textPrimary, fontSize = 13.sp, lineHeight = 20.sp)
-                Text(stringResource(R.string.settings_about_source_fonts), color = paper.textPrimary, fontSize = 13.sp, lineHeight = 20.sp)
-                Text(stringResource(R.string.settings_about_source_audio), color = paper.textPrimary, fontSize = 13.sp, lineHeight = 20.sp)
+                Text(
+                    text = stringResource(R.string.settings_about_open_source_text),
+                    color = paper.textPrimary,
+                    fontSize = 13.sp,
+                    lineHeight = 20.sp,
+                )
+                Text(
+                    text = stringResource(R.string.settings_about_github),
+                    color = paper.accent,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable {
+                            runCatching {
+                                context.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse(githubUrl),
+                                    ),
+                                )
+                            }
+                        }
+                        .padding(vertical = 4.dp),
+                )
                 Text(
                     text = stringResource(
                         R.string.settings_app_version,
