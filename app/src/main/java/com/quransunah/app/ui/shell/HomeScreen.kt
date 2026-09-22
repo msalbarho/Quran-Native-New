@@ -138,6 +138,7 @@ fun HomeScreen(
                 description = stringResource(R.string.home_training_description),
                 iconRes = R.drawable.ic_training_brain,
                 featured = false,
+                backgroundImageRes = R.drawable.home_training,
                 onClick = onOpenTraining,
                 modifier = Modifier.weight(1f),
             )
