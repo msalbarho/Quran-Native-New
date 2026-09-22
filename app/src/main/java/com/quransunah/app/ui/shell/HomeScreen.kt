@@ -160,6 +160,7 @@ fun HomeScreen(
             description = stringResource(R.string.home_index_description),
             iconRes = R.drawable.ic_format_list_bulleted,
             featured = false,
+            backgroundImageRes = R.drawable.home_index,
             onClick = onOpenIndex,
             modifier = Modifier.fillMaxWidth(),
             compact = true,
