@@ -76,6 +76,7 @@ fun ListeningScreen(
         onThemeToggle = onThemeToggle,
         onSelectReciter = viewModel::selectReciter,
         onSelectSurah = viewModel::selectSurah,
+        onRetryReciters = viewModel::retryReciters,
         onDownloadFrom = viewModel::setDownloadFrom,
         onDownloadTo = viewModel::setDownloadTo,
         onDownload = viewModel::downloadRange,
@@ -98,6 +99,7 @@ fun ListeningScreenContent(
     onThemeToggle: () -> Unit,
     onSelectReciter: (SurahReciter) -> Unit,
     onSelectSurah: (Int) -> Unit,
+    onRetryReciters: () -> Unit,
     onDownloadFrom: (Int) -> Unit,
     onDownloadTo: (Int) -> Unit,
     onDownload: () -> Unit,
@@ -137,7 +139,7 @@ fun ListeningScreenContent(
                 EasternArabic.format(progress.total),
             )
         }
-        downloadError -> stringResource(R.string.audio_download_failed)
+        downloadError -> progress?.errorMessage ?: stringResource(R.string.audio_download_failed)
         allCached -> stringResource(R.string.audio_downloaded)
         pending > 1 -> stringResource(R.string.audio_download_count, EasternArabic.format(pending))
         else -> stringResource(R.string.audio_download)
@@ -157,7 +159,10 @@ fun ListeningScreenContent(
             AudioScreenHeader(nightMode = nightMode, onThemeToggle = onThemeToggle)
             if (ui.reciters.isEmpty()) {
                 Text(
-                    text = stringResource(R.string.audio_loading_reciters),
+                    text = stringResource(
+                        if (ui.recitersError) R.string.audio_reciters_error
+                        else R.string.audio_loading_reciters,
+                    ),
                     color = paper.textMuted,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
@@ -165,6 +170,18 @@ fun ListeningScreenContent(
                         .fillMaxWidth()
                         .padding(top = 32.dp),
                 )
+                if (ui.recitersError) {
+                    Text(
+                        text = stringResource(R.string.audio_retry),
+                        color = paper.accent,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(onClick = onRetryReciters)
+                            .padding(top = 14.dp),
+                    )
+                }
             } else {
                 ScreenAudioPlayer(
                     snapshot = playback,

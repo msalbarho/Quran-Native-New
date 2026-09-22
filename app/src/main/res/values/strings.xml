@@ -32,7 +32,9 @@
     <string name="playback_word_title">Word pronunciation</string>
     <string name="playback_ayah_title">%1$s · ayah %2$s</string>
     <string name="playback_surah_fallback">Surah %1$s</string>
-    <string name="error_offline">No internet connection.</string>
+    <string name="error_offline">No internet connection. Check your connection and try again.</string>
+    <string name="error_ayah_offline">Playing ayahs requires an internet connection.</string>
+    <string name="error_audio_server">Could not reach the audio server. Try again later.</string>
     <string name="error_offline_no_cache">Playback needs a connection. This surah is not saved on the device.</string>
     <string name="error_missing_file">The recitation file could not be found.</string>
     <string name="error_playback_generic">Could not play the recitation.</string>
@@ -124,7 +126,9 @@
     <string name="audio_play_surah">Play surah</string>
     <string name="audio_resume">Resume</string>
     <string name="audio_download">Download audio</string>
-    <string name="audio_download_failed">Download failed</string>
+    <string name="audio_download_failed">Could not reach the audio server. Try again later.</string>
+    <string name="audio_reciters_error">Could not load the reciter list.</string>
+    <string name="audio_retry">Retry</string>
     <string name="audio_downloading">Downloading… (%1$s/%2$s)</string>
     <string name="audio_choose_download_surahs">Choose surahs to download</string>
     <string name="audio_range_from_to">From surah %1$s to surah %2$s</string>

@@ -39,6 +39,7 @@ import kotlinx.coroutines.launch
 
 data class ListeningUiState(
     val reciters: List<SurahReciter> = emptyList(),
+    val recitersError: Boolean = false,
     val selectedReciter: SurahReciter? = null,
     val selectedMoshaf: MoshafEdition? = null,
     val selectedSurah: Int = 1,
@@ -79,6 +80,7 @@ class ListeningViewModel @Inject constructor(
         .distinctUntilChanged()
 
     private val reciters = MutableStateFlow<List<SurahReciter>>(emptyList())
+    private val recitersError = MutableStateFlow(false)
     private val surahCatalog = MutableStateFlow<List<SurahInfo>>(emptyList())
     private val selectedReciterId = MutableStateFlow(AppConstants.DEFAULT_SURAH_RECITER_ID)
     private val selectedSurah = MutableStateFlow(1)
@@ -89,8 +91,8 @@ class ListeningViewModel @Inject constructor(
     private val download = MutableStateFlow<DownloadProgress?>(null)
 
     val uiState: StateFlow<ListeningUiState> = combine(
-        combine(reciters, selectedReciterId, selectedSurah, surahCatalog) { reciterList, reciterId, surah, catalog ->
-            Quad(reciterList, reciterId, surah, catalog)
+        combine(reciters, recitersError, selectedReciterId, selectedSurah, surahCatalog) { reciterList, error, reciterId, surah, catalog ->
+            Quint(reciterList, error, reciterId, surah, catalog)
         },
         combine(query, repeatMode, downloadFrom, downloadTo) { q, repeat, from, to ->
             Quad(q, repeat, from, to)
@@ -100,10 +102,10 @@ class ListeningViewModel @Inject constructor(
         activePlayingSurah,
     ) { selection, filters, progress, _, playingSurah ->
         val reciterList = selection.a
-        val reciter = reciterList.firstOrNull { it.id == selection.b } ?: reciterList.firstOrNull()
+        val reciter = reciterList.firstOrNull { it.id == selection.c } ?: reciterList.firstOrNull()
         val moshaf = reciter?.preferredMoshaf()
         val available = moshaf?.surahNumbers?.sorted().orEmpty()
-        val surah = if (available.contains(selection.c)) selection.c else available.firstOrNull() ?: 1
+        val surah = if (available.contains(selection.d)) selection.d else available.firstOrNull() ?: 1
         val from = if (available.contains(filters.c)) filters.c else surah
         val to = if (available.contains(filters.d)) filters.d else surah
         val lo = minOf(from, to)
@@ -111,11 +113,12 @@ class ListeningViewModel @Inject constructor(
         val range = available.filter { it in lo..hi }
         ListeningUiState(
             reciters = reciterList,
+            recitersError = selection.b,
             selectedReciter = reciter,
             selectedMoshaf = moshaf,
             selectedSurah = playingSurah ?: surah,
             availableSurahs = available,
-            surahs = selection.d.filter { available.contains(it.number) },
+            surahs = selection.e.filter { available.contains(it.number) },
             query = filters.a,
             repeatMode = filters.b,
             downloadFrom = from,
@@ -130,7 +133,11 @@ class ListeningViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            reciters.value = reciterCatalog.surahReciters()
+            reciters.value = runCatching { reciterCatalog.surahReciters() }
+                .getOrElse {
+                    recitersError.value = true
+                    emptyList()
+                }
             surahCatalog.value = runCatching { mushafRepository.getSurahs() }.getOrDefault(emptyList())
             val restored = preferences.settings.first()
             val reciterId = reciters.value.firstOrNull { it.id == restored.lastReciterId }?.id
@@ -304,13 +311,23 @@ class ListeningViewModel @Inject constructor(
         viewModelScope.launch {
             download.value = DownloadProgress(done = 0, total = missing.size, running = true)
             missing.forEachIndexed { index, surah ->
+                if (!PlaybackNetwork.isOnline(appContext)) {
+                    download.value = DownloadProgress(
+                        done = index,
+                        total = missing.size,
+                        currentSurah = surah,
+                        errorMessage = appContext.getString(R.string.error_offline),
+                        running = false,
+                    )
+                    return@launch
+                }
                 val result = audioStore.download(moshaf, surah)
                 if (result.isFailure) {
                     download.value = DownloadProgress(
                         done = index,
                         total = missing.size,
                         currentSurah = surah,
-                        errorMessage = appContext.getString(R.string.audio_download_failed),
+                        errorMessage = appContext.getString(R.string.error_audio_server),
                         running = false,
                     )
                     delay(3_200)
@@ -347,5 +364,17 @@ class ListeningViewModel @Inject constructor(
 
     private fun MoshafEdition?.orEmptyContains(surah: Int): Boolean = this?.contains(surah) == true
 
+    fun retryReciters() {
+        viewModelScope.launch {
+            recitersError.value = false
+            reciters.value = runCatching { reciterCatalog.surahReciters() }
+                .getOrElse {
+                    recitersError.value = true
+                    emptyList()
+                }
+        }
+    }
+
     private data class Quad<A, B, C, D>(val a: A, val b: B, val c: C, val d: D)
+    private data class Quint<A, B, C, D, E>(val a: A, val b: B, val c: C, val d: D, val e: E)
 }

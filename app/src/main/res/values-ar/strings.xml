@@ -32,7 +32,9 @@
     <string name="playback_word_title">نطق الكلمة</string>
     <string name="playback_ayah_title">%1$s · الآية %2$s</string>
     <string name="playback_surah_fallback">سورة %1$s</string>
-    <string name="error_offline">لا يتوفر اتصال بالإنترنت.</string>
+    <string name="error_offline">لا يوجد اتصال بالإنترنت. تحقق من الاتصال ثم أعد المحاولة.</string>
+    <string name="error_ayah_offline">تشغيل الآيات يتطلب اتصالًا بالإنترنت.</string>
+    <string name="error_audio_server">تعذر الوصول إلى خادم الصوت. أعد المحاولة بعد قليل.</string>
     <string name="error_offline_no_cache">تعذّر التشغيل بدون اتصال. لا توجد نسخة محفوظة لهذه السورة.</string>
     <string name="error_missing_file">الملف الصوتي غير موجود.</string>
     <string name="error_playback_generic">تعذّر تشغيل التلاوة.</string>
@@ -124,7 +126,9 @@
     <string name="audio_play_surah">تشغيل السورة</string>
     <string name="audio_resume">استئناف التشغيل</string>
     <string name="audio_download">تحميل الصوت</string>
-    <string name="audio_download_failed">تعذّر التحميل</string>
+    <string name="audio_download_failed">تعذر الوصول إلى خادم الصوت. أعد المحاولة بعد قليل.</string>
+    <string name="audio_reciters_error">تعذر تحميل قائمة القراء.</string>
+    <string name="audio_retry">إعادة المحاولة</string>
     <string name="audio_downloading">جاري التحميل… (%1$s/%2$s)</string>
     <string name="audio_choose_download_surahs">اختر السور المطلوب تحميلها</string>
     <string name="audio_range_from_to">من سورة %1$s إلى سورة %2$s</string>

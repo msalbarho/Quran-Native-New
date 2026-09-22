@@ -9,6 +9,7 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.datasource.HttpDataSource
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.quransunah.app.R
@@ -122,8 +123,10 @@ class AudioController @Inject constructor(
                     if (snap.isPlaying || _snapshot.value.playWhenReady) return@withLock
                     val player = ensureController()
                     if (hasSurahPlaylist(player, moshaf.id, items.size)) return@withLock
-                    val playlist = (1..AppConstants.SURAH_COUNT).filter { moshaf.contains(it) }
-                    val startIndex = playlist.indexOf(surah).coerceAtLeast(0)
+                val playlist = (1..AppConstants.SURAH_COUNT)
+                    .filter { moshaf.contains(it) }
+                    .filter { PlaybackNetwork.isOnline(context) || surahAudioStore.has(moshaf.id, it) }
+                val startIndex = playlist.indexOf(surah).coerceAtLeast(0)
                     player.setMediaItems(items, startIndex, 0L)
                     player.prepare()
                     player.pause()
@@ -145,13 +148,16 @@ class AudioController @Inject constructor(
             ?: error(context.getString(R.string.error_reciter_missing))
         val moshaf = reciter.moshaf(moshafId) ?: reciter.preferredMoshaf()
             ?: error(context.getString(R.string.error_reciter_missing))
-        val playlist = (1..AppConstants.SURAH_COUNT).filter { moshaf.contains(it) }
+        val online = PlaybackNetwork.isOnline(context)
+        val playlist = (1..AppConstants.SURAH_COUNT)
+            .filter { moshaf.contains(it) }
+            .filter { online || surahAudioStore.has(moshaf.id, it) }
         if (playlist.isEmpty() || !moshaf.contains(surah)) {
             error(context.getString(R.string.error_missing_file))
         }
         val startIndex = playlist.indexOf(surah).coerceAtLeast(0)
         val currentLocal = surahAudioStore.has(moshaf.id, surah)
-        if (!currentLocal && !PlaybackNetwork.isOnline(context)) {
+        if (!currentLocal && !online) {
             error(context.getString(R.string.error_offline_no_cache))
         }
         val verse = startAyah.coerceIn(1, SurahAyahCounts.ayahCount(surah).coerceAtLeast(1))
@@ -203,7 +209,7 @@ class AudioController @Inject constructor(
         }
         clearCurrentPlayback()
         if (!PlaybackNetwork.isOnline(context)) {
-            error(context.getString(R.string.error_offline))
+            error(context.getString(R.string.error_ayah_offline))
         }
         val count = SurahAyahCounts.ayahCount(surah)
         if (count <= 0 || ayah !in 1..count) error(context.getString(R.string.error_missing_file))
@@ -231,7 +237,7 @@ class AudioController @Inject constructor(
         return runCatching {
         val reciter = reciterCatalog.ayahReciter(reciterId) ?: reciterCatalog.defaultAyahReciter()
         if (!PlaybackNetwork.isOnline(context)) {
-            error(context.getString(R.string.error_offline))
+            error(context.getString(R.string.error_ayah_offline))
         }
         val range = SurahAyahCounts.range(startSurah, startAyah, endSurah, endAyah)
         if (range.isEmpty()) error(context.getString(R.string.error_missing_file))
@@ -573,13 +579,16 @@ class AudioController @Inject constructor(
         startSurah: Int,
         startAyah: Int,
     ): List<MediaItem> {
-        val cacheKey = "${moshaf.id}:$startSurah:$startAyah:$repeatMode"
+        val online = PlaybackNetwork.isOnline(context)
+        val cacheKey = "${moshaf.id}:$startSurah:$startAyah:$repeatMode:${if (online) "online" else "offline"}"
         val cached = cachedPlaylistItems
         if (cachedPlaylistKey == cacheKey && cached.size > 1) {
             return cached
         }
         surahName(1)
-        val playlist = (1..AppConstants.SURAH_COUNT).filter { moshaf.contains(it) }
+        val playlist = (1..AppConstants.SURAH_COUNT)
+            .filter { moshaf.contains(it) }
+            .filter { online || surahAudioStore.has(moshaf.id, it) }
         val items = playlist.map { number ->
             surahMediaItem(
                 reciterName = moshaf.reciterName,
@@ -852,12 +861,21 @@ class AudioController @Inject constructor(
             PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED,
             PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT,
             -> context.getString(R.string.error_offline)
-            PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND,
-            PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS,
-            -> context.getString(R.string.error_missing_file)
+            PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND -> context.getString(R.string.error_missing_file)
+            PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS -> when (error.httpStatusCode()) {
+                404 -> context.getString(R.string.error_missing_file)
+                in 500..599 -> context.getString(R.string.error_audio_server)
+                else -> context.getString(R.string.error_playback_generic)
+            }
             else -> context.getString(R.string.error_playback_generic)
         }
     }
+
+    private fun PlaybackException.httpStatusCode(): Int? =
+        generateSequence<Throwable>(cause) { it.cause }
+            .filterIsInstance<HttpDataSource.InvalidResponseCodeException>()
+            .map { it.responseCode }
+            .firstOrNull()
 
     private companion object {
         const val SEEK_MATCH_TOLERANCE_MS = 800L
