@@ -3,6 +3,7 @@ package com.quransunah.app.ui.shell
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +26,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -34,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.MaterialTheme
 import com.quransunah.app.R
 import com.quransunah.app.core.EasternArabic
 import com.quransunah.app.ui.theme.LocalAppFontFamily
@@ -142,6 +146,7 @@ fun HomeScreen(
                 description = stringResource(R.string.home_listening_description),
                 iconRes = R.drawable.ic_headset,
                 featured = false,
+                backgroundImageRes = R.drawable.home_listening,
                 onClick = onOpenListening,
                 modifier = Modifier.weight(1f),
             )
@@ -172,18 +177,22 @@ private fun HomeRouteCard(
     modifier: Modifier = Modifier,
     detail: String? = null,
     compact: Boolean = false,
+    backgroundImageRes: Int? = null,
 ) {
     val paper = LocalPaperColors.current
     val nightMode = LocalNightMode.current
-    val background = if (featured) paper.accent else paper.pageBody
-    val titleColor = if (featured) Color.White else paper.textStrong
-    val descriptionColor = if (featured) Color.White.copy(alpha = 0.9f) else paper.textMuted
-    val iconSurface = if (featured) Color.White.copy(alpha = 0.16f) else paper.tone300
-    val iconTint = if (featured) Color.White else if (nightMode) paper.textStrong else paper.accent
+    val themeColor = MaterialTheme.colorScheme.primary
+    val themedImage = featured || backgroundImageRes != null
+    val themedContentColor = if (nightMode) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimary
+    val background = if (themedImage) Color.Transparent else paper.pageBody
+    val titleColor = if (themedImage) themedContentColor else paper.textStrong
+    val descriptionColor = if (themedImage) themedContentColor.copy(alpha = 0.9f) else paper.textMuted
+    val iconSurface = if (themedImage) themedContentColor.copy(alpha = 0.16f) else paper.tone300
+    val iconTint = if (themedImage) themedContentColor else if (nightMode) paper.textStrong else paper.accent
     val minHeight = if (compact) 104.dp else if (featured) 156.dp else 148.dp
     val cardDescription = "$title، $description"
 
-    Row(
+    Box(
         modifier = modifier
             .height(minHeight)
             .shadow(if (featured) 10.dp else 2.dp, HomeCardShape, clip = false)
@@ -195,12 +204,43 @@ private fun HomeRouteCard(
                 shape = HomeCardShape,
             )
             .semantics { this.contentDescription = cardDescription }
-            .clickable(onClick = onClick)
-            .padding(horizontal = if (compact) 16.dp else 14.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(if (compact) 14.dp else 10.dp),
+            .clickable(onClick = onClick),
     ) {
-        Box(
+        if (themedImage) {
+            Image(
+                painter = painterResource(if (featured) R.drawable.home_continue_reading else backgroundImageRes!!),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                alignment = if (featured) Alignment.Center else Alignment.CenterStart,
+                modifier = Modifier.matchParentSize(),
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(themeColor.copy(alpha = 0.32f)),
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.horizontalGradient(
+                            colorStops = arrayOf(
+                                0.0f to Color.Black.copy(alpha = 0.56f),
+                                0.42f to Color.Black.copy(alpha = 0.30f),
+                                0.78f to Color.Transparent,
+                            ),
+                        ),
+                    ),
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = if (compact) 16.dp else 14.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(if (compact) 14.dp else 10.dp),
+        ) {
+            Box(
             modifier = Modifier
                 .size(if (featured) 62.dp else 46.dp)
                 .clip(CircleShape)
@@ -213,8 +253,8 @@ private fun HomeRouteCard(
                 tint = iconTint,
                 modifier = Modifier.size(if (featured) 33.dp else 25.dp),
             )
-        }
-        Column(
+            }
+            Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center,
         ) {
@@ -240,11 +280,12 @@ private fun HomeRouteCard(
             detail?.let {
                 Text(
                     text = it,
-                    color = Color.White.copy(alpha = 0.76f),
+                    color = titleColor.copy(alpha = 0.76f),
                     fontFamily = LocalAppFontFamily.current,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 10.dp),
                 )
+            }
             }
         }
     }
