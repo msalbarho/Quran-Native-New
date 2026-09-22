@@ -216,27 +216,28 @@ private fun HomeRouteCard(
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                    .drawWithContent {
-                        drawContent()
-                        drawRect(
-                            brush = Brush.horizontalGradient(
-                                colorStops = arrayOf(
-                                    0.0f to Color.White,
-                                    0.72f to Color.White.copy(alpha = 0.55f),
-                                    1.0f to Color.Transparent,
-                                ),
-                            ),
-                            blendMode = BlendMode.DstIn,
-                        )
-                    },
             ) {
                 Image(
                     painter = painterResource(if (featured) R.drawable.home_continue_reading else backgroundImageRes!!),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     alignment = if (featured) Alignment.Center else Alignment.CenterStart,
-                    modifier = Modifier.matchParentSize(),
+                    modifier = Modifier
+                        .matchParentSize()
+                        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                        .drawWithContent {
+                            drawContent()
+                            drawRect(
+                                brush = Brush.horizontalGradient(
+                                    colorStops = arrayOf(
+                                        0.0f to Color.White,
+                                        0.72f to Color.White.copy(alpha = 0.55f),
+                                        1.0f to Color.Transparent,
+                                    ),
+                                ),
+                                blendMode = BlendMode.DstIn,
+                            )
+                        },
                 )
                 Box(
                     modifier = Modifier
