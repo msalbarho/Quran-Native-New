@@ -35,7 +35,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,14 +48,12 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -311,8 +308,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                 modifier = Modifier.fillMaxSize(),
             )
             AppTab.Reading, AppTab.Training -> {
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    HorizontalPager(
+                HorizontalPager(
                         state = pagerState,
                         reverseLayout = false,
                         beyondViewportPageCount = 0,
@@ -402,7 +398,6 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                                 sajda = pageData?.sajda,
                             )
                         }
-                    }
                 }
             }
             AppTab.Listening -> ListeningScreen(

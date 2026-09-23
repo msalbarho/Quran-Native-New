@@ -6,35 +6,54 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import java.util.Locale
 
+/** Locale utilities for the UI. Quran text rendering remains Arabic-specific. */
 object ArabicRtl {
-    val locale: Locale = Locale.forLanguageTag("ar")
+    private const val PREFS_NAME = "holy_quran_locale"
+    private const val LANGUAGE_KEY = "language_tag"
+    private val supported = setOf("ar", "en", "nb")
 
-    /**
-     * Applies Arabic locale + RTL without freezing orientation/size.
-     *
-     * [Context.createConfigurationContext] alone snapshots the whole
-     * configuration at [attachBaseContext] time. With
-     * `configChanges="orientation|screenSize|…"`, that snapshot stays
-     * portrait forever and Compose's [LocalConfiguration] never flips to
-     * landscape. This wrapper always merges locale into the *live* base
-     * configuration so rotation still updates screen size and orientation.
-     */
-    fun wrap(base: Context): Context {
-        Locale.setDefault(locale)
-        return LocaleRtlContext(base)
+    fun selectedLanguage(context: Context): String? =
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(LANGUAGE_KEY, null)
+            ?.lowercase()
+            ?.takeIf { it in supported }
+
+    fun setSelectedLanguage(context: Context, languageTag: String?) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .apply {
+                if (languageTag == null) remove(LANGUAGE_KEY)
+                else putString(LANGUAGE_KEY, languageTag.lowercase())
+            }
+            .apply()
     }
 
-    fun applyLocale(config: Configuration) {
+    fun wrap(base: Context): Context {
+        val tag = selectedLanguage(base) ?: systemLanguage(base)
+        val locale = Locale.forLanguageTag(tag)
+        Locale.setDefault(locale)
+        return LocaleContext(base, locale)
+    }
+
+    fun applyLocale(config: Configuration, locale: Locale) {
         config.setLocale(locale)
         config.setLayoutDirection(locale)
     }
 
-    private class LocaleRtlContext(base: Context) : ContextWrapper(base) {
-        @Volatile
-        private var cachedResources: Resources? = null
+    fun isRtl(languageTag: String?): Boolean = languageTag == "ar"
 
-        @Volatile
-        private var cachedKey: Int = Int.MIN_VALUE
+    private fun systemLanguage(context: Context): String {
+        val system = context.resources.configuration.locales[0]
+        return when (system.language) {
+            "ar" -> "ar"
+            "nb", "no" -> "nb"
+            else -> "en"
+        }
+    }
+
+    private class LocaleContext(base: Context, private val locale: Locale) : ContextWrapper(base) {
+        @Volatile private var cachedResources: Resources? = null
+        @Volatile private var cachedKey: Int = Int.MIN_VALUE
 
         override fun getResources(): Resources {
             val live = baseContext.resources.configuration
@@ -42,7 +61,7 @@ object ArabicRtl {
             val hit = cachedResources
             if (hit != null && key == cachedKey) return hit
             val localized = Configuration(live)
-            applyLocale(localized)
+            applyLocale(localized, locale)
             val created = baseContext.createConfigurationContext(localized).resources
             cachedResources = created
             cachedKey = key
@@ -51,7 +70,7 @@ object ArabicRtl {
 
         override fun createConfigurationContext(overrideConfiguration: Configuration): Context {
             val localized = Configuration(overrideConfiguration)
-            applyLocale(localized)
+            applyLocale(localized, locale)
             return baseContext.createConfigurationContext(localized)
         }
 

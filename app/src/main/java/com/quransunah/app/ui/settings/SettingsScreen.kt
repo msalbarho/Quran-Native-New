@@ -1,5 +1,6 @@
 package com.quransunah.app.ui.settings
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -51,6 +52,7 @@ import androidx.lifecycle.viewModelScope
 import com.quransunah.app.R
 import com.quransunah.app.BuildConfig
 import com.quransunah.app.core.AppConstants
+import com.quransunah.app.core.ArabicRtl
 import com.quransunah.app.core.EasternArabic
 import com.quransunah.app.data.prefs.UserPreferences
 import com.quransunah.app.data.prefs.UserSettings
@@ -81,6 +83,7 @@ fun SettingsScreen(
     }
     val viewModel: SettingsViewModel = hiltViewModel()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     SettingsScreenContent(
         settings = settings,
         onNightMode = viewModel::setNightMode,
@@ -88,6 +91,11 @@ fun SettingsScreen(
         onMedinaMode = viewModel::setMedinaMode,
         onMushafFontSize = viewModel::setMushafFontSize,
         onMushafFontSizePreview = viewModel::previewMushafFontSize,
+        onLanguage = { language ->
+            ArabicRtl.setSelectedLanguage(context, language)
+            viewModel.setLanguage(language)
+            (context as? Activity)?.recreate()
+        },
         modifier = modifier,
     )
 }
@@ -102,6 +110,7 @@ fun SettingsScreenContent(
     onMedinaMode: (Boolean) -> Unit = {},
     onMushafFontSize: (Float) -> Unit = {},
     onMushafFontSizePreview: (Float) -> Unit = {},
+    onLanguage: (String?) -> Unit = {},
 ) {
     val paper = LocalPaperColors.current
     var aboutOpen by remember { mutableStateOf(false) }
@@ -121,6 +130,9 @@ fun SettingsScreenContent(
                 onFirst = { onNightMode(false) },
                 onSecond = { onNightMode(true) },
             )
+        }
+        SettingsSection(title = stringResource(R.string.settings_language)) {
+            LanguageOptions(selected = settings.appLanguage, onSelect = onLanguage)
         }
         SettingsSection(title = stringResource(R.string.settings_app_color)) {
             FlowRow(
@@ -195,6 +207,30 @@ fun SettingsScreenContent(
     }
     if (aboutOpen) {
         AboutAppDialog(onClose = { aboutOpen = false })
+    }
+}
+
+@Composable
+private fun LanguageOptions(selected: String?, onSelect: (String?) -> Unit) {
+    val options = listOf(
+        null to stringResource(R.string.settings_language_system),
+        "ar" to stringResource(R.string.settings_language_arabic),
+        "en" to stringResource(R.string.settings_language_english),
+        "nb" to stringResource(R.string.settings_language_norwegian),
+    )
+    Column(verticalArrangement = Arrangement.spacedBy(7.dp), modifier = Modifier.fillMaxWidth()) {
+        options.chunked(2).forEach { row ->
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                row.forEach { (tag, label) ->
+                    SegmentedOption(
+                        label = label,
+                        selected = selected == tag,
+                        onClick = { onSelect(tag) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -543,5 +579,9 @@ class SettingsViewModel @Inject constructor(
 
     fun setMushafFontSize(size: Float) {
         viewModelScope.launch { preferences.setTextSize(size) }
+    }
+
+    fun setLanguage(languageTag: String?) {
+        viewModelScope.launch { preferences.setAppLanguage(languageTag) }
     }
 }

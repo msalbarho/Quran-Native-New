@@ -12,12 +12,10 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 
@@ -115,7 +113,6 @@ fun HolyQuranTheme(
         LocalPaperPaletteId provides paletteId,
         LocalAppFontFamily provides bodyFont,
         LocalDisplayFontFamily provides displayFont,
-        LocalLayoutDirection provides LayoutDirection.Rtl,
     ) {
         MaterialTheme(
             colorScheme = scheme,

@@ -3,14 +3,12 @@ package com.quransunah.app
 import android.app.Application
 import android.content.ComponentCallbacks2
 import androidx.media3.common.util.UnstableApi
-import com.quransunah.app.core.ArabicRtl
 import com.quransunah.app.core.CrashFileLogger
 import com.quransunah.app.data.audio.AyatTimingStore
 import com.quransunah.app.fonts.QcfFontManager
 import com.quransunah.app.ui.index.PlaceArtCache
 import com.quransunah.app.ui.mushaf.MedinaPageLayoutStore
 import dagger.hilt.android.HiltAndroidApp
-import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +26,6 @@ class QuranApplication : Application() {
         // Do NOT wrap attachBaseContext: ContextWrapper here breaks BroadcastReceiver
         // instantiation on Android 14+ (ClassCastException → ContextImpl), which
         // would prevent Auto car-connection from priming PlaybackService.
-        Locale.setDefault(ArabicRtl.locale)
         super.onCreate()
         CrashFileLogger.install(this)
         silenceMedia3Logs()

@@ -43,6 +43,8 @@ data class UserSettings(
     val tafsirSizeSp: Float = AppConstants.TAFSIR_DEFAULT_SP,
     val audioQuality: AudioQuality = AudioQuality.HIGH,
     val playbackRate: Float = AppConstants.DEFAULT_PLAYBACK_RATE,
+    /** Null follows the device language; otherwise ar, en, or nb. */
+    val appLanguage: String? = null,
 )
 
 @Singleton
@@ -73,6 +75,7 @@ class UserPreferences @Inject constructor(
             audioQuality = AudioQuality.fromId(prefs[Keys.AUDIO_QUALITY] ?: AudioQuality.HIGH.id),
             playbackRate = (prefs[Keys.PLAYBACK_RATE] ?: AppConstants.DEFAULT_PLAYBACK_RATE)
                 .let { rate -> AppConstants.PLAYBACK_RATES.minBy { kotlin.math.abs(it - rate) } },
+            appLanguage = prefs[Keys.APP_LANGUAGE],
         )
     }.distinctUntilChanged()
 
@@ -191,6 +194,13 @@ class UserPreferences @Inject constructor(
         dataStore.edit { it[Keys.PLAYBACK_RATE] = nearest }
     }
 
+    suspend fun setAppLanguage(languageTag: String?) {
+        val normalized = languageTag?.lowercase()?.takeIf { it in SUPPORTED_LANGUAGES }
+        dataStore.edit {
+            if (normalized == null) it.remove(Keys.APP_LANGUAGE) else it[Keys.APP_LANGUAGE] = normalized
+        }
+    }
+
     suspend fun getSearchIndexVersion(): Int =
         dataStore.data.first()[Keys.SEARCH_INDEX_VERSION] ?: 0
 
@@ -251,5 +261,10 @@ class UserPreferences @Inject constructor(
         val PLAYBACK_MOSHAF_ID = intPreferencesKey("playback_moshaf_id")
         val PLAYBACK_RECITER_ID = stringPreferencesKey("playback_reciter_id")
         val SEARCH_INDEX_VERSION = intPreferencesKey("search_index_version")
+        val APP_LANGUAGE = stringPreferencesKey("app_language")
+    }
+
+    private companion object {
+        val SUPPORTED_LANGUAGES = setOf("ar", "en", "nb")
     }
 }

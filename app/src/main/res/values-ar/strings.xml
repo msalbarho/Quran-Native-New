@@ -230,7 +230,12 @@
     <string name="share_saved_image">تم حفظ الصورة في المعرض بنجاح</string>
     <string name="share_saved_video">تم حفظ الفيديو في المعرض بنجاح</string>
     <string name="share_ayah_one">آية %1$s</string>
-    <string name="settings_appearance">وضع العرض</string>
+    <string name="settings_appearance">المظهر</string>
+    <string name="settings_language">اللغة</string>
+    <string name="settings_language_system">لغة الجهاز</string>
+    <string name="settings_language_arabic">العربية</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_norwegian">Norsk bokmål</string>
     <string name="settings_theme_light">نهاري</string>
     <string name="settings_theme_dark">ليلي</string>
     <string name="settings_app_color">لون التطبيق</string>
@@ -261,6 +266,7 @@
     <string name="settings_about_open_source_text">هذا المشروع مفتوح المصدر ومتاح للجميع للاستفادة منه وتطويره والمساهمة فيه بما يخدم كتاب الله تعالى، ابتغاءً للأجر والثواب.</string>
     <string name="settings_about_github">عرض المشروع على GitHub</string>
     <string name="settings_about_github_url">https://github.com/msalbarho/Quran-Native-New</string>
+    <string name="settings_app_version">إصدار التطبيق: %1$d (%2$s)</string>
     <string name="settings_contact_email">m.s.albarho@gmail.com</string>
     <string name="settings_about_contact">للتواصل والمقترحات أو التعديلات: %1$s</string>
 </resources>
