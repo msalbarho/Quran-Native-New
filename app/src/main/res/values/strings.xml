@@ -229,7 +229,7 @@
     <string name="share_via">Share via</string>
     <string name="share_saved_image">Image saved to gallery</string>
     <string name="share_saved_video">Video saved to gallery</string>
-    <string name="share_ayah_one">آية %1$s</string>
+    <string name="share_ayah_one">Ayah %1$s</string>
     <string name="settings_appearance">Appearance</string>
     <string name="settings_language">Language</string>
     <string name="settings_language_system">System default</string>
