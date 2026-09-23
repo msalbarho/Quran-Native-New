@@ -79,7 +79,7 @@ android {
         buildConfig = true
     }
     androidResources {
-        localeFilters += listOf("en", "ar")
+        localeFilters += listOf("en", "ar", "nb")
     }
     bundle {
         density {
