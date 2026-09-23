@@ -37,10 +37,9 @@ object ArabicRtl {
 
     fun applyLocale(config: Configuration, locale: Locale) {
         config.setLocale(locale)
-        config.setLayoutDirection(locale)
+        // Keep the application's visual structure RTL for every UI language.
+        config.setLayoutDirection(Locale.forLanguageTag("ar"))
     }
-
-    fun isRtl(languageTag: String?): Boolean = languageTag == "ar"
 
     private fun systemLanguage(context: Context): String {
         val system = context.resources.configuration.locales[0]
