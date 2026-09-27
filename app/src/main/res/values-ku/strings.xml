@@ -267,6 +267,7 @@
     <string name="settings_about_open_source_text">Ev proje çavkaniya vekirî ye û ji her kesî re vekirî ye ku jê sûd werbigire, wê pêş bixe û tê de beşdar bibe, di xizmeta Kitêba Xwedê de, bi hêviya xelatê ji Xwedê.</string>
     <string name="settings_about_github">Projeyê li GitHub bibîne</string>
     <string name="settings_about_github_url">https://github.com/msalbarho/Quran-Native-New</string>
+    <string name="settings_about_privacy">Polîtîkaya nepenîtiyê</string>
     <string name="settings_app_version">Guhertoya sepanê: %1$d (%2$s)</string>
     <string name="settings_contact_email">m.s.albarho@gmail.com</string>
     <string name="settings_about_contact">Têkilî û pêşniyar: %1$s</string>

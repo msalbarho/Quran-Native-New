@@ -267,6 +267,7 @@
     <string name="settings_about_open_source_text">Dieses Projekt ist quelloffen und steht allen offen, um davon zu profitieren, es weiterzuentwickeln und dazu beizutragen, im Dienst am Buch Allahs und in der Hoffnung auf Lohn von Allah.</string>
     <string name="settings_about_github">Projekt auf GitHub ansehen</string>
     <string name="settings_about_github_url">https://github.com/msalbarho/Quran-Native-New</string>
+    <string name="settings_about_privacy">Datenschutzerklärung</string>
     <string name="settings_app_version">App-Version: %1$d (%2$s)</string>
     <string name="settings_contact_email">m.s.albarho@gmail.com</string>
     <string name="settings_about_contact">Kontakt und Vorschläge: %1$s</string>

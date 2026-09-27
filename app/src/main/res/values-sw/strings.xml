@@ -267,6 +267,7 @@
     <string name="settings_about_open_source_text">Mradi huu ni wa chanzo wazi na upo wazi kwa kila mtu kunufaika nao, kuuendeleza, na kuchangia ndani yake katika kutumikia Kitabu cha Mwenyezi Mungu, tukitafuta thawabu kutoka kwa Mwenyezi Mungu.</string>
     <string name="settings_about_github">Angalia mradi kwenye GitHub</string>
     <string name="settings_about_github_url">https://github.com/msalbarho/Quran-Native-New</string>
+    <string name="settings_about_privacy">Sera ya Faragha</string>
     <string name="settings_app_version">Toleo la programu: %1$d (%2$s)</string>
     <string name="settings_contact_email">m.s.albarho@gmail.com</string>
     <string name="settings_about_contact">Mawasiliano na mapendekezo: %1$s</string>

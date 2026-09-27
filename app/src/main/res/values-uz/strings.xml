@@ -267,6 +267,7 @@
     <string name="settings_about_open_source_text">Bu loyiha ochiq manbali va hamma uchun ochiq: undan foydalanish, uni rivojlantirish va Allohning Kitobiga xizmat yoʻlida hissa qoʻshish mumkin, Allohdan savob umid qilib.</string>
     <string name="settings_about_github">Loyihani GitHub da koʻrish</string>
     <string name="settings_about_github_url">https://github.com/msalbarho/Quran-Native-New</string>
+    <string name="settings_about_privacy">Maxfiylik siyosati</string>
     <string name="settings_app_version">Ilova versiyasi: %1$d (%2$s)</string>
     <string name="settings_contact_email">m.s.albarho@gmail.com</string>
     <string name="settings_about_contact">Aloqa va takliflar: %1$s</string>

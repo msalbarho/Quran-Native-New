@@ -267,6 +267,7 @@
     <string name="settings_about_open_source_text">Mashruucan waa mid furan, qof walbana wuu ka faa’iidaysan karaa, horumarin karaa, kuna tabaruci karaa si uu ugu adeego Kitaabka Allah, isagoo rajaynaya ajar Allah.</string>
     <string name="settings_about_github">Eeg masharucanka GitHub</string>
     <string name="settings_about_github_url">https://github.com/msalbarho/Quran-Native-New</string>
+    <string name="settings_about_privacy">Siyaasadda Asturnaanta</string>
     <string name="settings_app_version">Nooca app-ka: %1$d (%2$s)</string>
     <string name="settings_contact_email">m.s.albarho@gmail.com</string>
     <string name="settings_about_contact">Xiriir iyo soo jeedin: %1$s</string>

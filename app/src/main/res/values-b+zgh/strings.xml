@@ -267,6 +267,7 @@
     <string name="settings_about_open_source_text">ⴰⵙⵏⴼⴰⵔ ⴰⴷ ⵢⵔⵣⵎ, ⵉⵍⵍⴰ ⵉ ⴽⵓ ⴰⵎⴷⴰⵏ ⴰⴷ ⵙⴳⵉⵙ ⵢⴰⵡⵉ ⵜⴰⵏⴼⴰⵍⵉⵜ, ⴰⴷ ⵜ ⵉⵙⵙⵓⴳⵍ, ⴷ ⴰⴷ ⴳⵉⵙ ⵉⴰⵡⵙ, ⴳ ⵜⵍⴰⵍⵉⵜ ⵏ ⴰⴷⵍⵉⵙ ⵏ ⵍⵍⴰⵀ, ⵙ ⵓⵔⵣⵣⵓ ⵏ ⵜⵎⵢⴰⴳⵜ ⵙⴳ ⵍⵍⴰⵀ.</string>
     <string name="settings_about_github">ⵥⵕ ⴰⵙⵏⴼⴰⵔ ⴳ GitHub</string>
     <string name="settings_about_github_url">https://github.com/msalbarho/Quran-Native-New</string>
+    <string name="settings_about_privacy">ⵜⴰⵙⵔⵜⵉⵜ ⵏ ⵜⵉⵏⵏⵓⵜⵍⴰ</string>
     <string name="settings_app_version">ⵜⵍⴰⵍⵉⵜ ⵏ ⵓⵙⵏⴼⴰⵔ: %1$d (%2$s)</string>
     <string name="settings_contact_email">m.s.albarho@gmail.com</string>
     <string name="settings_about_contact">ⴰⵎⵢⴰⵡⴰⴹ ⴷ ⵜⵉⵙⵉⵖⵉⵏ: %1$s</string>

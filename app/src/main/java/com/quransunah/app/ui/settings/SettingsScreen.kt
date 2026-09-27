@@ -597,6 +597,7 @@ private fun AboutAppDialog(onClose: () -> Unit) {
     val context = LocalContext.current
     val email = stringResource(R.string.settings_contact_email)
     val githubUrl = stringResource(R.string.settings_about_github_url)
+    val privacyUrl = stringResource(R.string.settings_about_privacy_url)
     val displayedVersionName = BuildConfig.VERSION_NAME.removeSuffix("-debug")
     Dialog(onDismissRequest = onClose) {
         Column(
@@ -722,6 +723,27 @@ private fun AboutAppDialog(onClose: () -> Unit) {
                         style = TextStyle(textDirection = bodyScript),
                     )
                 }
+                Text(
+                    text = stringResource(R.string.settings_about_privacy),
+                    color = paper.accent,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Start,
+                    style = TextStyle(textDirection = bodyScript),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable {
+                            runCatching {
+                                context.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse(privacyUrl),
+                                    ),
+                                )
+                            }
+                        }
+                        .padding(vertical = 4.dp),
+                )
             }
         }
         }

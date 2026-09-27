@@ -267,6 +267,7 @@
     <string name="settings_about_open_source_text">Wannan aiki ne mai buɗaɗɗen tushe kuma yana buɗe ga kowa don amfana da shi, haɓaka shi, da ba da gudummawa a ciki domin hidimar Littafin Allah, ina neman lada daga Allah.</string>
     <string name="settings_about_github">Duba sana\'a a GitHub</string>
     <string name="settings_about_github_url">https://github.com/msalbarho/Quran-Native-New</string>
+    <string name="settings_about_privacy">Manufar Sirri</string>
     <string name="settings_app_version">Sigar manhaja: %1$d (%2$s)</string>
     <string name="settings_contact_email">m.s.albarho@gmail.com</string>
     <string name="settings_about_contact">Tuƙanci da shawarwari: %1$s</string>
