@@ -26,10 +26,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import kotlin.math.roundToInt
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -63,11 +67,17 @@ fun MushafAyahLine(
         mutableStateOf(fontManager?.peekUthmanicTypeface())
     }
 
+    var fontsSettled by remember(pageNumber, fontManager) {
+        mutableStateOf(
+            fontManager == null || inspection || fontManager.peekPageTypeface(pageNumber) != null,
+        )
+    }
     LaunchedEffect(pageNumber, fontManager) {
         if (fontManager != null && !inspection) {
             pageFace = fontManager.loadPageTypeface(pageNumber)
             uthmanicFace = fontManager.loadUthmanicTypeface()
         }
+        fontsSettled = true
     }
 
     val glyphSize = when {
@@ -77,19 +87,43 @@ fun MushafAyahLine(
     }
     val glyphColor = if (night) Color.White else Color.Black
     val markerColor = ThemeTokens.AyahMarker
+    val scrollState = rememberScrollState()
+    val anchorWordId = remember { selectedWordId }
+    val fontsReady = pageFace != null || fontsSettled
+    val alignedToAnchor = remember(anchorWordId) { booleanArrayOf(false) }
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         Row(
             modifier = modifier
                 .fillMaxWidth()
                 .heightIn(min = 100.dp)
-                .horizontalScroll(rememberScrollState())
+                .horizontalScroll(scrollState)
                 .padding(horizontal = 4.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             words.forEachIndexed { index, word ->
                 val selected = word.id == selectedWordId && !word.isAyahMarker
+                val alignModifier = if (word.id == anchorWordId && !word.isAyahMarker) {
+                    Modifier.onPlaced { coordinates ->
+                        if (!fontsReady || alignedToAnchor[0]) return@onPlaced
+                        if (scrollState.value != 0) {
+                            alignedToAnchor[0] = true
+                            return@onPlaced
+                        }
+                        val target = startEdgeScrollTarget(
+                            word = coordinates,
+                            viewportWidth = scrollState.viewportSize,
+                            maxValue = scrollState.maxValue,
+                        )
+                        if (target == null) return@onPlaced
+                        alignedToAnchor[0] = true
+                        val delta = target - scrollState.value
+                        if (delta != 0) scrollState.dispatchRawDelta(delta.toFloat())
+                    }
+                } else {
+                    Modifier
+                }
                 MushafAyahWordGlyph(
                     word = word,
                     previous = words.getOrNull(index - 1),
@@ -104,6 +138,7 @@ fun MushafAyahLine(
                     highlight = paper.ayahHighlight,
                     accent = paper.accent,
                     onSelect = { onSelectWord(word) },
+                    modifier = alignModifier,
                 )
             }
         }
@@ -125,6 +160,7 @@ private fun MushafAyahWordGlyph(
     highlight: Color,
     accent: Color,
     onSelect: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val remapped = remember(word.textLigature, pageNumber, fontManager) {
         if (word.textLigature.isBlank() || fontManager == null) {
@@ -173,7 +209,7 @@ private fun MushafAyahWordGlyph(
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .padding(horizontal = 1.dp)
             .clip(shape)
             .then(
@@ -239,6 +275,28 @@ private fun MushafAyahWordGlyph(
             }
         }
     }
+}
+
+private fun startEdgeScrollTarget(
+    word: LayoutCoordinates,
+    viewportWidth: Int,
+    maxValue: Int,
+): Int? {
+    if (!word.isAttached || viewportWidth <= 0 || maxValue == Int.MAX_VALUE) return null
+    var current = word
+    var content: LayoutCoordinates? = null
+    while (true) {
+        val parent = current.parentLayoutCoordinates ?: break
+        if (!parent.isAttached) return null
+        if (parent.size.width == viewportWidth && current.size.width >= viewportWidth) {
+            content = current
+            break
+        }
+        current = parent
+    }
+    val scrollContent = content ?: return null
+    val wordRight = scrollContent.localPositionOf(word, Offset.Zero).x + word.size.width
+    return (scrollContent.size.width - wordRight).roundToInt().coerceIn(0, maxValue)
 }
 
 @Composable

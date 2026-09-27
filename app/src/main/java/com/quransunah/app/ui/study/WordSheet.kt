@@ -406,12 +406,12 @@ fun WordSheetContent(
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         CircleControl(
-                            enabled = canPrev,
-                            onClick = onPrevAyah,
+                            enabled = canNext,
+                            onClick = onNextAyah,
                             background = paper.pageBody,
                             border = paper.tone500,
                             size = 36.dp,
-                            contentDescription = stringResource(R.string.word_prev_word),
+                            contentDescription = stringResource(R.string.word_next_word),
                         ) {
                             SkipControlIcon(pointingRight = false, tint = paper.accent)
                         }
@@ -440,12 +440,12 @@ fun WordSheetContent(
                         }
                         Spacer(Modifier.size(8.dp))
                         CircleControl(
-                            enabled = canNext,
-                            onClick = onNextAyah,
+                            enabled = canPrev,
+                            onClick = onPrevAyah,
                             background = paper.pageBody,
                             border = paper.tone500,
                             size = 36.dp,
-                            contentDescription = stringResource(R.string.word_next_word),
+                            contentDescription = stringResource(R.string.word_prev_word),
                         ) {
                             SkipControlIcon(pointingRight = true, tint = paper.accent)
                         }
