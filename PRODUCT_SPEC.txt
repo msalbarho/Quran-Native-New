@@ -1,0 +1,660 @@
+================================================================================
+PRODUCT SPECIFICATION
+القرآن الكريم  /  Holy Quran
+Complete Recitation & Listening Companion
+Version 4.1.6
+================================================================================
+
+Document type : Product, functional, visual, and architectural specification
+Audience      : Product, design, and systems stakeholders
+Language      : English body with Arabic product terminology as used in the
+                shipped interface
+Constraint    : This document describes capabilities, experience, and data
+                architecture. It does not name programming languages,
+                application frameworks, or software libraries.
+
+
+--------------------------------------------------------------------------------
+1. APPLICATION OVERVIEW & IDENTITY
+--------------------------------------------------------------------------------
+
+1.1 Official names
+
+  In-app and Arabic launcher name
+      القرآن الكريم
+
+  English launcher / store fallback
+      Holy Quran
+
+  Long store title (Arabic)
+      القرآن الكريم كاملاً - استماع وتلاوة
+
+  Long store title (English)
+      Holy Quran - Audio & Recitation
+
+  The interface itself is Arabic-only. Numerals in chrome, indexes, page
+  pickers, and counts are rendered as Eastern Arabic digits. Layout direction
+  is right-to-left from the first painted frame.
+
+1.2 Branding intent
+
+  The product presents itself as a complete, trustworthy digital mushaf — not
+  as a social reader, not as a study dashboard, and not as a multi-religion
+  toolkit. Visual identity is a circular Arabic calligraphic emblem of
+  «القرآن الكريم» on a pure black field, with cyan / teal diacritic accents on
+  the launcher mark. The launch image carries the same emblem plus the line
+  «تلاوة و استماع», stating the two equal pillars of the product: recitation
+  (reading the printed Medina page) and listening (full-surah and verse audio).
+
+  Status-bar and media-notification marks are white stencil calligraphy on a
+  transparent field so they remain legible on both light and dark system bars.
+
+1.3 Core vision
+
+  Deliver a printed-mushaf-faithful 604-page Medina page experience, fully
+  usable offline for reading, with optional high-quality recitation that
+  continues when the device is locked, in the background, or connected to a
+  vehicle head unit. Every interaction — page turn, word tap, index jump,
+  verse share — must feel native, immediate, and reverent.
+
+  The work is offered as an act of worship and a gift to the Muslim community.
+  The in-app “About” statement frames the product as open for reuse in service
+  of the Qur’an, and invites du‘a. Contact for suggestions:
+  m.s.albarho@gmail.com
+
+1.4 Target audience
+
+  Primary
+      Arabic-reading Muslims who want a daily mushaf on a phone: accurate
+      page layout, tajweed-colored glyphs, and recitation without accounts,
+      feeds, or English UI chrome.
+
+  Secondary
+      Drivers using a vehicle media screen who need large, glanceable surah
+      and reciter lists and simple playback controls.
+
+  Tertiary
+      Learners who long-press a word for meaning, tafsir, word audio, verse
+      audio, bookmarking, and share-as-image / share-as-video.
+
+  Device class assumed in quality targets: contemporary Android phones
+  (including mid-range 6.7" class such as Galaxy A72), portrait-first, with
+  support for light and dark system appearance.
+
+1.5 Design philosophy
+
+  Dark royal aesthetic
+      Launch, adaptive icon field, and media-session chrome sit on #000000.
+      Ornament is restrained: eight-pointed star / girih geometry, thin gold
+      or theme-tinted frames, never busy wallpaper behind the page itself.
+
+  High legibility
+      Body UI type is a classical Arabic naskh family (Amiri). Mushaf pages
+      never substitute a generic Arabic font for the page glyphs. Contrast
+      between glyph, ayah marker, and paper tone is maintained across eight
+      paper palettes and an independent night mode.
+
+  Clean spatial arrangement
+      A single content column, generous but not wasteful gutters, a curved
+      five-slot bottom navigation, and a compact page header that appears
+      only when chrome is revealed. No persistent hamburger, no stacked
+      toolbars, no competing side drawers during reading.
+
+  RTL-first
+      Reading order, swipe direction, index lists, audio pickers, and
+      automotive browse trees assume Arabic. Page 1 is the first Medina
+      page; a swipe toward the leading edge (visually right in RTL) moves
+      toward later pages in the printed order, matching physical mushaf
+      muscle memory.
+
+
+--------------------------------------------------------------------------------
+2. VISUAL DESIGN & INTERFACE SYSTEM
+--------------------------------------------------------------------------------
+
+2.1 Visual system
+
+  Launch / icon field
+      Background           #000000
+      Emblem               circular calligraphy, cyan–teal accents
+      Safe zone            adaptive launcher art is scaled so every opaque
+                           pixel of the emblem lies inside the central 66 dp
+                           circle of a 108 dp layer, so OEM masks never clip
+                           the calligraphy tips.
+
+  Reading paper palettes (user-selectable, apply to mushaf chrome and page
+  body; independent of night mode)
+
+      أبيض ناصع   White
+      بيج         Beige  (default)
+      أزرق        Blue
+      أخضر        Green
+      بنفسجي      Purple
+      وردي        Rose
+      فيروزي      Teal
+      عنبري       Amber
+
+  Night mode
+      Inverts paper to a deep charcoal family while keeping glyph contrast.
+      Surah-name color glyphs in lists and the audio title are inverted to
+      white so they remain readable on dark cards.
+
+  Ornament
+      Header bars, page-number discs, surah name frames, hizb / sajdah
+      badges, bottom navigation, and audio player shells share a geometric
+      frame language (star tile, multiply-blended chrome fill). Audio player
+      and verse playback bar may carry a subtle repeating girih field.
+
+  Iconography
+      Custom Quran mark for the reading tab; list, bookmark, and settings
+      marks in the remaining slots. Reciter portraits exist as cropped
+      circular stills for automotive artwork. Each of the 114 surahs has a
+      dedicated calligraphic still for vehicle browse cards.
+
+2.2 Instant launch and seamless splash
+
+  Goal
+      From launcher tap to the first fully painted mushaf page, the user
+      must never see a black empty window, a default application icon in the
+      center of the screen, a spinner, or a “loading…” sentence.
+
+  Cold-start sequence
+
+      1. System launch surface
+         On modern Android (API 31+), the operating-system splash uses the
+         same black field and the same full splash artwork as the activity
+         window. Exit of that system splash is instantaneous (no fade to
+         white or to an empty activity).
+
+      2. Activity window
+         The window background is the full-bleed launch image
+         («القرآن الكريم / تلاوة و استماع» on black), cropped to fill.
+
+      3. First web paint
+         Before application styles apply, the document background is
+         #000000. A static full-screen image identical to the native splash
+         covers the viewport at the maximum stacking level.
+
+      4. Hydration gate
+         The overlay is held until:
+             - the word-level mushaf database is open and page metadata is
+               available, and
+             - the QCF4 page typeface for the restored page (or page 1) is
+               loaded and the first page panel can paint without glyph swap.
+         Database failure removes the overlay so an error and retry control
+         can appear. A safety timeout (approximately eight seconds) prevents
+         a stuck overlay.
+
+      5. Handoff
+         Native splash auto-hide duration is zero; there is no spinner.
+         When the gate opens, overlays are removed with zero fade. The user
+         should perceive a single continuous black splash that becomes the
+         mushaf.
+
+  Warm start
+      Last page number and last primary tab (reading vs listening) are
+      restored from local preferences so the splash hands off onto the
+      same place the user left.
+
+2.3 Screen views and layouts
+
+  2.3.1 Shell
+
+      Two primary tabs, five bottom-bar actions:
+
+          الفهرس          Index (surahs / juz / hizb)
+          القرآن الكريم   Reading (Medina pages)
+          الاستماع        Listening (surah audio)
+          آخر موضع        Saved reading positions
+          الإعدادات       Settings
+
+      The bar is a shallow curved capsule. The active item is emphasized
+      with a sliding bubble. A tap on empty page area toggles chrome
+      (header + bottom bar) together: both slide and fade. On the listening
+      tab the bar stays visible. Header is fixed to the top of the screen
+      and does not scroll with ayah lines.
+
+  2.3.2 Tajweed mushaf page view (default: صفحات مصحف المدينة)
+
+      Full-bleed digital facsimile of the King Fahd Complex printed page:
+
+          - 604 pages, typical 15 lines.
+          - Line types: surah name band, basmalah, ayah line, empty.
+          - Each visible word is a private-use ligature from the QCF4 Hafs
+            bundle mapped to that page, preserving tajweed coloring encoded
+            in the typeface.
+          - 47 Hafs face files plus a dedicated basmalah face are mapped so
+            consecutive pages that share a face reuse the same loaded file.
+          - Surah openings use a framed name ligature (QCF full-surah color
+            face) with revelation place (مكية / مدنية) and ayah count
+            (عدد الآيات N) as readable meta, not as part of the glyph.
+          - Quarter-hizb badges (ربع، نصف، ثلاثة أرباع، بداية الحزب) and
+            sajdah marks sit in the printed positions.
+          - Page number sits in a circular disc; juz name uses a matching
+            decorative face.
+
+      Adjacent pages (previous / current / next) are composed in a
+      horizontal track so a flip never waits on a blank panel.
+
+  2.3.3 Text mushaf (المصحف النصي)
+
+      Same pagination and word identity, but lines reflow as continuous
+      readable text using a Uthmanic Hafs face. User-controlled size from
+      20 px to 34 px in 0.5 px steps (default 25 px). Size control is
+      disabled while Medina pages are selected, with an explanatory hint.
+
+  2.3.4 Listening screen
+
+      Reciter grid, surah list with the same QCF surah-name ligatures as
+      the index, download range controls, repeat mode, and a full-screen
+      player. Player title is the surah ligature with enough vertical
+      measure that diacritics are not clipped. A compact restore bar
+      appears on the reading tab if a surah is still playing.
+
+  2.3.5 Overlays (modals / sheets)
+
+      Index, page jump, ayah search, bookmarks, settings, about, word
+      sheet, meaning popover, tafsir sheet, verse playback bar, reciter
+      pickers, onboarding, and first-read coach mark. All are Arabic,
+      dismissible by backdrop tap or the close label «إغلاق».
+
+
+--------------------------------------------------------------------------------
+3. CORE FEATURES & FUNCTIONAL SPECIFICATIONS
+--------------------------------------------------------------------------------
+
+3.1 Quran page viewer engine
+
+  Pagination
+      Strict 1…604 Medina pagination. Invalid stored pages are clamped.
+      Jump via header page disc, numeric page picker (with range hint),
+      index (surah start page, juz, hizb), search result, or bookmark.
+
+  Horizontal flipping
+      Pointer-driven horizontal panning of a three-panel track.
+      Commit threshold approximately 50 px; drag begins after 8 px of
+      horizontal motion. Slide settle approximately 280 ms.
+      First/last page apply edge resistance rather than looping.
+      Composition is hardware-accelerated; panels keep a stable width so
+      line wrapping does not shift during the gesture (zero layout shift).
+
+  Vertical rubber-banding
+      The reading viewport does not bounce or stretch vertically. Vertical
+      motion is ignored for paging. If the user starts a vertical drag, the
+      horizontal page gesture is cancelled so the system does not fight the
+      finger. The page is a fitted panel, not a scrolling document, in
+      Medina mode.
+
+  Offline rendering
+      All 604 pages, word glyphs, meanings index, tafsir store, and typeface
+      files ship inside the application package. No network is required to
+      open a page, search text, or read tafsir. Word audio prefers a local
+      file and falls back to a remote word-by-word source when absent.
+
+  Word-level mapping
+      Every painted token is a word record: identifier, surah, ayah, word
+      index, QCF ligature (display), and Uthmanic Hafs string (search,
+      bookmark snippet, share, audio titles). Ayah-end markers are distinct
+      tokens. Unicode private-use code points in the ligature field map
+      one-to-one onto the loaded page face so alignment matches the printed
+      line.
+
+  Prefetch
+      Current page face loads first; previous and next faces preload. A
+      small least-recently-used cache of page faces (about twelve) is kept
+      so memory stays bounded on mid-range devices.
+
+3.2 Word, verse, and study interactions
+
+  Short tap on a word that has a gloss
+      Meaning popover anchored to the word.
+
+  Long press (about 450 ms; cancelled if the finger moves more than 10 px)
+      Word sheet: location (surah / ayah / word index), word audio with
+      previous/next ayah, save ayah as a reading position, play/pause the
+      full verse with reciter choice, tafsir, share as still image, share
+      as video (range of at most 10 consecutive ayahs, reciter required).
+
+  Tafsir
+      Loaded on demand from a separate packaged commentary store and
+      released when the sheet closes to keep memory small.
+
+  Search
+      Full-text over Hafs strings, or a reference of the form «سورة:آية»
+      (Western or Eastern digits). Results show snippet, surah, ayah, and
+      page, and jump the viewer with a highlight.
+
+3.3 Audio and background playback engine
+
+  Two recitation domains
+
+      Surah recitation (listening tab)
+          Full-surah files from the selected reciter’s mushaf server.
+          Play, pause, stop, seek, previous/next surah, repeat off / repeat
+          one surah / play all remaining surahs in order.
+          Optional download of a surah range into on-device cache; cached
+          playback is labeled «يُشغَّل من التخزين المحلي».
+          Reciter catalog is packaged with the application.
+
+      Verse recitation (from the word sheet)
+          Per-ayah reciters (separate catalog). Previous/next ayah while
+          the verse bar is open. Word-level pronunciation uses the word
+          audio sources described above.
+
+  Continuity
+      A foreground media session keeps audio alive when the screen is off,
+      another application is in front, or the user leaves the reading tab.
+      Lock-screen and shade controls expose play/pause/skip. Audio focus is
+      requested and abandoned correctly so navigation prompts and calls
+      interrupt recitation politely.
+
+  Errors
+      Distinct copy for offline-without-cache, missing file, and generic
+      play failure — never a blank player.
+
+3.4 Automotive / external display (Android Auto)
+
+  Headless playback
+      Vehicle browse and playback do not depend on the phone UI being
+      visible. Audio is prepared and played by the device’s native media
+      session so driving use remains reliable if the phone activity is
+      sent to the background.
+
+  Browse tree (Arabic labels, RTL)
+
+      Root
+          القراء     reciters → reciter → list of 114 surahs
+          السور      flat list of 114 playable surahs
+
+  Controls optimized for driving
+      Play, pause, skip to adjacent surah, and selection from the two
+      trees. Artwork: reciter stills and per-surah calligraphic cards.
+      No reading of the mushaf page, no word sheets, no settings — glance
+      and control only.
+
+  Wake policy
+      If the phone activity is started only to satisfy the vehicle
+      connection, it is moved to the background after a short delay so the
+      car screen remains the user’s focus.
+
+3.5 Sharing
+
+  Still image
+      Composed ayah card: surah ligature, Arabic text, optional basmalah,
+      branded layout, handed to the system share sheet.
+
+  Video
+      Timed recitation over a composed card, ayah range clamped to ten
+      verses, duration expected under five minutes. User is warned to wait
+      during encode. Cancellation of the system share sheet is not treated
+      as an error.
+
+3.6 First-run experience
+
+  Six-step onboarding (skippable after completion, stored locally):
+
+      1. Welcome to the Medina 604-page mushaf.
+      2. Horizontal swipe; tap to reveal chrome; tap page number to jump.
+      3. Printed-page fidelity: centered page numbers, quarter-hizb marks.
+      4. Listening tab for full surahs; long-press a word to play a verse.
+      5. Meanings, tafsir, word/verse audio, save, share.
+      6. Download surahs for offline listening.
+
+  After onboarding, a one-time coach mark on the page: long-press words.
+
+3.7 Permissions
+
+  Network for streaming and downloads; notifications for media; wake lock
+  and foreground media playback for background audio. Onboarding’s final
+  step requests what the platform requires. Failure to grant does not
+  block reading.
+
+
+--------------------------------------------------------------------------------
+4. USER EXPERIENCE (UX) & INTERACTIONS
+--------------------------------------------------------------------------------
+
+4.1 Touch gestures
+
+  Horizontal pan          Turn pages (see 3.1).
+  Vertical axis           Does not page; cancels an in-progress horizontal
+                          page drag so there is no diagonal “smear.”
+  Single tap on page      Toggle header + bottom navigation.
+  Long-press word         Word sheet.
+  Short tap glossed word  Meaning popover.
+  Long-press surah frame  Open surah index.
+  Long-press juz / hizb   Open divisions index.
+  Drag on player / verse  Reposition floating control bars.
+  bar handle
+
+  Interactive chrome (pickers, sheets, buttons) is excluded from page-swipe
+  hit testing.
+
+4.2 Instant app state and local caching
+
+  Restored on launch
+      Last Medina page, last primary tab, color palette, night/day, Medina
+      vs text mode, text-mode font size, onboarding and coach-mark flags.
+
+  Reading positions
+      Multiple ayah bookmarks with Hafs snippet, surah, ayah, page. Created
+      from the word sheet; listed under «آخر موضع»; jump or delete.
+
+  Audio
+      Cached surah files remain until the user replaces storage. Repeat
+      mode and last reciter persist for the listening session.
+
+  Databases
+      Packaged mushaf, tafsir, and marker stores are copied into local
+      application storage on first run and version-stamped so a later
+      package can replace them without corrupting user bookmarks.
+
+4.3 Settings and customization
+
+  لون التطبيق          Eight paper palettes (section 2.1).
+  نوع عرض الصفحات      Medina pages vs text mushaf.
+  حجم خط المصحف        20–34 px, text mushaf only.
+  الوضع الليلي/النهاري Toggle in the page header.
+  حول التطبيق          Dedication, reuse invitation, contact.
+
+  No language switcher: the product is Arabic-only by design.
+
+4.4 Motion and feedback
+
+  Page settle 280 ms; overlay open uses a single frame to attach then
+  transitions in; chrome show/hide is a coordinated slide+fade. No
+  gratuitous parallax. Errors are inline Arabic sentences with retry
+  where recovery is possible.
+
+4.5 Accessibility notes
+
+  Icon-only controls have Arabic names. Ligature-only titles expose a
+  textual aria-label (surah name). Dialogs are modal with explicit close.
+  The product does not yet claim full talkback reading of QCF ligature
+  pages; Hafs strings back search and bookmarks for that reason.
+
+
+--------------------------------------------------------------------------------
+5. DATABASE & ASSET DATA ARCHITECTURE
+--------------------------------------------------------------------------------
+
+5.1 Packaged data stores
+
+  Primary mushaf store (word-level)
+      Tables conceptually include:
+
+          words
+              word identity, surah, ayah, position in ayah,
+              Uthmanic Hafs UTF-8, QCF ligature, ayah-marker flag.
+              Indexed by word id and by (surah, ayah).
+
+          mushaf_pages
+              page number, line number, line type (surah_name, basmallah,
+              ayah, empty), centering flag, first/last word id spanning
+              the line, optional surah id on the line.
+              Indexed by page and by word range so a page is a contiguous
+              slice of the word stream.
+
+          surahs
+              1–114, Arabic name, ayah count, revelation type
+              (Meccan / Medinan), used with a derived start page.
+
+          divisions
+              juz (30), hizb (60), and related quarter metadata:
+              start/end surah–ayah, labels, optional page hints.
+
+          page_meta
+              page → juz number, hizb number (fast header lookup).
+
+          mushaf_editions
+              edition identity (Medina 15-line, 604 pages).
+
+  Marker store (separate, small)
+      Quarter-hizb (rub) rows: first verse key, printed Arabic label
+      (بداية الحزب، ربع الحزب، نصف الحزب، ثلاثة أرباع الحزب).
+      Sajdah rows: verse key, obligatory vs recommended.
+      Joined to pages through the word/page map so badges sit on the
+      correct line.
+
+  Tafsir store (separate, loaded lazily)
+      Per-ayah commentary. Opened when the user requests tafsir; closed
+      when the sheet is dismissed.
+
+5.2 Derived and packaged sidecars
+
+  QCF4 face map
+      Page 1–604 → one of 47 Hafs face identifiers (plus a basmalah face).
+      Consecutive pages share a face, so the loader requests files, not
+      604 unique faces.
+
+  Surah-name ligature maps
+      Code point tables for the page-header / list surah face.
+
+  Juz-name ligature map
+      Decorative juz labels in the header.
+
+  Reciter catalogs
+      Full-surah reciters (listening + automotive) and per-ayah reciters
+      (verse bar), including stream bases and which surahs each mushaf
+      covers.
+
+  Meanings
+      Gloss strings attached to words that have them; indexed after the
+      primary store is ready.
+
+  Search index
+      Built in the background over Hafs text for prefix and phrase query.
+
+5.3 Vectorized typography and asset management
+
+  Page faces (QCF4 Hafs)
+      Compact webfont files, one per shared face, loaded on demand,
+      cached with a hard cap, trimmed when the user moves far away.
+      Ligatures occupy a private-use Unicode range reserved for this
+      mushaf; the renderer never synthesizes missing glyphs from a
+      fallback Arabic face on Medina pages.
+
+  UI faces
+      Amiri regular/bold for chrome.
+      Uthmanic Hafs for text mushaf, search snippets, audio fallback
+      titles, and bookmark excerpts.
+      Surah-name color face for frames, index cards, audio title.
+      Juz decorative face for header juz.
+
+  Imagery
+      Launch still, adaptive launcher layers, notification stencil,
+      114 surah stills for the vehicle, reciter portraits, geometric
+      frames drawn as resolution-independent paths rather than heavy
+      bitmaps in scrolling lists.
+
+  Audio
+      Optional on-device surah cache keyed by reciter and surah.
+      Word audio: local package first, remote word-by-word second.
+
+  Memory posture
+      One primary store in memory for reading; tafsir not resident until
+      asked; page faces LRU; marker store is tiny; vehicle playback uses
+      the same packaged reciter list and surah metadata without opening
+      the reading renderer.
+
+5.4 Integrity and versioning
+
+  Mushaf package version and tafsir package version are independent.
+  Installing a newer application replaces packaged stores when the
+  version stamp changes. User bookmarks, preferences, and downloaded
+  surah files survive across those replacements.
+
+  Page construction is a join: page lines → word id range → ligature +
+  Hafs + meaning. Header juz/hizb comes from page_meta with a
+  deterministic fallback from page number if meta is missing. A small
+  set of known printed-page surah-boundary overrides keeps index labels
+  aligned with the physical mushaf.
+
+
+--------------------------------------------------------------------------------
+6. INFORMATION ARCHITECTURE (SUMMARY MAP)
+--------------------------------------------------------------------------------
+
+  Launch splash (black, branded still)
+        │
+        ▼
+  Reading tab (default)                    Listening tab
+    Medina or text page                      Reciter + surah + player
+    Header: juz, surah, page, search,        Downloads + repeat
+            day/night
+    Chrome reveal on tap
+        │
+        ├── Index: surahs | juz & hizb
+        ├── Page number picker
+        ├── Ayah search
+        ├── Bookmarks
+        ├── Settings: palette, page mode,
+        │             text size, about
+        └── Word long-press
+              meaning, tafsir, word audio,
+              verse audio, bookmark, share
+
+  Vehicle media
+        القراء → reciter → surahs
+        السور  → 114 tracks
+        play / pause / skip
+
+
+--------------------------------------------------------------------------------
+7. NON-GOALS (CURRENT PRODUCT BOUNDARY)
+--------------------------------------------------------------------------------
+
+  - Multi-language UI (English chrome is not offered).
+  - User accounts, cloud sync, or social features.
+  - Translation-as-primary-reading-mode (meanings and tafsir are
+    supporting, not a parallel mushaf).
+  - Editing or annotating the rasm.
+  - Video recitation inside the reader (share-as-video is an export).
+  - Non-Hafs riwayat as a page renderer (audio mushafs may vary; the
+    painted page is Hafs Medina).
+
+
+--------------------------------------------------------------------------------
+8. QUALITY BAR (EXPERIENCE ACCEPTANCE)
+--------------------------------------------------------------------------------
+
+  Cold start from the launcher icon shows the branded black still until
+  the mushaf page is paintable; no centered default icon, no empty black
+  flash, no loading sentence.
+
+  A full swipe between pages does not reflow lines, does not bounce
+  vertically, and does not flash a missing typeface.
+
+  Background surah audio survives screen-off and app-switch; vehicle
+  browse plays without requiring the reading screen.
+
+  Long-press on any word on a populated page opens the word sheet within
+  one gesture; tafsir appears without leaving the page.
+
+  Changing palette or night mode never resets the current page or the
+  playback position.
+
+
+================================================================================
+END OF PRODUCT SPECIFICATION
+================================================================================

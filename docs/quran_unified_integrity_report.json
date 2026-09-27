@@ -1,0 +1,1024 @@
+{
+  "output": "/mnt/data/quran_unified.db",
+  "checks": {
+    "foreign_key_violations": 0,
+    "integrity_check": "ok",
+    "quick_check": "ok",
+    "ayah_count": 6236,
+    "word_count": 83668,
+    "meaning_count": 6109,
+    "tafsir_count": 6236,
+    "quran_text_count": 6236,
+    "sajdah_count": 15,
+    "division_count": 271,
+    "division_ranges_count": 313,
+    "hash_quran_final_surahs": true,
+    "hash_quran_final_ayahs": true,
+    "hash_quran_final_words": true,
+    "hash_quran_final_meanings": true,
+    "hash_quran_final_mushaf_pages": true,
+    "hash_quran_final_divisions": true,
+    "hash_quran_final_mushaf_editions": true,
+    "hash_quran_tafsir_quran_text": true,
+    "hash_quran_tafsir_arabic_muyassar": true,
+    "juz_count_ok": true,
+    "hizb_count_ok": true,
+    "rub_all_mapped": true,
+    "marker_number_nonnull": 240,
+    "source_file_sha256": {
+      "quran_final": "38caa900404d90d60ee9e697bf979b8fce66a4a921825747054de593d78601df",
+      "quran_tafsir": "4ff83f8ed45474e0c391f98eb6bad40e31ebcbfe448b4ef4b106645a9094d5d5",
+      "quran_markers": "e279a615e2e4eb1649ea8a8b9ae22de6cb67a3197ccff680a95c8f604256262c"
+    },
+    "all_critical_checks_pass": true,
+    "count_surahs": 114,
+    "count_ayahs": 6236,
+    "count_words": 83668,
+    "count_meanings": 6109,
+    "count_mushaf_pages": 9046,
+    "count_divisions": 271,
+    "count_mushaf_editions": 1,
+    "count_quran_text": 6236,
+    "count_tafsir_muyassar": 6236,
+    "count_marker_juz": 30,
+    "count_marker_hizb": 60,
+    "count_sajdah": 15,
+    "count_division_ranges": 313,
+    "rub_exact_preserved": true,
+    "rub_rows": 240,
+    "rub_ranges": 313,
+    "marker_juz_rows": 30,
+    "marker_hizb_rows": 60
+  },
+  "source_tables": [
+    {
+      "source_name": "quran_final",
+      "source_file": "/mnt/data/quran_final.db",
+      "source_sha256": "38caa900404d90d60ee9e697bf979b8fce66a4a921825747054de593d78601df",
+      "table_name": "ayahs",
+      "source_row_count": 6236,
+      "represented_row_count": 6236,
+      "status": "OK",
+      "notes": ""
+    },
+    {
+      "source_name": "quran_final",
+      "source_file": "/mnt/data/quran_final.db",
+      "source_sha256": "38caa900404d90d60ee9e697bf979b8fce66a4a921825747054de593d78601df",
+      "table_name": "meanings",
+      "source_row_count": 6109,
+      "represented_row_count": 6109,
+      "status": "OK",
+      "notes": ""
+    },
+    {
+      "source_name": "quran_final",
+      "source_file": "/mnt/data/quran_final.db",
+      "source_sha256": "38caa900404d90d60ee9e697bf979b8fce66a4a921825747054de593d78601df",
+      "table_name": "words",
+      "source_row_count": 83668,
+      "represented_row_count": 83668,
+      "status": "OK",
+      "notes": ""
+    },
+    {
+      "source_name": "quran_final",
+      "source_file": "/mnt/data/quran_final.db",
+      "source_sha256": "38caa900404d90d60ee9e697bf979b8fce66a4a921825747054de593d78601df",
+      "table_name": "surahs",
+      "source_row_count": 114,
+      "represented_row_count": 114,
+      "status": "OK",
+      "notes": ""
+    },
+    {
+      "source_name": "quran_final",
+      "source_file": "/mnt/data/quran_final.db",
+      "source_sha256": "38caa900404d90d60ee9e697bf979b8fce66a4a921825747054de593d78601df",
+      "table_name": "mushaf_pages",
+      "source_row_count": 9046,
+      "represented_row_count": 9046,
+      "status": "OK",
+      "notes": ""
+    },
+    {
+      "source_name": "quran_final",
+      "source_file": "/mnt/data/quran_final.db",
+      "source_sha256": "38caa900404d90d60ee9e697bf979b8fce66a4a921825747054de593d78601df",
+      "table_name": "divisions",
+      "source_row_count": 271,
+      "represented_row_count": 271,
+      "status": "OK",
+      "notes": ""
+    },
+    {
+      "source_name": "quran_final",
+      "source_file": "/mnt/data/quran_final.db",
+      "source_sha256": "38caa900404d90d60ee9e697bf979b8fce66a4a921825747054de593d78601df",
+      "table_name": "mushaf_editions",
+      "source_row_count": 1,
+      "represented_row_count": 1,
+      "status": "OK",
+      "notes": ""
+    },
+    {
+      "source_name": "quran_tafsir",
+      "source_file": "/mnt/data/quran_tafsir.db",
+      "source_sha256": "4ff83f8ed45474e0c391f98eb6bad40e31ebcbfe448b4ef4b106645a9094d5d5",
+      "table_name": "arabic_muyassar",
+      "source_row_count": 6236,
+      "represented_row_count": 6236,
+      "status": "OK",
+      "notes": ""
+    },
+    {
+      "source_name": "quran_tafsir",
+      "source_file": "/mnt/data/quran_tafsir.db",
+      "source_sha256": "4ff83f8ed45474e0c391f98eb6bad40e31ebcbfe448b4ef4b106645a9094d5d5",
+      "table_name": "quran_text",
+      "source_row_count": 6236,
+      "represented_row_count": 6236,
+      "status": "OK",
+      "notes": ""
+    },
+    {
+      "source_name": "quran_markers",
+      "source_file": "/mnt/data/quran-markers.sqlite",
+      "source_sha256": "e279a615e2e4eb1649ea8a8b9ae22de6cb67a3197ccff680a95c8f604256262c",
+      "table_name": "juz",
+      "source_row_count": 30,
+      "represented_row_count": 30,
+      "status": "OK",
+      "notes": ""
+    },
+    {
+      "source_name": "quran_markers",
+      "source_file": "/mnt/data/quran-markers.sqlite",
+      "source_sha256": "e279a615e2e4eb1649ea8a8b9ae22de6cb67a3197ccff680a95c8f604256262c",
+      "table_name": "hizb",
+      "source_row_count": 60,
+      "represented_row_count": 60,
+      "status": "OK",
+      "notes": ""
+    },
+    {
+      "source_name": "quran_markers",
+      "source_file": "/mnt/data/quran-markers.sqlite",
+      "source_sha256": "e279a615e2e4eb1649ea8a8b9ae22de6cb67a3197ccff680a95c8f604256262c",
+      "table_name": "rub",
+      "source_row_count": 240,
+      "represented_row_count": 240,
+      "status": "OK",
+      "notes": "Confirmed duplicate: 240 rub boundaries map one-to-one to canonical divisions; labels/counts/ranges retained."
+    },
+    {
+      "source_name": "quran_markers",
+      "source_file": "/mnt/data/quran-markers.sqlite",
+      "source_sha256": "e279a615e2e4eb1649ea8a8b9ae22de6cb67a3197ccff680a95c8f604256262c",
+      "table_name": "sajda",
+      "source_row_count": 15,
+      "represented_row_count": 15,
+      "status": "OK",
+      "notes": ""
+    }
+  ],
+  "merge_audit": [
+    {
+      "id": 1,
+      "source_name": "quran_markers",
+      "source_table": "rub",
+      "action": "DEDUPLICATED",
+      "reason": "Confirmed exact duplicate of the 240 canonical quarter boundaries already present in divisions. The original rub metadata is retained as marker_number/marker_label/verse_count and normalized division_ranges.",
+      "represented_by": "divisions + division_ranges"
+    },
+    {
+      "id": 2,
+      "source_name": "quran_markers",
+      "source_table": "juz",
+      "action": "RETAINED",
+      "reason": "Not deduplicated: marker juz boundaries are different from quran_final divisions and are retained verbatim.",
+      "represented_by": "marker_juz"
+    },
+    {
+      "id": 3,
+      "source_name": "quran_markers",
+      "source_table": "hizb",
+      "action": "RETAINED",
+      "reason": "Not deduplicated: marker hizb boundaries are different from quran_final divisions and are retained verbatim.",
+      "represented_by": "marker_hizb"
+    }
+  ],
+  "schema": {
+    "surahs": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "name_arabic",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "number_of_ayahs",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "revelation_type",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "ayahs": [
+      {
+        "cid": 0,
+        "name": "global_ayah_index",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "surah_id",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "ayah_number",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "words": [
+      {
+        "cid": 0,
+        "name": "word_id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "surah_id",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "ayah_number",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "word_position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "text_hafs",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "is_ayah_marker",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "qpc_ligature",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "meanings": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "ayah_id",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "word",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "text",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "mushaf_editions": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "name",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "number_of_pages",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "lines_per_page",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "font_name",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "mushaf_pages": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "mushaf_id",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "page_number",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "line_number",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "line_type",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "is_centered",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "first_word_index",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "last_word_index",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "surah_id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "divisions": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "division_type",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "division_type_id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "division_number",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "start_surah",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "start_ayah",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "end_surah",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "end_ayah",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "name",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "quarter_number",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "quarter_type_label",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 11,
+        "name": "page_id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 12,
+        "name": "end_page_number",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 13,
+        "name": "ayah_id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 14,
+        "name": "mark",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 15,
+        "name": "hex_str",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 16,
+        "name": "parent_id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 17,
+        "name": "verse_count",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 18,
+        "name": "marker_number",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 19,
+        "name": "marker_label",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 20,
+        "name": "marker_hizb_number",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 21,
+        "name": "marker_quarter_type_label",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "quran_text": [
+      {
+        "cid": 0,
+        "name": "index",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "sura",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "aya",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "text",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "tafsir_muyassar": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "sura",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "aya",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "text",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "division_ranges": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "division_id",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "range_order",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "surah_id",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "start_ayah",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "end_ayah",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "marker_juz": [
+      {
+        "cid": 0,
+        "name": "juz_number",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "verses_count",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "first_verse_key",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "last_verse_key",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "verse_mapping",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "marker_hizb": [
+      {
+        "cid": 0,
+        "name": "hizb_number",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "verses_count",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "first_verse_key",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "last_verse_key",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "verse_mapping",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "sajdah": [
+      {
+        "cid": 0,
+        "name": "sajdah_number",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "verse_key",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "surah_id",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "ayah_number",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "sajdah_type",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "integrity_report": [
+      {
+        "cid": 0,
+        "name": "source_name",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 1,
+        "name": "source_file",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "source_sha256",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "table_name",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "source_row_count",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "represented_row_count",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "status",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "notes",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "merge_audit": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "source_name",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "source_table",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "action",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "reason",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "represented_by",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ]
+  },
+  "notes": [
+    "Only quran-markers.rub was deduplicated, after exact one-to-one boundary verification against divisions.",
+    "quran-markers.juz and hizb were retained because their ranges are not the same as quran_final.divisions.",
+    "All original source files remain untouched; the report stores their SHA-256 hashes."
+  ]
+}

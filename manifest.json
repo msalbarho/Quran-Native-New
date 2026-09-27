@@ -1,0 +1,386 @@
+{
+  "ui_languages": 22,
+  "translation_files": 21,
+  "arabic_translation_file": false,
+  "note": "Arabic Quran text is native app content; no Arabic translation DB is required.",
+  "translations": [
+    {
+      "language_code": "en",
+      "language": "English",
+      "translator": "Muhammad Taqi-ud-Din al-Hilali & Muhammad Muhsin Khan",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/en.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "f6c11b7c0ade46eae41d5af50353071a302ca5779e8f1fc8f55f44347eb1fb01",
+      "original_qUL_filename": "taqi-ud-din-al-hilali-muhsin-khan-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "nb",
+      "language": "Norwegian Bokmål",
+      "translator": "Unknown (as labeled by QUL file)",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/nb.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "3afb2e8feb8d6d98418c0fca9c2edfcc25fd986c87ab298821adc75d55ba9681",
+      "original_qUL_filename": "no-unknown-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "id",
+      "language": "Indonesian",
+      "translator": "King Fahad Quran Complex",
+      "source": "QUL / King Fahad Quran Complex",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/id.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "a8b5a1182746352c8b713212759ea37adc4a9678958abc64367149ae85aa472b",
+      "original_qUL_filename": "king-fahad-quran-complex-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "ur",
+      "language": "Urdu",
+      "translator": "Maulana Muhammad Junagarhi",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/ur.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "9b84d0c5a5f7d77023131eeaeeae43b8f7a04167f8736add8603d3668f7c612a",
+      "original_qUL_filename": "ur-junagarri-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "bn",
+      "language": "Bengali",
+      "translator": "Dr. Abu Bakr Muhammad Zakaria",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/bn.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "bfdc89c228fc2d8edc78ab3cd3db74b5c55f02c346e815c220c3727275190358",
+      "original_qUL_filename": "dr-abu-bakr-muhammad-zakaria-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "hi",
+      "language": "Hindi",
+      "translator": "Maulana Azizul Haque al-Umari",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/hi.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "382d2d986cedc5b3b839eea442adeca2662fdc8e6aa66b41002c56534eff91d7",
+      "original_qUL_filename": "maulana-azizul-haque-al-umari-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "tr",
+      "language": "Turkish",
+      "translator": "Diyanet",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/tr.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "0a276b0fa924271cec731c0d8a040ff49148612d948cbd1312ecc4d5d3f67166",
+      "original_qUL_filename": "quran-tr-diyanet-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "fa",
+      "language": "Persian",
+      "translator": "Hussein Taji Kal Dari",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/fa.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "42472296623e15bb1e1d2d7feaba8cb5952646ccf39db94c7fb5427dfca178c4",
+      "original_qUL_filename": "fr-hussein-taji-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "fr",
+      "language": "French",
+      "translator": "Muhammad Hamidullah",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/fr.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "ddadbd328f69a95fe87aa922c71df369b9207d69f9410137f6d98e6f76709838",
+      "original_qUL_filename": "quran-fr-hamidullah-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "ha",
+      "language": "Hausa",
+      "translator": "Abubakar Mahmood Jummi",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/ha.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "8547bcdbe428375a8d63ba13e8246bec074cc3e12abdfa568a40c44f362e92e4",
+      "original_qUL_filename": "abubakar-mahmood-jummi-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "ms",
+      "language": "Malay",
+      "translator": "Abdullah Basamia",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/ms.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "1b773a2bba9e1929c360153b7c6a4918190ed0c7b6fcce536a8905edbca1b462",
+      "original_qUL_filename": "abdullah-basamia-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "ps",
+      "language": "Pashto",
+      "translator": "Sarfaraz",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/ps.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "1220ab9775d032528f23f30d6c79878915fdf059be846dc103cf5dae734761fb",
+      "original_qUL_filename": "pashto-sarfaraz-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "pa",
+      "language": "Punjabi",
+      "translator": "Arif",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/pa.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "1bcfbf8d9b8df7ec3d978fd2bb1396e5198f0127f6f5f33c765b925933228a9e",
+      "original_qUL_filename": "punjabi-arif-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "uz",
+      "language": "Uzbek",
+      "translator": "Muhammad Sodiq Muhammad Yusuf",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/uz.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "ccc5cccfec24205b7791a5b0478bb2f5fc69fcaa1b62590b5586793b0dd38eb2",
+      "original_qUL_filename": "quran-uz-sodik-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "ru",
+      "language": "Russian",
+      "translator": "Elmir Kuliev",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/ru.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "3a709cc87b25fbc3b1148a5b92f4fb4c9f895df38c46d39714eb6dc7032dabf6",
+      "original_qUL_filename": "quran-ru-kuliev-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "sw",
+      "language": "Swahili",
+      "translator": "Dr. Abdullah Muhammad Abu Bakr & Sheikh Nasir Khamis",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/sw.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "61c76a7474b4c26bbea2a93456423de6b198256c3ec9fd956006d67761dac8c0",
+      "original_qUL_filename": "dr-abdullah-muhammad-abu-bakr-and-sheikh-nasir-khamis-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "so",
+      "language": "Somali",
+      "translator": "Abdullah Hassan Yacoub",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/so.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "47d857e45d766180f36f76011ba5e5a2d770fcf7aec2c28b6c48e76f8ee9aac3",
+      "original_qUL_filename": "abdullah-hassan-yacoub-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "fa-AF",
+      "language": "Dari",
+      "translator": "Mawlawi Muhammad Anwar Badkhashani",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/fa-AF.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "7c8e96c72a55d6479ed8ac86e38085fd4475c9e07b4b3db4bdc8b2fa4c847af7",
+      "original_qUL_filename": "mawlawi-muhammad-anwar-badkhashani-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "ku",
+      "language": "Kurdish",
+      "translator": "Muhammad Saleh Bamoki",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/ku.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "4805c9bb484632687bf98f04e6b15db3a9c2fab1c56d603bb18373d4b43d854f",
+      "original_qUL_filename": "muhammad-saleh-bamoki-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "zgh",
+      "language": "Amazigh",
+      "translator": "Ramdane At Mansour",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/zgh.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "09f1f5332f22d2e3c42a374ba4ac531e26b5f82dfbaada61389a9cd9b86b7ae8",
+      "original_qUL_filename": "ramdane-at-mansour-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    },
+    {
+      "language_code": "de",
+      "language": "German",
+      "translator": "Frank Bubenheim and Nadeem",
+      "source": "QUL",
+      "format": "SQLite",
+      "file": "app/src/main/assets/translations/de.sqlite",
+      "rows": 6236,
+      "distinct_ayah_keys": 6236,
+      "sha256": "7dbb9e51295ffd3ee76f6bc5ad1e5dd1da8f1ded73bd51e734eb1c48a724cf0c",
+      "original_qUL_filename": "de-bubenheim-simple.db.zip",
+      "columns": [
+        "sura",
+        "ayah",
+        "ayah_key",
+        "text"
+      ]
+    }
+  ]
+}
