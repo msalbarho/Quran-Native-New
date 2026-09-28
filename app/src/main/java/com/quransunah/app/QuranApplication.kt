@@ -49,7 +49,7 @@ class QuranApplication : Application() {
         }
     }
 
-    @OptIn(UnstableApi::class)
+    @androidx.annotation.OptIn(markerClass = [UnstableApi::class])
     private fun silenceMedia3Logs() {
         if (BuildConfig.DEBUG) return
         androidx.media3.common.util.Log.setLogLevel(

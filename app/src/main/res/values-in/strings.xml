@@ -279,6 +279,26 @@
     <string name="translation_selector">Pilih terjemahan: %1$s</string>
     <string name="copied">Disalin</string>
     <string name="word_share_text">Bagikan sebagai teks</string>
+    <string name="settings_user_guide">Panduan pengguna</string>
+    <string name="settings_user_guide_button">Lihat panduan pengguna</string>
+    <string name="onboarding_skip">Lewati</string>
+    <string name="onboarding_next">Berikutnya</string>
+    <string name="onboarding_start">Mulai</string>
+    <string name="onboarding_page_cd">Halaman panduan %1$d dari %2$d</string>
+    <string name="guide_welcome_title">Selamat datang</string>
+    <string name="guide_welcome_body">Bacalah Al-Qur’an, dengarkan tilawah, dan lihat makna dalam bahasa yang Anda pilih.</string>
+    <string name="guide_reading_title">Membaca</string>
+    <string name="guide_reading_body">Geser antar halaman, dan buka indeks untuk berpindah ke surah atau halaman.</string>
+    <string name="guide_word_title">Alat kata</string>
+    <string name="guide_word_body">Tekan lama kata Al-Qur’an mana pun untuk mendengar, membuka tafsir, menyimpan posisi, dan membagikannya sebagai teks, gambar, atau video.</string>
+    <string name="guide_listen_title">Mendengar dan makna</string>
+    <string name="guide_listen_body">Pilih qari dan dengarkan surah atau ayat, lalu baca makna dalam terjemahan yang dipilih.</string>
+    <string name="guide_comfort_title">Membaca dengan nyaman</string>
+    <string name="guide_text_title">Mushaf teks</string>
+    <string name="guide_text_body">Di Pengaturan, pilih Mushaf teks untuk mengatur ukuran huruf.</string>
+    <string name="guide_madinah_title">Mushaf Madinah</string>
+    <string name="guide_madinah_body">Jika Anda lebih suka Mushaf Madinah, putar perangkat ke lanskap agar halaman tampil lebih besar.</string>
+    <string name="guide_meaning_sample">Dengan nama Allah Yang Maha Pengasih, Maha Penyayang.</string>
 </resources>
 
 

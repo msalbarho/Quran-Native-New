@@ -279,4 +279,24 @@
     <string name="translation_selector">Dooro tarjumaad: %1$s</string>
     <string name="copied">Waa la koobiyay</string>
     <string name="word_share_text">Wadaag sida qoraal</string>
+    <string name="settings_user_guide">Hagaha isticmaalaha</string>
+    <string name="settings_user_guide_button">Eeg hagaha</string>
+    <string name="onboarding_skip">Ka bood</string>
+    <string name="onboarding_next">Xiga</string>
+    <string name="onboarding_start">Bilow</string>
+    <string name="onboarding_page_cd">Bogga hagaha %1$d ee %2$d</string>
+    <string name="guide_welcome_title">Soo dhawoow</string>
+    <string name="guide_welcome_body">Akhri Quraanka, dhageyso akhriska, oo arag macnaha luqadda aad dooratay.</string>
+    <string name="guide_reading_title">Akhris</string>
+    <string name="guide_reading_body">U jiid bogagga, oo fur tusmada si aad ugu gudubto suurad ama bog.</string>
+    <string name="guide_word_title">Qalabka erayga</string>
+    <string name="guide_word_body">Riix dheer eray kasta oo Qur’aan ah si aad u dhageysato, u furto tafsiirka, u kaydsato meeshaada, oo aad ula wadaagto qoraal, sawir, ama muuqaal.</string>
+    <string name="guide_listen_title">Dhageysi iyo macne</string>
+    <string name="guide_listen_body">Dooro qaari oo dhageyso suurad ama aayad, kadibna akhri macnaha tarjamadda aad dooratay.</string>
+    <string name="guide_comfort_title">Akhris raaxo leh</string>
+    <string name="guide_text_title">Mushaf qoraal ah</string>
+    <string name="guide_text_body">Settings, dooro Mushaf qoraal ah si aad u xakamayso cabbirka farta.</string>
+    <string name="guide_madinah_title">Mushafka Madiina</string>
+    <string name="guide_madinah_body">Haddii aad doorbidayso Mushafka Madiina, u rog qalabka qaabka jiifa si boggu u weynaado.</string>
+    <string name="guide_meaning_sample">Magaca Eebbe, Kan Naxariista badan, ee Naxariista leh.</string>
 </resources>

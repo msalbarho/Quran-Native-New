@@ -279,6 +279,26 @@
     <string name="translation_selector">Choisir la traduction : %1$s</string>
     <string name="copied">Copié</string>
     <string name="word_share_text">Partager en texte</string>
+    <string name="settings_user_guide">Guide d’utilisation</string>
+    <string name="settings_user_guide_button">Voir le guide</string>
+    <string name="onboarding_skip">Passer</string>
+    <string name="onboarding_next">Suivant</string>
+    <string name="onboarding_start">Commencer</string>
+    <string name="onboarding_page_cd">Page du guide %1$d sur %2$d</string>
+    <string name="guide_welcome_title">Bienvenue</string>
+    <string name="guide_welcome_body">Lisez le Coran, écoutez la récitation et consultez les sens dans la langue de votre choix.</string>
+    <string name="guide_reading_title">Lecture</string>
+    <string name="guide_reading_body">Faites glisser les pages, et ouvrez l’index pour atteindre une sourate ou une page.</string>
+    <string name="guide_word_title">Outils du mot</string>
+    <string name="guide_word_body">Appuyez longuement sur un mot du Coran pour écouter, ouvrir le tafsir, enregistrer votre position et le partager en texte, en image ou en vidéo.</string>
+    <string name="guide_listen_title">Écoute et sens</string>
+    <string name="guide_listen_body">Choisissez un récitateur et écoutez une sourate ou un verset, puis lisez les sens dans la traduction choisie.</string>
+    <string name="guide_comfort_title">Lecture confortable</string>
+    <string name="guide_text_title">Mushaf texte</string>
+    <string name="guide_text_body">Dans Réglages, choisissez Mushaf texte pour régler la taille du texte.</string>
+    <string name="guide_madinah_title">Mushaf de Médine</string>
+    <string name="guide_madinah_body">Si vous préférez le Mushaf de Médine, tournez l’appareil en paysage pour afficher la page plus grande.</string>
+    <string name="guide_meaning_sample">Au nom d’Allah, le Tout Miséricordieux, le Très Miséricordieux.</string>
 </resources>
 
 

@@ -279,4 +279,24 @@
     <string name="translation_selector">Velg oversettelse: %1$s</string>
     <string name="copied">Kopiert</string>
     <string name="word_share_text">Del som tekst</string>
+    <string name="settings_user_guide">Brukerveiledning</string>
+    <string name="settings_user_guide_button">Vis brukerveiledningen</string>
+    <string name="onboarding_skip">Hopp over</string>
+    <string name="onboarding_next">Neste</string>
+    <string name="onboarding_start">Start</string>
+    <string name="onboarding_page_cd">Veiledningsside %1$d av %2$d</string>
+    <string name="guide_welcome_title">Velkommen</string>
+    <string name="guide_welcome_body">Les Koranen, lytt til resitasjon, og se betydningene på språket du velger.</string>
+    <string name="guide_reading_title">Lesing</string>
+    <string name="guide_reading_body">Bla mellom sidene, og åpne innholdet for å gå til en sura eller side.</string>
+    <string name="guide_word_title">Ordverktøy</string>
+    <string name="guide_word_body">Hold inne et koranord for å lytte, åpne tafsir, lagre stedet ditt, og dele det som tekst, bilde eller video.</string>
+    <string name="guide_listen_title">Lytting og betydninger</string>
+    <string name="guide_listen_body">Velg en resitatør og lytt til en sura eller aya, og les deretter betydningene i den valgte oversettelsen.</string>
+    <string name="guide_comfort_title">Behagelig lesing</string>
+    <string name="guide_text_title">Tekstmushaf</string>
+    <string name="guide_text_body">Under Innstillinger velger du Tekstmushaf for å justere skriftstørrelsen.</string>
+    <string name="guide_madinah_title">Madinah-mushaf</string>
+    <string name="guide_madinah_body">Foretrekker du Madinah-mushaf, kan du vri enheten til liggende visning slik at siden blir større.</string>
+    <string name="guide_meaning_sample">I Guds navn, den barmhjertige, den nåderike.</string>
 </resources>

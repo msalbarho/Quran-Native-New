@@ -2,7 +2,7 @@
 PRODUCT SPECIFICATION
 القرآن الكريم  /  Holy Quran
 Complete Recitation & Listening Companion
-Version 4.1.6
+Version 4.2.0
 ================================================================================
 
 Document type : Product, functional, visual, and architectural specification
@@ -32,9 +32,10 @@ Constraint    : This document describes capabilities, experience, and data
   Long store title (English)
       Holy Quran - Audio & Recitation
 
-  The interface itself is Arabic-only. Numerals in chrome, indexes, page
-  pickers, and counts are rendered as Eastern Arabic digits. Layout direction
-  is right-to-left from the first painted frame.
+  The interface language is chosen in Settings. Quran text stays Arabic.
+  When the interface language is Arabic, numerals in chrome, indexes, page
+  pickers, and counts are Eastern Arabic digits. The application layout
+  direction stays right-to-left for every interface language.
 
 1.2 Branding intent
 
@@ -89,8 +90,8 @@ Constraint    : This document describes capabilities, experience, and data
       or theme-tinted frames, never busy wallpaper behind the page itself.
 
   High legibility
-      Body UI type is a classical Arabic naskh family (Amiri). Mushaf pages
-      never substitute a generic Arabic font for the page glyphs. Contrast
+      Body UI type is Noto Naskh Arabic. Titles and chrome meta use Amiri.
+      Mushaf pages never substitute a generic Arabic font for the page glyphs. Contrast
       between glyph, ayah marker, and paper tone is maintained across eight
       paper palettes and an independent night mode.
 
@@ -146,8 +147,8 @@ Constraint    : This document describes capabilities, experience, and data
       and verse playback bar may carry a subtle repeating girih field.
 
   Iconography
-      Custom Quran mark for the reading tab; list, bookmark, and settings
-      marks in the remaining slots. Reciter portraits exist as cropped
+      Custom Quran mark for the reading tab. The other slots are settings,
+      training, listening, and the index. Reciter portraits exist as cropped
       circular stills for automotive artwork. Each of the 114 surahs has a
       dedicated calligraphic still for vehicle browse cards.
 
@@ -170,10 +171,9 @@ Constraint    : This document describes capabilities, experience, and data
          The window background is the full-bleed launch image
          («القرآن الكريم / تلاوة و استماع» on black), cropped to fill.
 
-      3. First web paint
-         Before application styles apply, the document background is
-         #000000. A static full-screen image identical to the native splash
-         covers the viewport at the maximum stacking level.
+      3. First page
+         The activity keeps the launch image until the mushaf page can
+         paint. There is no separate web document or browser paint step.
 
       4. Hydration gate
          The overlay is held until:
@@ -240,7 +240,7 @@ Constraint    : This document describes capabilities, experience, and data
 
       Same pagination and word identity, but lines reflow as continuous
       readable text using a Uthmanic Hafs face. User-controlled size from
-      20 px to 34 px in 0.5 px steps (default 25 px). Size control is
+      22.7 sp to 34 sp in 0.1 sp steps (default 25 sp). Size control is
       disabled while Medina pages are selected, with an explanatory hint.
 
   2.3.4 Listening screen
@@ -255,8 +255,8 @@ Constraint    : This document describes capabilities, experience, and data
 
       Index, page jump, ayah search, bookmarks, settings, about, word
       sheet, meaning popover, tafsir sheet, verse playback bar, reciter
-      pickers, onboarding, and first-read coach mark. All are Arabic,
-      dismissible by backdrop tap or the close label «إغلاق».
+      pickers, and onboarding. Their labels follow the selected interface
+      language. They are dismissible by backdrop tap or the close control.
 
 
 --------------------------------------------------------------------------------
@@ -360,11 +360,13 @@ Constraint    : This document describes capabilities, experience, and data
       session so driving use remains reliable if the phone activity is
       sent to the background.
 
-  Browse tree (Arabic labels, RTL)
+  Browse tree (labels follow the interface language; RTL)
 
       Root
-          القراء     reciters → reciter → list of 114 surahs
-          السور      flat list of 114 playable surahs
+          Reciters   reciters → reciter → list of 114 surahs
+          Surahs     flat list of 114 playable surahs
+
+      In Arabic these roots are «القراء» and «السور».
 
   Controls optimized for driving
       Play, pause, skip to adjacent surah, and selection from the two
@@ -391,23 +393,27 @@ Constraint    : This document describes capabilities, experience, and data
 
 3.6 First-run experience
 
-  Six-step onboarding (skippable after completion, stored locally):
+  Five-page onboarding, shown when it has not been completed. Skip and
+  Start store completion locally. System back on the first page dismisses
+  the guide for that session without storing completion. Settings can open
+  the same guide again.
 
-      1. Welcome to the Medina 604-page mushaf.
-      2. Horizontal swipe; tap to reveal chrome; tap page number to jump.
-      3. Printed-page fidelity: centered page numbers, quarter-hizb marks.
-      4. Listening tab for full surahs; long-press a word to play a verse.
-      5. Meanings, tafsir, word/verse audio, save, share.
-      6. Download surahs for offline listening.
+      1. Welcome.
+      2. Reading the Medina page, including the horizontal swipe.
+      3. Word tools: long-press, listen, tafsir, save, and share.
+      4. Listening and meanings.
+      5. Comfortable reading: text-mushaf size and page orientation.
 
-  After onboarding, a one-time coach mark on the page: long-press words.
+  The guide does not request permissions.
 
 3.7 Permissions
 
   Network for streaming and downloads; notifications for media; wake lock
-  and foreground media playback for background audio. Onboarding’s final
-  step requests what the platform requires. Failure to grant does not
-  block reading.
+  and foreground media playback for background audio. Legacy storage access
+  only on older Android versions, for saving a shared ayah. After onboarding
+  is completed, the app may request the notification permission, then the
+  battery-optimization prompt. Failure to grant does not block reading.
+  The app does not request the camera, microphone, contacts, or location.
 
 
 --------------------------------------------------------------------------------
@@ -434,7 +440,7 @@ Constraint    : This document describes capabilities, experience, and data
 
   Restored on launch
       Last Medina page, last primary tab, color palette, night/day, Medina
-      vs text mode, text-mode font size, onboarding and coach-mark flags.
+      vs text mode, text-mode font size, and the onboarding flag.
 
   Reading positions
       Multiple ayah bookmarks with Hafs snippet, surah, ayah, page. Created
@@ -453,22 +459,24 @@ Constraint    : This document describes capabilities, experience, and data
 
   لون التطبيق          Eight paper palettes (section 2.1).
   نوع عرض الصفحات      Medina pages vs text mushaf.
-  حجم خط المصحف        20–34 px, text mushaf only.
+  حجم خط المصحف        22.7–34 sp, text mushaf only.
   الوضع الليلي/النهاري Toggle in the page header.
   حول التطبيق          Dedication, reuse invitation, contact.
 
-  No language switcher: the product is Arabic-only by design.
+  لغة التطبيق          Interface language, independent of the translation
+                       language used in meanings.
 
 4.4 Motion and feedback
 
   Page settle 280 ms; overlay open uses a single frame to attach then
   transitions in; chrome show/hide is a coordinated slide+fade. No
-  gratuitous parallax. Errors are inline Arabic sentences with retry
-  where recovery is possible.
+  gratuitous parallax. Errors are inline sentences in the selected
+  interface language, with retry where recovery is possible.
 
 4.5 Accessibility notes
 
-  Icon-only controls have Arabic names. Ligature-only titles expose a
+  Icon-only controls have names in the selected interface language.
+  Ligature-only titles expose a
   textual aria-label (surah name). Dialogs are modal with explicit close.
   The product does not yet claim full talkback reading of QCF ligature
   pages; Hafs strings back search and bookmarks for that reason.
@@ -598,9 +606,16 @@ Constraint    : This document describes capabilities, experience, and data
   Launch splash (black, branded still)
         │
         ▼
-  Reading tab (default)                    Listening tab
-    Medina or text page                      Reciter + surah + player
-    Header: juz, surah, page, search,        Downloads + repeat
+  Home                                     Listening
+    Continue reading                         Reciter + surah + player
+    Training                                 Downloads + repeat
+    Listening
+    Index
+        │
+        ▼
+  Reading tab
+    Medina or text page, or meanings view
+    Header: juz, surah, page, search,
             day/night
     Chrome reveal on tap
         │
@@ -609,14 +624,20 @@ Constraint    : This document describes capabilities, experience, and data
         ├── Ayah search
         ├── Bookmarks
         ├── Settings: palette, page mode,
-        │             text size, about
+        │             text size, language, about
         └── Word long-press
               meaning, tafsir, word audio,
               verse audio, bookmark, share
 
+  Training
+        Same mushaf page with ayah text hidden.
+        Reveal an ayah, show or hide the page,
+        listen to the selected ayah, or close.
+        No microphone and no speech recognition.
+
   Vehicle media
-        القراء → reciter → surahs
-        السور  → 114 tracks
+        Reciters → reciter → surahs
+        Surahs  → 114 tracks
         play / pause / skip
 
 
@@ -624,10 +645,9 @@ Constraint    : This document describes capabilities, experience, and data
 7. NON-GOALS (CURRENT PRODUCT BOUNDARY)
 --------------------------------------------------------------------------------
 
-  - Multi-language UI (English chrome is not offered).
   - User accounts, cloud sync, or social features.
-  - Translation-as-primary-reading-mode (meanings and tafsir are
-    supporting, not a parallel mushaf).
+  - Replacing the Hafs mushaf with a translation. Meanings are a
+    separate reading view; tafsir stays a supporting sheet.
   - Editing or annotating the rasm.
   - Video recitation inside the reader (share-as-video is an export).
   - Non-Hafs riwayat as a page renderer (audio mushafs may vary; the

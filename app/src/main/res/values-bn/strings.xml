@@ -279,4 +279,24 @@
     <string name="translation_selector">অনুবাদ বেছে নিন: %1$s</string>
     <string name="copied">কপি হয়েছে</string>
     <string name="word_share_text">টেক্সট হিসেবে শেয়ার করুন</string>
+    <string name="settings_user_guide">ব্যবহার নির্দেশিকা</string>
+    <string name="settings_user_guide_button">নির্দেশিকা দেখুন</string>
+    <string name="onboarding_skip">এড়িয়ে যান</string>
+    <string name="onboarding_next">পরবর্তী</string>
+    <string name="onboarding_start">শুরু</string>
+    <string name="onboarding_page_cd">নির্দেশিকার পৃষ্ঠা %1$d / %2$d</string>
+    <string name="guide_welcome_title">স্বাগতম</string>
+    <string name="guide_welcome_body">কুরআন পড়ুন, তিলাওয়াত শুনুন, এবং আপনার নির্বাচিত ভাষায় অর্থ দেখুন।</string>
+    <string name="guide_reading_title">পঠন</string>
+    <string name="guide_reading_body">পৃষ্ঠার মধ্যে সোয়াইপ করুন, এবং সূরা বা পৃষ্ঠায় যেতে সূচি খুলুন।</string>
+    <string name="guide_word_title">শব্দের সরঞ্জাম</string>
+    <string name="guide_word_body">শুনতে, তাফসির খুলতে, স্থান সংরক্ষণ করতে, এবং লেখা, ছবি বা ভিডিও হিসেবে শেয়ার করতে যেকোনো কুরআনের শব্দে দীর্ঘ চাপ দিন।</string>
+    <string name="guide_listen_title">শোনা ও অর্থ</string>
+    <string name="guide_listen_body">কারী বেছে নিয়ে সূরা বা আয়াত শুনুন, তারপর নির্বাচিত অনুবাদে অর্থ পড়ুন।</string>
+    <string name="guide_comfort_title">স্বাচ্ছন্দ্যে পড়া</string>
+    <string name="guide_text_title">টেক্সট মুশহাফ</string>
+    <string name="guide_text_body">সেটিংসে ফন্টের আকার বদলাতে টেক্সট মুশহাফ বেছে নিন।</string>
+    <string name="guide_madinah_title">মদিনা মুশহাফ</string>
+    <string name="guide_madinah_body">মদিনা মুশহাফ পছন্দ হলে পৃষ্ঠা বড় দেখাতে ডিভাইসটি ল্যান্ডস্কেপে ঘোরান।</string>
+    <string name="guide_meaning_sample">পরম করুণাময়, অসীম দয়ালু আল্লাহর নামে।</string>
 </resources>

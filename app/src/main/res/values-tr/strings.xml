@@ -279,6 +279,26 @@
     <string name="translation_selector">Meal seçin: %1$s</string>
     <string name="copied">Kopyalandı</string>
     <string name="word_share_text">Metin olarak paylaş</string>
+    <string name="settings_user_guide">Kullanım kılavuzu</string>
+    <string name="settings_user_guide_button">Kullanım kılavuzunu gör</string>
+    <string name="onboarding_skip">Atla</string>
+    <string name="onboarding_next">İleri</string>
+    <string name="onboarding_start">Başla</string>
+    <string name="onboarding_page_cd">Kılavuz sayfası %1$d / %2$d</string>
+    <string name="guide_welcome_title">Hoş geldiniz</string>
+    <string name="guide_welcome_body">Kur’an’ı okuyun, tilaveti dinleyin ve anlamları seçtiğiniz dilde görün.</string>
+    <string name="guide_reading_title">Okuma</string>
+    <string name="guide_reading_body">Sayfalar arasında kaydırın ve bir sureye veya sayfaya gitmek için dizini açın.</string>
+    <string name="guide_word_title">Kelime araçları</string>
+    <string name="guide_word_body">Dinlemek, tefsiri açmak, yerinizi kaydetmek ve metin, görüntü veya video olarak paylaşmak için herhangi bir Kur’an kelimesine uzun basın.</string>
+    <string name="guide_listen_title">Dinleme ve anlamlar</string>
+    <string name="guide_listen_body">Bir kari seçip sure veya ayet dinleyin, ardından anlamları seçtiğiniz çeviride okuyun.</string>
+    <string name="guide_comfort_title">Rahat okuma</string>
+    <string name="guide_text_title">Metin mushafı</string>
+    <string name="guide_text_body">Ayarlar’dan Metin mushafı’nı seçerek yazı boyutunu ayarlayın.</string>
+    <string name="guide_madinah_title">Medine mushafı</string>
+    <string name="guide_madinah_body">Medine mushafını tercih ediyorsanız, sayfanın daha büyük görünmesi için cihazı yatay konuma çevirin.</string>
+    <string name="guide_meaning_sample">Rahman ve Rahim olan Allah’ın adıyla.</string>
 </resources>
 
 

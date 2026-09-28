@@ -123,6 +123,10 @@ class UserPreferences @Inject constructor(
         dataStore.edit { it[Keys.TRAINING_HINT] = done }
     }
 
+    suspend fun setOnboardingDone(done: Boolean = true) {
+        dataStore.edit { it[Keys.ONBOARDING] = done }
+    }
+
     suspend fun setPalette(id: PaperPaletteId) {
         dataStore.edit { it[Keys.PALETTE] = id.id }
     }

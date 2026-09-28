@@ -112,7 +112,7 @@ android {
             enableSplit = true
         }
         language {
-            enableSplit = true
+            enableSplit = false
         }
         abi {
             enableSplit = true

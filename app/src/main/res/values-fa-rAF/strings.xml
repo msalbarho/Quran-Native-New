@@ -279,4 +279,24 @@
     <string name="translation_selector">انتخاب ترجمه: %1$s</string>
     <string name="copied">کاپي شد</string>
     <string name="word_share_text">اشتراک به‌صورت متن</string>
+    <string name="settings_user_guide">رهنما</string>
+    <string name="settings_user_guide_button">دیدن رهنما</string>
+    <string name="onboarding_skip">رد شدن</string>
+    <string name="onboarding_next">بعدی</string>
+    <string name="onboarding_start">آغاز</string>
+    <string name="onboarding_page_cd">صفحه رهنما %1$d از %2$d</string>
+    <string name="guide_welcome_title">خوش آمدید</string>
+    <string name="guide_welcome_body">قرآن را بخوانید، تلاوت را بشنوید، و معانی را به زبان دلخواه خود ببینید.</string>
+    <string name="guide_reading_title">خواندن</string>
+    <string name="guide_reading_body">میان صفحه‌ها بکشید و برای رفتن به سوره یا صفحه، فهرست را باز کنید.</string>
+    <string name="guide_word_title">ابزارهای واژه</string>
+    <string name="guide_word_body">برای شنیدن، باز کردن تفسیر، ذخیره جای خود، و شریک ساختن به‌گونه متن، تصویر یا ویدیو، هر واژه قرآنی را طولانی لمس کنید.</string>
+    <string name="guide_listen_title">شنیدن و معانی</string>
+    <string name="guide_listen_body">قاری را انتخاب کنید و سوره یا آیه را بشنوید، سپس معانی را در ترجمه انتخاب‌شده بخوانید.</string>
+    <string name="guide_comfort_title">خواندن آسوده</string>
+    <string name="guide_text_title">مصحف متنی</string>
+    <string name="guide_text_body">در تنظیمات، مصحف متنی را برای تنظیم اندازه خط انتخاب کنید.</string>
+    <string name="guide_madinah_title">مصحف مدینه</string>
+    <string name="guide_madinah_body">اگر مصحف مدینه را می‌پسندید، دستگاه را افقی کنید تا صفحه بزرگ‌تر دیده شود.</string>
+    <string name="guide_meaning_sample">به نام خداوند بخشنده مهربان</string>
 </resources>

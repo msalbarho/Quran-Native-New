@@ -223,15 +223,20 @@ class ListeningViewModel @Inject constructor(
         downloadTo.value = surah
     }
 
+    fun selectRepeatMode(mode: SurahRepeatMode) {
+        if (mode == repeatMode.value) return
+        repeatMode.value = mode
+        audioPlayer.setRepeatMode(mode)
+        viewModelScope.launch { preferences.setLastRepeatMode(mode) }
+    }
+
     fun cycleRepeatMode() {
         val next = when (repeatMode.value) {
             SurahRepeatMode.REMAINING -> SurahRepeatMode.OFF
             SurahRepeatMode.OFF -> SurahRepeatMode.ONE
             SurahRepeatMode.ONE -> SurahRepeatMode.REMAINING
         }
-        repeatMode.value = next
-        audioPlayer.setRepeatMode(next)
-        viewModelScope.launch { preferences.setLastRepeatMode(next) }
+        selectRepeatMode(next)
     }
 
     fun playOrToggle(surah: Int = uiState.value.selectedSurah) {

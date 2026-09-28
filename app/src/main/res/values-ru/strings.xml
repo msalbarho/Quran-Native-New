@@ -279,4 +279,24 @@
     <string name="translation_selector">Выберите перевод: %1$s</string>
     <string name="copied">Скопировано</string>
     <string name="word_share_text">Поделиться текстом</string>
+    <string name="settings_user_guide">Руководство</string>
+    <string name="settings_user_guide_button">Открыть руководство</string>
+    <string name="onboarding_skip">Пропустить</string>
+    <string name="onboarding_next">Далее</string>
+    <string name="onboarding_start">Начать</string>
+    <string name="onboarding_page_cd">Страница руководства %1$d из %2$d</string>
+    <string name="guide_welcome_title">Добро пожаловать</string>
+    <string name="guide_welcome_body">Читайте Коран, слушайте чтение и смотрите смыслы на выбранном языке.</string>
+    <string name="guide_reading_title">Чтение</string>
+    <string name="guide_reading_body">Листайте страницы и откройте указатель, чтобы перейти к суре или странице.</string>
+    <string name="guide_word_title">Инструменты слова</string>
+    <string name="guide_word_body">Удерживайте любое слово Корана, чтобы слушать, открыть тафсир, сохранить место и поделиться текстом, изображением или видео.</string>
+    <string name="guide_listen_title">Слушание и смыслы</string>
+    <string name="guide_listen_body">Выберите чтеца и слушайте суру или аят, затем читайте смыслы в выбранном переводе.</string>
+    <string name="guide_comfort_title">Удобное чтение</string>
+    <string name="guide_text_title">Текстовый мусхаф</string>
+    <string name="guide_text_body">В Настройках выберите текстовый мусхаф, чтобы изменить размер шрифта.</string>
+    <string name="guide_madinah_title">Мусхаф Медины</string>
+    <string name="guide_madinah_body">Если вы предпочитаете мусхаф Медины, поверните устройство горизонтально, чтобы страница отображалась крупнее.</string>
+    <string name="guide_meaning_sample">С именем Аллаха, Милостивого, Милосердного.</string>
 </resources>

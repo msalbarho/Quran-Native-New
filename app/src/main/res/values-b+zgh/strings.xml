@@ -279,4 +279,24 @@
     <string name="translation_selector">ⵙⵜⵉ ⵜⴰⵙⵓⵖⵍⵜ: %1$s</string>
     <string name="copied">ⵉⵜⵜⵓⵙⵙⵏⵖⵍ</string>
     <string name="word_share_text">ⴱⴹⵓ ⴰⵎ ⴰⴹⵕⵉⵚ</string>
+    <string name="settings_user_guide">ⴰⵎⵏⵏⴰⵢ ⵏ ⵓⵙⵎⵔⵙ</string>
+    <string name="settings_user_guide_button">ⵥⵕ ⴰⵎⵏⵏⴰⵢ</string>
+    <string name="onboarding_skip">ⵣⵔⵉ</string>
+    <string name="onboarding_next">ⵓⴹⴼⵉⵔ</string>
+    <string name="onboarding_start">ⴱⴷⵓ</string>
+    <string name="onboarding_page_cd">ⵜⴰⵙⵏⴰ ⵏ ⵓⵎⵏⵏⴰⵢ %1$d ⵙⴳ %2$d</string>
+    <string name="guide_welcome_title">ⴰⵏⵙⵓⴼ</string>
+    <string name="guide_welcome_body">ⵖⵔ ⵍⵇⵓⵔⴰⵏ, ⵙⵍⵍ ⵉ ⵜⵖⵔⵉ, ⵜⵥⵕⴷ ⵉⵎⵏⵉⵜⵏ ⵙ ⵜⵓⵜⵍⴰⵢⵜ ⵜⴻⵜⵜⵓⴼⵔⴰⵏ.</string>
+    <string name="guide_reading_title">ⵜⵉⵖⵔⵉ</string>
+    <string name="guide_reading_body">ⵙⵙⵓⵜⵍ ⵉⵏⴳⵔ ⵜⵙⵏⵉⵡⵉⵏ, ⵜⵔⵣⵎⴷ ⴰⵙⵓⴳⵍ ⵃⵎⴰ ⴰⴷ ⵜⴰⵡⴹⴷ ⵖⵔ ⵢⴰⵜ ⵜⵙⵓⵔⵜ ⵏⵖ ⵜⴰⵙⵏⴰ.</string>
+    <string name="guide_word_title">ⵉⵎⴰⵙⵙⵏ ⵏ ⵡⴰⵡⴰⵍ</string>
+    <string name="guide_word_body">ⵙⵙⵉⴷⴼ ⴰⴷⵓⴷⴷⵓⵎ ⵅⴼ ⵢⴰⵏ ⵡⴰⵡⴰⵍ ⵏ ⵍⵇⵓⵔⴰⵏ ⵃⵎⴰ ⴰⴷ ⵜⵙⵍⵍⴷ, ⵜⵔⵣⵎⴷ ⴰⵜⴼⵙⵉⵔ, ⵜⵃⴹⵓⴷ ⴰⴷⵖⴰⵔ, ⵜⴱⴹⵓⴷ ⴰⵎ ⵓⴹⵕⵉⵚ, ⵜⴰⵡⵍⴰⴼⵜ ⵏⵖ ⵜⴰⵡⵉⴷⵢⵓ.</string>
+    <string name="guide_listen_title">ⴰⵙⴼⵍⴷ ⴷ ⵉⵎⵏⵉⵜⵏ</string>
+    <string name="guide_listen_body">ⴼⵔⵏ ⴰⵎⵖⵔⴰⵢ ⵜⵙⵍⵍⴷ ⵉ ⵜⵙⵓⵔⵜ ⵏⵖ ⵜⴰⵢⴰⵜ, ⴷⴼⴼⵉⵔ ⵖⵔ ⵉⵎⵏⵉⵜⵏ ⵙ ⵜⵙⵓⵖⵍⵜ ⵜⴻⵜⵜⵓⴼⵔⴰⵏ.</string>
+    <string name="guide_comfort_title">ⵜⵉⵖⵔⵉ ⵉⵀⵉⵏⴰⵏ</string>
+    <string name="guide_text_title">ⴰⵎⵓⵚⵃⴰⴼ ⵏ ⵓⴹⵕⵉⵚ</string>
+    <string name="guide_text_body">ⴳ ⵉⵙⵖⵉⵡⵏ, ⴼⵔⵏ ⴰⵎⵓⵚⵃⴰⴼ ⵏ ⵓⴹⵕⵉⵚ ⵃⵎⴰ ⴰⴷ ⵜⵙⵏⴼⵍⴷ ⵜⵉⴷⴷⵉ ⵏ ⵓⵙⴽⴽⵉⵍ.</string>
+    <string name="guide_madinah_title">ⴰⵎⵓⵚⵃⴰⴼ ⵏ ⵎⴷⵉⵏⵜ</string>
+    <string name="guide_madinah_body">ⵎⴽ ⵜⵔⵉⴷ ⴰⵎⵓⵚⵃⴰⴼ ⵏ ⵎⴷⵉⵏⵜ, ⵙⵙⵓⵜⵍ ⴰⵍⵍⴰⵍ ⵖⵔ ⵓⵙⵏⵉⵍ ⴰⵡⵔⵉⵣ ⵃⵎⴰ ⴰⴷ ⵜⴱⴰⵢⵏ ⵜⴰⵙⵏⴰ ⵎⵇⵇⵓⵔⵏ.</string>
+    <string name="guide_meaning_sample">ⵙ ⵢⵉⵙⵎ ⵏ ⵕⴱⴱⵉ, ⴰⵎⵓⵃⵉⴱ, ⴰⵎⵔⵃⵓⵎ.</string>
 </resources>

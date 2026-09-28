@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
@@ -113,6 +114,23 @@ class HolyQuranViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(5_000),
         UserSettings(),
     )
+
+    /**
+     * Null until DataStore emits, so a returning user does not see the guide
+     * flash from the default [UserSettings.onboardingDone] value.
+     */
+    val onboardingDone: StateFlow<Boolean?> = preferences.settings
+        .map { it.onboardingDone }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /**
+     * One post-onboarding permission sequence per ViewModel, so rotation does not
+     * open the system dialogs again. Reset only when the ViewModel is cleared.
+     */
+    var postOnboardingPromptsDispatched: Boolean = false
+    var postOnboardingPermissionRequestOpen: Boolean = false
+    var postOnboardingBatteryPromptPending: Boolean = false
     val textSizeSp: StateFlow<Float> = preferences.textSizeSp.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
@@ -323,6 +341,10 @@ class HolyQuranViewModel @Inject constructor(
 
     fun markTrainingHintDone() {
         viewModelScope.launch { preferences.setTrainingHintDone() }
+    }
+
+    fun completeOnboarding() {
+        viewModelScope.launch { preferences.setOnboardingDone(true) }
     }
 
     fun closePicker() {

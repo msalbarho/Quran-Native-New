@@ -279,4 +279,24 @@
     <string name="translation_selector">Tarjimani tanlang: %1$s</string>
     <string name="copied">Nusxa olindi</string>
     <string name="word_share_text">Matn sifatida ulashish</string>
+    <string name="settings_user_guide">Foydalanuvchi qoʻllanmasi</string>
+    <string name="settings_user_guide_button">Qoʻllanmani koʻrish</string>
+    <string name="onboarding_skip">Oʻtkazib yuborish</string>
+    <string name="onboarding_next">Keyingi</string>
+    <string name="onboarding_start">Boshlash</string>
+    <string name="onboarding_page_cd">Qoʻllanma sahifasi %1$d / %2$d</string>
+    <string name="guide_welcome_title">Xush kelibsiz</string>
+    <string name="guide_welcome_body">Qur’onni oʻqing, tilovatni tinglang va ma’nolarni tanlagan tilingizda koʻring.</string>
+    <string name="guide_reading_title">Oʻqish</string>
+    <string name="guide_reading_body">Sahifalar orasida suring va sura yoki sahifaga oʻtish uchun mundarijani oching.</string>
+    <string name="guide_word_title">Soʻz vositalari</string>
+    <string name="guide_word_body">Tinglash, tafsirni ochish, joyni saqlash va matn, rasm yoki video sifatida ulashish uchun istalgan Qur’on soʻzini uzoq bosing.</string>
+    <string name="guide_listen_title">Tinglash va ma’nolar</string>
+    <string name="guide_listen_body">Qorini tanlang va sura yoki oyatni tinglang, soʻng ma’nolarni tanlangan tarjimada oʻqing.</string>
+    <string name="guide_comfort_title">Qulay oʻqish</string>
+    <string name="guide_text_title">Matnli mushaf</string>
+    <string name="guide_text_body">Sozlamalarda shrift hajmini boshqarish uchun matnli mushafni tanlang.</string>
+    <string name="guide_madinah_title">Madina mushafi</string>
+    <string name="guide_madinah_body">Madina mushafini ma’qul koʻrsangiz, sahifa kattaroq koʻrinishi uchun qurilmani yon holatga burang.</string>
+    <string name="guide_meaning_sample">Mehribon va rahmli Alloh nomi bilan.</string>
 </resources>

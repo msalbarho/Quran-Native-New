@@ -279,4 +279,24 @@
     <string name="translation_selector">अनुवाद चुनें: %1$s</string>
     <string name="copied">कॉपी हो गया</string>
     <string name="word_share_text">पाठ के रूप में साझा करें</string>
+    <string name="settings_user_guide">उपयोग मार्गदर्शिका</string>
+    <string name="settings_user_guide_button">मार्गदर्शिका देखें</string>
+    <string name="onboarding_skip">छोड़ें</string>
+    <string name="onboarding_next">आगे</string>
+    <string name="onboarding_start">शुरू करें</string>
+    <string name="onboarding_page_cd">मार्गदर्शिका पृष्ठ %1$d / %2$d</string>
+    <string name="guide_welcome_title">स्वागत है</string>
+    <string name="guide_welcome_body">क़ुरआन पढ़ें, तिलावत सुनें, और अर्थ अपनी चुनी भाषा में देखें।</string>
+    <string name="guide_reading_title">पढ़ना</string>
+    <string name="guide_reading_body">पृष्ठों के बीच स्वाइप करें, और सूरह या पृष्ठ पर जाने के लिए अनुक्रमणिका खोलें।</string>
+    <string name="guide_word_title">शब्द उपकरण</string>
+    <string name="guide_word_body">सुनने, तफ़सीर खोलने, स्थान सहेजने, और लेख, चित्र या वीडियो के रूप में साझा करने के लिए किसी भी क़ुरआनी शब्द को देर तक दबाएँ।</string>
+    <string name="guide_listen_title">सुनना और अर्थ</string>
+    <string name="guide_listen_body">क़ारी चुनें और सूरह या आयत सुनें, फिर चुने हुए अनुवाद में अर्थ पढ़ें।</string>
+    <string name="guide_comfort_title">आराम से पढ़ना</string>
+    <string name="guide_text_title">पाठ मुसहफ़</string>
+    <string name="guide_text_body">सेटिंग्स में फ़ॉन्ट आकार बदलने के लिए पाठ मुसहफ़ चुनें।</string>
+    <string name="guide_madinah_title">मदीना मुसहफ़</string>
+    <string name="guide_madinah_body">यदि आप मदीना मुसहफ़ पसंद करते हैं, तो पृष्ठ बड़ा दिखाने के लिए डिवाइस को लैंडस्केप में घुमाएँ।</string>
+    <string name="guide_meaning_sample">अल्लाह के नाम से जो बड़ा कृपालु और अत्यंत दयालु है।</string>
 </resources>

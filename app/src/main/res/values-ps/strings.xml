@@ -279,4 +279,24 @@
     <string name="translation_selector">ژباړه وټاکئ: %1$s</string>
     <string name="copied">کاپي شو</string>
     <string name="word_share_text">متن په توګه شریک کړئ</string>
+    <string name="settings_user_guide">لارښود</string>
+    <string name="settings_user_guide_button">لارښود وګورئ</string>
+    <string name="onboarding_skip">تېرول</string>
+    <string name="onboarding_next">بل</string>
+    <string name="onboarding_start">پیل</string>
+    <string name="onboarding_page_cd">د لارښود پاڼه %1$d له %2$d</string>
+    <string name="guide_welcome_title">ښه راغلاست</string>
+    <string name="guide_welcome_body">قرآن ولولئ، تلاوت واورئ، او معنی په هغه ژبه وګورئ چې تاسو یې ټاکئ.</string>
+    <string name="guide_reading_title">لوستل</string>
+    <string name="guide_reading_body">د پاڼو ترمنځ وښویئ، او د سورت یا پاڼې لپاره فهرست پرانیزئ.</string>
+    <string name="guide_word_title">د کلمې وسایل</string>
+    <string name="guide_word_body">د اورېدو، تفسیر پرانیستلو، ځای خوندي کولو، او د متن، انځور یا ویډیو په بڼه شریکولو لپاره پر هر قرآني کلمه اوږد فشار ورکړئ.</string>
+    <string name="guide_listen_title">اورېدل او معنی</string>
+    <string name="guide_listen_body">قاري وټاکئ او سورت یا آیت واورئ، بیا معنی په ټاکل شوي ژباړه کې ولولئ.</string>
+    <string name="guide_comfort_title">آرام لوستل</string>
+    <string name="guide_text_title">متني مصحف</string>
+    <string name="guide_text_body">په تنظیماتو کې د لیک اندازه بدلولو لپاره متني مصحف وټاکئ.</string>
+    <string name="guide_madinah_title">د مدینې مصحف</string>
+    <string name="guide_madinah_body">که د مدینې مصحف غواړئ، وسیله افقی وګرځوئ تر څو پاڼه لویه ښکاره شي.</string>
+    <string name="guide_meaning_sample">د الله په نامه چې ډېر مهربان او بخښونکی دی.</string>
 </resources>

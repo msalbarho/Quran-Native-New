@@ -279,5 +279,25 @@
     <string name="translation_selector">Pilih terjemahan: %1$s</string>
     <string name="copied">Disalin</string>
     <string name="word_share_text">Kongsi sebagai teks</string>
+    <string name="settings_user_guide">Panduan pengguna</string>
+    <string name="settings_user_guide_button">Lihat panduan pengguna</string>
+    <string name="onboarding_skip">Langkau</string>
+    <string name="onboarding_next">Seterusnya</string>
+    <string name="onboarding_start">Mula</string>
+    <string name="onboarding_page_cd">Halaman panduan %1$d daripada %2$d</string>
+    <string name="guide_welcome_title">Selamat datang</string>
+    <string name="guide_welcome_body">Bacalah al-Quran, dengar bacaan, dan lihat makna dalam bahasa yang anda pilih.</string>
+    <string name="guide_reading_title">Membaca</string>
+    <string name="guide_reading_body">Leret antara halaman, dan buka indeks untuk pergi ke surah atau halaman.</string>
+    <string name="guide_word_title">Alatan perkataan</string>
+    <string name="guide_word_body">Tekan lama mana-mana perkataan al-Quran untuk mendengar, membuka tafsir, menyimpan tempat anda, dan berkongsinya sebagai teks, imej atau video.</string>
+    <string name="guide_listen_title">Mendengar dan makna</string>
+    <string name="guide_listen_body">Pilih qari dan dengar surah atau ayat, kemudian baca makna dalam terjemahan yang dipilih.</string>
+    <string name="guide_comfort_title">Bacaan yang selesa</string>
+    <string name="guide_text_title">Mushaf teks</string>
+    <string name="guide_text_body">Dalam Tetapan, pilih Mushaf teks untuk mengawal saiz fon.</string>
+    <string name="guide_madinah_title">Mushaf Madinah</string>
+    <string name="guide_madinah_body">Jika anda lebih suka Mushaf Madinah, putar peranti ke landskap supaya halaman kelihatan lebih besar.</string>
+    <string name="guide_meaning_sample">Dengan nama Allah, Yang Maha Pemurah, lagi Maha Mengasihani.</string>
 </resources>
 

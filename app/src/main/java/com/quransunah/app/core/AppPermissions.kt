@@ -31,10 +31,21 @@ object AppPermissions {
             .toTypedArray()
     }
 
-    fun requestIfNeeded(activity: Activity) {
+    /**
+     * Requests whatever [neededRuntimePermissions] are still missing.
+     * Returns false when Android has nothing to ask, so the caller can continue.
+     * [launch] is the activity-result path; the default keeps the legacy request.
+     */
+    fun requestIfNeeded(
+        activity: Activity,
+        launch: (Array<String>) -> Unit = { missing ->
+            ActivityCompat.requestPermissions(activity, missing, REQUEST_CODE)
+        },
+    ): Boolean {
         val missing = missing(activity)
-        if (missing.isEmpty()) return
-        ActivityCompat.requestPermissions(activity, missing, REQUEST_CODE)
+        if (missing.isEmpty()) return false
+        launch(missing)
+        return true
     }
 
     fun canWriteLegacyStorage(context: Context): Boolean {

@@ -74,7 +74,7 @@ private enum class SharePaintMode {
     AYAH,
 }
 
-@OptIn(UnstableApi::class)
+@androidx.annotation.OptIn(markerClass = [UnstableApi::class])
 @Singleton
 class AyahShareExporter @Inject constructor(
     @ApplicationContext private val context: Context,

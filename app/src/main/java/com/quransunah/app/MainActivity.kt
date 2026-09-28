@@ -8,6 +8,7 @@ import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
@@ -30,6 +31,17 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: HolyQuranViewModel by viewModels()
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) {
+        viewModel.postOnboardingPermissionRequestOpen = false
+        if (launchedFromAndroidAuto()) return@registerForActivityResult
+        if (isFinishing || isDestroyed) {
+            viewModel.postOnboardingBatteryPromptPending = true
+            return@registerForActivityResult
+        }
+        AutoPowerCompat.maybePromptOnce(this)
+    }
     private val mainHandler = Handler(Looper.getMainLooper())
     @Volatile
     private var allowSplash = true
@@ -68,12 +80,37 @@ class MainActivity : ComponentActivity() {
             HolyQuranApp(viewModel)
         }
         if (!fromAuto) {
-            window.decorView.post {
-                AppPermissions.requestIfNeeded(this)
-                AutoPowerCompat.maybePromptOnce(this)
+            lifecycleScope.launch {
+                viewModel.onboardingDone.collect { done ->
+                    if (done == true) beginPostOnboardingPrompts()
+                }
             }
         }
         maybeYieldToCarDisplay()
+    }
+
+    /**
+     * Notification (and legacy storage) first. The battery screen opens only
+     * after that request finishes, or immediately when nothing is missing.
+     */
+    private fun beginPostOnboardingPrompts() {
+        if (launchedFromAndroidAuto()) return
+        if (viewModel.postOnboardingPermissionRequestOpen) return
+        if (viewModel.postOnboardingBatteryPromptPending) {
+            viewModel.postOnboardingBatteryPromptPending = false
+            AutoPowerCompat.maybePromptOnce(this)
+            return
+        }
+        if (viewModel.postOnboardingPromptsDispatched) return
+        viewModel.postOnboardingPromptsDispatched = true
+        viewModel.postOnboardingPermissionRequestOpen = true
+        val requested = AppPermissions.requestIfNeeded(this) { missing ->
+            permissionLauncher.launch(missing)
+        }
+        if (!requested) {
+            viewModel.postOnboardingPermissionRequestOpen = false
+            AutoPowerCompat.maybePromptOnce(this)
+        }
     }
 
     override fun onStart() {

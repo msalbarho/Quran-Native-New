@@ -27,6 +27,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +44,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -62,6 +64,7 @@ import com.quransunah.app.BuildConfig
 import com.quransunah.app.core.uiLayoutDirection
 import com.quransunah.app.core.AppConstants
 import com.quransunah.app.core.ArabicRtl
+import com.quransunah.app.fonts.QcfFontManager
 import com.quransunah.app.core.EasternArabic
 import com.quransunah.app.core.LanguageRegistry
 import com.quransunah.app.data.prefs.UserPreferences
@@ -72,7 +75,11 @@ import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 import com.quransunah.app.ui.theme.PaperPaletteId
 import com.quransunah.app.ui.theme.PaperPalettes
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -82,11 +89,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
+    onOpenUserGuide: () -> Unit = {},
 ) {
     val inspection = LocalInspectionMode.current
     if (inspection) {
         SettingsScreenContent(
             settings = UserSettings(nightMode = LocalNightMode.current),
+            onOpenUserGuide = onOpenUserGuide,
             modifier = modifier,
         )
         return
@@ -106,6 +115,7 @@ fun SettingsScreen(
             viewModel.setLanguage(language)
             (context as? Activity)?.recreate()
         },
+        onOpenUserGuide = onOpenUserGuide,
         modifier = modifier,
     )
 }
@@ -121,6 +131,7 @@ fun SettingsScreenContent(
     onMushafFontSize: (Float) -> Unit = {},
     onMushafFontSizePreview: (Float) -> Unit = {},
     onLanguage: (String?) -> Unit = {},
+    onOpenUserGuide: () -> Unit = {},
 ) {
     val paper = LocalPaperColors.current
     var aboutOpen by remember { mutableStateOf(false) }
@@ -199,6 +210,22 @@ fun SettingsScreenContent(
                     onCommit = onMushafFontSize,
                 )
             }
+        }
+        SettingsSection(title = stringResource(R.string.settings_user_guide)) {
+            Text(
+                text = stringResource(R.string.settings_user_guide_button),
+                color = paper.textStrong,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(paper.tone300)
+                    .border(1.dp, paper.tone500.copy(alpha = 0.88f), RoundedCornerShape(12.dp))
+                    .clickable(onClick = onOpenUserGuide)
+                    .padding(vertical = 12.dp, horizontal = 14.dp),
+            )
         }
         SettingsSection(title = stringResource(R.string.settings_about)) {
             Text(
@@ -588,7 +615,54 @@ private fun FontSizeSlider(
             Text(stringResource(R.string.settings_font_small), color = paper.textMuted, fontSize = 12.sp)
             Text(stringResource(R.string.settings_font_large), color = paper.textMuted, fontSize = 12.sp)
         }
+        TextMushafSizePreview(sizeSp = local)
     }
+}
+
+private const val TEXT_MUSHAF_PREVIEW = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
+
+@Composable
+private fun TextMushafSizePreview(sizeSp: Float) {
+    val paper = LocalPaperColors.current
+    val context = LocalContext.current
+    val inspection = LocalInspectionMode.current
+    val fontManager = remember(context, inspection) {
+        if (inspection) {
+            null
+        } else {
+            EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                SettingsFontEntryPoint::class.java,
+            ).qcfFontManager()
+        }
+    }
+    var uthmanicFace by remember(fontManager) {
+        mutableStateOf(fontManager?.peekUthmanicTypeface())
+    }
+    LaunchedEffect(fontManager) {
+        if (fontManager != null && uthmanicFace == null) {
+            uthmanicFace = fontManager.loadUthmanicTypeface()
+        }
+    }
+    val family = uthmanicFace?.let { FontFamily(it) } ?: FontFamily.Serif
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        Text(
+            text = TEXT_MUSHAF_PREVIEW,
+            color = paper.textStrong,
+            fontFamily = family,
+            fontSize = sizeSp.sp,
+            lineHeight = (sizeSp * 1.75f).sp,
+            textAlign = TextAlign.Center,
+            style = TextStyle(textDirection = TextDirection.Rtl),
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface SettingsFontEntryPoint {
+    fun qcfFontManager(): QcfFontManager
 }
 
 @Composable

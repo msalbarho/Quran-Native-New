@@ -97,6 +97,7 @@ import com.quransunah.app.ui.mushaf.PageNumberBadge
 import com.quransunah.app.ui.mushaf.PagePickerDialog
 import com.quransunah.app.ui.mushaf.TextMushafPage
 import com.quransunah.app.ui.mushaf.toLineRecords
+import com.quransunah.app.ui.onboarding.OnboardingScreen
 import com.quransunah.app.ui.search.SearchPane
 import com.quransunah.app.ui.study.MeaningPopover
 import com.quransunah.app.ui.study.StudyViewModel
@@ -285,13 +286,18 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
     var translationPickerOpen by remember { mutableStateOf(false) }
     val appLanguageTag = ArabicRtl.currentTag(LocalContext.current)
     val highlight by viewModel.mushafHighlight.collectAsStateWithLifecycle()
+    val onboardingDone by viewModel.onboardingDone.collectAsStateWithLifecycle()
+    var manualGuide by remember { mutableStateOf(false) }
+    var autoGuideDismissed by remember { mutableStateOf(false) }
+    val showGuide = manualGuide || (onboardingDone == false && !autoGuideDismissed)
 
     val pagerState = rememberPagerState(
         initialPage = pageNumber - 1,
         pageCount = { AppConstants.TOTAL_PAGES },
     )
     BackHandler(
-        enabled = tab != AppTab.Home &&
+        enabled = !showGuide &&
+            tab != AppTab.Home &&
             overlay == StudyOverlay.None &&
             !searchOpen &&
             picker == ShellPicker.None,
@@ -358,7 +364,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                             viewModel.pageCache
                                 .map { cache -> cache[pageNo] }
                                 .distinctUntilChanged()
-                        }.collectAsStateWithLifecycle(initialValue = viewModel.pageCache.value[pageNo])
+                        }.collectAsStateWithLifecycle(initialValue = cachedPage(viewModel, pageNo))
                         val lineRecords = remember(pageData) { pageData?.toLineRecords().orEmpty() }
                         val showMeanings = tab == AppTab.Reading && meaningsMode
                         if (showMeanings) {
@@ -657,7 +663,25 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
             onStartReading = {
                 viewModel.selectTab(AppTab.Reading)
             },
+            onOpenUserGuide = {
+                viewModel.closePicker()
+                manualGuide = true
+            },
         )
+
+        if (showGuide) {
+            OnboardingScreen(
+                onComplete = {
+                    viewModel.completeOnboarding()
+                    manualGuide = false
+                    autoGuideDismissed = true
+                },
+                onDismiss = {
+                    manualGuide = false
+                    autoGuideDismissed = true
+                },
+            )
+        }
     }
 }
 
@@ -972,3 +996,6 @@ private fun LiveTextMushafPage(
         modifier = Modifier.fillMaxSize().clipToBounds(),
     )
 }
+
+private fun cachedPage(viewModel: HolyQuranViewModel, pageNo: Int) =
+    viewModel.pageCache.value[pageNo]

@@ -1,26 +1,38 @@
 package com.quransunah.app.ui.listening
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -28,14 +40,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,18 +64,24 @@ import com.quransunah.app.R
 import com.quransunah.app.core.uiLayoutDirection
 import com.quransunah.app.core.ArabicRtl
 import com.quransunah.app.core.EasternArabic
+import com.quransunah.app.core.formatPlaybackClock
 import com.quransunah.app.data.catalog.ReciterNames
 import com.quransunah.app.data.catalog.SurahReciter
 import com.quransunah.app.ui.index.SurahNames
 import com.quransunah.app.domain.model.PlaybackDomain
 import com.quransunah.app.domain.model.SurahInfo
 import com.quransunah.app.domain.model.PlaybackSnapshot
+import com.quransunah.app.domain.model.SurahRepeatMode
 import com.quransunah.app.fonts.QcfFontManager
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewFixtures
 import com.quransunah.app.ui.preview.PreviewTheme
 import com.quransunah.app.ui.shell.ThemeToggle
+import com.quransunah.app.ui.theme.LocalAppFontFamily
+import com.quransunah.app.ui.theme.LocalDisplayFontFamily
+import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
+import com.quransunah.app.ui.theme.PaperColors
 
 private val PickerShape = RoundedCornerShape(14.dp)
 private val PlayShape = RoundedCornerShape(14.dp)
@@ -94,7 +120,7 @@ fun ListeningScreen(
         onPrevious = viewModel::playPreviousSurah,
         onNext = viewModel::playNextSurah,
         onSeek = viewModel::seekTo,
-        onCycleRepeat = viewModel::cycleRepeatMode,
+        onSelectRepeat = viewModel::selectRepeatMode,
         modifier = modifier,
     )
 }
@@ -117,7 +143,7 @@ fun ListeningScreenContent(
     onPrevious: () -> Unit,
     onNext: () -> Unit,
     onSeek: (Long) -> Unit,
-    onCycleRepeat: () -> Unit,
+    onSelectRepeat: (SurahRepeatMode) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
@@ -155,13 +181,14 @@ fun ListeningScreenContent(
         else -> stringResource(R.string.audio_download)
     }
     Box(modifier.fillMaxSize().background(paper.pageBackground)) {
+        CompositionLocalProvider(LocalLayoutDirection provides uiLayoutDirection()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp),
+                .verticalScroll(rememberScrollState()),
         ) {
-            AudioScreenHeader(nightMode = nightMode, onThemeToggle = onThemeToggle)
             if (ui.reciters.isEmpty()) {
+                AudioScreenHeader(nightMode = nightMode, onThemeToggle = onThemeToggle)
                 Text(
                     text = stringResource(
                         if (ui.recitersError) R.string.audio_reciters_error
@@ -172,7 +199,7 @@ fun ListeningScreenContent(
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 32.dp),
+                        .padding(top = 32.dp, start = 16.dp, end = 16.dp),
                 )
                 if (ui.recitersError) {
                     Text(
@@ -187,14 +214,17 @@ fun ListeningScreenContent(
                     )
                 }
             } else {
-                ScreenAudioPlayer(
+                ListeningHeroPlayer(
                     snapshot = playback,
                     surahNumber = ui.selectedSurah,
-                    fallbackTitle = surahName,
+                    surahTitle = surahName,
                     reciterName = reciterName,
                     repeatMode = ui.repeatMode,
                     fontManager = fontManager,
+                    nightMode = nightMode,
+                    onThemeToggle = onThemeToggle,
                     isCurrentTrackActive = currentActive,
+                    playing = currentPlaying,
                     hasPrevious = index > 0,
                     hasNext = index >= 0 && index < ui.availableSurahs.lastIndex,
                     primaryDisabled = !playEnabled,
@@ -203,99 +233,29 @@ fun ListeningScreenContent(
                     onPrevious = onPrevious,
                     onNext = onNext,
                     onSeek = onSeek,
-                    onCycleRepeat = onCycleRepeat,
-                    modifier = Modifier.padding(bottom = 18.dp),
+                    onSelectRepeat = onSelectRepeat,
                 )
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(9.dp),
-                ) {
-                    PickerRow(
-                        label = stringResource(R.string.audio_surah),
-                        value = surahName,
-                        open = picker == ListeningPicker.Surah,
-                        playing = currentPlaying,
-                        enabled = ui.availableSurahs.isNotEmpty(),
-                        onClick = { picker = ListeningPicker.Surah },
-                    )
-                    PickerRow(
-                        label = stringResource(R.string.audio_reciter),
-                        value = reciterName ?: "—",
-                        open = picker == ListeningPicker.Reciter,
-                        playing = false,
-                        enabled = ui.reciters.isNotEmpty(),
-                        onClick = { picker = ListeningPicker.Reciter },
-                    )
-                    Text(
-                        text = stringResource(R.string.audio_choose_download_surahs),
-                        color = paper.textMuted,
-                        fontSize = 13.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    CompositionLocalProvider(LocalLayoutDirection provides uiLayoutDirection()) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(7.dp), modifier = Modifier.fillMaxWidth()) {
-                        RangePickerButton(
-                            label = stringResource(R.string.audio_range_from),
-                            value = fromName,
-                            open = picker == ListeningPicker.DownloadFrom,
-                            enabled = ui.availableSurahs.isNotEmpty() && !downloading,
-                            onClick = { picker = ListeningPicker.DownloadFrom },
-                            modifier = Modifier.weight(1f),
-                        )
-                        RangePickerButton(
-                            label = stringResource(R.string.audio_range_to),
-                            value = toName,
-                            open = picker == ListeningPicker.DownloadTo,
-                            enabled = ui.availableSurahs.isNotEmpty() && !downloading,
-                            onClick = { picker = ListeningPicker.DownloadTo },
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                    }
-                    val errorRed = Color(0xFFC53030)
-                    val downloadBg = when {
-                        downloadError -> errorRed.copy(alpha = 0.08f)
-                        allCached -> paper.accent.copy(alpha = 0.08f)
-                        else -> paper.pageBody
-                    }
-                    val downloadColor = when {
-                        downloadError -> errorRed
-                        allCached -> paper.accent
-                        downloading -> paper.textMuted
-                        else -> paper.textStrong
-                    }
-                    val downloadBorder = when {
-                        downloadError -> errorRed
-                        allCached -> paper.accent
-                        else -> paper.tone500.copy(alpha = 0.7f)
-                    }
-                    Text(
-                        text = downloadLabel,
-                        color = downloadColor,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .alpha(if (downloading || (!allCached && pending <= 0)) 0.65f else 1f)
-                            .shadow(3.dp, PlayShape, clip = false)
-                            .clip(PlayShape)
-                            .background(downloadBg)
-                            .border(1.dp, downloadBorder, PlayShape)
-                            .clickable(
-                                enabled = ui.selectedMoshaf != null &&
-                                    ui.selectedReciter != null &&
-                                    !downloading &&
-                                    !allCached &&
-                                    pending > 0,
-                                onClick = onDownload,
-                            )
-                            .padding(vertical = 13.dp, horizontal = 16.dp),
-                    )
-                    val hint = buildString {
+                ListeningControlSheet(
+                    surahName = surahName,
+                    reciterName = reciterName,
+                    fromName = fromName,
+                    toName = toName,
+                    picker = picker,
+                    surahEnabled = ui.availableSurahs.isNotEmpty(),
+                    reciterEnabled = ui.reciters.isNotEmpty(),
+                    rangeEnabled = ui.availableSurahs.isNotEmpty() && !downloading,
+                    playing = currentPlaying,
+                    downloadLabel = downloadLabel,
+                    downloadError = downloadError,
+                    allCached = allCached,
+                    downloading = downloading,
+                    pending = pending,
+                    downloadEnabled = ui.selectedMoshaf != null &&
+                        ui.selectedReciter != null &&
+                        !downloading &&
+                        !allCached &&
+                        pending > 0,
+                    hint = buildString {
                         append(
                             if (ui.rangeTotal > 1) {
                                 stringResource(
@@ -321,18 +281,15 @@ fun ListeningScreenContent(
                                 ),
                             )
                         }
-                    }
-                    Text(
-                        text = hint,
-                        color = paper.textMuted,
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 4.dp, bottom = 12.dp),
-                    )
-                }
+                    },
+                    onSurah = { picker = ListeningPicker.Surah },
+                    onReciter = { picker = ListeningPicker.Reciter },
+                    onFrom = { picker = ListeningPicker.DownloadFrom },
+                    onTo = { picker = ListeningPicker.DownloadTo },
+                    onDownload = onDownload,
+                )
             }
+        }
         }
 
         when (picker) {
@@ -385,6 +342,583 @@ private fun listeningSurahName(
     return SurahNames.displayName(languageTag, number, stripped)
 }
 
+private val SheetShape = RoundedCornerShape(28.dp)
+private val StopRed = Color(0xFFFF8A80)
+
+private fun listeningPlayerColor(paper: PaperColors, night: Boolean): Color {
+    return if (night) paper.pageBackground else lerp(paper.textStrong, paper.accent, 0.42f)
+}
+
+private fun listeningHeroTitle(paper: PaperColors, night: Boolean): Color {
+    return if (night) paper.textStrong else paper.tone100
+}
+
+private fun listeningHeroMuted(paper: PaperColors, night: Boolean): Color {
+    return if (night) paper.textMuted else paper.tone400
+}
+
+@Composable
+private fun ListeningHeroPlayer(
+    snapshot: PlaybackSnapshot,
+    surahNumber: Int,
+    surahTitle: String,
+    reciterName: String?,
+    repeatMode: SurahRepeatMode,
+    fontManager: QcfFontManager?,
+    nightMode: Boolean,
+    onThemeToggle: () -> Unit,
+    isCurrentTrackActive: Boolean,
+    playing: Boolean,
+    hasPrevious: Boolean,
+    hasNext: Boolean,
+    primaryDisabled: Boolean,
+    onPrimary: () -> Unit,
+    onStop: () -> Unit,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+    onSeek: (Long) -> Unit,
+    onSelectRepeat: (SurahRepeatMode) -> Unit,
+) {
+    val paper = LocalPaperColors.current
+    val player = listeningPlayerColor(paper, nightMode)
+    val heroTitle = listeningHeroTitle(paper, nightMode)
+    val heroMuted = listeningHeroMuted(paper, nightMode)
+    val duration = snapshot.durationMs.coerceAtLeast(0L)
+    val idle = snapshot.domain == PlaybackDomain.IDLE
+    val buffering = snapshot.isBuffering
+    var dragging by remember { mutableFloatStateOf(-1f) }
+    val progress = if (dragging >= 0f) {
+        dragging
+    } else if (duration > 0L) {
+        (snapshot.positionMs.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+    val imageHeight = (LocalConfiguration.current.screenHeightDp * 0.30f).dp.coerceIn(156.dp, 228.dp)
+    val scrimTop = if (nightMode) 0.72f else 0.52f
+    val scrimMid = if (nightMode) 0.58f else 0.34f
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(player),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(imageHeight),
+        ) {
+            Image(
+                painter = painterResource(R.drawable.home_listening),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize(),
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.verticalGradient(
+                            0f to Color.Black.copy(alpha = scrimTop),
+                            0.38f to Color.Black.copy(alpha = scrimMid),
+                            0.72f to player.copy(alpha = if (nightMode) 0.9f else 0.78f),
+                            1f to player,
+                        ),
+                    ),
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+            ) {
+                ListeningHeroHeader(
+                    nightMode = nightMode,
+                    titleColor = heroTitle,
+                    onThemeToggle = onThemeToggle,
+                )
+                Spacer(Modifier.weight(1f))
+                SurahLigatureText(
+                    surahNumber = snapshot.surah ?: surahNumber,
+                    fontManager = fontManager,
+                    color = heroTitle,
+                    fallback = snapshot.surahName ?: surahTitle,
+                    fontSize = 30.sp,
+                )
+                reciterName?.takeIf { it.isNotBlank() }?.let { name ->
+                    Text(
+                        text = name,
+                        color = heroMuted,
+                        fontFamily = LocalAppFontFamily.current,
+                        fontSize = 14.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                snapshot.errorMessage?.let { message ->
+                    Text(
+                        text = message,
+                        color = Color(0xFFFFB4A8),
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp),
+                    )
+                }
+            }
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 18.dp, end = 18.dp, top = 2.dp, bottom = 28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = formatPlaybackClock(if (dragging >= 0f) (dragging * duration).toLong() else snapshot.positionMs),
+                    color = heroMuted,
+                    fontFamily = LocalAppFontFamily.current,
+                    fontSize = 12.sp,
+                )
+                Text(
+                    text = formatPlaybackClock(duration),
+                    color = heroMuted,
+                    fontFamily = LocalAppFontFamily.current,
+                    fontSize = 12.sp,
+                )
+            }
+            Slider(
+                value = progress,
+                onValueChange = { dragging = it },
+                onValueChangeFinished = {
+                    if (duration > 0L && dragging >= 0f) {
+                        onSeek((dragging * duration).toLong())
+                    }
+                    dragging = -1f
+                },
+                enabled = !idle && !buffering && duration > 0L,
+                colors = SliderDefaults.colors(
+                    thumbColor = paper.accent,
+                    activeTrackColor = paper.accent,
+                    inactiveTrackColor = paper.accent.copy(alpha = 0.28f),
+                    disabledThumbColor = paper.accent.copy(alpha = 0.45f),
+                    disabledActiveTrackColor = paper.accent.copy(alpha = 0.35f),
+                    disabledInactiveTrackColor = Color.White.copy(alpha = 0.14f),
+                ),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            ListeningTransport(
+                playing = playing,
+                buffering = buffering && isCurrentTrackActive,
+                previousEnabled = hasPrevious && !buffering,
+                nextEnabled = hasNext && !buffering,
+                primaryEnabled = !primaryDisabled && !buffering,
+                stopEnabled = !idle,
+                onPrevious = onPrevious,
+                onPrimary = onPrimary,
+                onNext = onNext,
+                onStop = onStop,
+            )
+            Spacer(Modifier.height(12.dp))
+            ListeningRepeatModes(
+                selected = repeatMode,
+                onSelect = onSelectRepeat,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ListeningHeroHeader(
+    nightMode: Boolean,
+    titleColor: Color,
+    onThemeToggle: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Spacer(Modifier.width(40.dp))
+        Text(
+            text = stringResource(R.string.tab_listening),
+            color = titleColor,
+            fontFamily = LocalDisplayFontFamily.current,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(if (nightMode) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.38f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            ThemeToggle(night = nightMode, onToggle = onThemeToggle)
+        }
+    }
+}
+
+@Composable
+private fun ListeningTransport(
+    playing: Boolean,
+    buffering: Boolean,
+    previousEnabled: Boolean,
+    nextEnabled: Boolean,
+    primaryEnabled: Boolean,
+    stopEnabled: Boolean,
+    onPrevious: () -> Unit,
+    onPrimary: () -> Unit,
+    onNext: () -> Unit,
+    onStop: () -> Unit,
+) {
+    val paper = LocalPaperColors.current
+    val night = LocalNightMode.current
+    val ink = listeningHeroTitle(paper, night)
+    val onAccent = paper.pageBackground
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val previousIcon = if (rtl) R.drawable.ic_skip_next else R.drawable.ic_skip_previous
+    val nextIcon = if (rtl) R.drawable.ic_skip_previous else R.drawable.ic_skip_next
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            HeroCircleButton(
+                onClick = onPrevious,
+                enabled = previousEnabled,
+                size = 46.dp,
+                background = Color.White.copy(alpha = 0.08f),
+                border = paper.accent.copy(alpha = 0.45f),
+            ) {
+                Icon(
+                    painter = painterResource(previousIcon),
+                    contentDescription = stringResource(R.string.audio_prev_surah),
+                    tint = ink,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+            HeroCircleButton(
+                onClick = onPrimary,
+                enabled = primaryEnabled,
+                size = 68.dp,
+                background = paper.accent,
+                border = Color.Transparent,
+            ) {
+                if (buffering) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = onAccent,
+                        strokeWidth = 2.4.dp,
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(if (playing) R.drawable.ic_pause else R.drawable.ic_play_arrow),
+                        contentDescription = stringResource(if (playing) R.string.audio_pause else R.string.audio_play),
+                        tint = onAccent,
+                        modifier = Modifier.size(30.dp),
+                    )
+                }
+            }
+            HeroCircleButton(
+                onClick = onNext,
+                enabled = nextEnabled,
+                size = 46.dp,
+                background = Color.White.copy(alpha = 0.08f),
+                border = paper.accent.copy(alpha = 0.45f),
+            ) {
+                Icon(
+                    painter = painterResource(nextIcon),
+                    contentDescription = stringResource(R.string.audio_next_surah),
+                    tint = ink,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        HeroCircleButton(
+            onClick = onStop,
+            enabled = stopEnabled,
+            size = 32.dp,
+            background = StopRed.copy(alpha = 0.22f),
+            border = StopRed,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_stop),
+                contentDescription = stringResource(R.string.audio_stop),
+                tint = StopRed,
+                modifier = Modifier.size(16.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun HeroCircleButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    size: androidx.compose.ui.unit.Dp,
+    background: Color,
+    border: Color,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .size(size)
+            .alpha(if (enabled) 1f else 0.38f)
+            .clip(CircleShape)
+            .background(background)
+            .then(
+                if (border == Color.Transparent) {
+                    Modifier
+                } else {
+                    Modifier.border(1.dp, border, CircleShape)
+                },
+            )
+            .clickable(enabled = enabled, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        content()
+    }
+}
+
+@Composable
+private fun ListeningRepeatModes(
+    selected: SurahRepeatMode,
+    onSelect: (SurahRepeatMode) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        RepeatModeButton(
+            icon = R.drawable.ic_repeat,
+            label = stringResource(R.string.audio_repeat_all),
+            selected = selected == SurahRepeatMode.REMAINING,
+            onClick = { onSelect(SurahRepeatMode.REMAINING) },
+            modifier = Modifier.weight(1f),
+        )
+        RepeatModeButton(
+            icon = R.drawable.ic_repeat_one,
+            label = stringResource(R.string.audio_repeat_one),
+            selected = selected == SurahRepeatMode.ONE,
+            onClick = { onSelect(SurahRepeatMode.ONE) },
+            modifier = Modifier.weight(1f),
+        )
+        RepeatModeButton(
+            icon = R.drawable.ic_play_once,
+            label = stringResource(R.string.audio_repeat_off),
+            selected = selected == SurahRepeatMode.OFF,
+            onClick = { onSelect(SurahRepeatMode.OFF) },
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun RepeatModeButton(
+    icon: Int,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val paper = LocalPaperColors.current
+    val muted = listeningHeroMuted(paper, LocalNightMode.current)
+    val mark = if (selected) paper.pageBackground else muted.copy(alpha = 0.82f)
+    val shape = RoundedCornerShape(14.dp)
+    Column(
+        modifier = modifier
+            .heightIn(min = 42.dp)
+            .clip(shape)
+            .background(if (selected) paper.accent else Color.White.copy(alpha = 0.05f))
+            .border(
+                width = 1.dp,
+                color = if (selected) paper.accent else muted.copy(alpha = 0.45f),
+                shape = shape,
+            )
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            .padding(horizontal = 6.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            tint = mark,
+            modifier = Modifier.size(18.dp),
+        )
+        Text(
+            text = label,
+            color = mark,
+            fontFamily = LocalAppFontFamily.current,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+            fontSize = 11.sp,
+            lineHeight = 13.sp,
+            textAlign = TextAlign.Center,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+private fun ListeningControlSheet(
+    surahName: String,
+    reciterName: String?,
+    fromName: String,
+    toName: String,
+    picker: ListeningPicker?,
+    surahEnabled: Boolean,
+    reciterEnabled: Boolean,
+    rangeEnabled: Boolean,
+    playing: Boolean,
+    downloadLabel: String,
+    downloadError: Boolean,
+    allCached: Boolean,
+    downloading: Boolean,
+    pending: Int,
+    downloadEnabled: Boolean,
+    hint: String,
+    onSurah: () -> Unit,
+    onReciter: () -> Unit,
+    onFrom: () -> Unit,
+    onTo: () -> Unit,
+    onDownload: () -> Unit,
+) {
+    val paper = LocalPaperColors.current
+    val night = LocalNightMode.current
+    val sheetColor = if (night) paper.pageBody else paper.pageBackground
+    val cardColor = if (night) paper.surface else paper.pageBody
+    val errorRed = Color(0xFFC53030)
+    val downloadBg = when {
+        downloadError -> errorRed.copy(alpha = 0.08f)
+        allCached -> paper.accent.copy(alpha = 0.08f)
+        else -> cardColor
+    }
+    val downloadColor = when {
+        downloadError -> errorRed
+        allCached -> paper.accent
+        downloading -> paper.textMuted
+        else -> paper.textStrong
+    }
+    val downloadBorder = when {
+        downloadError -> errorRed
+        allCached -> paper.accent
+        else -> paper.tone500.copy(alpha = 0.7f)
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .offset(y = (-16).dp)
+            .shadow(6.dp, SheetShape, clip = false)
+            .clip(SheetShape)
+            .background(sheetColor)
+            .border(1.dp, paper.accent.copy(alpha = 0.35f), SheetShape)
+            .padding(horizontal = 16.dp, vertical = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        PickerRow(
+            label = stringResource(R.string.audio_surah),
+            value = surahName,
+            open = picker == ListeningPicker.Surah,
+            playing = playing,
+            enabled = surahEnabled,
+            onClick = onSurah,
+        )
+        PickerRow(
+            label = stringResource(R.string.audio_reciter),
+            value = reciterName ?: "—",
+            open = picker == ListeningPicker.Reciter,
+            playing = false,
+            enabled = reciterEnabled,
+            onClick = onReciter,
+        )
+        Text(
+            text = stringResource(R.string.audio_choose_download_surahs),
+            color = paper.textMuted,
+            fontFamily = LocalAppFontFamily.current,
+            fontSize = 13.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            if (maxWidth < 300.dp) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    RangePickerButton(
+                        label = stringResource(R.string.audio_range_from),
+                        value = fromName,
+                        open = picker == ListeningPicker.DownloadFrom,
+                        enabled = rangeEnabled,
+                        onClick = onFrom,
+                    )
+                    RangePickerButton(
+                        label = stringResource(R.string.audio_range_to),
+                        value = toName,
+                        open = picker == ListeningPicker.DownloadTo,
+                        enabled = rangeEnabled,
+                        onClick = onTo,
+                    )
+                }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    RangePickerButton(
+                        label = stringResource(R.string.audio_range_from),
+                        value = fromName,
+                        open = picker == ListeningPicker.DownloadFrom,
+                        enabled = rangeEnabled,
+                        onClick = onFrom,
+                        modifier = Modifier.weight(1f),
+                    )
+                    RangePickerButton(
+                        label = stringResource(R.string.audio_range_to),
+                        value = toName,
+                        open = picker == ListeningPicker.DownloadTo,
+                        enabled = rangeEnabled,
+                        onClick = onTo,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
+        Text(
+            text = downloadLabel,
+            color = downloadColor,
+            fontFamily = LocalAppFontFamily.current,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .alpha(if (downloading || (!allCached && pending <= 0)) 0.65f else 1f)
+                .clip(PlayShape)
+                .background(downloadBg)
+                .border(1.dp, downloadBorder, PlayShape)
+                .clickable(enabled = downloadEnabled, onClick = onDownload)
+                .padding(vertical = 13.dp, horizontal = 16.dp),
+        )
+        Text(
+            text = hint,
+            color = paper.textMuted,
+            fontFamily = LocalAppFontFamily.current,
+            fontSize = 12.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+        )
+    }
+}
+
 @Composable
 private fun AudioScreenHeader(nightMode: Boolean, onThemeToggle: () -> Unit) {
     val paper = LocalPaperColors.current
@@ -419,13 +953,15 @@ private fun PickerRow(
     onClick: () -> Unit,
 ) {
     val paper = LocalPaperColors.current
+    val cardColor = if (LocalNightMode.current) paper.surface else paper.pageBody
     val highlight = open || playing
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(if (highlight) 8.dp else 3.dp, PickerShape, clip = false)
+            .shadow(if (highlight) 3.dp else 1.dp, PickerShape, clip = false)
             .clip(PickerShape)
-            .background(paper.pageBody)
+            .background(cardColor)
             .border(
                 1.dp,
                 if (highlight) paper.accent else paper.tone500.copy(alpha = 0.7f),
@@ -437,17 +973,28 @@ private fun PickerRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text(text = label, color = paper.textMuted, fontSize = 14.sp)
+        Text(
+            text = label,
+            color = paper.textMuted,
+            fontFamily = LocalAppFontFamily.current,
+            fontSize = 14.sp,
+        )
         Text(
             text = value,
             color = paper.textStrong,
+            fontFamily = LocalAppFontFamily.current,
             fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
-        Text(text = "›", color = paper.textMuted, fontSize = 20.sp)
+        Text(
+            text = "›",
+            color = paper.textMuted,
+            fontSize = 20.sp,
+            modifier = Modifier.graphicsLayer { scaleX = if (rtl) -1f else 1f },
+        )
     }
 }
 
@@ -479,9 +1026,9 @@ private fun RangePickerButton(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(3.dp, RoundedCornerShape(12.dp), clip = false)
+                .shadow(1.dp, RoundedCornerShape(12.dp), clip = false)
                 .clip(RoundedCornerShape(12.dp))
-                .background(paper.pageBody)
+                .background(if (LocalNightMode.current) paper.surface else paper.pageBody)
                 .border(
                     1.dp,
                     if (open) paper.accent else paper.tone500.copy(alpha = 0.7f),
@@ -527,7 +1074,7 @@ private fun ListeningScreenPreview() {
             onPrevious = {},
             onNext = {},
             onSeek = {},
-            onCycleRepeat = {},
+            onSelectRepeat = {},
         )
     }
 }

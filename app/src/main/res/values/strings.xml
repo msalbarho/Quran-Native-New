@@ -280,4 +280,30 @@
     <string name="translation_selector">Choose translation: %1$s</string>
     <string name="copied">Copied</string>
     <string name="word_share_text">Share as text</string>
+    <string name="settings_user_guide">User guide</string>
+    <string name="settings_user_guide_button">View user guide</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_start">Start</string>
+    <string name="onboarding_page_cd">Guide page %1$d of %2$d</string>
+    <string name="guide_welcome_title">Welcome</string>
+    <string name="guide_welcome_body">Read the Quran, listen to recitation, and view the meanings in the language you choose.</string>
+    <string name="guide_reading_title">Reading</string>
+    <string name="guide_reading_body">Swipe between pages, and open the index to move to a surah or page.</string>
+    <string name="guide_word_title">Word tools</string>
+    <string name="guide_word_body">Long-press any Quran word to listen, open tafsir, save your place, and share it as text, an image, or a video.</string>
+    <string name="guide_listen_title">Listening and meanings</string>
+    <string name="guide_listen_body">Choose a reciter and listen to a surah or ayah, then read the meanings in your selected translation.</string>
+    <string name="guide_comfort_title">Comfortable reading</string>
+    <string name="guide_text_title">Text Mushaf</string>
+    <string name="guide_text_body">In Settings, choose Text Mushaf to control the font size.</string>
+    <string name="guide_madinah_title">Madinah Mushaf</string>
+    <string name="guide_madinah_body">If you prefer the Madinah Mushaf, rotate the device to landscape so the page appears larger.</string>
+    <string name="guide_meaning_sample">In the name of Allah, the Most Gracious, the Most Merciful.</string>
+    <string name="guide_font_mark" translatable="false">A</string>
+    <string name="guide_preview_surah" translatable="false">سُورَةُ الْفَاتِحَةِ</string>
+    <string name="guide_preview_lines" translatable="false">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\nالْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ</string>
+    <string name="guide_preview_words" translatable="false">مَالِكِ يَوْمِ الدِّينِ</string>
+    <string name="guide_preview_selected" translatable="false">مَالِكِ</string>
+    <string name="guide_preview_bismillah" translatable="false">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</string>
 </resources>

@@ -1,5 +1,3 @@
-@file:OptIn(UnstableApi::class)
-
 package com.quransunah.app.media
 
 import android.app.Notification
@@ -34,7 +32,6 @@ import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaStyleNotificationHelper
 import androidx.media3.session.SessionError
-import androidx.media3.session.SessionResult
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
@@ -75,6 +72,7 @@ import kotlinx.coroutines.withTimeoutOrNull
  * bind/destroy loop that hides the app on Samsung One UI (S24 Ultra).
  */
 @AndroidEntryPoint
+@androidx.annotation.OptIn(markerClass = [UnstableApi::class])
 class PlaybackService : MediaLibraryService() {
 
     @Inject
@@ -825,7 +823,7 @@ class PlaybackService : MediaLibraryService() {
                     AppLog.i(TAG) {
                         "reject background auto-play from ${describeController(controller)}"
                     }
-                    return SessionResult.RESULT_ERROR_NOT_SUPPORTED
+                    return SessionError.ERROR_NOT_SUPPORTED
                 }
                 if (starting) authorizePlayback(controller)
                 AppLog.i(TAG) { "onPlay: COMMAND_PLAY_PAUSE from ${describeController(controller)}" }

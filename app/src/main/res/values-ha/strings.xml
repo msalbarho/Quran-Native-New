@@ -279,4 +279,24 @@
     <string name="translation_selector">Zaɓi fassara: %1$s</string>
     <string name="copied">An kwafa</string>
     <string name="word_share_text">Raba a matsayin rubutu</string>
+    <string name="settings_user_guide">Jagorar mai amfani</string>
+    <string name="settings_user_guide_button">Duba jagorar</string>
+    <string name="onboarding_skip">Tsallake</string>
+    <string name="onboarding_next">Na gaba</string>
+    <string name="onboarding_start">Fara</string>
+    <string name="onboarding_page_cd">Shafin jagora %1$d cikin %2$d</string>
+    <string name="guide_welcome_title">Barka da zuwa</string>
+    <string name="guide_welcome_body">Karanta Alqur\'ani, saurari tilawa, kuma duba ma\'anoni a harshen da kuka zaɓa.</string>
+    <string name="guide_reading_title">Karatu</string>
+    <string name="guide_reading_body">Murza tsakanin shafuka, kuma buɗe fihirisa don zuwa sura ko shafi.</string>
+    <string name="guide_word_title">Kayan aikin kalma</string>
+    <string name="guide_word_body">Danna dogon lokaci a kan kowace kalmar Alqur\'ani don saurare, buɗe tafsiri, adana wurin ku, da raba shi a matsayin rubutu, hoto, ko bidiyo.</string>
+    <string name="guide_listen_title">Sauraro da ma\'anoni</string>
+    <string name="guide_listen_body">Zaɓi mai karatu kuma saurari sura ko aya, sannan karanta ma\'anoni a fassarar da kuka zaɓa.</string>
+    <string name="guide_comfort_title">Karatu cikin kwanciyar hankali</string>
+    <string name="guide_text_title">Mushaf na rubutu</string>
+    <string name="guide_text_body">A cikin Saituna, zaɓi Mushaf na rubutu don sarrafa girman rubutu.</string>
+    <string name="guide_madinah_title">Mushaf na Madina</string>
+    <string name="guide_madinah_body">Idan kun fi son Mushaf na Madina, juya na\'urar zuwa kwance domin shafin ya fi girma.</string>
+    <string name="guide_meaning_sample">Da sunan Allah, Mai rahama, Mai jin ƙai.</string>
 </resources>

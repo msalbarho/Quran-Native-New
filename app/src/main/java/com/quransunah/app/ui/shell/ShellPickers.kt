@@ -76,6 +76,7 @@ fun ShellPickerHost(
     onSelectIndexPage: (IndexJump) -> Unit,
     onJumpBookmark: (ReadingBookmark) -> Unit,
     onStartReading: () -> Unit,
+    onOpenUserGuide: () -> Unit = {},
 ) {
     if (picker == ShellPicker.None) return
     BackHandler(onBack = onClose)
@@ -144,7 +145,7 @@ fun ShellPickerHost(
                 modifier = Modifier.fillMaxWidth().weight(1f),
             )
         }
-        ShellPicker.Settings -> SettingsSideSheet(onClose = onClose)
+        ShellPicker.Settings -> SettingsSideSheet(onClose = onClose, onOpenUserGuide = onOpenUserGuide)
         ShellPicker.None -> Unit
     }
 }
@@ -299,6 +300,7 @@ private fun CenteredPickerCard(
 @Composable
 private fun SettingsSideSheet(
     onClose: () -> Unit,
+    onOpenUserGuide: () -> Unit,
 ) {
     val paper = LocalPaperColors.current
     var open by remember { mutableStateOf(false) }
@@ -340,6 +342,7 @@ private fun SettingsSideSheet(
                     ) {
                         SettingsPickerHeader(onClose = onClose)
                         SettingsScreen(
+                            onOpenUserGuide = onOpenUserGuide,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f),

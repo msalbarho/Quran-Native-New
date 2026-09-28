@@ -25,6 +25,7 @@ import com.quransunah.app.domain.model.SurahRepeatMode
 import com.quransunah.app.media.PlaybackMediaIds
 import com.quransunah.app.media.PlaybackSessionPolicy
 
+@androidx.annotation.OptIn(markerClass = [androidx.media3.common.util.UnstableApi::class])
 class AutoLibrary(
     private val context: Context,
     private val reciterCatalog: ReciterCatalog,

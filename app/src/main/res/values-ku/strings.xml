@@ -279,4 +279,24 @@
     <string name="translation_selector">Wergerê hilbijêre: %1$s</string>
     <string name="copied">Hate kopîkirin</string>
     <string name="word_share_text">Wek nivîs parve bike</string>
+    <string name="settings_user_guide">Rêberê bikarhêner</string>
+    <string name="settings_user_guide_button">Rêberê bibîne</string>
+    <string name="onboarding_skip">Derbas bike</string>
+    <string name="onboarding_next">Pêşve</string>
+    <string name="onboarding_start">Dest pê bike</string>
+    <string name="onboarding_page_cd">Rûpela rêberê %1$d ji %2$d</string>
+    <string name="guide_welcome_title">Bi xêr hatî</string>
+    <string name="guide_welcome_body">Qur\'anê bixwîne, guhdarî tilawetê bike, û wateyan bi zimanê ku tu hildibijêrî bibîne.</string>
+    <string name="guide_reading_title">Xwendin</string>
+    <string name="guide_reading_body">Di nav rûpelan de bikişîne, û ji bo çûna sûre an rûpelekê pêristê veke.</string>
+    <string name="guide_word_title">Amûrên peyvê</string>
+    <string name="guide_word_body">Ji bo guhdarîkirin, vekirina tefsîrê, tomarkirina cihê xwe û parvekirina wekî nivîs, wêne an vîdyoyê, li ser her peyveke Qur\'anê dirêj bitikîne.</string>
+    <string name="guide_listen_title">Guhdarî û wate</string>
+    <string name="guide_listen_body">Qarîyekî hilbijêre û sûre an ayetekê bibihîze, paşê wateyan di wergera hilbijartî de bixwîne.</string>
+    <string name="guide_comfort_title">Xwendina rehet</string>
+    <string name="guide_text_title">Mushafa nivîsê</string>
+    <string name="guide_text_body">Di Mîhengê de Mushafa nivîsê hilbijêre da ku mezinahiya nivîsê kontrol bikî.</string>
+    <string name="guide_madinah_title">Mushafa Medîneyê</string>
+    <string name="guide_madinah_body">Heke tu Mushafa Medîneyê tercîh dikî, cîhazê ber bi asoyî ve bizivirîne da ku rûpel mezintir xuya bibe.</string>
+    <string name="guide_meaning_sample">Bi navê Xwedê yê Dilovan û Dilovantir.</string>
 </resources>

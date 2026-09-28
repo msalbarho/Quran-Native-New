@@ -279,4 +279,24 @@
     <string name="translation_selector">ਅਨੁਵਾਦ ਚੁਣੋ: %1$s</string>
     <string name="copied">ਕਾਪੀ ਹੋ ਗਿਆ</string>
     <string name="word_share_text">ਲਿਖਤ ਵਜੋਂ ਸਾਂਝਾ ਕਰੋ</string>
+    <string name="settings_user_guide">ਵਰਤੋਂ ਗਾਈਡ</string>
+    <string name="settings_user_guide_button">ਗਾਈਡ ਵੇਖੋ</string>
+    <string name="onboarding_skip">ਛੱਡੋ</string>
+    <string name="onboarding_next">ਅੱਗੇ</string>
+    <string name="onboarding_start">ਸ਼ੁਰੂ</string>
+    <string name="onboarding_page_cd">ਗਾਈਡ ਸਫ਼ਾ %1$d / %2$d</string>
+    <string name="guide_welcome_title">ਜੀ ਆਇਆਂ ਨੂੰ</string>
+    <string name="guide_welcome_body">ਕੁਰਆਨ ਪੜ੍ਹੋ, ਤਿਲਾਵਤ ਸੁਣੋ, ਅਤੇ ਅਰਥ ਆਪਣੀ ਚੁਣੀ ਭਾਸ਼ਾ ਵਿੱਚ ਵੇਖੋ।</string>
+    <string name="guide_reading_title">ਪੜ੍ਹਨਾ</string>
+    <string name="guide_reading_body">ਸਫ਼ਿਆਂ ਵਿਚਕਾਰ ਸਵਾਈਪ ਕਰੋ, ਅਤੇ ਸੂਰਤ ਜਾਂ ਸਫ਼ੇ ਲਈ ਸੂਚੀ ਖੋਲ੍ਹੋ।</string>
+    <string name="guide_word_title">ਸ਼ਬਦ ਦੇ ਸੰਦ</string>
+    <string name="guide_word_body">ਸੁਣਨ, ਤਫ਼ਸੀਰ ਖੋਲ੍ਹਣ, ਥਾਂ ਸੰਭਾਲਣ, ਅਤੇ ਲਿਖਤ, ਤਸਵੀਰ ਜਾਂ ਵੀਡੀਓ ਵਜੋਂ ਸਾਂਝਾ ਕਰਨ ਲਈ ਕਿਸੇ ਵੀ ਕੁਰਆਨੀ ਸ਼ਬਦ ਨੂੰ ਦੇਰ ਤੱਕ ਦਬਾਓ।</string>
+    <string name="guide_listen_title">ਸੁਣਨਾ ਅਤੇ ਅਰਥ</string>
+    <string name="guide_listen_body">ਕਾਰੀ ਚੁਣੋ ਅਤੇ ਸੂਰਤ ਜਾਂ ਆਇਤ ਸੁਣੋ, ਫਿਰ ਚੁਣੇ ਅਨੁਵਾਦ ਵਿੱਚ ਅਰਥ ਪੜ੍ਹੋ।</string>
+    <string name="guide_comfort_title">ਆਰਾਮ ਨਾਲ ਪੜ੍ਹਨਾ</string>
+    <string name="guide_text_title">ਲਿਖਤੀ ਮੁਸਹਫ਼</string>
+    <string name="guide_text_body">ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਫ਼ੌਂਟ ਆਕਾਰ ਲਈ ਲਿਖਤੀ ਮੁਸਹਫ਼ ਚੁਣੋ।</string>
+    <string name="guide_madinah_title">ਮਦੀਨਾ ਮੁਸਹਫ਼</string>
+    <string name="guide_madinah_body">ਜੇ ਤੁਸੀਂ ਮਦੀਨਾ ਮੁਸਹਫ਼ ਪਸੰਦ ਕਰਦੇ ਹੋ ਤਾਂ ਸਫ਼ਾ ਵੱਡਾ ਵਿਖਾਉਣ ਲਈ ਡਿਵਾਈਸ ਨੂੰ ਲੈਂਡਸਕੇਪ ਵਿੱਚ ਘੁਮਾਓ।</string>
+    <string name="guide_meaning_sample">ਅੱਲਾਹ ਦੇ ਨਾਮ ਨਾਲ ਜੋ ਬਹੁਤ ਮਿਹਰਬਾਨ ਅਤੇ ਰਹਿਮ ਵਾਲਾ ਹੈ।</string>
 </resources>

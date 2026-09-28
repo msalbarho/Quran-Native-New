@@ -279,4 +279,24 @@
     <string name="translation_selector">Chagua tafsiri: %1$s</string>
     <string name="copied">Imenakiliwa</string>
     <string name="word_share_text">Shiriki kama maandishi</string>
+    <string name="settings_user_guide">Mwongozo wa mtumiaji</string>
+    <string name="settings_user_guide_button">Angalia mwongozo</string>
+    <string name="onboarding_skip">Ruka</string>
+    <string name="onboarding_next">Ifuatayo</string>
+    <string name="onboarding_start">Anza</string>
+    <string name="onboarding_page_cd">Ukurasa wa mwongozo %1$d kati ya %2$d</string>
+    <string name="guide_welcome_title">Karibu</string>
+    <string name="guide_welcome_body">Soma Qurani, sikiliza usomaji, na uone maana kwa lugha unayochagua.</string>
+    <string name="guide_reading_title">Kusoma</string>
+    <string name="guide_reading_body">Telezesha kati ya kurasa, na ufungue faharasa ili uende kwenye sura au ukurasa.</string>
+    <string name="guide_word_title">Zana za neno</string>
+    <string name="guide_word_body">Bonyeza kwa muda neno lolote la Qurani ili usikilize, ufungue tafsiri, uhifadhi mahali pako, na ushiriki kama maandishi, picha, au video.</string>
+    <string name="guide_listen_title">Kusikiliza na maana</string>
+    <string name="guide_listen_body">Chagua msomaji na usikilize sura au aya, kisha soma maana katika tafsiri uliyochagua.</string>
+    <string name="guide_comfort_title">Kusoma kwa starehe</string>
+    <string name="guide_text_title">Mushaf wa maandishi</string>
+    <string name="guide_text_body">Katika Mipangilio, chagua Mushaf wa maandishi ili udhibiti ukubwa wa herufi.</string>
+    <string name="guide_madinah_title">Mushaf wa Madina</string>
+    <string name="guide_madinah_body">Ukiipendelea Mushaf wa Madina, zungusha kifaa kwa mlalo ili ukurasa uonekane mkubwa zaidi.</string>
+    <string name="guide_meaning_sample">Kwa jina la Mwenyezi Mungu, Mwingi wa rehema, Mwenye kurehemu.</string>
 </resources>

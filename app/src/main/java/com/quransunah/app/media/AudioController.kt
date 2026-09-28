@@ -123,10 +123,10 @@ class AudioController @Inject constructor(
                     if (snap.isPlaying || _snapshot.value.playWhenReady) return@withLock
                     val player = ensureController()
                     if (hasSurahPlaylist(player, moshaf.id, items.size)) return@withLock
-                val playlist = (1..AppConstants.SURAH_COUNT)
-                    .filter { moshaf.contains(it) }
-                    .filter { PlaybackNetwork.isOnline(context) || surahAudioStore.has(moshaf.id, it) }
-                val startIndex = playlist.indexOf(surah).coerceAtLeast(0)
+                    val playlist = (1..AppConstants.SURAH_COUNT)
+                        .filter { moshaf.contains(it) }
+                        .filter { PlaybackNetwork.isOnline(context) || surahAudioStore.has(moshaf.id, it) }
+                    val startIndex = playlist.indexOf(surah).coerceAtLeast(0)
                     player.setMediaItems(items, startIndex, 0L)
                     player.prepare()
                     player.pause()

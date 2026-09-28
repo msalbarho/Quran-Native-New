@@ -279,6 +279,26 @@
     <string name="translation_selector">Übersetzung wählen: %1$s</string>
     <string name="copied">Kopiert</string>
     <string name="word_share_text">Als Text teilen</string>
+    <string name="settings_user_guide">Benutzerhandbuch</string>
+    <string name="settings_user_guide_button">Benutzerhandbuch öffnen</string>
+    <string name="onboarding_skip">Überspringen</string>
+    <string name="onboarding_next">Weiter</string>
+    <string name="onboarding_start">Beginnen</string>
+    <string name="onboarding_page_cd">Anleitungsseite %1$d von %2$d</string>
+    <string name="guide_welcome_title">Willkommen</string>
+    <string name="guide_welcome_body">Lies den Quran, höre die Rezitation und sieh die Bedeutungen in der Sprache, die du wählst.</string>
+    <string name="guide_reading_title">Lesen</string>
+    <string name="guide_reading_body">Wische zwischen den Seiten und öffne das Verzeichnis, um zu einer Sure oder Seite zu wechseln.</string>
+    <string name="guide_word_title">Wortwerkzeuge</string>
+    <string name="guide_word_body">Halte ein Quran-Wort gedrückt, um zuzuhören, den Tafsir zu öffnen, deine Stelle zu speichern und es als Text, Bild oder Video zu teilen.</string>
+    <string name="guide_listen_title">Hören und Bedeutungen</string>
+    <string name="guide_listen_body">Wähle einen Rezitator und höre eine Sure oder einen Vers, und lies dann die Bedeutungen in der gewählten Übersetzung.</string>
+    <string name="guide_comfort_title">Angenehmes Lesen</string>
+    <string name="guide_text_title">Text-Mushaf</string>
+    <string name="guide_text_body">Wähle unter Einstellungen den Text-Mushaf, um die Schriftgröße zu steuern.</string>
+    <string name="guide_madinah_title">Madinah-Mushaf</string>
+    <string name="guide_madinah_body">Wenn du den Madinah-Mushaf bevorzugst, drehe das Gerät ins Querformat, damit die Seite größer erscheint.</string>
+    <string name="guide_meaning_sample">Im Namen Allahs, des Allerbarmers, des Barmherzigen.</string>
 </resources>
 
 
