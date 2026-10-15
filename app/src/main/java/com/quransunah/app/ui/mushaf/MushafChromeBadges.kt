@@ -7,6 +7,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +34,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -51,8 +57,6 @@ import com.quransunah.app.core.ArabicRtl
 import com.quransunah.app.core.EasternArabic
 import com.quransunah.app.core.HizbBadgeParts
 import com.quransunah.app.core.HizbQuarterKind
-import com.quransunah.app.ui.shell.ChromeFrameDecor
-import com.quransunah.app.ui.shell.ChromeFrameOrientation
 import com.quransunah.app.ui.shell.ChromeTokens
 import com.quransunah.app.ui.theme.LocalDisplayFontFamily
 import com.quransunah.app.ui.theme.LocalNightMode
@@ -186,10 +190,23 @@ private fun hizbMarkerLines(parts: HizbBadgeParts): List<String> {
     val number = EasternArabic.format(parts.number)
     if (ArabicRtl.currentTag(LocalContext.current) == "ar") {
         return when (parts.kind) {
-            HizbQuarterKind.Full -> listOf("الحزب", number)
-            HizbQuarterKind.Quarter -> listOf("ربع", "الحزب", number)
-            HizbQuarterKind.Half -> listOf("نصف", "الحزب", number)
-            HizbQuarterKind.ThreeQuarters -> listOf("ثلاثة", "أرباع", "الحزب", number)
+            HizbQuarterKind.Full -> listOf(stringResource(R.string.mushaf_hizb_full), number)
+            HizbQuarterKind.Quarter -> listOf(
+                stringResource(R.string.mushaf_hizb_quarter),
+                stringResource(R.string.mushaf_hizb_full),
+                number,
+            )
+            HizbQuarterKind.Half -> listOf(
+                stringResource(R.string.mushaf_hizb_half),
+                stringResource(R.string.mushaf_hizb_full),
+                number,
+            )
+            HizbQuarterKind.ThreeQuarters -> listOf(
+                stringResource(R.string.mushaf_hizb_three),
+                stringResource(R.string.mushaf_hizb_quarters),
+                stringResource(R.string.mushaf_hizb_full),
+                number,
+            )
         }
     }
     val term = stringResource(R.string.index_tab_hizb_short)
@@ -222,7 +239,7 @@ private fun SajdahBadgeBox(
                     .padding(horizontal = 2.dp, vertical = 4.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                CenteredBadgeLine(text = stringResource(R.string.index_tab_sajdah_short))
+                CenteredBadgeLine(text = stringResource(R.string.mushaf_sajdah))
             }
         }
     }
@@ -299,11 +316,16 @@ private fun MushafSideBadgeBox(
     onTap: () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
+    val paper = LocalPaperColors.current
+    val night = LocalNightMode.current
+    val shape = RoundedCornerShape(12.dp)
     Box(
         modifier = Modifier
             .width(width)
             .height(height)
-            .clip(RoundedCornerShape(6.dp))
+            .clip(shape)
+            .background(paper.chromeFill)
+            .border(1.dp, paper.accent.copy(alpha = if (night) 0.42f else 0.30f), shape)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -311,10 +333,19 @@ private fun MushafSideBadgeBox(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        ChromeFrameDecor(
-            modifier = Modifier.matchParentSize(),
-            orientation = ChromeFrameOrientation.Vertical,
-        )
+        Canvas(Modifier.matchParentSize()) {
+            val inset = 3.dp.toPx()
+            drawRoundRect(
+                color = paper.decorPattern,
+                topLeft = Offset(inset, inset),
+                size = Size(
+                    (size.width - inset * 2f).coerceAtLeast(0f),
+                    (size.height - inset * 2f).coerceAtLeast(0f),
+                ),
+                cornerRadius = CornerRadius(8.dp.toPx(), 8.dp.toPx()),
+                style = Stroke(width = 0.8.dp.toPx()),
+            )
+        }
         content()
     }
 }
@@ -335,8 +366,4 @@ private fun badgeExit() =
         )
 
 @Composable
-private fun badgeLabelColor(): Color {
-    val night = LocalNightMode.current
-    val paper = LocalPaperColors.current
-    return if (night) Color.White else paper.textStrong
-}
+private fun badgeLabelColor() = LocalPaperColors.current.textStrong

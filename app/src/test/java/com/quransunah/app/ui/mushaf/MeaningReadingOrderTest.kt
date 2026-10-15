@@ -26,8 +26,10 @@ class MeaningReadingOrderTest {
         val marker604 = markerLigature(114, 6)
         assertEquals(1, marker604.length)
         assertTrue(marker604[0].code in 0xE000..0xF8FF)
-        assertFalse(fontHasColorTables(File("../public/fonts/qcf4/QCF4_Hafs_06.ttf")))
-        assertFalse(fontHasColorTables(File("../public/fonts/qcf4/QCF4_Hafs_47.ttf")))
+        // These shipped faces have included COLR/CPAL since the initial commit.
+        // The page map points at those files; the color tables are part of them.
+        assertTrue(fontHasColorTables(File("../public/fonts/qcf4/QCF4_Hafs_06.ttf")))
+        assertTrue(fontHasColorTables(File("../public/fonts/qcf4/QCF4_Hafs_47.ttf")))
     }
 
     @Test

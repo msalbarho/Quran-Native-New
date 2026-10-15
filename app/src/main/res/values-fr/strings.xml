@@ -174,7 +174,6 @@
     <string name="training_listen_accessibility">Écouter depuis le verset choisi</string>
     <string name="training_close_accessibility">Fermer l’entraînement</string>
     <string name="last_position_title">Dernière position</string>
-    <string name="saved_places_tab">Places enregistrées</string>
     <string name="training_tab">Entraînement</string>
     <string name="bookmarks_saved">Positions enregistrées</string>
     <string name="bookmarks_saved_count">Positions enregistrées (%1$s)</string>
@@ -299,6 +298,34 @@
     <string name="guide_madinah_title">Mushaf de Médine</string>
     <string name="guide_madinah_body">Si vous préférez le Mushaf de Médine, tournez l’appareil en paysage pour afficher la page plus grande.</string>
     <string name="guide_meaning_sample">Au nom d’Allah, le Tout Miséricordieux, le Très Miséricordieux.</string>
+    <string name="index_matching_surahs">Sourates correspondantes</string>
+    <string name="index_matching_verses">Versets correspondants</string>
+    <string name="training_next_word">Mot suivant</string>
+    <string name="training_more">Plus</string>
+    <string name="training_mark_memorized">Je l’ai mémorisé</string>
+    <string name="training_saved_mastered">Enregistré comme mémorisé</string>
+    <string name="training_saved_review">Enregistré pour révision</string>
+    <string name="training_continue_last">Continuer le dernier entraînement</string>
+    <string name="training_my_progress">Ma progression de mémorisation</string>
+    <string name="training_log">Historique d’entraînement</string>
+    <string name="training_no_position">Aucune position d’entraînement précédente</string>
+    <string name="training_history_empty">Aucune séance d’entraînement</string>
+    <string name="training_history_resume">Reprendre à ce verset</string>
+    <string name="training_history_back">Retour</string>
+    <string name="training_history_same_surah">%1$s %2$s–%3$s</string>
+    <string name="training_history_span">%1$s %2$s – %3$s %4$s</string>
+    <string name="training_history_last">Dernier verset : %1$s %2$s</string>
+    <string name="training_history_practiced">Versets travaillés : %1$s</string>
+    <string name="training_history_assessments">Mémorisés %1$s · À réviser %2$s</string>
+    <string name="training_history_no_assessments">Aucune évaluation dans cette séance</string>
+    <string name="training_history_legacy_assessments">Les anciennes évaluations sont conservées sans être réécrites</string>
+    <string name="training_history_started">Début : %1$s</string>
+    <string name="training_history_ended">Fin : %1$s</string>
+    <string name="training_history_active">En cours</string>
+    <string name="training_selected_verse">Verset %1$s</string>
+    <string name="index_search_all">Rechercher un verset, un numéro ou une sourate…</string>
+    <string name="memorization_plan_custom_name">Plan de mémorisation</string>
+    <string name="memorization_plan_sequential_name">Mémorisation séquentielle</string>
 </resources>
 
 

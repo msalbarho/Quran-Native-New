@@ -10,6 +10,8 @@ import com.quransunah.app.data.local.user.entity.MemorizationSessionEntity
 import com.quransunah.app.data.local.user.entity.MemorizationRecordingEntity
 import com.quransunah.app.data.local.user.entity.RecitationAttemptEntity
 import com.quransunah.app.data.local.user.entity.PageMetaEntity
+import com.quransunah.app.data.local.user.entity.TrainingLogEntity
+import com.quransunah.app.data.local.user.entity.TrainingPositionEntity
 import com.quransunah.app.data.local.user.entity.WordMeaningEntity
 
 @Database(
@@ -23,8 +25,10 @@ import com.quransunah.app.data.local.user.entity.WordMeaningEntity
         PageMetaEntity::class,
         AyahSearchEntity::class,
         WordMeaningEntity::class,
+        TrainingLogEntity::class,
+        TrainingPositionEntity::class,
     ],
-    version = 5,
+    version = 7,
     exportSchema = true,
 )
 abstract class UserDatabase : RoomDatabase() {
@@ -34,4 +38,5 @@ abstract class UserDatabase : RoomDatabase() {
     abstract fun pageMetaDao(): PageMetaDao
     abstract fun searchDao(): SearchDao
     abstract fun wordMeaningDao(): WordMeaningDao
+    abstract fun trainingHistoryDao(): TrainingHistoryDao
 }

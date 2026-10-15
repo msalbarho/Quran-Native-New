@@ -11,6 +11,7 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
+import android.os.SystemClock
 import android.view.KeyEvent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
@@ -39,7 +40,6 @@ import com.quransunah.app.MainActivity
 import com.quransunah.app.R
 import com.quransunah.app.core.AppConstants
 import com.quransunah.app.core.AppLog
-import com.quransunah.app.core.AppUiPresence
 import com.quransunah.app.data.audio.SurahAudioStore
 import com.quransunah.app.data.catalog.ReciterCatalog
 import com.quransunah.app.data.local.mushaf.MushafDao
@@ -107,11 +107,17 @@ class PlaybackService : MediaLibraryService() {
     private val catalogReady = CompletableDeferred<Unit>()
     private var playerListener: Player.Listener? = null
     /**
-     * Set after an explicit Play from the phone UI or Android Auto.
-     * Blocks Bluetooth headset / car A2DP auto-resume from starting audio
-     * when the user never opened the app or Auto this process.
+     * Set after playback has actually started from the phone UI, a chosen
+     * Auto item, or an accepted play command. Bluetooth alone never sets this.
      */
     private var userAllowedPlayback = false
+
+    /**
+     * Play commands from other packages are ignored until this elapsed-realtime
+     * deadline. Android Auto and Bluetooth emit a normal play request when they
+     * connect, and the platform does not mark that request as automatic.
+     */
+    private var implicitPlayBlockedUntilMs = 0L
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(AutoRtl.wrap(newBase))
@@ -184,7 +190,10 @@ class PlaybackService : MediaLibraryService() {
             }
 
             override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
-                if (playWhenReady) ensurePlaybackForeground()
+                if (playWhenReady) {
+                    userAllowedPlayback = true
+                    ensurePlaybackForeground()
+                }
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
@@ -231,6 +240,7 @@ class PlaybackService : MediaLibraryService() {
         when (intent?.action) {
             ACTION_AUTO_SESSION -> {
                 AppLog.i(TAG) { "onStartCommand: ACTION_AUTO_SESSION" }
+                armImplicitPlayBlock(ACTION_AUTO_SESSION)
                 promoteAutoSession(reason = ACTION_AUTO_SESSION, startSelf = false)
                 serviceScope.launch {
                     withTimeoutOrNull(8_000) { catalogReady.await() }
@@ -394,18 +404,36 @@ class PlaybackService : MediaLibraryService() {
     }
 
     /**
-     * Phone UI or Android Auto may start audio. Bare Bluetooth A2DP / headset
-     * media-key auto-resume must not start playback in the background.
+     * The phone UI is this app's own controller. Android Auto may play only
+     * after the connection window. Bluetooth may resume only after the user
+     * has already started playback in this process, and never during connect.
      */
     private fun mayStartPlayback(controller: MediaSession.ControllerInfo): Boolean {
-        if (isCarOrLegacyBrowser(controller)) return true
-        if (AppUiPresence.isUiStarted) return true
-        if (userAllowedPlayback) return true
-        return false
+        return PlaybackStartPolicy.mayStartPlayback(
+            ownApp = isOwnApp(controller),
+            carBrowser = isCarOrLegacyBrowser(controller),
+            userAlreadyAllowed = userAllowedPlayback,
+            nowElapsedMs = SystemClock.elapsedRealtime(),
+            implicitPlayBlockedUntilElapsedMs = implicitPlayBlockedUntilMs,
+        )
+    }
+
+    private fun isOwnApp(controller: MediaSession.ControllerInfo): Boolean {
+        return controller.packageName == packageName
+    }
+
+    private fun armImplicitPlayBlock(reason: String) {
+        if (isActivePlayback()) {
+            AppLog.i(TAG) { "implicit play block skipped while audio is playing: $reason" }
+            return
+        }
+        implicitPlayBlockedUntilMs = SystemClock.elapsedRealtime() +
+            PlaybackStartPolicy.IMPLICIT_CONNECTION_PLAY_WINDOW_MS
+        AppLog.i(TAG) { "implicit play block armed: $reason" }
     }
 
     private fun authorizePlayback(controller: MediaSession.ControllerInfo) {
-        if (isCarOrLegacyBrowser(controller) || AppUiPresence.isUiStarted) {
+        if (isOwnApp(controller) || isCarOrLegacyBrowser(controller)) {
             userAllowedPlayback = true
         }
     }
@@ -539,15 +567,12 @@ class PlaybackService : MediaLibraryService() {
     }
 
     /**
-     * Load the last persisted surah queue into the player without forcing play.
-     * Auto / DHU can then resume via [LibraryCallback.onPlaybackResumption].
+     * Load the last persisted surah queue without starting playback.
+     * An already playing queue is left untouched.
      */
     private fun prepareLastSessionForAuto() {
         if (!::player.isInitialized || !::autoLibrary.isInitialized) return
-        if (player.mediaItemCount > 0) {
-            player.playWhenReady = false
-            return
-        }
+        if (player.mediaItemCount > 0) return
         val queue = autoLibrary.defaultQueue(progressTracker.last()) ?: return
         runCatching {
             player.setMediaItems(queue.mediaItems, queue.startIndex, queue.startPositionMs)
@@ -623,9 +648,8 @@ class PlaybackService : MediaLibraryService() {
             controller: MediaSession.ControllerInfo,
         ): MediaSession.ConnectionResult {
             AppLog.i(TAG) { "onConnect: ${describeController(controller)}" }
-            // Browse/connect must never start audio — only an explicit Play command may.
-            if (::player.isInitialized) {
-                player.playWhenReady = false
+            if (!isOwnApp(controller)) {
+                armImplicitPlayBlock("onConnect ${controller.packageName}")
             }
             if (isCarOrLegacyBrowser(controller)) {
                 promoteAutoSession(reason = "onConnect")
@@ -871,8 +895,9 @@ class PlaybackService : MediaLibraryService() {
         ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> {
             return libraryFuture {
                 catalogReady.await()
-                // Supply the last queue for the head unit, but stay paused until Play.
-                player.playWhenReady = false
+                if (::player.isInitialized && !isActivePlayback()) {
+                    player.playWhenReady = false
+                }
                 if (!mayStartPlayback(controller)) {
                     AppLog.i(TAG) {
                         "onPlaybackResumption: queue only (no auto-play) " +

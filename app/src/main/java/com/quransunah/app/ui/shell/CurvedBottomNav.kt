@@ -3,7 +3,6 @@ package com.quransunah.app.ui.shell
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,14 +33,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
@@ -60,13 +52,11 @@ import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewTheme
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
-import kotlin.math.PI
-import kotlin.math.cos
 import kotlin.math.roundToInt
-import kotlin.math.sin
 
 val BottomNavBarHeight = 50.dp
-private val NavCornerRadius = ChromeTokens.Corner
+private val NavBarShape = RoundedCornerShape(18.dp)
+private val NavBubbleShape = RoundedCornerShape(14.dp)
 private val NavBubbleWidth = 56.dp
 private val NavBubbleHeight = 42.dp
 private val NavIconSize = 20.dp
@@ -82,51 +72,6 @@ private data class NavItemSpec(
 )
 
 @Composable
-internal fun BottomNavSurface(
-    modifier: Modifier = Modifier,
-    content: @Composable BoxScope.() -> Unit,
-) {
-    val paper = LocalPaperColors.current
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        Box(
-            modifier = modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = ChromeTokens.HorizontalInset, vertical = 0.dp),
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(BottomNavBarHeight)
-                    .shadow(8.dp, RoundedCornerShape(NavCornerRadius), clip = false)
-                    .clip(RoundedCornerShape(NavCornerRadius))
-                    .background(paper.chromeFill)
-                    .border(1.6.dp, ChromeTokens.Gold, RoundedCornerShape(NavCornerRadius)),
-            ) {
-                Canvas(Modifier.fillMaxSize()) {
-                    val tile = 22.dp.toPx()
-                    val stroke = paper.decorPattern
-                    var y = 0f
-                    while (y < size.height + tile) {
-                        var x = 0f
-                        while (x < size.width + tile) {
-                            drawGirihStar(Offset(x + tile / 2f, y + tile / 2f), tile * 0.36f, stroke)
-                            x += tile
-                        }
-                        y += tile
-                    }
-                    drawRect(
-                        color = ChromeTokens.GoldInner,
-                        style = Stroke(width = 1.dp.toPx()),
-                    )
-                }
-                content()
-            }
-        }
-    }
-}
-
-@Composable
 fun CurvedBottomNav(
     activeTab: AppTab,
     onTabChange: (AppTab) -> Unit,
@@ -137,8 +82,7 @@ fun CurvedBottomNav(
 ) {
     val paper = LocalPaperColors.current
     val night = LocalNightMode.current
-    val bubbleFill = lerp(paper.tone500, paper.tone300, 0.58f)
-    val bubbleIcon = if (night) Color.White else paper.textStrong
+    val bubbleIcon = paper.textStrong
     val inactive = paper.textMuted
     val density = LocalDensity.current
     val bubbleWidthPx = with(density) { NavBubbleWidth.toPx() }
@@ -202,7 +146,22 @@ fun CurvedBottomNav(
         label = "nav-bubble",
     )
 
-    BottomNavSurface(modifier = modifier) {
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = ChromeTokens.HorizontalInset),
+        ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(BottomNavBarHeight)
+                .clip(NavBarShape)
+                .background(paper.chromeFill)
+                .border(1.dp, paper.accent.copy(alpha = if (night) 0.40f else 0.26f), NavBarShape),
+        ) {
+        IslamicEdgePattern(Modifier.matchParentSize())
         Box(Modifier.fillMaxSize()) {
                 if (bubbleX > 0f) {
                     Box(
@@ -213,13 +172,12 @@ fun CurvedBottomNav(
                             }
                             .width(NavBubbleWidth)
                             .height(NavBubbleHeight)
-                            .shadow(6.dp, RoundedCornerShape(NavCornerRadius))
-                            .clip(RoundedCornerShape(NavCornerRadius))
-                            .background(bubbleFill)
+                            .clip(NavBubbleShape)
+                            .background(paper.accent.copy(alpha = if (night) 0.22f else 0.12f))
                             .border(
                                 1.dp,
-                                paper.textStrong.copy(alpha = if (night) 0.16f else 0.18f),
-                                RoundedCornerShape(NavCornerRadius),
+                                paper.accent.copy(alpha = if (night) 0.46f else 0.32f),
+                                NavBubbleShape,
                             ),
                     )
                 }
@@ -282,32 +240,16 @@ fun CurvedBottomNav(
                                         .width(22.dp)
                                         .height(2.5.dp)
                                         .clip(RoundedCornerShape(50))
-                                        .background(paper.darkAccent),
+                                        .background(paper.accent),
                                 )
                             }
                         }
                     }
                 }
         }
+        }
+        }
     }
-}
-
-private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawGirihStar(
-    center: Offset,
-    outer: Float,
-    color: Color,
-) {
-    val inner = outer * 0.41f
-    val path = Path()
-    for (i in 0 until 16) {
-        val angle = (PI / 8.0) * i - PI / 2.0
-        val radius = if (i % 2 == 0) outer else inner
-        val x = center.x + (cos(angle) * radius).toFloat()
-        val y = center.y + (sin(angle) * radius).toFloat()
-        if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
-    }
-    path.close()
-    drawPath(path, color, style = Stroke(width = 0.75.dp.toPx()))
 }
 
 @ArabicPreviews

@@ -2,8 +2,6 @@ package com.quransunah.app.core
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.ui.platform.LocalContext
-import java.text.NumberFormat
 import java.util.Locale
 
 /**
@@ -14,11 +12,6 @@ import java.util.Locale
  */
 object UiNumbers {
     private val eastern = charArrayOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
-
-    fun locale(context: android.content.Context): Locale {
-        val tag = ArabicRtl.selectedLanguage(context) ?: currentSystemTag(context)
-        return Locale.forLanguageTag(tag)
-    }
 
     fun format(value: Int, locale: Locale): String =
         formatInteger(value.toString(), locale)
@@ -84,11 +77,6 @@ object UiNumbers {
         }
     }
 
-    private fun currentSystemTag(context: android.content.Context): String {
-        val system = context.resources.configuration.locales[0]
-        return LanguageRegistry.matchTag(system) ?: LanguageRegistry.defaultTag()
-    }
-
     fun resolvedLocale(): Locale {
         // Compose callers already run inside ArabicRtl.wrap(), so Locale.getDefault()
         // matches the selected app language. This avoids needing a Context everywhere.
@@ -105,19 +93,3 @@ fun uiNumber(value: Int): String = UiNumbers.format(value, UiNumbers.resolvedLoc
 @Composable
 @ReadOnlyComposable
 fun uiNumber(value: Long): String = UiNumbers.format(value, UiNumbers.resolvedLocale())
-
-@Composable
-@ReadOnlyComposable
-fun uiDecimal(value: Float, decimals: Int = 1): String =
-    UiNumbers.formatDecimal(value, decimals, UiNumbers.resolvedLocale())
-
-@Composable
-@ReadOnlyComposable
-fun uiClock(positionMs: Long): String =
-    UiNumbers.formatClock(positionMs, UiNumbers.resolvedLocale())
-
-@Composable
-fun rememberUiLocale(): Locale {
-    val context = LocalContext.current
-    return androidx.compose.runtime.remember(context) { UiNumbers.locale(context) }
-}

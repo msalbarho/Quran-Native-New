@@ -18,6 +18,7 @@ import com.quransunah.app.data.local.user.MemorizationDao
 import com.quransunah.app.data.local.user.MemorizationPlanDao
 import com.quransunah.app.data.local.user.PageMetaDao
 import com.quransunah.app.data.local.user.SearchDao
+import com.quransunah.app.data.local.user.TrainingHistoryDao
 import com.quransunah.app.data.local.user.UserDatabase
 import com.quransunah.app.data.local.user.UserDatabaseMigrations
 import com.quransunah.app.data.local.user.WordMeaningDao
@@ -69,6 +70,9 @@ object DatabaseModule {
             .addMigrations(UserDatabaseMigrations.MIGRATION_2_3)
             .addMigrations(UserDatabaseMigrations.MIGRATION_3_4)
             .addMigrations(UserDatabaseMigrations.MIGRATION_4_5)
+            .addMigrations(UserDatabaseMigrations.MIGRATION_6_5)
+            .addMigrations(UserDatabaseMigrations.MIGRATION_5_7)
+            .addMigrations(UserDatabaseMigrations.MIGRATION_6_7)
             .build()
     }
 
@@ -98,6 +102,9 @@ object DatabaseModule {
 
     @Provides
     fun provideWordMeaningDao(db: UserDatabase): WordMeaningDao = db.wordMeaningDao()
+
+    @Provides
+    fun provideTrainingHistoryDao(db: UserDatabase): TrainingHistoryDao = db.trainingHistoryDao()
 
     @Provides
     @Singleton

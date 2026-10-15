@@ -2,9 +2,8 @@ package com.quransunah.app.core
 
 /**
  * Tracks whether [com.quransunah.app.MainActivity] is in the STARTED state.
- * Used by [com.quransunah.app.media.PlaybackService] to reject Bluetooth
- * auto-resume when the user has not opened the phone UI (Android Auto is
- * allowed separately via car browser package checks).
+ * A visible activity is not permission for Android Auto or Bluetooth to start
+ * playback; those commands are gated in [com.quransunah.app.media.PlaybackService].
  */
 object AppUiPresence {
     @Volatile

@@ -5,6 +5,7 @@ import com.quransunah.app.data.repository.MemorizationRepositoryImpl
 import com.quransunah.app.data.repository.MushafRepositoryImpl
 import com.quransunah.app.data.repository.SearchRepositoryImpl
 import com.quransunah.app.data.repository.TafsirRepositoryImpl
+import com.quransunah.app.data.repository.TrainingHistoryRepositoryImpl
 import com.quransunah.app.data.repository.TranslationRepositoryImpl
 import com.quransunah.app.domain.repository.AudioPlayerRepository
 import com.quransunah.app.domain.repository.BookmarkRepository
@@ -12,6 +13,7 @@ import com.quransunah.app.domain.repository.MemorizationRepository
 import com.quransunah.app.domain.repository.MushafRepository
 import com.quransunah.app.domain.repository.SearchRepository
 import com.quransunah.app.domain.repository.TafsirRepository
+import com.quransunah.app.domain.repository.TrainingHistoryRepository
 import com.quransunah.app.domain.repository.TranslationRepository
 import com.quransunah.app.media.AudioController
 import dagger.Binds
@@ -50,4 +52,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindTranslationRepository(impl: TranslationRepositoryImpl): TranslationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTrainingHistoryRepository(impl: TrainingHistoryRepositoryImpl): TrainingHistoryRepository
 }

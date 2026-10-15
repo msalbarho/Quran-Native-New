@@ -1,7 +1,10 @@
 package com.quransunah.app.ui.memorization
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.quransunah.app.R
+import com.quransunah.app.core.ArabicRtl
 import com.quransunah.app.domain.model.MemorizationItem
 import com.quransunah.app.domain.model.MemorizationState
 import com.quransunah.app.domain.model.MemorizationSession
@@ -13,6 +16,7 @@ import com.quransunah.app.domain.model.memorizationSummary
 import com.quransunah.app.domain.repository.MemorizationRepository
 import com.quransunah.app.domain.repository.MushafRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -46,6 +50,7 @@ data class MemorizationUiState(
 class MemorizationViewModel @Inject constructor(
     private val memorizationRepository: MemorizationRepository,
     private val mushafRepository: MushafRepository,
+    @ApplicationContext private val appContext: Context,
 ) : ViewModel() {
     private val surahs = flow { emit(mushafRepository.getSurahs()) }
     private val _sessionId = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
@@ -146,7 +151,7 @@ class MemorizationViewModel @Inject constructor(
             val now = System.currentTimeMillis()
             val plan = MemorizationPlan(
                 id = MemorizationPlan.idFor(first.surah, first.ayah, last.surah, last.ayah),
-                name = "خطة التحفيظ",
+                name = localizedString(R.string.memorization_plan_custom_name),
                 startSurah = first.surah,
                 startAyah = first.ayah,
                 endSurah = last.surah,
@@ -167,7 +172,7 @@ class MemorizationViewModel @Inject constructor(
             val dailyTarget = 3
             val plan = MemorizationPlan(
                 id = MemorizationPlan.idFor(1, 1, 114, endAyah),
-                name = "الحفظ بالتسلسل",
+                name = localizedString(R.string.memorization_plan_sequential_name),
                 startSurah = 1,
                 startAyah = 1,
                 endSurah = 114,
@@ -200,7 +205,8 @@ class MemorizationViewModel @Inject constructor(
     }
 
     private suspend fun advanceSequentialQueue() {
-        val plan = memorizationRepository.observePlans().first().firstOrNull { it.name == "الحفظ بالتسلسل" } ?: return
+        val sequentialPlanId = MemorizationPlan.idFor(1, 1, 114, SurahAyahCounts.ayahCount(114))
+        val plan = memorizationRepository.observePlans().first().firstOrNull { it.id == sequentialPlanId } ?: return
         val items = memorizationRepository.observeItems().first()
         if (items.isEmpty() || items.any { it.state == MemorizationState.LEARNING }) return
         val lastIndex = items.maxOf { SurahAyahCounts.ayahId(it.surah, it.ayah) }
@@ -229,6 +235,9 @@ class MemorizationViewModel @Inject constructor(
             }
         }
     }
+
+    private fun localizedString(resourceId: Int): String =
+        ArabicRtl.wrap(appContext).getString(resourceId)
 
     fun startSession(planId: String) {
         viewModelScope.launch {

@@ -592,7 +592,15 @@ private fun TextMushafWord(
     val size = if (word.isAyahMarker) fontSize * 0.92f else fontSize
     val shape = RoundedCornerShape(6.dp)
     val paintColor = when {
-        hideAyahText && !word.isAyahMarker && (word.surah to word.ayah) !in revealedAyahs -> Color.Transparent
+        trainingWordHidden(
+            isAyahMarker = word.isAyahMarker,
+            surah = word.surah,
+            ayah = word.ayah,
+            wordId = word.id,
+            hideAyahText = hideAyahText,
+            revealedAyahs = revealedAyahs,
+            revealedWordIds = LocalTrainingRevealedWordIds.current,
+        ) -> Color.Transparent
         ayahHighlighted -> ChromeTokens.PlaybackAyahBlue
         word.isAyahMarker -> glyphColor
         else -> glyphColor

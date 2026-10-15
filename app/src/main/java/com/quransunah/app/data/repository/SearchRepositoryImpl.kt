@@ -61,6 +61,21 @@ class SearchRepositoryImpl @Inject constructor(
             .map { it.toDomain(needle) }
     }
 
+    override suspend fun searchVerses(query: String, limit: Int, offset: Int): List<AyahSearchHit> {
+        if (limit <= 0 || offset < 0) return emptyList()
+        ensureIndex()
+        val needle = verseNeedle(query) ?: return emptyList()
+        return searchDao.containsSearchPage(needle, limit, offset).map { it.toDomain(needle) }
+    }
+
+    private fun verseNeedle(query: String): String? {
+        val needle = ArabicNormalize.fold(query.trim(), stripSpaces = true)
+            .replace("%", "")
+            .replace("_", "")
+        if (needle.length < AppConstants.SEARCH_MIN_QUERY_LENGTH) return null
+        return needle
+    }
+
     private suspend fun rebuildIndex() = withContext(Dispatchers.IO) {
         searchDao.clear()
         val ranges = mushafDao.getAyahLineRanges()

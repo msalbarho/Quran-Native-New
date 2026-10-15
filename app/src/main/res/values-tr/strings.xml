@@ -174,7 +174,6 @@
     <string name="training_listen_accessibility">Buradan dinle</string>
     <string name="training_close_accessibility">Egzersizi kapat</string>
     <string name="last_position_title">Son konum</string>
-    <string name="saved_places_tab">Kayıtlar</string>
     <string name="training_tab">Egzersiz</string>
     <string name="bookmarks_saved">Kayıtlar</string>
     <string name="bookmarks_saved_count">Kayıtlar (%1$s)</string>
@@ -299,6 +298,34 @@
     <string name="guide_madinah_title">Medine mushafı</string>
     <string name="guide_madinah_body">Medine mushafını tercih ediyorsanız, sayfanın daha büyük görünmesi için cihazı yatay konuma çevirin.</string>
     <string name="guide_meaning_sample">Rahman ve Rahim olan Allah’ın adıyla.</string>
+    <string name="index_matching_surahs">Eşleşen sureler</string>
+    <string name="index_matching_verses">Eşleşen ayetler</string>
+    <string name="training_next_word">Sonraki kelime</string>
+    <string name="training_more">Daha fazla</string>
+    <string name="training_mark_memorized">Ezberledim</string>
+    <string name="training_saved_mastered">Ezberlendi olarak kaydedildi</string>
+    <string name="training_saved_review">Tekrar için kaydedildi</string>
+    <string name="training_continue_last">Son egzersize devam et</string>
+    <string name="training_my_progress">Ezber ilerlemem</string>
+    <string name="training_log">Egzersiz geçmişi</string>
+    <string name="training_no_position">Önceki egzersiz konumu yok</string>
+    <string name="training_history_empty">Henüz egzersiz oturumu yok</string>
+    <string name="training_history_resume">Bu ayetten devam et</string>
+    <string name="training_history_back">Geri</string>
+    <string name="training_history_same_surah">%1$s %2$s–%3$s</string>
+    <string name="training_history_span">%1$s %2$s – %3$s %4$s</string>
+    <string name="training_history_last">Son ayet: %1$s %2$s</string>
+    <string name="training_history_practiced">Çalışılan ayetler: %1$s</string>
+    <string name="training_history_assessments">Ezberlendi %1$s · Tekrar gerek %2$s</string>
+    <string name="training_history_no_assessments">Bu oturumda değerlendirme yok</string>
+    <string name="training_history_legacy_assessments">Eski değerlendirmeler korundu ve yeniden yazılmadı</string>
+    <string name="training_history_started">Başlangıç: %1$s</string>
+    <string name="training_history_ended">Bitiş: %1$s</string>
+    <string name="training_history_active">Devam ediyor</string>
+    <string name="training_selected_verse">Ayet %1$s</string>
+    <string name="index_search_all">Ayet, numara veya sure adı ara…</string>
+    <string name="memorization_plan_custom_name">Ezber planı</string>
+    <string name="memorization_plan_sequential_name">Sıralı ezber</string>
 </resources>
 
 

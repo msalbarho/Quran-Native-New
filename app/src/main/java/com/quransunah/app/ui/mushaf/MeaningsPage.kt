@@ -26,11 +26,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -66,6 +62,8 @@ import com.quransunah.app.domain.model.SurahInfo
 import com.quransunah.app.fonts.QcfFontManager
 import com.quransunah.app.ui.shell.MeaningEntry
 import com.quransunah.app.ui.shell.ChromeTokens
+import com.quransunah.app.ui.shell.ThemedLanguageCard
+import com.quransunah.app.ui.shell.ThemedListDialog
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 
@@ -79,55 +77,23 @@ fun TranslationLanguageDialog(
     onSelect: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val paper = LocalPaperColors.current
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = paper.pageBackground,
-        title = {
-            Text(
-                text = stringResource(R.string.translation_choose),
-                color = paper.textStrong,
+    ThemedListDialog(
+        title = stringResource(R.string.translation_choose),
+        onDismiss = onDismiss,
+    ) {
+        TranslationRegistry.entries.forEach { entry ->
+            val language = LanguageRegistry.byTag(entry.languageTag)
+            val label = language?.nativeName ?: entry.languageTag
+            val selected = selectedTag?.equals(entry.languageTag, ignoreCase = true) == true
+            ThemedLanguageCard(
+                mark = language?.flag.orEmpty(),
+                label = label,
+                active = selected,
+                onClick = { onSelect(entry.languageTag) },
+                markSize = 18.sp,
             )
-        },
-        text = {
-            Column(
-                modifier = Modifier
-                    .heightIn(max = 420.dp)
-                    .verticalScroll(rememberScrollState()),
-            ) {
-                TranslationRegistry.entries.forEach { entry ->
-                    val language = LanguageRegistry.byTag(entry.languageTag)
-                    val label = language?.nativeName ?: entry.languageTag
-                    val selected = selectedTag?.equals(entry.languageTag, ignoreCase = true) == true
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSelect(entry.languageTag) }
-                            .padding(vertical = 10.dp, horizontal = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(text = language?.flag.orEmpty(), fontSize = 18.sp)
-                        Text(
-                            text = label,
-                            color = if (selected) paper.accentHover else paper.textStrong,
-                            fontSize = 16.sp,
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(
-                    stringResource(R.string.close),
-                    color = if (LocalNightMode.current) Color.White else Color.Black,
-                )
-            }
-        },
-    )
+        }
+    }
 }
 
 internal fun translationIsRtl(tag: String?): Boolean {

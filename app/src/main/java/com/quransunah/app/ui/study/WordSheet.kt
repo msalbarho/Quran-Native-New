@@ -2,10 +2,12 @@ package com.quransunah.app.ui.study
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,11 +18,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -57,9 +61,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -68,6 +74,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextMeasurer
@@ -77,7 +84,6 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -101,11 +107,9 @@ import com.quransunah.app.ui.mushaf.WordRecord
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewFixtures
 import com.quransunah.app.ui.preview.PreviewTheme
-import com.quransunah.app.ui.shell.ChromeTokens
-import com.quransunah.app.ui.theme.LocalAppFontFamily
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
-import com.quransunah.app.ui.theme.PaperPalettes
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val ReciterFieldText = TextStyle(fontSize = 16.sp)
@@ -134,7 +138,8 @@ private fun ellipsizeReciterName(measurer: TextMeasurer, text: String, maxWidthP
 
 private val CloseRedLight = Color(0xFFC53030)
 private val CloseRedDark = Color.White
-private val WordSheetShape = RoundedCornerShape(ChromeTokens.SidePanelCorner)
+private val WordSheetShape = RoundedCornerShape(28.dp)
+private val WordSheetMotion = tween<Float>(durationMillis = 200)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -153,26 +158,60 @@ fun WordSheet(
     val inspection = LocalInspectionMode.current
     val selected = ui.word ?: word
 
+    val transitionState = remember { MutableTransitionState(false) }
+    var everOpened by remember { mutableStateOf(false) }
+    var closeDispatched by remember { mutableStateOf(false) }
+    fun finishClose() {
+        if (closeDispatched) return
+        closeDispatched = true
+        viewModel.onDismiss()
+        onDismiss()
+    }
+    val requestClose = {
+        if (inspection) {
+            finishClose()
+        } else if (transitionState.targetState) {
+            transitionState.targetState = false
+            scope.launch {
+                delay(240)
+                finishClose()
+            }
+        }
+    }
+
     LaunchedEffect(word.id, word.surah, word.ayah) {
         viewModel.bind(word)
     }
     if (!inspection) {
-        BackHandler {
-            viewModel.onDismiss()
-            onDismiss()
+        BackHandler(onBack = requestClose)
+        LaunchedEffect(Unit) { transitionState.targetState = true }
+        LaunchedEffect(transitionState.targetState) {
+            if (transitionState.targetState) everOpened = true
+        }
+        LaunchedEffect(
+            everOpened,
+            transitionState.targetState,
+            transitionState.isIdle,
+            transitionState.currentState,
+        ) {
+            if (
+                everOpened &&
+                !transitionState.targetState &&
+                transitionState.isIdle &&
+                !transitionState.currentState
+            ) {
+                finishClose()
+            }
         }
     }
 
-    val body = @Composable {
+    val body = @Composable { contentModifier: Modifier ->
         WordSheetContent(
             word = selected,
             ui = ui,
             playback = playback,
             fontManager = viewModel.fontManager,
-            onDismiss = {
-                viewModel.onDismiss()
-                onDismiss()
-            },
+            onDismiss = requestClose,
             onPrevAyah = {
                 scope.launch { viewModel.stepWord(-1)?.let(onStepAyah) }
             },
@@ -186,8 +225,7 @@ fun WordSheet(
             onPlayAyah = {
                 viewModel.playAyah(target = selected) {
                     onAyahPlaybackStarted()
-                    viewModel.onDismiss()
-                    onDismiss()
+                    requestClose()
                 }
             },
             onReciterMenu = viewModel::setReciterMenuOpen,
@@ -200,54 +238,75 @@ fun WordSheet(
             onVideoTo = viewModel::setVideoTo,
             onSelectVideoReciter = viewModel::selectVideoReciter,
             onShareVideo = viewModel::shareVideo,
+            modifier = contentModifier,
         )
     }
 
     if (inspection) {
-        body()
+        Column(Modifier.fillMaxSize().background(
+            Brush.verticalGradient(
+                colors = listOf(paper.chromeFill, paper.pageBody, paper.pageBackground),
+            ),
+        )) {
+            WordSheetHeader(onClose = requestClose)
+            body(Modifier.weight(1f))
+        }
     } else {
-        var visible by remember { mutableStateOf(false) }
-        LaunchedEffect(Unit) { visible = true }
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color(0x6B0F172A))
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = {
-                                viewModel.onDismiss()
-                                onDismiss()
-                            },
-                        ),
-                )
+        Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0x6B0F172A))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = requestClose,
+                    ),
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
+                    .padding(vertical = 10.dp),
+            ) {
                 AnimatedVisibility(
-                    visible = visible,
-                    enter = fadeIn() + slideInHorizontally { it },
-                    exit = fadeOut() + slideOutHorizontally { it },
+                    visibleState = transitionState,
+                    enter = fadeIn(WordSheetMotion) + scaleIn(
+                        initialScale = 0.96f,
+                        animationSpec = WordSheetMotion,
+                    ),
+                    exit = fadeOut(WordSheetMotion) + scaleOut(
+                        targetScale = 0.96f,
+                        animationSpec = WordSheetMotion,
+                    ),
                     modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .fillMaxWidth(0.8f)
-                        .fillMaxHeight()
-                        .statusBarsPadding()
-                        .navigationBarsPadding()
-                        .padding(
-                            top = ChromeTokens.MushafHeaderReserve,
-                            bottom = ChromeTokens.MushafNavReserve,
-                        ),
+                        .align(Alignment.Center)
+                        .fillMaxWidth(0.94f)
+                        .fillMaxHeight(),
                 ) {
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .shadow(18.dp, WordSheetShape)
-                                .clip(WordSheetShape)
-                                .background(paper.pageBody),
-                        ) {
-                            body()
-                        }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .shadow(10.dp, WordSheetShape)
+                            .clip(WordSheetShape)
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        paper.chromeFill,
+                                        paper.pageBody,
+                                        paper.pageBackground,
+                                    ),
+                                ),
+                            )
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {},
+                            ),
+                    ) {
+                        WordSheetHeader(onClose = requestClose)
+                        body(Modifier.weight(1f))
                     }
                 }
             }
@@ -291,6 +350,7 @@ fun WordSheetContent(
     onVideoTo: (Int) -> Unit,
     onSelectVideoReciter: (String) -> Unit,
     onShareVideo: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
     val night = LocalNightMode.current
@@ -299,7 +359,7 @@ fun WordSheetContent(
         reciter.id to ReciterNames.display(languageTag, reciter.id, reciter.name)
     }
     val closeColor = if (night) CloseRedDark else CloseRedLight
-    val onAccent = if (night) PaperPalettes.CharcoalBlack else Color.White
+    val onAccent = paper.pageBackground
     val bodyWords = ui.ayahWords.filter { !it.isAyahMarker }
     val wordIndex = bodyWords.indexOfFirst { it.id == word.id }
     val canPrev = wordIndex > 0 || SurahAyahCounts.previous(word.surah, word.ayah) != null
@@ -316,12 +376,13 @@ fun WordSheetContent(
     val maxAyah = SurahAyahCounts.ayahCount(word.surah)
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .padding(bottom = 28.dp),
     ) {
+        SheetSection {
         CompositionLocalProvider(LocalLayoutDirection provides uiLayoutDirection()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -347,17 +408,6 @@ fun WordSheetContent(
                     highlight = true,
                 )
             }
-            Text(
-                text = stringResource(R.string.close),
-                color = if (night) Color.White else Color.Black,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                textDecoration = TextDecoration.Underline,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable(role = Role.Button, onClick = onDismiss)
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
-            )
         }
         }
 
@@ -383,6 +433,7 @@ fun WordSheetContent(
                     .padding(vertical = 12.dp),
             )
         }
+        }
 
         CompositionLocalProvider(LocalLayoutDirection provides uiLayoutDirection()) {
         Column(
@@ -391,6 +442,7 @@ fun WordSheetContent(
                 .padding(top = 14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
+            SheetSection {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -408,8 +460,8 @@ fun WordSheetContent(
                         CircleControl(
                             enabled = canNext,
                             onClick = onNextAyah,
-                            background = paper.pageBody,
-                            border = paper.tone500,
+                            background = if (night) paper.pageBody else paper.surface,
+                            border = paper.accent.copy(alpha = if (night) 0.4f else 0.22f),
                             size = 36.dp,
                             contentDescription = stringResource(R.string.word_next_word),
                         ) {
@@ -442,8 +494,8 @@ fun WordSheetContent(
                         CircleControl(
                             enabled = canPrev,
                             onClick = onPrevAyah,
-                            background = paper.pageBody,
-                            border = paper.tone500,
+                            background = if (night) paper.pageBody else paper.surface,
+                            border = paper.accent.copy(alpha = if (night) 0.4f else 0.22f),
                             size = 36.dp,
                             contentDescription = stringResource(R.string.word_prev_word),
                         ) {
@@ -452,7 +504,9 @@ fun WordSheetContent(
                     }
                 }
             }
+            }
 
+            SheetSection {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -470,16 +524,9 @@ fun WordSheetContent(
                     modifier = Modifier.weight(1f),
                 )
             }
+            }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(1.dp, paper.tone500, RoundedCornerShape(12.dp))
-                    .background(paper.ayahHighlight.copy(alpha = 0.35f))
-                    .padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
+            SheetSection {
                 ReciterDropdown(
                     reciters = reciterLabels,
                     selectedId = ui.selectedReciterId,
@@ -499,6 +546,8 @@ fun WordSheetContent(
                     onClick = onPlayAyah,
                     enabled = ui.surahReciters.isNotEmpty(),
                 )
+            }
+            SheetSection {
                 AccentFillButton(
                     label = stringResource(
                         if (ui.sharing) R.string.word_preparing else R.string.word_share_image,
@@ -511,6 +560,8 @@ fun WordSheetContent(
                     onClick = onShareText,
                     enabled = !ui.sharing,
                 )
+            }
+            SheetSection {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                     VideoFromAyahField(
                         ayah = ui.videoFromAyah,
@@ -547,25 +598,87 @@ fun WordSheetContent(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                if (ui.sharing) {
-                    LinearProgressIndicator(
-                        modifier = Modifier.fillMaxWidth(),
-                        color = paper.accent,
-                    )
-                }
-                ui.shareError?.let { error ->
-                    Text(
-                        error,
-                        color = closeColor,
-                        fontSize = 13.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
+            }
+            if (ui.sharing) {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = paper.accent,
+                    trackColor = paper.tone500.copy(alpha = 0.35f),
+                )
+            }
+            ui.shareError?.let { error ->
+                Text(
+                    error,
+                    color = closeColor,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
         }
     }
+}
+
+@Composable
+private fun WordSheetHeader(onClose: () -> Unit) {
+    val paper = LocalPaperColors.current
+    val direction = uiLayoutDirection()
+    CompositionLocalProvider(LocalLayoutDirection provides direction) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 10.dp)
+                    .size(width = 36.dp, height = 4.dp)
+                    .clip(RoundedCornerShape(999.dp))
+                    .background(paper.textMuted.copy(alpha = 0.45f))
+                    .clearAndSetSemantics { },
+            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = stringResource(R.string.close),
+                    color = paper.textStrong,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable(role = Role.Button, onClick = onClose)
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SheetSection(
+    content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit,
+) {
+    val paper = LocalPaperColors.current
+    val night = LocalNightMode.current
+    val shape = RoundedCornerShape(16.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(
+                if (night) {
+                    paper.tone400.copy(alpha = 0.78f)
+                } else {
+                    lerp(paper.surface, paper.chromeFill, 0.3f)
+                },
+            )
+            .border(1.dp, paper.accent.copy(alpha = if (night) 0.34f else 0.18f), shape)
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        content = content,
+    )
 }
 
 @Composable
@@ -673,16 +786,16 @@ private fun SheetChipButton(
 ) {
     val paper = LocalPaperColors.current
     val shape = RoundedCornerShape(12.dp)
-    val border = if (emphasized) paper.accent else paper.tone500
-    val fill = if (emphasized) paper.accent.copy(alpha = 0.14f) else paper.pageBody
+    val border = if (emphasized) paper.accent else paper.accent.copy(alpha = 0.28f)
+    val fill = if (emphasized) paper.accent.copy(alpha = 0.16f) else Color.Transparent
     Box(
         modifier = modifier
-            .height(40.dp)
+            .heightIn(min = 44.dp)
             .clip(shape)
             .border(1.dp, border, shape)
             .background(fill)
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = 8.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -691,7 +804,8 @@ private fun SheetChipButton(
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
             textAlign = TextAlign.Center,
-            maxLines = 1,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
@@ -764,20 +878,20 @@ private fun AccentFillButton(
     enabled: Boolean = true,
 ) {
     val paper = LocalPaperColors.current
-    val night = LocalNightMode.current
     val shape = RoundedCornerShape(12.dp)
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(42.dp)
+            .heightIn(min = 44.dp)
             .clip(shape)
             .background(if (enabled) paper.accent else paper.accent.copy(alpha = 0.45f))
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = label,
-            color = if (night) PaperPalettes.CharcoalBlack else Color.White,
+            color = paper.pageBackground,
             fontWeight = FontWeight.Bold,
             fontSize = 15.sp,
             textAlign = TextAlign.Center,

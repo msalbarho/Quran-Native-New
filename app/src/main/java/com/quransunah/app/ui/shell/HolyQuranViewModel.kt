@@ -68,6 +68,7 @@ enum class ShellPicker {
     Index,
     LastPosition,
     Progress,
+    TrainingHistory,
     Settings,
 }
 
@@ -339,6 +340,11 @@ class HolyQuranViewModel @Inject constructor(
         _picker.value = ShellPicker.Progress
     }
 
+    fun openTrainingHistory() {
+        _searchOpen.value = false
+        _picker.value = ShellPicker.TrainingHistory
+    }
+
     fun markTrainingHintDone() {
         viewModelScope.launch { preferences.setTrainingHintDone() }
     }
@@ -544,6 +550,33 @@ class HolyQuranViewModel @Inject constructor(
         jumpToAyah(bookmark.surah, bookmark.ayah, bookmark.pageNumber)
     }
 
+    suspend fun trainingBodyWords(surah: Int, ayah: Int) =
+        mushafRepository.getAyahWords(surah, ayah).filter { !it.isAyahMarker }
+
+    suspend fun trainingAyahPage(surah: Int, ayah: Int): Int =
+        mushafRepository.getPageForAyah(surah, ayah).coerceIn(1, AppConstants.TOTAL_PAGES)
+
+    /** Page that actually draws [wordId], including a verse that continues past its start page. */
+    suspend fun pageContainingWord(surah: Int, ayah: Int, wordId: Int): Int {
+        val start = mushafRepository.getPageForAyah(surah, ayah).coerceIn(1, AppConstants.TOTAL_PAGES)
+        val last = (start + 3).coerceAtMost(AppConstants.TOTAL_PAGES)
+        for (page in start..last) {
+            ensurePage(page)
+            val loaded = _pageCache.value[page] ?: continue
+            if (loaded.lines.any { line -> line.words.any { it.id == wordId } }) return page
+        }
+        return start
+    }
+
+    /** Opens an ayah without leaving Reading or Training, and without a new player. */
+    fun showAyahKeepingTab(pageNumber: Int) {
+        if (_tab.value != AppTab.Reading && _tab.value != AppTab.Training) return
+        followAudio = false
+        val clamped = pageNumber.coerceIn(1, AppConstants.TOTAL_PAGES)
+        _pendingPagerPage.value = clamped
+        goToPage(clamped)
+    }
+
     fun jumpToPageNumber(page: Int) {
         if (_tab.value != AppTab.Reading && _tab.value != AppTab.Training) {
             selectTab(AppTab.Reading)
@@ -622,7 +655,7 @@ class HolyQuranViewModel @Inject constructor(
             lastFollowedAyahKey = null
             if (sessionKey != null) followAudio = true
         }
-        if (!followAudio || _tab.value != AppTab.Reading) return
+        if (!followAudio || (_tab.value != AppTab.Reading && _tab.value != AppTab.Training)) return
         if (snapshot.domain == PlaybackDomain.IDLE) return
         val surah = snapshot.surah ?: return
         val ayah = when (snapshot.domain) {
@@ -634,7 +667,7 @@ class HolyQuranViewModel @Inject constructor(
         lastFollowedAyahKey = key
         viewModelScope.launch {
             val page = mushafRepository.getPageForAyah(surah, ayah)
-            if (!followAudio || _tab.value != AppTab.Reading) return@launch
+            if (!followAudio || (_tab.value != AppTab.Reading && _tab.value != AppTab.Training)) return@launch
             if (page != _currentPage.value) {
                 _pendingPagerPage.value = page
                 goToPage(page)

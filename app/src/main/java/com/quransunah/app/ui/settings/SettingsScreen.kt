@@ -8,16 +8,14 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -39,10 +37,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -52,7 +52,6 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -71,6 +70,8 @@ import com.quransunah.app.data.prefs.UserPreferences
 import com.quransunah.app.data.prefs.UserSettings
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewTheme
+import com.quransunah.app.ui.shell.ThemedLanguageCard
+import com.quransunah.app.ui.shell.ThemedListDialog
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 import com.quransunah.app.ui.theme.PaperPaletteId
@@ -120,7 +121,6 @@ fun SettingsScreen(
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreenContent(
     settings: UserSettings,
@@ -139,7 +139,6 @@ fun SettingsScreenContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(paper.pageBody)
             .verticalScroll(rememberScrollState())
             .padding(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(0.dp),
@@ -157,24 +156,10 @@ fun SettingsScreenContent(
             LanguageSettingRow(selected = settings.appLanguage, onSelect = onLanguage)
         }
         SettingsSection(title = stringResource(R.string.settings_app_color)) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(9.dp),
-                verticalArrangement = Arrangement.spacedBy(9.dp),
-                maxItemsInEachRow = 4,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                PaperPaletteId.entries.forEach { id ->
-                    val active = id == settings.palette
-                    val (start, end) = PaperPalettes.swatchGradient(id)
-                    PaletteOption(
-                        label = stringResource(id.paletteLabelRes()),
-                        start = start,
-                        end = end,
-                        active = active,
-                        onClick = { onPalette(id) },
-                    )
-                }
-            }
+            PaletteChoiceGrid(
+                selected = settings.palette,
+                onPalette = onPalette,
+            )
             Text(
                 text = stringResource(R.string.settings_selected_palette, stringResource(settings.palette.paletteLabelRes())),
                 color = paper.textMuted,
@@ -261,13 +246,16 @@ private fun LanguageSettingRow(selected: String?, onSelect: (String?) -> Unit) {
         selectedLanguage.nativeName
     }
     val currentMark = selectedLanguage?.flag ?: DEVICE_LANGUAGE_ICON
+    val night = LocalNightMode.current
+    val rowShape = RoundedCornerShape(16.dp)
+    val rowFill = if (night) paper.tone400 else lerp(paper.surface, paper.chromeFill, 0.28f)
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(paper.tone300)
-            .border(1.dp, paper.tone500.copy(alpha = 0.88f), RoundedCornerShape(12.dp))
-            .clickable { dialogOpen = true }
+            .clip(rowShape)
+            .background(rowFill)
+            .border(1.dp, paper.accent.copy(alpha = if (night) 0.4f else 0.22f), rowShape)
+            .clickable(role = Role.Button) { dialogOpen = true }
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -312,85 +300,62 @@ private fun LanguagePickerDialog(
         }
     }
     val showDevice = query.isBlank() || deviceLabel.lowercase().contains(query.trim().lowercase())
-    Dialog(onDismissRequest = onDismiss) {
-        CompositionLocalProvider(LocalLayoutDirection provides uiLayoutDirection()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(paper.surface)
-                .border(1.dp, paper.tone500.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
-                .padding(16.dp),
+    val night = LocalNightMode.current
+    val fieldShape = RoundedCornerShape(14.dp)
+    val fieldFill = if (night) paper.tone400.copy(alpha = 0.72f) else lerp(paper.surface, paper.chromeFill, 0.28f)
+    CompositionLocalProvider(LocalLayoutDirection provides uiLayoutDirection()) {
+        ThemedListDialog(
+            title = stringResource(R.string.settings_choose_language),
+            onDismiss = onDismiss,
+            header = {
+                androidx.compose.foundation.text.BasicTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    singleLine = true,
+                    textStyle = TextStyle(
+                        color = paper.textStrong,
+                        fontSize = 16.sp,
+                    ),
+                    cursorBrush = androidx.compose.ui.graphics.SolidColor(paper.accent),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp)
+                        .padding(bottom = 4.dp)
+                        .clip(fieldShape)
+                        .background(fieldFill)
+                        .border(1.dp, paper.accent.copy(alpha = if (night) 0.34f else 0.18f), fieldShape)
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                )
+            },
         ) {
-            Text(
-                text = stringResource(R.string.settings_choose_language),
-                color = paper.textStrong,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
-            )
-            androidx.compose.foundation.text.BasicTextField(
-                value = query,
-                onValueChange = { query = it },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
-            )
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(top = 10.dp)
-                    .height(360.dp).verticalScroll(rememberScrollState()),
-            ) {
-                if (!showDevice && filtered.isEmpty()) {
-                    Text(text = stringResource(R.string.settings_no_languages))
-                }
-                if (showDevice) {
-                    LanguageChoiceRow(
-                        mark = DEVICE_LANGUAGE_ICON,
-                        label = deviceLabel,
-                        active = selected == null,
-                        onClick = { onSelect(null) },
-                    )
-                }
-                filtered.forEach { entry ->
-                    LanguageChoiceRow(
-                        mark = entry.flag,
-                        label = entry.nativeName,
-                        active = selected.equals(entry.tag, ignoreCase = true),
-                        onClick = { onSelect(entry.tag) },
-                    )
-                }
+            if (!showDevice && filtered.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.settings_no_languages),
+                    color = paper.textMuted,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(vertical = 12.dp),
+                )
             }
-        }
-        }
-    }
-}
-
-@Composable
-private fun LanguageChoiceRow(
-    mark: String,
-    label: String,
-    active: Boolean,
-    onClick: () -> Unit,
-) {
-    val paper = LocalPaperColors.current
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(if (active) paper.accent.copy(alpha = 0.1f) else Color.Transparent)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Text(text = mark, fontSize = 15.sp)
-        Text(
-            text = label,
-            color = paper.textStrong,
-            fontSize = 15.sp,
-            fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
-            modifier = Modifier.weight(1f),
-        )
-        if (active) {
-            Text(text = "✓", color = paper.accent, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+            if (showDevice) {
+                ThemedLanguageCard(
+                    mark = DEVICE_LANGUAGE_ICON,
+                    label = deviceLabel,
+                    active = selected == null,
+                    onClick = { onSelect(null) },
+                    markSize = 15.sp,
+                    showCheck = true,
+                )
+            }
+            filtered.forEach { entry ->
+                ThemedLanguageCard(
+                    mark = entry.flag,
+                    label = entry.nativeName,
+                    active = selected.equals(entry.tag, ignoreCase = true),
+                    onClick = { onSelect(entry.tag) },
+                    markSize = 15.sp,
+                    showCheck = true,
+                )
+            }
         }
     }
 }
@@ -409,20 +374,59 @@ private fun PaperPaletteId.paletteLabelRes(): Int = when (this) {
 }
 
 @Composable
+private fun PaletteChoiceGrid(
+    selected: PaperPaletteId,
+    onPalette: (PaperPaletteId) -> Unit,
+) {
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val columns = if (maxWidth >= 270.dp) 3 else 2
+        Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+            PaperPaletteId.entries.chunked(columns).forEach { row ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(9.dp),
+                ) {
+                    row.forEach { id ->
+                        val (start, end) = PaperPalettes.swatchGradient(id)
+                        PaletteOption(
+                            label = stringResource(id.paletteLabelRes()),
+                            start = start,
+                            end = end,
+                            active = id == selected,
+                            onClick = { onPalette(id) },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                    repeat(columns - row.size) {
+                        Spacer(Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun PaletteOption(
     label: String,
     start: Color,
     end: Color,
     active: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
-    val shape = RoundedCornerShape(12.dp)
+    val night = LocalNightMode.current
+    val shape = RoundedCornerShape(16.dp)
+    val resting = if (night) {
+        paper.tone400.copy(alpha = 0.72f)
+    } else {
+        lerp(paper.surface, paper.chromeFill, 0.4f)
+    }
     Column(
-        modifier = Modifier
-            .width(76.dp)
+        modifier = modifier
             .clip(shape)
-            .background(if (active) paper.accent.copy(alpha = 0.09f) else Color.Transparent)
+            .background(if (active) paper.accent.copy(alpha = 0.12f) else resting)
             .border(
                 width = if (active) 1.7.dp else 1.dp,
                 color = if (active) paper.accent else paper.tone500.copy(alpha = 0.78f),
@@ -500,9 +504,17 @@ private fun SegmentedTwoOptions(
     onSecond: () -> Unit,
     fitSingleLine: Boolean = false,
 ) {
+    val paper = LocalPaperColors.current
+    val night = LocalNightMode.current
+    val shape = RoundedCornerShape(999.dp)
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(7.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(if (night) paper.tone400 else lerp(paper.surface, paper.chromeFill, 0.35f))
+            .border(1.dp, paper.accent.copy(alpha = if (night) 0.38f else 0.2f), shape)
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         SegmentedOption(
             label = firstLabel,
@@ -531,9 +543,10 @@ private fun SegmentedOption(
 ) {
     val paper = LocalPaperColors.current
     var fontSize by remember(label) { mutableStateOf(MushafOptionFont) }
+    val shape = RoundedCornerShape(999.dp)
     Text(
         text = label,
-        color = paper.textStrong,
+        color = if (selected) paper.pageBackground else paper.textStrong,
         fontSize = if (fitSingleLine) fontSize else MushafOptionFont,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
@@ -564,14 +577,9 @@ private fun SegmentedOption(
             null
         },
         modifier = modifier
-            .clip(RoundedCornerShape(999.dp))
-            .background(if (selected) paper.accent.copy(alpha = 0.14f) else paper.tone300)
-            .border(
-                1.dp,
-                if (selected) paper.accent.copy(alpha = 0.55f) else paper.tone500.copy(alpha = 0.88f),
-                RoundedCornerShape(999.dp),
-            )
-            .clickable(onClick = onClick)
+            .clip(shape)
+            .background(if (selected) paper.accent else Color.Transparent)
+            .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 10.dp),
     )
 }

@@ -25,23 +25,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material3.MaterialTheme
 import com.quransunah.app.R
 import com.quransunah.app.core.EasternArabic
 import com.quransunah.app.ui.theme.LocalAppFontFamily
@@ -187,89 +186,147 @@ private fun HomeRouteCard(
 ) {
     val paper = LocalPaperColors.current
     val nightMode = LocalNightMode.current
-    val themeColor = MaterialTheme.colorScheme.primary
+    val textAtStart = LocalLayoutDirection.current == LayoutDirection.Rtl
     val themedImage = featured || backgroundImageRes != null
-    val themedContentColor = if (nightMode) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimary
-    val background = paper.pageBody
-    val titleColor = if (themedImage) themedContentColor else paper.textStrong
-    val descriptionColor = if (themedImage) themedContentColor.copy(alpha = 0.9f) else paper.textMuted
-    val iconSurface = if (themedImage) themedContentColor.copy(alpha = 0.16f) else paper.tone300
-    val iconTint = if (themedImage) themedContentColor else if (nightMode) paper.textStrong else paper.accent
+    // Light wash from the active palette. Day uses the theme chrome fill;
+    // night tints a warm white with the palette accent so the photo stays bright.
+    val imageBackdrop = if (nightMode) {
+        lerp(Color(0xFFFFF8F1), paper.accent, 0.18f)
+    } else {
+        paper.chromeFill
+    }
+    val background = if (themedImage) imageBackdrop else paper.pageBody
+    val titleColor = if (themedImage && nightMode) paper.pageBackground else paper.textStrong
+    val descriptionColor = if (themedImage && nightMode) {
+        lerp(paper.pageBackground, paper.textMuted, 0.42f)
+    } else {
+        paper.textMuted
+    }
+    val iconSurface = if (themedImage) {
+        Color.White.copy(alpha = if (nightMode) 0.82f else 0.9f)
+    } else {
+        paper.tone300
+    }
+    val iconTint = if (nightMode && !themedImage) {
+        paper.textStrong
+    } else if (nightMode) {
+        paper.pageBackground
+    } else {
+        paper.accent
+    }
     val minHeight = if (compact) 104.dp else if (featured) 156.dp else 148.dp
     val cardDescription = "$title، $description"
+    val stackText = !featured && !compact
+    val contentFraction = when {
+        featured -> 0.58f
+        compact -> 0.60f
+        else -> 0.68f
+    }
+    val borderColor = paper.accent.copy(alpha = if (nightMode) 0.34f else if (featured) 0.24f else 0.16f)
+    val shadowElevation = when {
+        nightMode -> if (featured) 6.dp else 3.dp
+        featured -> 14.dp
+        else -> 8.dp
+    }
 
     Box(
         modifier = modifier
             .height(minHeight)
-            .shadow(if (featured) 10.dp else 2.dp, HomeCardShape, clip = false)
+            .shadow(
+                elevation = shadowElevation,
+                shape = HomeCardShape,
+                clip = false,
+                ambientColor = paper.accent.copy(alpha = if (nightMode) 0.26f else 0.16f),
+                spotColor = paper.accent.copy(alpha = if (nightMode) 0.14f else 0.10f),
+            )
             .clip(HomeCardShape)
             .background(background)
-            .border(
-                width = 1.dp,
-                color = if (featured) paper.accentHover.copy(alpha = 0.44f) else paper.tone500.copy(alpha = 0.74f),
-                shape = HomeCardShape,
-            )
+            .border(width = 1.dp, color = borderColor, shape = HomeCardShape)
             .semantics { this.contentDescription = cardDescription }
             .clickable(onClick = onClick),
     ) {
         if (themedImage) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-            ) {
-                Image(
-                    painter = painterResource(if (featured) R.drawable.home_continue_reading else backgroundImageRes!!),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    alignment = if (featured) Alignment.Center else Alignment.CenterStart,
-                    modifier = Modifier
-                        .matchParentSize()
-                        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                        .drawWithContent {
-                            drawContent()
-                            drawRect(
-                                brush = Brush.horizontalGradient(
-                                    colorStops = arrayOf(
-                                        0.0f to Color.Transparent,
-                                        0.28f to Color.White.copy(alpha = 0.55f),
-                                        1.0f to Color.White,
-                                    ),
-                                ),
-                                blendMode = BlendMode.DstIn,
-                            )
-                        },
-                )
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .background(themeColor.copy(alpha = 0.32f)),
-                )
-            }
+            Image(
+                painter = painterResource(if (featured) R.drawable.home_continue_reading else backgroundImageRes!!),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.Center,
+                alpha = 0.7f,
+                modifier = Modifier.matchParentSize(),
+            )
+            val clear = Color.Transparent
+            val soft = imageBackdrop.copy(alpha = 0.28f)
+            val lift = imageBackdrop.copy(alpha = 0.66f)
             Box(
                 modifier = Modifier
                     .matchParentSize()
                     .background(
                         Brush.horizontalGradient(
-                            colorStops = arrayOf(
-                                0.0f to Color.Transparent,
-                                0.22f to Color.Transparent,
-                                0.58f to Color.Black.copy(alpha = 0.30f),
-                                1.0f to Color.Black.copy(alpha = 0.56f),
-                            ),
+                            colorStops = if (textAtStart) {
+                                arrayOf(
+                                    0.00f to clear,
+                                    0.34f to clear,
+                                    0.62f to soft,
+                                    1.00f to lift,
+                                )
+                            } else {
+                                arrayOf(
+                                    0.00f to lift,
+                                    0.38f to soft,
+                                    0.66f to clear,
+                                    1.00f to clear,
+                                )
+                            },
                         ),
                     ),
             )
         }
-        Row(
+        HomeCardCopy(
+            title = title,
+            description = description,
+            detail = detail,
+            iconRes = iconRes,
+            featured = featured,
+            compact = compact,
+            stackText = stackText,
+            titleColor = titleColor,
+            descriptionColor = descriptionColor,
+            iconSurface = iconSurface,
+            iconTint = iconTint,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = if (compact) 16.dp else 14.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(if (compact) 14.dp else 10.dp),
-        ) {
-            Box(
+                .align(if (stackText) Alignment.TopStart else Alignment.CenterStart)
+                .fillMaxWidth(contentFraction)
+                .padding(
+                    start = if (compact) 14.dp else 16.dp,
+                    end = 8.dp,
+                    top = if (featured) 16.dp else 12.dp,
+                    bottom = if (featured) 14.dp else 10.dp,
+                ),
+        )
+    }
+}
+
+@Composable
+private fun HomeCardCopy(
+    title: String,
+    description: String,
+    detail: String?,
+    iconRes: Int,
+    featured: Boolean,
+    compact: Boolean,
+    stackText: Boolean,
+    titleColor: Color,
+    descriptionColor: Color,
+    iconSurface: Color,
+    iconTint: Color,
+    modifier: Modifier = Modifier,
+) {
+    val iconSize = if (featured) 56.dp else 40.dp
+    val glyphSize = if (featured) 30.dp else 22.dp
+    val icon: @Composable () -> Unit = {
+        Box(
             modifier = Modifier
-                .size(if (featured) 62.dp else 46.dp)
+                .size(iconSize)
                 .clip(CircleShape)
                 .background(iconSurface),
             contentAlignment = Alignment.Center,
@@ -278,42 +335,64 @@ private fun HomeRouteCard(
                 painter = painterResource(iconRes),
                 contentDescription = null,
                 tint = iconTint,
-                modifier = Modifier.size(if (featured) 33.dp else 25.dp),
+                modifier = Modifier.size(glyphSize),
             )
-            }
-            Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.Center,
-        ) {
+        }
+    }
+    val copy: @Composable () -> Unit = {
+        Text(
+            text = title,
+            color = titleColor,
+            fontFamily = LocalDisplayFontFamily.current,
+            fontWeight = FontWeight.Bold,
+            fontSize = if (featured) 21.sp else if (compact) 17.sp else 16.sp,
+            lineHeight = if (featured) 28.sp else if (compact) 22.sp else 21.sp,
+            textAlign = TextAlign.Start,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            text = description,
+            color = descriptionColor,
+            fontFamily = LocalAppFontFamily.current,
+            fontSize = if (featured) 14.sp else 12.sp,
+            lineHeight = if (featured) 21.sp else 17.sp,
+            textAlign = TextAlign.Start,
+            maxLines = if (compact) 1 else 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+        detail?.let {
             Text(
-                text = title,
-                color = titleColor,
-                fontFamily = LocalDisplayFontFamily.current,
-                fontWeight = FontWeight.Bold,
-                fontSize = if (featured) 21.sp else if (compact) 17.sp else 16.sp,
+                text = it,
+                color = titleColor.copy(alpha = 0.86f),
+                fontFamily = LocalAppFontFamily.current,
+                fontSize = 12.sp,
+                lineHeight = 17.sp,
+                textAlign = TextAlign.Start,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = 8.dp),
             )
-            Text(
-                text = description,
-                color = descriptionColor,
-                fontFamily = LocalAppFontFamily.current,
-                fontSize = if (featured) 14.sp else 12.sp,
-                lineHeight = if (featured) 21.sp else 18.sp,
-                maxLines = if (compact) 1 else 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 4.dp),
-            )
-            detail?.let {
-                Text(
-                    text = it,
-                    color = titleColor.copy(alpha = 0.76f),
-                    fontFamily = LocalAppFontFamily.current,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 10.dp),
-                )
-            }
-            }
+        }
+    }
+    if (stackText) {
+        Column(
+            modifier = modifier,
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalAlignment = Alignment.Start,
+        ) {
+            icon()
+            Column { copy() }
+        }
+    } else {
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            icon()
+            Column(modifier = Modifier.weight(1f)) { copy() }
         }
     }
 }

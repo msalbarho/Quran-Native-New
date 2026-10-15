@@ -42,8 +42,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -83,8 +83,8 @@ import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 import com.quransunah.app.ui.theme.PaperColors
 
-private val PickerShape = RoundedCornerShape(14.dp)
-private val PlayShape = RoundedCornerShape(14.dp)
+private val PickerShape = RoundedCornerShape(16.dp)
+private val PlayShape = RoundedCornerShape(16.dp)
 
 private enum class ListeningPicker {
     Surah,
@@ -343,18 +343,17 @@ private fun listeningSurahName(
 }
 
 private val SheetShape = RoundedCornerShape(28.dp)
-private val StopRed = Color(0xFFFF8A80)
 
 private fun listeningPlayerColor(paper: PaperColors, night: Boolean): Color {
-    return if (night) paper.pageBackground else lerp(paper.textStrong, paper.accent, 0.42f)
+    return if (night) paper.pageBody else paper.pageBody
 }
 
 private fun listeningHeroTitle(paper: PaperColors, night: Boolean): Color {
-    return if (night) paper.textStrong else paper.tone100
+    return paper.textStrong
 }
 
 private fun listeningHeroMuted(paper: PaperColors, night: Boolean): Color {
-    return if (night) paper.textMuted else paper.tone400
+    return paper.textMuted
 }
 
 @Composable
@@ -381,8 +380,13 @@ private fun ListeningHeroPlayer(
 ) {
     val paper = LocalPaperColors.current
     val player = listeningPlayerColor(paper, nightMode)
-    val heroTitle = listeningHeroTitle(paper, nightMode)
     val heroMuted = listeningHeroMuted(paper, nightMode)
+    val heroArtInk = Color(0xFF25211D)
+    val heroBackdrop = if (nightMode) {
+        lerp(Color(0xFFFFF8F1), paper.accent, 0.18f)
+    } else {
+        paper.chromeFill
+    }
     val duration = snapshot.durationMs.coerceAtLeast(0L)
     val idle = snapshot.domain == PlaybackDomain.IDLE
     val buffering = snapshot.isBuffering
@@ -395,8 +399,6 @@ private fun ListeningHeroPlayer(
         0f
     }
     val imageHeight = (LocalConfiguration.current.screenHeightDp * 0.30f).dp.coerceIn(156.dp, 228.dp)
-    val scrimTop = if (nightMode) 0.72f else 0.52f
-    val scrimMid = if (nightMode) 0.58f else 0.34f
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -405,13 +407,15 @@ private fun ListeningHeroPlayer(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(imageHeight),
+                .height(imageHeight)
+                .background(heroBackdrop),
         ) {
             Image(
                 painter = painterResource(R.drawable.home_listening),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.Center,
+                alpha = 0.8f,
                 modifier = Modifier.fillMaxSize(),
             )
             Box(
@@ -419,10 +423,20 @@ private fun ListeningHeroPlayer(
                     .matchParentSize()
                     .background(
                         Brush.verticalGradient(
-                            0f to Color.Black.copy(alpha = scrimTop),
-                            0.38f to Color.Black.copy(alpha = scrimMid),
-                            0.72f to player.copy(alpha = if (nightMode) 0.9f else 0.78f),
-                            1f to player,
+                            colorStops = if (nightMode) {
+                                arrayOf(
+                                    0f to Color.Transparent,
+                                    0.88f to Color.Transparent,
+                                    1f to player,
+                                )
+                            } else {
+                                arrayOf(
+                                    0f to Color.Transparent,
+                                    0.58f to Color.Transparent,
+                                    0.84f to player.copy(alpha = 0.78f),
+                                    1f to player,
+                                )
+                            },
                         ),
                     ),
             )
@@ -433,39 +447,53 @@ private fun ListeningHeroPlayer(
             ) {
                 ListeningHeroHeader(
                     nightMode = nightMode,
-                    titleColor = heroTitle,
+                    titleColor = if (nightMode) paper.pageBackground else paper.textStrong,
                     onThemeToggle = onThemeToggle,
                 )
-                Spacer(Modifier.weight(1f))
-                SurahLigatureText(
-                    surahNumber = snapshot.surah ?: surahNumber,
-                    fontManager = fontManager,
-                    color = heroTitle,
-                    fallback = snapshot.surahName ?: surahTitle,
-                    fontSize = 30.sp,
-                )
-                reciterName?.takeIf { it.isNotBlank() }?.let { name ->
-                    Text(
-                        text = name,
-                        color = heroMuted,
-                        fontFamily = LocalAppFontFamily.current,
-                        fontSize = 14.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-                snapshot.errorMessage?.let { message ->
-                    Text(
-                        text = message,
-                        color = Color(0xFFFFB4A8),
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center,
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(top = 6.dp, bottom = 12.dp),
+                ) {
+                    val onVisualRight = LocalLayoutDirection.current == LayoutDirection.Rtl
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 4.dp),
-                    )
+                            .align(if (onVisualRight) Alignment.TopStart else Alignment.TopEnd)
+                            .fillMaxWidth(0.46f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        SurahLigatureText(
+                            surahNumber = snapshot.surah ?: surahNumber,
+                            fontManager = fontManager,
+                            color = heroArtInk,
+                            fallback = snapshot.surahName ?: surahTitle,
+                            fontSize = 30.sp,
+                        )
+                        reciterName?.takeIf { it.isNotBlank() }?.let { name ->
+                            Text(
+                                text = name,
+                                color = heroArtInk,
+                                fontFamily = LocalAppFontFamily.current,
+                                fontSize = 14.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                        snapshot.errorMessage?.let { message ->
+                            Text(
+                                text = message,
+                                color = Color(0xFFFFB4A8),
+                                fontSize = 12.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 4.dp),
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -505,10 +533,10 @@ private fun ListeningHeroPlayer(
                 colors = SliderDefaults.colors(
                     thumbColor = paper.accent,
                     activeTrackColor = paper.accent,
-                    inactiveTrackColor = paper.accent.copy(alpha = 0.28f),
-                    disabledThumbColor = paper.accent.copy(alpha = 0.45f),
-                    disabledActiveTrackColor = paper.accent.copy(alpha = 0.35f),
-                    disabledInactiveTrackColor = Color.White.copy(alpha = 0.14f),
+                    inactiveTrackColor = paper.accent.copy(alpha = if (nightMode) 0.22f else 0.16f),
+                    disabledThumbColor = paper.accent.copy(alpha = 0.4f),
+                    disabledActiveTrackColor = paper.accent.copy(alpha = 0.28f),
+                    disabledInactiveTrackColor = paper.accent.copy(alpha = 0.1f),
                 ),
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -539,6 +567,7 @@ private fun ListeningHeroHeader(
     titleColor: Color,
     onThemeToggle: () -> Unit,
 ) {
+    val paper = LocalPaperColors.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -559,7 +588,7 @@ private fun ListeningHeroHeader(
             modifier = Modifier
                 .size(36.dp)
                 .clip(CircleShape)
-                .background(if (nightMode) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.38f)),
+                .background(if (nightMode) paper.surface.copy(alpha = 0.88f) else Color.White.copy(alpha = 0.82f)),
             contentAlignment = Alignment.Center,
         ) {
             ThemeToggle(night = nightMode, onToggle = onThemeToggle)
@@ -584,20 +613,22 @@ private fun ListeningTransport(
     val night = LocalNightMode.current
     val ink = listeningHeroTitle(paper, night)
     val onAccent = paper.pageBackground
+    val sideFill = if (night) paper.tone400 else paper.chromeFill
+    val sideBorder = paper.accent.copy(alpha = if (night) 0.34f else 0.2f)
+    val stop = if (night) Color(0xFFFF8A80) else Color(0xFFB42318)
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val previousIcon = if (rtl) R.drawable.ic_skip_next else R.drawable.ic_skip_previous
     val nextIcon = if (rtl) R.drawable.ic_skip_previous else R.drawable.ic_skip_next
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(18.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
             HeroCircleButton(
                 onClick = onPrevious,
                 enabled = previousEnabled,
                 size = 46.dp,
-                background = Color.White.copy(alpha = 0.08f),
-                border = paper.accent.copy(alpha = 0.45f),
+                background = sideFill,
+                border = sideBorder,
             ) {
                 Icon(
                     painter = painterResource(previousIcon),
@@ -632,8 +663,8 @@ private fun ListeningTransport(
                 onClick = onNext,
                 enabled = nextEnabled,
                 size = 46.dp,
-                background = Color.White.copy(alpha = 0.08f),
-                border = paper.accent.copy(alpha = 0.45f),
+                background = sideFill,
+                border = sideBorder,
             ) {
                 Icon(
                     painter = painterResource(nextIcon),
@@ -642,23 +673,21 @@ private fun ListeningTransport(
                     modifier = Modifier.size(22.dp),
                 )
             }
+            HeroCircleButton(
+                onClick = onStop,
+                enabled = stopEnabled,
+                size = 42.dp,
+                background = stop.copy(alpha = 0.12f),
+                border = stop.copy(alpha = 0.7f),
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_stop),
+                    contentDescription = stringResource(R.string.audio_stop),
+                    tint = stop,
+                    modifier = Modifier.size(18.dp),
+                )
+            }
         }
-        Spacer(Modifier.height(8.dp))
-        HeroCircleButton(
-            onClick = onStop,
-            enabled = stopEnabled,
-            size = 32.dp,
-            background = StopRed.copy(alpha = 0.22f),
-            border = StopRed,
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_stop),
-                contentDescription = stringResource(R.string.audio_stop),
-                tint = StopRed,
-                modifier = Modifier.size(16.dp),
-            )
-        }
-    }
 }
 
 @Composable
@@ -698,7 +727,7 @@ private fun ListeningRepeatModes(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         RepeatModeButton(
             icon = R.drawable.ic_repeat,
@@ -733,17 +762,17 @@ private fun RepeatModeButton(
     modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
-    val muted = listeningHeroMuted(paper, LocalNightMode.current)
-    val mark = if (selected) paper.pageBackground else muted.copy(alpha = 0.82f)
-    val shape = RoundedCornerShape(14.dp)
+    val night = LocalNightMode.current
+    val mark = if (selected) paper.pageBackground else paper.textMuted
+    val shape = RoundedCornerShape(16.dp)
     Column(
         modifier = modifier
-            .heightIn(min = 42.dp)
+            .heightIn(min = 46.dp)
             .clip(shape)
-            .background(if (selected) paper.accent else Color.White.copy(alpha = 0.05f))
+            .background(if (selected) paper.accent else if (night) paper.surface else paper.surface)
             .border(
                 width = 1.dp,
-                color = if (selected) paper.accent else muted.copy(alpha = 0.45f),
+                color = if (selected) paper.accent else paper.accent.copy(alpha = if (night) 0.32f else 0.18f),
                 shape = shape,
             )
             .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
@@ -797,8 +826,8 @@ private fun ListeningControlSheet(
 ) {
     val paper = LocalPaperColors.current
     val night = LocalNightMode.current
-    val sheetColor = if (night) paper.pageBody else paper.pageBackground
-    val cardColor = if (night) paper.surface else paper.pageBody
+    val sheetColor = if (night) paper.surface else paper.surface
+    val cardColor = if (night) paper.pageBody else paper.pageBody
     val errorRed = Color(0xFFC53030)
     val downloadBg = when {
         downloadError -> errorRed.copy(alpha = 0.08f)
@@ -814,16 +843,22 @@ private fun ListeningControlSheet(
     val downloadBorder = when {
         downloadError -> errorRed
         allCached -> paper.accent
-        else -> paper.tone500.copy(alpha = 0.7f)
+        else -> paper.accent.copy(alpha = if (night) 0.28f else 0.16f)
     }
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .offset(y = (-16).dp)
-            .shadow(6.dp, SheetShape, clip = false)
+            .shadow(
+                elevation = if (night) 4.dp else 10.dp,
+                shape = SheetShape,
+                clip = false,
+                ambientColor = paper.accent.copy(alpha = if (night) 0.22f else 0.12f),
+                spotColor = paper.accent.copy(alpha = if (night) 0.12f else 0.08f),
+            )
             .clip(SheetShape)
             .background(sheetColor)
-            .border(1.dp, paper.accent.copy(alpha = 0.35f), SheetShape)
+            .border(1.dp, paper.accent.copy(alpha = if (night) 0.28f else 0.16f), SheetShape)
             .padding(horizontal = 16.dp, vertical = 18.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -953,18 +988,29 @@ private fun PickerRow(
     onClick: () -> Unit,
 ) {
     val paper = LocalPaperColors.current
-    val cardColor = if (LocalNightMode.current) paper.surface else paper.pageBody
+    val night = LocalNightMode.current
+    val cardColor = if (night) paper.surface else paper.pageBody
     val highlight = open || playing
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(if (highlight) 3.dp else 1.dp, PickerShape, clip = false)
+            .shadow(
+                elevation = if (night) {
+                    if (highlight) 3.dp else 1.dp
+                } else {
+                    if (highlight) 1.dp else 0.dp
+                },
+                shape = PickerShape,
+                clip = false,
+                ambientColor = paper.accent.copy(alpha = if (night) 0.18f else 0.05f),
+                spotColor = paper.accent.copy(alpha = if (night) 0.1f else 0.03f),
+            )
             .clip(PickerShape)
             .background(cardColor)
             .border(
                 1.dp,
-                if (highlight) paper.accent else paper.tone500.copy(alpha = 0.7f),
+                if (highlight) paper.accent.copy(alpha = if (night) 1f else 0.45f) else paper.accent.copy(alpha = if (night) 0.28f else 0.1f),
                 PickerShape,
             )
             .clickable(enabled = enabled, onClick = onClick)
@@ -1026,13 +1072,13 @@ private fun RangePickerButton(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(1.dp, RoundedCornerShape(12.dp), clip = false)
-                .clip(RoundedCornerShape(12.dp))
-                .background(if (LocalNightMode.current) paper.surface else paper.pageBody)
+                .shadow(1.dp, RoundedCornerShape(16.dp), clip = false)
+                .clip(RoundedCornerShape(16.dp))
+                .background(if (LocalNightMode.current) paper.pageBody else paper.pageBody)
                 .border(
                     1.dp,
-                    if (open) paper.accent else paper.tone500.copy(alpha = 0.7f),
-                    RoundedCornerShape(12.dp),
+                    if (open) paper.accent else paper.accent.copy(alpha = if (LocalNightMode.current) 0.28f else 0.16f),
+                    RoundedCornerShape(16.dp),
                 )
                 .clickable(enabled = enabled, onClick = onClick)
                 .height(SelectorCardHeight)

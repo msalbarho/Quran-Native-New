@@ -174,7 +174,6 @@
     <string name="training_listen_accessibility">Ab dem gewählten Vers anhören</string>
     <string name="training_close_accessibility">Training schließen</string>
     <string name="last_position_title">Letzte Position</string>
-    <string name="saved_places_tab">Gespeicherte Orte</string>
     <string name="training_tab">Training</string>
     <string name="bookmarks_saved">Gespeicherte Positionen</string>
     <string name="bookmarks_saved_count">Gespeicherte Positionen (%1$s)</string>
@@ -299,6 +298,34 @@
     <string name="guide_madinah_title">Madinah-Mushaf</string>
     <string name="guide_madinah_body">Wenn du den Madinah-Mushaf bevorzugst, drehe das Gerät ins Querformat, damit die Seite größer erscheint.</string>
     <string name="guide_meaning_sample">Im Namen Allahs, des Allerbarmers, des Barmherzigen.</string>
+    <string name="index_matching_surahs">Passende Suren</string>
+    <string name="index_matching_verses">Passende Verse</string>
+    <string name="training_next_word">Nächstes Wort</string>
+    <string name="training_more">Mehr</string>
+    <string name="training_mark_memorized">Ich habe ihn auswendig gelernt</string>
+    <string name="training_saved_mastered">Als auswendig gelernt gespeichert</string>
+    <string name="training_saved_review">Zum Wiederholen gespeichert</string>
+    <string name="training_continue_last">Letztes Training fortsetzen</string>
+    <string name="training_my_progress">Mein Lernfortschritt</string>
+    <string name="training_log">Trainingsverlauf</string>
+    <string name="training_no_position">Keine vorherige Trainingsposition</string>
+    <string name="training_history_empty">Noch keine Trainingseinheiten</string>
+    <string name="training_history_resume">Ab diesem Vers fortsetzen</string>
+    <string name="training_history_back">Zurück</string>
+    <string name="training_history_same_surah">%1$s %2$s–%3$s</string>
+    <string name="training_history_span">%1$s %2$s – %3$s %4$s</string>
+    <string name="training_history_last">Letzter Vers: %1$s %2$s</string>
+    <string name="training_history_practiced">Geübte Verse: %1$s</string>
+    <string name="training_history_assessments">Auswendig gelernt %1$s · Zu wiederholen %2$s</string>
+    <string name="training_history_no_assessments">Keine Bewertungen in dieser Einheit</string>
+    <string name="training_history_legacy_assessments">Ältere Bewertungen wurden beibehalten und nicht überschrieben</string>
+    <string name="training_history_started">Beginn: %1$s</string>
+    <string name="training_history_ended">Ende: %1$s</string>
+    <string name="training_history_active">Läuft</string>
+    <string name="training_selected_verse">Vers %1$s</string>
+    <string name="index_search_all">Vers, Nummer oder Surenname suchen…</string>
+    <string name="memorization_plan_custom_name">Auswendiglern-Plan</string>
+    <string name="memorization_plan_sequential_name">Fortlaufendes Auswendiglernen</string>
 </resources>
 
 

@@ -4,11 +4,13 @@ import com.quransunah.app.core.AppConstants
 import com.quransunah.app.core.ArabicNormalize
 import com.quransunah.app.core.ArabicOrdinals
 import com.quransunah.app.core.EasternArabic
+import com.quransunah.app.domain.model.AyahSearchHit
 import com.quransunah.app.domain.model.DivisionInfo
 import com.quransunah.app.domain.model.IndexJump
 import com.quransunah.app.domain.model.SajdaMarker
 import com.quransunah.app.domain.model.SurahInfo
 import com.quransunah.app.domain.repository.MushafRepository
+import com.quransunah.app.domain.repository.SearchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +18,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -60,6 +64,9 @@ data class QuranIndexUiState(
     val visibleJuzSections: List<JuzIndexSection> = emptyList(),
     val visibleHizbSections: List<HizbIndexSection> = emptyList(),
     val visibleSajdas: List<SajdaMarker> = emptyList(),
+    val verseHits: List<AyahSearchHit> = emptyList(),
+    val verseLoading: Boolean = false,
+    val verseHasMore: Boolean = false,
 ) {
     fun surahName(number: Int): String = surahNames[number].orEmpty()
 
@@ -164,10 +171,13 @@ private fun buildSajdaRows(
 @HiltViewModel
 class QuranIndexViewModel @Inject constructor(
     private val mushafRepository: MushafRepository,
+    private val searchRepository: SearchRepository,
 ) : ViewModel() {
 
     private val _ui = MutableStateFlow(QuranIndexUiState())
     val uiState: StateFlow<QuranIndexUiState> = _ui.asStateFlow()
+    private var verseJob: Job? = null
+    private var verseGeneration = 0
 
     init {
         viewModelScope.launch(Dispatchers.Default) {
@@ -190,6 +200,7 @@ class QuranIndexViewModel @Inject constructor(
 
     fun prepare(tab: QuranIndexTab, pageNumber: Int, juz: Int, hizb: Int, currentSurah: Int) {
         val provisional = currentSurah.coerceIn(1, AppConstants.SURAH_COUNT)
+        cancelVerseSearch()
         _ui.update { current ->
             current.copy(
                 tab = tab,
@@ -198,6 +209,9 @@ class QuranIndexViewModel @Inject constructor(
                 currentHizb = hizb.coerceAtLeast(1),
                 currentPage = pageNumber.coerceIn(1, AppConstants.TOTAL_PAGES),
                 currentSurah = provisional,
+                verseHits = emptyList(),
+                verseLoading = false,
+                verseHasMore = false,
             ).derived()
         }
         if (tab == QuranIndexTab.Hizb) loadQuarters()
@@ -213,22 +227,99 @@ class QuranIndexViewModel @Inject constructor(
     }
 
     fun resetForOpen(tab: QuranIndexTab) {
+        cancelVerseSearch()
         _ui.update { current ->
-            current.copy(tab = tab, query = "").derived()
+            current.copy(
+                tab = tab,
+                query = "",
+                verseHits = emptyList(),
+                verseLoading = false,
+                verseHasMore = false,
+            ).derived()
         }
         if (tab == QuranIndexTab.Hizb) loadQuarters()
     }
 
     fun setTab(tab: QuranIndexTab) {
+        if (_ui.value.tab == tab) return
+        cancelVerseSearch()
         _ui.update { current ->
-            if (current.tab == tab) current
-            else current.copy(tab = tab, query = "").derived()
+            current.copy(
+                tab = tab,
+                query = "",
+                verseHits = emptyList(),
+                verseLoading = false,
+                verseHasMore = false,
+            ).derived()
         }
         if (tab == QuranIndexTab.Hizb) loadQuarters()
     }
 
     fun setQuery(value: String) {
-        _ui.update { it.copy(query = value).derived() }
+        cancelVerseSearch()
+        val trimmed = value.trim()
+        val skipVerses = trimmed.isEmpty() || isPlainNumericIndexQuery(trimmed)
+        _ui.update {
+            it.copy(
+                query = value,
+                verseHits = emptyList(),
+                verseLoading = !skipVerses,
+                verseHasMore = false,
+            ).derived()
+        }
+        if (skipVerses) return
+        val generation = verseGeneration
+        verseJob = viewModelScope.launch {
+            delay(VERSE_SEARCH_DEBOUNCE_MS)
+            if (generation != verseGeneration) return@launch
+            _ui.update { it.copy(verseLoading = true) }
+            val hits = runCatching {
+                searchRepository.searchVerses(trimmed, limit = VERSE_PAGE_SIZE + 1, offset = 0)
+            }.getOrDefault(emptyList())
+            if (generation != verseGeneration) return@launch
+            _ui.update {
+                it.copy(
+                    verseHits = hits.take(VERSE_PAGE_SIZE),
+                    verseLoading = false,
+                    verseHasMore = hits.size > VERSE_PAGE_SIZE,
+                )
+            }
+        }
+    }
+
+    fun loadMoreVerses() {
+        val snapshot = _ui.value
+        val trimmed = snapshot.query.trim()
+        if (
+            snapshot.verseLoading ||
+            !snapshot.verseHasMore ||
+            trimmed.isEmpty() ||
+            isPlainNumericIndexQuery(trimmed)
+        ) {
+            return
+        }
+        val generation = verseGeneration
+        val offset = snapshot.verseHits.size
+        verseJob = viewModelScope.launch {
+            _ui.update { it.copy(verseLoading = true) }
+            val hits = runCatching {
+                searchRepository.searchVerses(trimmed, limit = VERSE_PAGE_SIZE + 1, offset = offset)
+            }.getOrDefault(emptyList())
+            if (generation != verseGeneration) return@launch
+            _ui.update { current ->
+                current.copy(
+                    verseHits = current.verseHits + hits.take(VERSE_PAGE_SIZE),
+                    verseLoading = false,
+                    verseHasMore = hits.size > VERSE_PAGE_SIZE,
+                )
+            }
+        }
+    }
+
+    private fun cancelVerseSearch() {
+        verseJob?.cancel()
+        verseJob = null
+        verseGeneration++
     }
 
     private fun loadQuarters() {
@@ -359,6 +450,16 @@ internal fun matchesSajdaQuery(
     if (foldedQuery.isEmpty()) return digits.isNotEmpty()
     return foldIndexQuery(surahName).contains(foldedQuery)
 }
+
+internal fun isPlainNumericIndexQuery(query: String): Boolean {
+    val compact = query.trim().filterNot { it.isWhitespace() }
+    if (compact.isEmpty()) return false
+    val digits = EasternArabic.westernDigits(compact)
+    return digits.isNotEmpty() && digits.length == compact.length
+}
+
+private const val VERSE_PAGE_SIZE = 24
+private const val VERSE_SEARCH_DEBOUNCE_MS = 300L
 
 internal fun SurahInfo.toIndexJump(): IndexJump =
     IndexJump(pageNumber = startPage, surah = number, ayah = 1)

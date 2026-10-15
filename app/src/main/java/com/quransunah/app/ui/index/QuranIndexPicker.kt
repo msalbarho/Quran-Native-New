@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -41,6 +43,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -62,6 +66,7 @@ import com.quransunah.app.core.uiLayoutDirection
 import com.quransunah.app.core.ArabicOrdinals
 import com.quransunah.app.core.EasternArabic
 import com.quransunah.app.core.LanguageRegistry
+import com.quransunah.app.domain.model.AyahSearchHit
 import com.quransunah.app.domain.model.DivisionInfo
 import com.quransunah.app.domain.model.IndexJump
 import com.quransunah.app.domain.model.SajdaMarker
@@ -71,6 +76,7 @@ import com.quransunah.app.ui.mushaf.QcfGlyphText
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewFixtures
 import com.quransunah.app.ui.preview.PreviewTheme
+import com.quransunah.app.ui.shell.IslamicEdgePattern
 import com.quransunah.app.ui.theme.LocalAppFontFamily
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
@@ -78,8 +84,8 @@ import com.quransunah.app.ui.theme.PaperColors
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.yield
 
-private val CardShape = RoundedCornerShape(11.dp)
-private val ChipShape = RoundedCornerShape(6.dp)
+private val CardShape = RoundedCornerShape(14.dp)
+private val ChipShape = RoundedCornerShape(12.dp)
 private val SurahListRtlTags = setOf("ar", "ur", "fa", "fa-af", "ps")
 
 @Composable
@@ -115,6 +121,7 @@ fun QuranIndexPicker(
         onSubmitQuery = {
             viewModel.resolveJump()?.let(onSelectPage)
         },
+        onLoadMoreVerses = viewModel::loadMoreVerses,
         modifier = modifier,
     )
 }
@@ -128,6 +135,7 @@ fun QuranIndexPickerContent(
     onClose: () -> Unit,
     onSelectPage: (IndexJump) -> Unit,
     onSubmitQuery: () -> Unit,
+    onLoadMoreVerses: () -> Unit = {},
     modifier: Modifier = Modifier,
     openEpoch: Int = 0,
 ) {
@@ -138,14 +146,6 @@ fun QuranIndexPickerContent(
             QuranIndexTab.Juz -> R.string.index_tab_juz
             QuranIndexTab.Hizb -> R.string.index_tab_hizb
             QuranIndexTab.Sajdah -> R.string.index_tab_sajdah
-        },
-    )
-    val placeholder = stringResource(
-        when (ui.tab) {
-            QuranIndexTab.Surah -> R.string.index_search_surah
-            QuranIndexTab.Juz -> R.string.index_search_juz
-            QuranIndexTab.Hizb -> R.string.index_search_hizb
-            QuranIndexTab.Sajdah -> R.string.index_search_sajdah
         },
     )
     val inspection = LocalInspectionMode.current
@@ -163,17 +163,17 @@ fun QuranIndexPickerContent(
         }
     }
 
+    val night = LocalNightMode.current
+    val fieldFill = if (night) paper.tone400.copy(alpha = 0.72f) else lerp(paper.surface, paper.chromeFill, 0.28f)
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight()
-            .background(paper.pageBody),
+            .fillMaxHeight(),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(paper.chromeFill)
-                .padding(horizontal = 14.dp, vertical = 10.dp),
+                .padding(horizontal = 14.dp, vertical = 8.dp),
         ) {
             CompositionLocalProvider(LocalLayoutDirection provides uiLayoutDirection()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -181,20 +181,23 @@ fun QuranIndexPickerContent(
                     text = title,
                     color = paper.textStrong,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
                 )
                 Text(
                     text = stringResource(R.string.close),
-                    color = if (LocalNightMode.current) Color.White else Color.Black,
+                    color = paper.textStrong,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .clickable(onClick = onClose)
-                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                        .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable(role = Role.Button, onClick = onClose)
+                        .padding(horizontal = 8.dp, vertical = 12.dp),
                 )
             }
             }
@@ -206,11 +209,11 @@ fun QuranIndexPickerContent(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .height(56.dp),
+                    .padding(top = 4.dp)
+                    .heightIn(min = 52.dp),
                 placeholder = {
                     Text(
-                        text = placeholder,
+                        text = stringResource(R.string.index_search_all),
                         color = paper.textMuted,
                         fontSize = 14.sp,
                         maxLines = 1,
@@ -233,13 +236,13 @@ fun QuranIndexPickerContent(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = paper.textStrong,
                     unfocusedTextColor = paper.textPrimary,
-                    focusedBorderColor = paper.darkAccent,
-                    unfocusedBorderColor = paper.tone500,
+                    focusedBorderColor = paper.accent.copy(alpha = 0.7f),
+                    unfocusedBorderColor = paper.accent.copy(alpha = if (night) 0.34f else 0.2f),
                     cursorColor = paper.accent,
-                    focusedContainerColor = paper.pageBody,
-                    unfocusedContainerColor = paper.pageBody,
+                    focusedContainerColor = fieldFill,
+                    unfocusedContainerColor = fieldFill,
                 ),
-                shape = RoundedCornerShape(10.dp),
+                shape = RoundedCornerShape(16.dp),
             )
             CompositionLocalProvider(LocalLayoutDirection provides uiLayoutDirection()) {
                 IndexTabRow(
@@ -251,9 +254,7 @@ fun QuranIndexPickerContent(
         }
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(paper.tone200),
+            modifier = Modifier.fillMaxSize(),
         ) {
             val languageTag = surahListLanguageTag()
             val visibleSurahs = remember(ui.surahs, query, languageTag) {
@@ -348,7 +349,20 @@ fun QuranIndexPickerContent(
                         sajdaListState.scrollToIndexWhenReady(sajdaTarget)
                 }
             }
-            when (ui.tab) {
+            if (!searchBlank) {
+                UnifiedIndexResults(
+                    surahs = visibleSurahs,
+                    verses = ui.verseHits,
+                    verseLoading = ui.verseLoading,
+                    verseHasMore = ui.verseHasMore,
+                    languageTag = languageTag,
+                    currentSurah = ui.currentSurah,
+                    fontManager = fontManager,
+                    titleTypeface = titleTypeface,
+                    onSelect = onSelectPage,
+                    onLoadMore = onLoadMoreVerses,
+                )
+            } else when (ui.tab) {
                 QuranIndexTab.Surah -> SurahIndexList(
                     surahs = visibleSurahs,
                     languageTag = languageTag,
@@ -400,42 +414,185 @@ private fun IndexTabRow(
     modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    val night = LocalNightMode.current
+    val track = if (night) paper.tone400.copy(alpha = 0.7f) else lerp(paper.surface, paper.chromeFill, 0.35f)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(track),
     ) {
-        QuranIndexTab.entries.forEach { tab ->
-            val active = tab == selected
-            val label = stringResource(
-                when (tab) {
-                    QuranIndexTab.Surah -> R.string.index_tab_surah_short
-                    QuranIndexTab.Juz -> R.string.index_tab_juz_short
-                    QuranIndexTab.Hizb -> R.string.index_tab_hizb_short
-                    QuranIndexTab.Sajdah -> R.string.index_tab_sajdah_short
-                },
-            )
+        IslamicEdgePattern(Modifier.matchParentSize())
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            QuranIndexTab.entries.forEach { tab ->
+                val active = tab == selected
+                val label = stringResource(
+                    when (tab) {
+                        QuranIndexTab.Surah -> R.string.index_tab_surah_short
+                        QuranIndexTab.Juz -> R.string.index_tab_juz_short
+                        QuranIndexTab.Hizb -> R.string.index_tab_hizb_short
+                        QuranIndexTab.Sajdah -> R.string.index_tab_sajdah_short
+                    },
+                )
+                Text(
+                    text = label,
+                    color = if (active) paper.pageBackground else paper.textStrong,
+                    fontWeight = if (active) FontWeight.Bold else FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(ChipShape)
+                        .background(if (active) paper.accent else Color.Transparent)
+                        .clickable(role = Role.Button) { onTab(tab) }
+                        .heightIn(min = 40.dp)
+                        .padding(horizontal = 4.dp, vertical = 8.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun UnifiedIndexResults(
+    surahs: List<SurahInfo>,
+    verses: List<AyahSearchHit>,
+    verseLoading: Boolean,
+    verseHasMore: Boolean,
+    languageTag: String,
+    currentSurah: Int,
+    fontManager: QcfFontManager?,
+    titleTypeface: Typeface?,
+    onSelect: (IndexJump) -> Unit,
+    onLoadMore: () -> Unit,
+) {
+    val paper = LocalPaperColors.current
+    val direction = if (languageTag in SurahListRtlTags) LayoutDirection.Rtl else LayoutDirection.Ltr
+    CompositionLocalProvider(LocalLayoutDirection provides direction) {
+        if (surahs.isEmpty() && verses.isEmpty() && !verseLoading) {
+            IndexEmpty()
+            return@CompositionLocalProvider
+        }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(9.dp),
+        ) {
+            if (surahs.isNotEmpty()) {
+                item(key = "surah-heading", contentType = "heading") {
+                    IndexSectionHeading(stringResource(R.string.index_matching_surahs))
+                }
+                items(surahs, key = { "surah-${it.number}" }, contentType = { "surah" }) { surah ->
+                    val jump = remember(surah.number, surah.startPage) { surah.toIndexJump() }
+                    SurahIndexCard(
+                        surah = surah,
+                        languageTag = languageTag,
+                        active = surah.number == currentSurah,
+                        fontManager = fontManager,
+                        titleTypeface = titleTypeface,
+                        onClick = { onSelect(jump) },
+                    )
+                }
+            }
+            if (verses.isNotEmpty()) {
+                item(key = "verse-heading", contentType = "heading") {
+                    IndexSectionHeading(stringResource(R.string.index_matching_verses))
+                }
+                items(verses, key = { "verse-${it.surah}:${it.ayah}" }, contentType = { "verse" }) { hit ->
+                    VerseHitCard(hit = hit, onClick = {
+                        onSelect(
+                            IndexJump(
+                                pageNumber = hit.pageNumber,
+                                surah = hit.surah,
+                                ayah = hit.ayah,
+                            ),
+                        )
+                    })
+                }
+            }
+            if (verseLoading || verseHasMore) {
+                item(key = "verse-more", contentType = "more") {
+                    if (verseHasMore && !verseLoading) {
+                        LaunchedEffect(verses.size) { onLoadMore() }
+                    }
+                    if (verseLoading) {
+                        LinearProgressIndicator(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                            color = paper.accent,
+                            trackColor = paper.accent.copy(alpha = 0.18f),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun IndexSectionHeading(text: String) {
+    val paper = LocalPaperColors.current
+    Text(
+        text = text,
+        color = paper.textMuted,
+        fontWeight = FontWeight.Bold,
+        fontSize = 13.sp,
+        modifier = Modifier.padding(start = 4.dp, top = 2.dp, bottom = 2.dp),
+    )
+}
+
+@Composable
+private fun VerseHitCard(
+    hit: AyahSearchHit,
+    onClick: () -> Unit,
+) {
+    val paper = LocalPaperColors.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(CardShape)
+            .goldCard(paper, active = false)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             Text(
-                text = label,
-                color = if (active) paper.darkAccent else paper.textMuted,
-                fontWeight = if (active) FontWeight.Bold else FontWeight.SemiBold,
-                fontSize = 11.sp,
-                textAlign = TextAlign.Center,
+                text = hit.surahName.ifBlank { EasternArabic.format(hit.surah) },
+                color = paper.textStrong,
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(ChipShape)
-                    .background(if (active) paper.darkAccent.copy(alpha = 0.20f) else Color.Transparent)
-                    .border(
-                        width = if (active) 1.dp else 0.dp,
-                        color = if (active) paper.darkAccent.copy(alpha = 0.72f) else Color.Transparent,
-                        shape = ChipShape,
-                    )
-                    .clickable { onTab(tab) }
-                    .heightIn(min = 40.dp)
-                    .padding(horizontal = 4.dp, vertical = 8.dp),
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = stringResource(R.string.index_sajdah_ayah, EasternArabic.format(hit.ayah)),
+                color = paper.accent,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                maxLines = 1,
             )
         }
+        Text(
+            text = hit.snippet.ifBlank { hit.text },
+            color = paper.textPrimary,
+            fontSize = 16.sp,
+            lineHeight = 26.sp,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            style = TextStyle(textDirection = TextDirection.Rtl),
+        )
     }
 }
 
@@ -493,7 +650,6 @@ private fun SurahIndexCard(
     onClick: () -> Unit,
 ) {
     val paper = LocalPaperColors.current
-    val night = LocalNightMode.current
     val place = revelationPlace(surah.revelationType)
     val fallbackName = surah.nameArabic.removePrefix("سُورَةُ ").removePrefix("سورة ")
     val localizedName = SurahNames.displayName(languageTag, surah.number, fallbackName)
@@ -535,7 +691,7 @@ private fun SurahIndexCard(
                     fallback = fallbackName,
                     fontManager = fontManager,
                     titleTypeface = titleTypeface,
-                    color = if (night) Color.White else paper.textStrong,
+                    color = paper.textStrong,
                     ligatureSize = 26.sp,
                     fallbackSize = 16.sp,
                     modifier = Modifier.widthIn(min = 88.dp, max = 130.dp),
@@ -543,7 +699,7 @@ private fun SurahIndexCard(
             } else {
                 Text(
                     text = localizedName,
-                    color = if (night) Color.White else paper.textStrong,
+                    color = paper.textStrong,
                     fontSize = 16.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -660,7 +816,6 @@ private fun JuzHeadCard(
     framed: Boolean = true,
 ) {
     val paper = LocalPaperColors.current
-    val night = LocalNightMode.current
     val opening = ArabicOrdinals.juzOpeningName(juz.number)
     val fallback = stringResource(R.string.index_juz_opening_fallback, opening)
     val boxModifier = if (framed) {
@@ -694,7 +849,7 @@ private fun JuzHeadCard(
                     fallback = fallback,
                     fontManager = fontManager,
                     titleTypeface = juzNameTypeface,
-                    color = if (night) Color.White else paper.textStrong,
+                    color = paper.textStrong,
                     ligatureSize = 19.5.sp,
                     fallbackSize = 17.sp,
                     preferLigature = true,
@@ -803,7 +958,6 @@ private fun SajdaIndexCard(
     onClick: () -> Unit,
 ) {
     val paper = LocalPaperColors.current
-    val night = LocalNightMode.current
     val fallbackName = surahName.removePrefix("سُورَةُ ").removePrefix("سورة ")
     val localizedName = SurahNames.localized(languageTag, marker.startSurah)
     Box(
@@ -828,7 +982,7 @@ private fun SajdaIndexCard(
                     fallback = fallbackName.ifBlank { EasternArabic.format(marker.startSurah) },
                     fontManager = fontManager,
                     titleTypeface = titleTypeface,
-                    color = if (night) Color.White else paper.textStrong,
+                    color = paper.textStrong,
                     ligatureSize = 24.sp,
                     fallbackSize = 16.sp,
                     modifier = Modifier.widthIn(min = 72.dp, max = 130.dp),
@@ -836,7 +990,7 @@ private fun SajdaIndexCard(
             } else {
                 Text(
                     text = localizedName,
-                    color = if (night) Color.White else paper.textStrong,
+                    color = paper.textStrong,
                     fontSize = 16.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -1054,9 +1208,9 @@ private fun IndexEmpty() {
 }
 
 private fun Modifier.goldCard(paper: PaperColors, active: Boolean): Modifier {
-    val stroke = paper.darkAccent.copy(alpha = if (active) 0.78f else 0.42f)
+    val stroke = paper.accent.copy(alpha = if (active) 0.62f else 0.2f)
     return this
-        .background(paper.pageBody.copy(alpha = 0.72f))
+        .background(paper.pageBody.copy(alpha = if (active) 0.92f else 0.58f))
         .border(if (active) 1.5.dp else 1.dp, stroke, CardShape)
 }
 

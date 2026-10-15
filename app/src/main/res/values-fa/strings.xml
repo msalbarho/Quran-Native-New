@@ -174,7 +174,6 @@
     <string name="training_listen_accessibility">شنیدن از آیهٔ انتخاب‌شده</string>
     <string name="training_close_accessibility">بستن تمرین</string>
     <string name="last_position_title">آخرین موقعیت</string>
-    <string name="saved_places_tab">مکان‌های ذخیره‌شده</string>
     <string name="training_tab">تمرین</string>
     <string name="bookmarks_saved">موقعیت‌های ذخیره‌شده</string>
     <string name="bookmarks_saved_count">موقعیت‌های ذخیره‌شده (%1$s)</string>
@@ -299,6 +298,34 @@
     <string name="guide_madinah_title">مصحف مدینه</string>
     <string name="guide_madinah_body">اگر مصحف مدینه را می‌پسندید، دستگاه را افقی کنید تا صفحه بزرگ‌تر دیده شود.</string>
     <string name="guide_meaning_sample">به نام خداوند بخشنده مهربان</string>
+    <string name="index_matching_surahs">سوره‌های منطبق</string>
+    <string name="index_matching_verses">آیه‌های منطبق</string>
+    <string name="training_next_word">واژهٔ بعدی</string>
+    <string name="training_more">بیشتر</string>
+    <string name="training_mark_memorized">حفظش کردم</string>
+    <string name="training_saved_mastered">به‌عنوان حفظ‌شده ذخیره شد</string>
+    <string name="training_saved_review">برای مرور ذخیره شد</string>
+    <string name="training_continue_last">ادامهٔ آخرین تمرین</string>
+    <string name="training_my_progress">پیشرفت حفظ من</string>
+    <string name="training_log">تاریخچهٔ تمرین</string>
+    <string name="training_no_position">موقعیت تمرین قبلی وجود ندارد</string>
+    <string name="training_history_empty">هنوز جلسهٔ تمرینی وجود ندارد</string>
+    <string name="training_history_resume">ادامه از این آیه</string>
+    <string name="training_history_back">بازگشت</string>
+    <string name="training_history_same_surah">%1$s %2$s–%3$s</string>
+    <string name="training_history_span">%1$s %2$s – %3$s %4$s</string>
+    <string name="training_history_last">آخرین آیه: %1$s %2$s</string>
+    <string name="training_history_practiced">آیه‌های تمرین‌شده: %1$s</string>
+    <string name="training_history_assessments">حفظ‌شده %1$s · نیازمند مرور %2$s</string>
+    <string name="training_history_no_assessments">در این جلسه ارزیابی‌ای وجود ندارد</string>
+    <string name="training_history_legacy_assessments">ارزیابی‌های قدیمی حفظ شده‌اند و بازنویسی نشده‌اند</string>
+    <string name="training_history_started">شروع: %1$s</string>
+    <string name="training_history_ended">پایان: %1$s</string>
+    <string name="training_history_active">در حال انجام</string>
+    <string name="training_selected_verse">آیهٔ %1$s</string>
+    <string name="index_search_all">جستجوی آیه، شماره یا نام سوره…</string>
+    <string name="memorization_plan_custom_name">برنامهٔ حفظ</string>
+    <string name="memorization_plan_sequential_name">حفظ ترتیبی</string>
 </resources>
 
 

@@ -105,4 +105,186 @@ class UserDatabaseMigrationTest {
             close()
         }
     }
+
+    @Test
+    fun migrationFrom6To5KeepsUserRowsAndTrainingLog() {
+        val name = "user-migration-test-v6"
+        helper.createDatabase(name, 5).apply {
+            execSQL(
+                """
+                INSERT INTO bookmarks(
+                    id, surah, ayah, page_number, word_id, word_index, ayah_text, saved_at
+                ) VALUES ('1:1', 1, 1, 1, 1, 0, 'بِسْمِ اللَّهِ', 10)
+                """.trimIndent(),
+            )
+            execSQL(
+                """
+                INSERT INTO memorization_progress(
+                    id, surah, ayah, page_number, ayah_text, state,
+                    review_count, created_at, updated_at
+                ) VALUES ('1:1', 1, 1, 1, 'بِسْمِ اللَّهِ', 'MASTERED', 2, 10, 11)
+                """.trimIndent(),
+            )
+            execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `training_log` (
+                    `id` TEXT NOT NULL,
+                    `mode` TEXT NOT NULL,
+                    `started_at` INTEGER NOT NULL,
+                    `surah` INTEGER NOT NULL,
+                    `start_ayah` INTEGER NOT NULL,
+                    `end_ayah` INTEGER NOT NULL,
+                    `last_ayah` INTEGER NOT NULL,
+                    `status` TEXT NOT NULL,
+                    `practiced_ayahs` TEXT NOT NULL,
+                    `assessments` TEXT NOT NULL,
+                    `updated_at` INTEGER NOT NULL,
+                    PRIMARY KEY(`id`)
+                )
+                """.trimIndent(),
+            )
+            execSQL(
+                """
+                INSERT INTO training_log(
+                    id, mode, started_at, surah, start_ayah, end_ayah, last_ayah,
+                    status, practiced_ayahs, assessments, updated_at
+                ) VALUES (
+                    'session-1', 'NEW', 20, 1, 1, 7, 7, 'ACTIVE', '[1]', '[]', 21
+                )
+                """.trimIndent(),
+            )
+            execSQL("PRAGMA user_version = 6")
+            close()
+        }
+
+        helper.runMigrationsAndValidate(
+            name,
+            5,
+            false,
+            UserDatabaseMigrations.MIGRATION_6_5,
+        ).apply {
+            query("PRAGMA user_version").use { cursor ->
+                cursor.moveToFirst()
+                assertEquals(5, cursor.getInt(0))
+            }
+            query("SELECT surah, state FROM memorization_progress WHERE id = '1:1'").use { cursor ->
+                cursor.moveToFirst()
+                assertEquals(1, cursor.getInt(0))
+                assertEquals("MASTERED", cursor.getString(1))
+            }
+            query("SELECT surah, status, last_ayah FROM training_log WHERE id = 'session-1'").use { cursor ->
+                cursor.moveToFirst()
+                assertEquals(1, cursor.getInt(0))
+                assertEquals("ACTIVE", cursor.getString(1))
+                assertEquals(7, cursor.getInt(2))
+            }
+            close()
+        }
+    }
+
+    @Test
+    fun migrationFrom5To7KeepsMemorizationAndAddsTrainingTables() {
+        val name = "user-migration-test-v5-training"
+        helper.createDatabase(name, 5).apply {
+            execSQL(
+                """
+                INSERT INTO memorization_progress(
+                    id, surah, ayah, page_number, ayah_text, state,
+                    review_count, created_at, updated_at
+                ) VALUES ('2:255', 2, 255, 42, 'آية الكرسي', 'MASTERED', 1, 10, 11)
+                """.trimIndent(),
+            )
+            close()
+        }
+        helper.runMigrationsAndValidate(
+            name,
+            7,
+            true,
+            UserDatabaseMigrations.MIGRATION_5_7,
+        ).apply {
+            query("SELECT state, page_number FROM memorization_progress WHERE id = '2:255'").use { cursor ->
+                cursor.moveToFirst()
+                assertEquals("MASTERED", cursor.getString(0))
+                assertEquals(42, cursor.getInt(1))
+            }
+            execSQL(
+                "INSERT INTO training_position(id, surah, ayah, page_number, updated_at) VALUES (1, 2, 255, 42, 12)",
+            )
+            close()
+        }
+    }
+
+    @Test
+    fun migrationFromLegacyVersion6KeepsTrainingHistory() {
+        val name = "user-migration-test-legacy-log-v7"
+        helper.createDatabase(name, 5).apply {
+            execSQL(
+                """
+                INSERT INTO memorization_progress(
+                    id, surah, ayah, page_number, ayah_text, state,
+                    review_count, created_at, updated_at
+                ) VALUES ('1:1', 1, 1, 1, 'بِسْمِ اللَّهِ', 'LEARNING', 0, 10, 11)
+                """.trimIndent(),
+            )
+            execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `training_log` (
+                    `id` TEXT NOT NULL,
+                    `mode` TEXT NOT NULL,
+                    `started_at` INTEGER NOT NULL,
+                    `surah` INTEGER NOT NULL,
+                    `start_ayah` INTEGER NOT NULL,
+                    `end_ayah` INTEGER NOT NULL,
+                    `last_ayah` INTEGER NOT NULL,
+                    `status` TEXT NOT NULL,
+                    `practiced_ayahs` TEXT NOT NULL,
+                    `assessments` TEXT NOT NULL,
+                    `updated_at` INTEGER NOT NULL,
+                    PRIMARY KEY(`id`)
+                )
+                """.trimIndent(),
+            )
+            execSQL(
+                """
+                INSERT INTO training_log(
+                    id, mode, started_at, surah, start_ayah, end_ayah, last_ayah,
+                    status, practiced_ayahs, assessments, updated_at
+                ) VALUES (
+                    'session-1', 'NEW', 20, 1, 1, 7, 7, 'ACTIVE', '[1]', '[]', 21
+                )
+                """.trimIndent(),
+            )
+            execSQL(
+                "CREATE INDEX IF NOT EXISTS `index_training_log_surah_updated_at` ON `training_log` (`surah`, `updated_at`)",
+            )
+            execSQL("PRAGMA user_version = 6")
+            close()
+        }
+        helper.runMigrationsAndValidate(
+            name,
+            7,
+            true,
+            UserDatabaseMigrations.MIGRATION_6_7,
+        ).apply {
+            query("SELECT surah, status, last_ayah, practiced_ayahs, assessments FROM training_log WHERE id = 'session-1'").use { cursor ->
+                cursor.moveToFirst()
+                assertEquals(1, cursor.getInt(0))
+                assertEquals("ACTIVE", cursor.getString(1))
+                assertEquals(7, cursor.getInt(2))
+                assertEquals("[1]", cursor.getString(3))
+                assertEquals("[]", cursor.getString(4))
+            }
+            query("SELECT end_surah, last_surah, page_number FROM training_log WHERE id = 'session-1'").use { cursor ->
+                cursor.moveToFirst()
+                assertEquals(1, cursor.getInt(0))
+                assertEquals(1, cursor.getInt(1))
+                assertEquals(0, cursor.getInt(2))
+            }
+            query("SELECT state FROM memorization_progress WHERE id = '1:1'").use { cursor ->
+                cursor.moveToFirst()
+                assertEquals("LEARNING", cursor.getString(0))
+            }
+            close()
+        }
+    }
 }

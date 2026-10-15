@@ -105,6 +105,16 @@ interface SearchDao {
     )
     suspend fun containsSearch(needle: String, limit: Int = 40): List<AyahSearchEntity>
 
+    @Query(
+        """
+        SELECT * FROM ayah_search
+        WHERE normalized LIKE '%' || :needle || '%'
+        ORDER BY surah, ayah
+        LIMIT :limit OFFSET :offset
+        """,
+    )
+    suspend fun containsSearchPage(needle: String, limit: Int, offset: Int): List<AyahSearchEntity>
+
     @Query("SELECT * FROM ayah_search WHERE surah = :surah AND ayah = :ayah LIMIT 1")
     suspend fun getReference(surah: Int, ayah: Int): AyahSearchEntity?
 }

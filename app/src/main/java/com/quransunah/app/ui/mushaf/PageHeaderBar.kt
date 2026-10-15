@@ -34,14 +34,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.PathParser
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
@@ -65,12 +61,10 @@ import com.quransunah.app.fonts.QcfFontManager
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewTheme
 import com.quransunah.app.ui.shell.ChromeTokens
+import com.quransunah.app.ui.shell.IslamicEdgePattern
 import com.quransunah.app.ui.shell.ThemeToggle
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 
 private val LigatureSize = 25.sp
 private val FallbackSize = 15.sp
@@ -119,37 +113,20 @@ fun PageHeaderBar(
             .padding(horizontal = ChromeTokens.HorizontalInset)
             .padding(top = ChromeTokens.HeaderTopGap, bottom = ChromeTokens.HeaderBottomGap),
     ) {
-        val shape = RoundedCornerShape(ChromeTokens.Corner)
+        val shape = RoundedCornerShape(14.dp)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(ChromeTokens.HeaderHeight)
-                .shadow(6.dp, shape, clip = false),
+                .height(ChromeTokens.HeaderHeight),
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(shape)
                     .background(paper.chromeFill)
-                    .border(1.6.dp, ChromeTokens.Gold, shape),
+                    .border(1.dp, paper.accent.copy(alpha = if (night) 0.40f else 0.26f), shape),
             ) {
-                Canvas(Modifier.fillMaxSize()) {
-                    val tile = 18.dp.toPx()
-                    val stroke = paper.decorPattern
-                    var y = 0f
-                    while (y < size.height + tile) {
-                        var x = 0f
-                        while (x < size.width + tile) {
-                            drawHeaderGirih(Offset(x + tile / 2f, y + tile / 2f), tile * 0.36f, stroke)
-                            x += tile
-                        }
-                        y += tile
-                    }
-                    drawRect(
-                        color = ChromeTokens.GoldInner,
-                        style = Stroke(width = 1.dp.toPx()),
-                    )
-                }
+                IslamicEdgePattern(Modifier.matchParentSize())
             }
 
             Row(
@@ -171,7 +148,7 @@ fun PageHeaderBar(
                             QbsmlSurahGlyph(
                                 ligature = surahLigature,
                                 fontManager = fontManager,
-                                color = if (night) Color.White else paper.textStrong,
+                                color = paper.textStrong,
                                 contentDescription = stringResource(R.string.header_open_surah_index, surahFallback),
                                 onClick = onOpenSurahIndex,
                                 modifier = Modifier.weight(1f, fill = false),
@@ -181,7 +158,7 @@ fun PageHeaderBar(
                             ligature = juzLigature.orEmpty(),
                             fallback = juzFallback,
                             fontManager = fontManager,
-                            color = if (night) Color.White else paper.textStrong,
+                            color = paper.textStrong,
                             contentDescription = stringResource(R.string.header_open_juz_index, juzFallback),
                             onClick = onOpenJuzIndex,
                         )
@@ -198,22 +175,30 @@ fun PageHeaderBar(
                     night = night,
                     onClick = onSearch,
                 )
-                Icon(
-                    painter = painterResource(R.drawable.ic_bookmark),
-                    contentDescription = stringResource(R.string.last_position_title),
-                    tint = if (night) Color.White else paper.textStrong,
-                    modifier = Modifier
-                        .size(26.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .clickable(onClick = onOpenBookmarks)
-                        .padding(4.dp),
-                )
-                ThemeToggle(
+                HeaderIconButton(
                     night = night,
-                    onToggle = onThemeToggle,
-                    width = 30.dp,
-                    height = 26.dp,
-                )
+                    contentDescription = stringResource(R.string.last_position_title),
+                    onClick = onOpenBookmarks,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_bookmark),
+                        contentDescription = null,
+                        tint = paper.textStrong,
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
+                HeaderIconButton(
+                    night = night,
+                    contentDescription = null,
+                    onClick = null,
+                ) {
+                    ThemeToggle(
+                        night = night,
+                        onToggle = onThemeToggle,
+                        width = 28.dp,
+                        height = 24.dp,
+                    )
+                }
             }
         }
     }
@@ -226,18 +211,19 @@ private fun ReadingModeToggle(
     onSelectMeanings: (Boolean) -> Unit,
 ) {
     val paper = LocalPaperColors.current
-    val shape = RoundedCornerShape(6.dp)
+    val shape = RoundedCornerShape(8.dp)
     val openMeanings = !meaningsSelected
     val label = stringResource(
         if (openMeanings) R.string.reading_mode_meanings else R.string.reading_mode_mushaf,
     )
-    val iconTint = if (night) Color.White else paper.textStrong
+    val iconTint = paper.textStrong
     Row(
         modifier = Modifier
-            .height(22.dp)
+            .height(24.dp)
             .wrapContentWidth(unbounded = true)
             .clip(shape)
-            .border(1.dp, if (night) Color.White.copy(alpha = 0.92f) else Color.Black, shape)
+            .background(headerChipFill(night))
+            .border(1.dp, headerChipStroke(night), shape)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -299,17 +285,14 @@ private fun SearchChip(
 ) {
     val paper = LocalPaperColors.current
     val label = stringResource(R.string.header_search_mushaf)
-    val shape = RoundedCornerShape(6.dp)
+    val shape = RoundedCornerShape(8.dp)
     Row(
         modifier = Modifier
-            .height(22.dp)
-            .widthIn(min = 38.dp)
+            .height(24.dp)
+            .widthIn(min = 36.dp)
             .clip(shape)
-            .background(
-                if (night) Color.Black.copy(alpha = 0.28f)
-                else Color(0xFFEDE6D4).copy(alpha = 0.72f),
-            )
-            .border(1.dp, if (night) Color.White.copy(alpha = 0.92f) else Color.Black, shape)
+            .background(headerChipFill(night))
+            .border(1.dp, headerChipStroke(night), shape)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -500,22 +483,51 @@ private fun LigatureCanvas(
     }
 }
 
-private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawHeaderGirih(
-    center: Offset,
-    outer: Float,
-    color: Color,
+@Composable
+private fun headerChipFill(night: Boolean): Color {
+    val paper = LocalPaperColors.current
+    return paper.accent.copy(alpha = if (night) 0.16f else 0.08f)
+}
+
+@Composable
+private fun headerChipStroke(night: Boolean): Color {
+    val paper = LocalPaperColors.current
+    return paper.accent.copy(alpha = if (night) 0.40f else 0.24f)
+}
+
+@Composable
+private fun HeaderIconButton(
+    night: Boolean,
+    contentDescription: String?,
+    onClick: (() -> Unit)?,
+    content: @Composable () -> Unit,
 ) {
-    val inner = outer * 0.41f
-    val path = Path()
-    for (i in 0 until 16) {
-        val angle = (PI / 8.0) * i - PI / 2.0
-        val radius = if (i % 2 == 0) outer else inner
-        val x = center.x + (cos(angle) * radius).toFloat()
-        val y = center.y + (sin(angle) * radius).toFloat()
-        if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+    val shape = RoundedCornerShape(8.dp)
+    Box(
+        modifier = Modifier
+            .height(24.dp)
+            .widthIn(min = 28.dp)
+            .clip(shape)
+            .background(headerChipFill(night))
+            .border(1.dp, headerChipStroke(night), shape)
+            .then(
+                if (onClick != null && contentDescription != null) {
+                    Modifier
+                        .semantics { this.contentDescription = contentDescription }
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = onClick,
+                        )
+                } else {
+                    Modifier
+                },
+            )
+            .padding(horizontal = 5.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        content()
     }
-    path.close()
-    drawPath(path, color, style = Stroke(width = 0.7.dp.toPx()))
 }
 
 @ArabicPreviews

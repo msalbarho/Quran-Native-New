@@ -174,7 +174,6 @@
     <string name="training_listen_accessibility">Dengar dari sini</string>
     <string name="training_close_accessibility">Tutup latihan</string>
     <string name="last_position_title">Kedudukan terakhir</string>
-    <string name="saved_places_tab">Simpanan</string>
     <string name="training_tab">Latihan</string>
     <string name="bookmarks_saved">Simpanan</string>
     <string name="bookmarks_saved_count">Simpanan (%1$s)</string>
@@ -299,5 +298,33 @@
     <string name="guide_madinah_title">Mushaf Madinah</string>
     <string name="guide_madinah_body">Jika anda lebih suka Mushaf Madinah, putar peranti ke landskap supaya halaman kelihatan lebih besar.</string>
     <string name="guide_meaning_sample">Dengan nama Allah, Yang Maha Pemurah, lagi Maha Mengasihani.</string>
+    <string name="index_matching_surahs">Surah sepadan</string>
+    <string name="index_matching_verses">Ayat sepadan</string>
+    <string name="training_next_word">Perkataan seterusnya</string>
+    <string name="training_more">Lagi</string>
+    <string name="training_mark_memorized">Saya sudah menghafalnya</string>
+    <string name="training_saved_mastered">Disimpan sebagai telah dihafaz</string>
+    <string name="training_saved_review">Disimpan untuk ulang kaji</string>
+    <string name="training_continue_last">Teruskan latihan terakhir</string>
+    <string name="training_my_progress">Kemajuan hafazan saya</string>
+    <string name="training_log">Sejarah latihan</string>
+    <string name="training_no_position">Tiada kedudukan latihan terdahulu</string>
+    <string name="training_history_empty">Belum ada sesi latihan</string>
+    <string name="training_history_resume">Sambung dari ayat ini</string>
+    <string name="training_history_back">Kembali</string>
+    <string name="training_history_same_surah">%1$s %2$s–%3$s</string>
+    <string name="training_history_span">%1$s %2$s – %3$s %4$s</string>
+    <string name="training_history_last">Ayat terakhir: %1$s %2$s</string>
+    <string name="training_history_practiced">Ayat dilatih: %1$s</string>
+    <string name="training_history_assessments">Dihafaz %1$s · Perlu diulang %2$s</string>
+    <string name="training_history_no_assessments">Tiada penilaian dalam sesi ini</string>
+    <string name="training_history_legacy_assessments">Penilaian lama dikekalkan dan tidak ditulis semula</string>
+    <string name="training_history_started">Mula: %1$s</string>
+    <string name="training_history_ended">Tamat: %1$s</string>
+    <string name="training_history_active">Sedang berlangsung</string>
+    <string name="training_selected_verse">Ayat %1$s</string>
+    <string name="index_search_all">Cari ayat, nombor atau nama surah…</string>
+    <string name="memorization_plan_custom_name">Pelan hafazan</string>
+    <string name="memorization_plan_sequential_name">Hafazan berurutan</string>
 </resources>
 

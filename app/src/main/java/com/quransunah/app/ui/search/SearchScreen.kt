@@ -3,6 +3,7 @@ package com.quransunah.app.ui.search
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -55,6 +57,7 @@ fun SearchPane(
         showTitle = showTitle,
         onQueryChange = viewModel::setQuery,
         onClear = viewModel::clear,
+        onLoadMore = viewModel::loadMore,
         onSelectHit = onSelectHit,
         modifier = modifier,
     )
@@ -66,6 +69,7 @@ fun SearchPaneContent(
     showTitle: Boolean,
     onQueryChange: (String) -> Unit,
     onClear: () -> Unit,
+    onLoadMore: () -> Unit,
     onSelectHit: (AyahSearchHit) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -128,7 +132,7 @@ fun SearchPaneContent(
             modifier = Modifier.padding(top = 8.dp, bottom = 12.dp),
         )
         when {
-            ui.loading -> {
+            ui.loading && ui.results.isEmpty() -> {
                 CircularProgressIndicator(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
@@ -160,6 +164,23 @@ fun SearchPaneContent(
                 ) {
                     items(ui.results, key = { "${it.surah}:${it.ayah}" }) { hit ->
                         SearchHitRow(hit = hit, onClick = { onSelectHit(hit) })
+                    }
+                    if (ui.hasMore || ui.loadingMore) {
+                        item(key = "mushaf-search-more") {
+                            if (ui.hasMore && !ui.loadingMore) {
+                                LaunchedEffect(ui.results.size) { onLoadMore() }
+                            }
+                            if (ui.loadingMore) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 12.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    CircularProgressIndicator(color = paper.accent)
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -242,6 +263,7 @@ private fun SearchPanePreview() {
             showTitle = true,
             onQueryChange = {},
             onClear = {},
+            onLoadMore = {},
             onSelectHit = {},
         )
     }

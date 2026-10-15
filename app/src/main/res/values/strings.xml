@@ -74,6 +74,8 @@
     <string name="index_search_hizb">Search by hizb or quarter number…</string>
     <string name="index_search_sajdah">Search by sajdah number or surah name…</string>
     <string name="index_empty">No matching results</string>
+    <string name="index_matching_surahs">Matching surahs</string>
+    <string name="index_matching_verses">Matching verses</string>
     <string name="index_makkah">Meccan</string>
     <string name="index_madinah">Medinan</string>
     <string name="index_ayahs_count">%1$s verses</string>
@@ -173,8 +175,30 @@
     <string name="training_hide_all_accessibility">Hide all ayahs</string>
     <string name="training_listen_accessibility">Listen from the selected ayah</string>
     <string name="training_close_accessibility">Close training</string>
+    <string name="training_next_word">Next word</string>
+    <string name="training_more">More</string>
+    <string name="training_mark_memorized">I memorized it</string>
+    <string name="training_saved_mastered">Saved as memorized</string>
+    <string name="training_saved_review">Saved for review</string>
+    <string name="training_continue_last">Continue last training</string>
+    <string name="training_my_progress">My memorization progress</string>
+    <string name="training_log">Training history</string>
+    <string name="training_no_position">No previous training position</string>
+    <string name="training_history_empty">No training sessions yet</string>
+    <string name="training_history_resume">Resume this verse</string>
+    <string name="training_history_back">Back</string>
+    <string name="training_history_same_surah">%1$s %2$s–%3$s</string>
+    <string name="training_history_span">%1$s %2$s – %3$s %4$s</string>
+    <string name="training_history_last">Last verse: %1$s %2$s</string>
+    <string name="training_history_practiced">Verses practiced: %1$s</string>
+    <string name="training_history_assessments">Memorized %1$s · Needs review %2$s</string>
+    <string name="training_history_no_assessments">No assessments in this session</string>
+    <string name="training_history_legacy_assessments">Older assessments are kept and were not rewritten</string>
+    <string name="training_history_started">Started: %1$s</string>
+    <string name="training_history_ended">Ended: %1$s</string>
+    <string name="training_history_active">In progress</string>
+    <string name="training_selected_verse">Ayah %1$s</string>
     <string name="last_position_title">Last position</string>
-    <string name="saved_places_tab">Saved places</string>
     <string name="training_tab">Training</string>
     <string name="bookmarks_saved">Saved positions</string>
     <string name="bookmarks_saved_count">Saved positions (%1$s)</string>
@@ -306,4 +330,12 @@
     <string name="guide_preview_words" translatable="false">مَالِكِ يَوْمِ الدِّينِ</string>
     <string name="guide_preview_selected" translatable="false">مَالِكِ</string>
     <string name="guide_preview_bismillah" translatable="false">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</string>
+    <string name="index_search_all">Search for an ayah, number, or surah name…</string>
+    <string name="memorization_plan_custom_name">Memorization plan</string>
+    <string name="memorization_plan_sequential_name">Sequential memorization</string>
+    <string name="mushaf_hizb_full">Hizb</string>
+    <string name="mushaf_hizb_quarter">Quarter</string>
+    <string name="mushaf_hizb_half">Half</string>
+    <string name="mushaf_hizb_three">Three</string>
+    <string name="mushaf_hizb_quarters">quarters</string>
 </resources>

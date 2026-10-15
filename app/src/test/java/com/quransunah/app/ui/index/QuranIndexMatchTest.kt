@@ -3,6 +3,7 @@ package com.quransunah.app.ui.index
 import com.quransunah.app.domain.model.DivisionInfo
 import com.quransunah.app.domain.model.SurahInfo
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -34,6 +35,18 @@ class QuranIndexMatchTest {
         assertTrue(matchesSurahQuery(tawbah, "التوبة"))
         assertTrue(matchesSurahQuery(tawbah, "توبه"))
         assertTrue(matchesSurahQuery(tawbah, "٩"))
+    }
+
+    @Test
+    fun plainDigitsStaySurahLookupNotVerseSearch() {
+        assertTrue(isPlainNumericIndexQuery("22"))
+        assertTrue(isPlainNumericIndexQuery("٢٢"))
+        assertTrue(isPlainNumericIndexQuery(" 22 "))
+        assertFalse(isPlainNumericIndexQuery("الناس"))
+        assertFalse(isPlainNumericIndexQuery("اعوذ"))
+        assertFalse(isPlainNumericIndexQuery("قل أعوذ"))
+        assertFalse(isPlainNumericIndexQuery("2:255"))
+        assertFalse(isPlainNumericIndexQuery(""))
     }
 
     @Test

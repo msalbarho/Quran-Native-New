@@ -127,6 +127,9 @@ android {
             excludes += "META-INF/*.kotlin_module"
         }
     }
+    sourceSets {
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    }
 }
 
 fun resolvePythonExecutable(): String? {
