@@ -150,7 +150,7 @@ fun MeaningsPage(
         state = listState,
         modifier = modifier
             .fillMaxSize()
-            .background(paper.pageBackground),
+            .background(paper.mushafPaper),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {

@@ -107,6 +107,8 @@ import com.quransunah.app.ui.mushaf.WordRecord
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewFixtures
 import com.quransunah.app.ui.preview.PreviewTheme
+import com.quransunah.app.ui.shell.IslamicEdgePattern
+import com.quransunah.app.ui.shell.IslamicOrnamentFade
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 import kotlinx.coroutines.delay
@@ -243,13 +245,19 @@ fun WordSheet(
     }
 
     if (inspection) {
-        Column(Modifier.fillMaxSize().background(
+        Box(Modifier.fillMaxSize().background(
             Brush.verticalGradient(
                 colors = listOf(paper.chromeFill, paper.pageBody, paper.pageBackground),
             ),
         )) {
-            WordSheetHeader(onClose = requestClose)
-            body(Modifier.weight(1f))
+            IslamicEdgePattern(
+                Modifier.matchParentSize(),
+                fade = IslamicOrnamentFade.Vertical,
+            )
+            Column(Modifier.fillMaxSize()) {
+                WordSheetHeader(onClose = requestClose)
+                body(Modifier.weight(1f))
+            }
         }
     } else {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -285,7 +293,7 @@ fun WordSheet(
                         .fillMaxWidth(0.94f)
                         .fillMaxHeight(),
                 ) {
-                    Column(
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .shadow(10.dp, WordSheetShape)
@@ -305,8 +313,14 @@ fun WordSheet(
                                 onClick = {},
                             ),
                     ) {
-                        WordSheetHeader(onClose = requestClose)
-                        body(Modifier.weight(1f))
+                        IslamicEdgePattern(
+                            Modifier.matchParentSize(),
+                            fade = IslamicOrnamentFade.Vertical,
+                        )
+                        Column(Modifier.fillMaxSize()) {
+                            WordSheetHeader(onClose = requestClose)
+                            body(Modifier.weight(1f))
+                        }
                     }
                 }
             }

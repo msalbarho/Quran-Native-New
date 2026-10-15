@@ -2,6 +2,7 @@ package com.quransunah.app.ui.mushaf
 
 import android.graphics.Paint
 import android.graphics.Typeface
+import androidx.compose.foundation.background
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -103,6 +104,7 @@ fun MedinaCanvasPage(
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
+            .background(LocalPaperColors.current.mushafPaper)
             .clipToBounds(),
     ) {
         val landscape = maxWidth > maxHeight

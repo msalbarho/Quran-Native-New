@@ -195,7 +195,7 @@ private fun IndexModal(
                 .navigationBarsPadding()
                 .imePadding(),
         ) {
-            Column(
+            Box(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .fillMaxWidth(0.92f)
@@ -216,17 +216,25 @@ private fun IndexModal(
                         indication = null,
                         onClick = {},
                     ),
-                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Box(
-                    modifier = Modifier
-                        .padding(top = 10.dp)
-                        .size(width = 36.dp, height = 4.dp)
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(paper.textMuted.copy(alpha = 0.45f))
-                        .clearAndSetSemantics { },
+                IslamicEdgePattern(
+                    Modifier.matchParentSize(),
+                    fade = IslamicOrnamentFade.Vertical,
                 )
-                content()
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 10.dp)
+                            .size(width = 36.dp, height = 4.dp)
+                            .clip(RoundedCornerShape(999.dp))
+                            .background(paper.textMuted.copy(alpha = 0.45f))
+                            .clearAndSetSemantics { },
+                    )
+                    content()
+                }
             }
         }
     }
@@ -318,7 +326,7 @@ private fun SettingsSideSheet(
                     .fillMaxWidth(0.9f)
                     .fillMaxHeight(),
             ) {
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .shadow(10.dp, SettingsModalShape)
@@ -338,13 +346,19 @@ private fun SettingsSideSheet(
                             onClick = {},
                         ),
                 ) {
-                    SettingsPickerHeader(onClose = onClose)
-                    SettingsScreen(
-                        onOpenUserGuide = onOpenUserGuide,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
+                    IslamicEdgePattern(
+                        Modifier.matchParentSize(),
+                        fade = IslamicOrnamentFade.Vertical,
                     )
+                    Column(Modifier.fillMaxSize()) {
+                        SettingsPickerHeader(onClose = onClose)
+                        SettingsScreen(
+                            onOpenUserGuide = onOpenUserGuide,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                        )
+                    }
                 }
             }
         }

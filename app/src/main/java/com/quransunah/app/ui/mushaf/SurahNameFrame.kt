@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -111,8 +112,8 @@ fun SurahNameFrame(
                 .border(1.dp, stroke, shape),
         ) {
             IslamicEdgePattern(Modifier.matchParentSize())
-            MosqueEnd(alignStart = true, width = frameHeight * 1.32f, alpha = if (night) 0.50f else 0.40f)
-            MosqueEnd(alignStart = false, width = frameHeight * 1.32f, alpha = if (night) 0.50f else 0.40f)
+            MosqueEnd(alignStart = true, width = frameHeight * 1.68f, alpha = if (night) 0.50f else 0.40f)
+            MosqueEnd(alignStart = false, width = frameHeight * 1.68f, alpha = if (night) 0.50f else 0.40f)
             Canvas(Modifier.fillMaxSize()) {
                 val inset = 3.5.dp.toPx()
                 drawRoundRect(
@@ -187,7 +188,8 @@ fun SurahNameFrame(
 /**
  * The WebP is one transparent illustration with a mosque at each end.
  * SrcIn keeps that alpha mask and replaces the beige pixels with the
- * active theme accent. Placement and aspect ratio stay unchanged.
+ * active theme accent. The art is scaled from the outer edge so the
+ * silhouettes read larger and reach slightly farther inward.
  */
 @Composable
 private fun BoxScope.MosqueEnd(
@@ -197,6 +199,7 @@ private fun BoxScope.MosqueEnd(
 ) {
     val paper = LocalPaperColors.current
     val sideWidth = if (width.value.isFinite()) width else 48.dp
+    val outerIsLeft = alignStart == (LocalLayoutDirection.current == LayoutDirection.Ltr)
     Box(
         modifier = Modifier
             .align(if (alignStart) Alignment.CenterStart else Alignment.CenterEnd)
@@ -212,7 +215,15 @@ private fun BoxScope.MosqueEnd(
             colorFilter = ColorFilter.tint(paper.accent, BlendMode.SrcIn),
             modifier = Modifier
                 .fillMaxSize()
-                .graphicsLayer { this.alpha = alpha },
+                .graphicsLayer {
+                    scaleX = 1.24f
+                    scaleY = 1.24f
+                    transformOrigin = TransformOrigin(
+                        pivotFractionX = if (outerIsLeft) 0f else 1f,
+                        pivotFractionY = 0.5f,
+                    )
+                    this.alpha = alpha
+                },
         )
         Box(
             modifier = Modifier

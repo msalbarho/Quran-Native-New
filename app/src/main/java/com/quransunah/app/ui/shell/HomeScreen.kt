@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -42,7 +43,9 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.quransunah.app.R
+import com.quransunah.app.core.ArabicRtl
 import com.quransunah.app.core.EasternArabic
+import com.quransunah.app.ui.index.SurahNames
 import com.quransunah.app.ui.theme.LocalAppFontFamily
 import com.quransunah.app.ui.theme.LocalDisplayFontFamily
 import com.quransunah.app.ui.theme.LocalNightMode
@@ -58,8 +61,8 @@ private val HomeActionShape = RoundedCornerShape(14.dp)
  */
 @Composable
 fun HomeScreen(
-    pageNumber: Int,
     currentSurah: String,
+    currentSurahNumber: Int,
     currentAyah: Int,
     onOpenReading: () -> Unit,
     onOpenTraining: () -> Unit,
@@ -70,17 +73,31 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
-    val nightMode = LocalNightMode.current
-    val iconTint = if (nightMode) paper.textStrong else paper.accent
+    val surahLabel = SurahNames.displayName(
+        ArabicRtl.currentTag(LocalContext.current),
+        currentSurahNumber,
+        currentSurah,
+    )
+    val readingPosition = stringResource(
+        R.string.home_last_page,
+        surahLabel,
+        EasternArabic.format(currentAyah),
+    )
 
-    Column(
-        modifier = modifier
-            .background(paper.pageBackground)
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 18.dp),
+    Box(
+        modifier = modifier.background(paper.pageBackground),
     ) {
+        IslamicEdgePattern(
+            Modifier.matchParentSize(),
+            fade = IslamicOrnamentFade.VerticalHome,
+        )
+        Column(
+            modifier = Modifier
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+        ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -117,13 +134,7 @@ fun HomeScreen(
 
         HomeRouteCard(
             title = stringResource(R.string.home_reading_title),
-            description = stringResource(R.string.home_reading_description),
-            detail = stringResource(
-                R.string.home_last_page,
-                currentSurah,
-                EasternArabic.format(currentAyah),
-                EasternArabic.format(pageNumber),
-            ),
+            description = readingPosition,
             iconRes = R.drawable.ic_nav_quran,
             featured = true,
             onClick = onOpenReading,
@@ -169,6 +180,7 @@ fun HomeScreen(
             compact = true,
         )
 
+        }
     }
 }
 
@@ -198,9 +210,9 @@ private fun HomeRouteCard(
     val background = if (themedImage) imageBackdrop else paper.pageBody
     val titleColor = if (themedImage && nightMode) paper.pageBackground else paper.textStrong
     val descriptionColor = if (themedImage && nightMode) {
-        lerp(paper.pageBackground, paper.textMuted, 0.42f)
+        paper.pageBackground.copy(alpha = 0.88f)
     } else {
-        paper.textMuted
+        lerp(paper.textMuted, paper.textStrong, 0.55f)
     }
     val iconSurface = if (themedImage) {
         Color.White.copy(alpha = if (nightMode) 0.82f else 0.9f)
@@ -255,8 +267,8 @@ private fun HomeRouteCard(
                 modifier = Modifier.matchParentSize(),
             )
             val clear = Color.Transparent
-            val soft = imageBackdrop.copy(alpha = 0.28f)
-            val lift = imageBackdrop.copy(alpha = 0.66f)
+            val soft = imageBackdrop.copy(alpha = 0.40f)
+            val lift = imageBackdrop.copy(alpha = 0.78f)
             Box(
                 modifier = Modifier
                     .matchParentSize()
@@ -355,8 +367,9 @@ private fun HomeCardCopy(
             text = description,
             color = descriptionColor,
             fontFamily = LocalAppFontFamily.current,
-            fontSize = if (featured) 14.sp else 12.sp,
-            lineHeight = if (featured) 21.sp else 17.sp,
+            fontWeight = FontWeight.Medium,
+            fontSize = if (featured) 15.sp else 13.sp,
+            lineHeight = if (featured) 22.sp else 18.sp,
             textAlign = TextAlign.Start,
             maxLines = if (compact) 1 else 2,
             overflow = TextOverflow.Ellipsis,

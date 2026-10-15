@@ -58,6 +58,8 @@ import com.quransunah.app.core.EasternArabic
 import com.quransunah.app.core.HizbBadgeParts
 import com.quransunah.app.core.HizbQuarterKind
 import com.quransunah.app.ui.shell.ChromeTokens
+import com.quransunah.app.ui.shell.IslamicEdgePattern
+import com.quransunah.app.ui.shell.IslamicOrnamentFade
 import com.quransunah.app.ui.theme.LocalDisplayFontFamily
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
@@ -333,6 +335,11 @@ private fun MushafSideBadgeBox(
             ),
         contentAlignment = Alignment.Center,
     ) {
+        IslamicEdgePattern(
+            Modifier.matchParentSize(),
+            fade = IslamicOrnamentFade.VerticalEdges,
+            pitch = 16.dp,
+        )
         Canvas(Modifier.matchParentSize()) {
             val inset = 3.dp.toPx()
             drawRoundRect(

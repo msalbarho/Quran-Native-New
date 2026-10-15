@@ -76,6 +76,8 @@ import com.quransunah.app.fonts.QcfFontManager
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewFixtures
 import com.quransunah.app.ui.preview.PreviewTheme
+import com.quransunah.app.ui.shell.IslamicEdgePattern
+import com.quransunah.app.ui.shell.IslamicOrnamentFade
 import com.quransunah.app.ui.shell.ThemeToggle
 import com.quransunah.app.ui.theme.LocalAppFontFamily
 import com.quransunah.app.ui.theme.LocalDisplayFontFamily
@@ -399,11 +401,16 @@ private fun ListeningHeroPlayer(
         0f
     }
     val imageHeight = (LocalConfiguration.current.screenHeightDp * 0.30f).dp.coerceIn(156.dp, 228.dp)
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(player),
     ) {
+        IslamicEdgePattern(
+            Modifier.matchParentSize(),
+            fade = IslamicOrnamentFade.Vertical,
+        )
+        Column(Modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -557,6 +564,7 @@ private fun ListeningHeroPlayer(
                 selected = repeatMode,
                 onSelect = onSelectRepeat,
             )
+        }
         }
     }
 }
@@ -845,7 +853,7 @@ private fun ListeningControlSheet(
         allCached -> paper.accent
         else -> paper.accent.copy(alpha = if (night) 0.28f else 0.16f)
     }
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .offset(y = (-16).dp)
@@ -858,10 +866,18 @@ private fun ListeningControlSheet(
             )
             .clip(SheetShape)
             .background(sheetColor)
-            .border(1.dp, paper.accent.copy(alpha = if (night) 0.28f else 0.16f), SheetShape)
-            .padding(horizontal = 16.dp, vertical = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+            .border(1.dp, paper.accent.copy(alpha = if (night) 0.28f else 0.16f), SheetShape),
     ) {
+        IslamicEdgePattern(
+            Modifier.matchParentSize(),
+            fade = IslamicOrnamentFade.Vertical,
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
         PickerRow(
             label = stringResource(R.string.audio_surah),
             value = surahName,
@@ -951,6 +967,7 @@ private fun ListeningControlSheet(
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
         )
+        }
     }
 }
 

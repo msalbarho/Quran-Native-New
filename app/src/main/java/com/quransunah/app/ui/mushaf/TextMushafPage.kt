@@ -154,7 +154,7 @@ fun TextMushafPage(
         modifier = modifier
             .fillMaxSize()
             .clipToBounds()
-            .background(paper.pageBackground),
+            .background(paper.mushafPaper),
     ) {
         Column(
             modifier = Modifier

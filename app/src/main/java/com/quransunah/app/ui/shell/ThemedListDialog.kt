@@ -65,7 +65,7 @@ fun ThemedListDialog(
             contentAlignment = Alignment.Center,
         ) {
             val listMax = (maxHeight * 0.85f - 148.dp).coerceAtLeast(120.dp)
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .shadow(4.dp, DialogShape)
@@ -76,6 +76,13 @@ fun ThemedListDialog(
                             colors = listOf(paper.chromeFill, paper.pageBody, paper.pageBackground),
                         ),
                     ),
+            ) {
+            IslamicEdgePattern(
+                Modifier.matchParentSize(),
+                fade = IslamicOrnamentFade.Vertical,
+            )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(
@@ -123,6 +130,7 @@ fun ThemedListDialog(
                         .clickable(role = Role.Button, onClick = onDismiss)
                         .padding(vertical = 12.dp),
                 )
+            }
             }
         }
     }

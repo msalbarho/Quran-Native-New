@@ -77,6 +77,7 @@ import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewFixtures
 import com.quransunah.app.ui.preview.PreviewTheme
 import com.quransunah.app.ui.shell.IslamicEdgePattern
+import com.quransunah.app.ui.shell.IslamicOrnamentFade
 import com.quransunah.app.ui.theme.LocalAppFontFamily
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
@@ -968,6 +969,10 @@ private fun SajdaIndexCard(
             .goldCard(paper, active)
             .clickable(onClick = onClick),
     ) {
+        IslamicEdgePattern(
+            Modifier.matchParentSize(),
+            fade = IslamicOrnamentFade.VerticalEdges,
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1041,12 +1046,17 @@ private fun HizbSectionCard(
     val activeDivisionId = remember(section.hizb.id, section.quarters, currentPage) {
         activeDivisionIdForPage(section.hizb, section.quarters, currentPage)
     }
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(CardShape)
             .goldCard(paper, activeHizb),
     ) {
+        IslamicEdgePattern(
+            Modifier.matchParentSize(),
+            fade = IslamicOrnamentFade.VerticalEdges,
+        )
+        Column(Modifier.fillMaxWidth()) {
         DivisionRow(
             number = section.hizb.number,
             title = stringResource(R.string.index_hizb_label, EasternArabic.format(section.hizb.number)),
@@ -1063,6 +1073,7 @@ private fun HizbSectionCard(
                 compact = true,
                 onClick = { onSelect(quarter.toIndexJump()) },
             )
+        }
         }
     }
 }

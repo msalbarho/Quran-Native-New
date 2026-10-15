@@ -240,6 +240,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
             ?.flatMap { it.words.asSequence() }
             ?.firstOrNull { !it.isAyahMarker }
     }
+    val currentSurahNumber = currentLocationWord?.surah ?: 1
     val currentSurahName = currentLocationWord?.let { word ->
         surahsByNumber[word.surah]?.nameArabic
             ?: stringResource(R.string.surah_fallback, EasternArabic.format(word.surah))
@@ -394,8 +395,8 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
     ) {
         when (tab) {
             AppTab.Home -> HomeScreen(
-                pageNumber = pageNumber,
                 currentSurah = currentSurahName,
+                currentSurahNumber = currentSurahNumber,
                 currentAyah = currentAyah,
                 onOpenReading = { viewModel.selectTab(AppTab.Reading) },
                 onOpenTraining = { viewModel.selectTab(AppTab.Training) },
