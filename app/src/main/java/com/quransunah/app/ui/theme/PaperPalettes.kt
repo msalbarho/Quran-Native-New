@@ -33,7 +33,7 @@ data class PaperColors(
     val accentHover: Color,
     val accentSoft: Color,
     val pageBackground: Color,
-    /** Verse paper. Richer than [pageBackground]; chrome stays on the page token. */
+    /** Verse paper. Matches [pageBackground], the lighter page color from before the darker sheet. */
     val mushafPaper: Color,
     val pageBody: Color,
     /**
@@ -101,7 +101,7 @@ object PaperPalettes {
         accentHover = Color(0xFFE7E6E7),
         accentSoft = Color(0xFF4C4D4C),
         pageBackground = Color(0xFF121417),
-        mushafPaper = Color(0xFF191B1D),
+        mushafPaper = Color(0xFF121417),
         pageBody = Color(0xFF1E2228),
         chromeFill = lerp(Color(0xFFF5F5F5), Color(0xFF1E2228), 0.62f),
         darkAccent = Color(0xFF4C4D4C),
@@ -293,7 +293,7 @@ object PaperPalettes {
             accentHover = Color(accentHover),
             accentSoft = secondaryColor,
             pageBackground = Color(bg),
-            mushafPaper = nightMushafPaper(id),
+            mushafPaper = Color(bg),
             pageBody = surfaceColor,
             chromeFill = chrome,
             darkAccent = secondaryColor,
@@ -329,7 +329,7 @@ object PaperPalettes {
             accentHover = hoverColor,
             accentSoft = softColor,
             pageBackground = Color(t200),
-            mushafPaper = lightMushafPaper(id),
+            mushafPaper = Color(t200),
             pageBody = Color(t300),
             chromeFill = chromeLight(id),
             // Soft interactive stroke: accent (not near-black hover).
@@ -340,29 +340,5 @@ object PaperPalettes {
             ayahHighlight = accentColor.copy(alpha = 0.14f),
             surface = Color.White,
         )
-    }
-
-    /** About 70% of the step from the pale page token toward the next paper tone. */
-    private fun lightMushafPaper(id: PaperPaletteId): Color = when (id) {
-        PaperPaletteId.White -> Color(0xFFF4F4F4)
-        PaperPaletteId.Beige -> Color(0xFFF5F0EA)
-        PaperPaletteId.Blue -> Color(0xFFECF3FB)
-        PaperPaletteId.Green -> Color(0xFFECF6EE)
-        PaperPaletteId.Purple -> Color(0xFFF2EEF9)
-        PaperPaletteId.Rose -> Color(0xFFFAECEF)
-        PaperPaletteId.Teal -> Color(0xFFECF6F5)
-        PaperPaletteId.Amber -> Color(0xFFFAF3E5)
-    }
-
-    /** A small mix of the night accent into the night page, so the hue reads without lifting the paper. */
-    private fun nightMushafPaper(id: PaperPaletteId): Color = when (id) {
-        PaperPaletteId.White -> Color(0xFF191B1D)
-        PaperPaletteId.Beige -> Color(0xFF21140A)
-        PaperPaletteId.Blue -> Color(0xFF0B192A)
-        PaperPaletteId.Green -> Color(0xFF0C2019)
-        PaperPaletteId.Purple -> Color(0xFF1B1027)
-        PaperPaletteId.Rose -> Color(0xFF24121A)
-        PaperPaletteId.Teal -> Color(0xFF0B201D)
-        PaperPaletteId.Amber -> Color(0xFF231C0C)
     }
 }

@@ -326,6 +326,11 @@
     <string name="index_search_all">Ayet, numara veya sure adı ara…</string>
     <string name="memorization_plan_custom_name">Ezber planı</string>
     <string name="memorization_plan_sequential_name">Sıralı ezber</string>
+    <string name="mushaf_hizb_full">Hizb</string>
+    <string name="mushaf_hizb_quarter">Çeyrek</string>
+    <string name="mushaf_hizb_half">Yarım</string>
+    <string name="mushaf_hizb_three">Üç</string>
+    <string name="mushaf_hizb_quarters">çeyrek</string>
 </resources>
 
 

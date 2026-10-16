@@ -326,4 +326,9 @@
     <string name="index_search_all">Поиск аята, номера или названия суры…</string>
     <string name="memorization_plan_custom_name">План заучивания</string>
     <string name="memorization_plan_sequential_name">Последовательное заучивание</string>
+    <string name="mushaf_hizb_full">Хизб</string>
+    <string name="mushaf_hizb_quarter">Четверть</string>
+    <string name="mushaf_hizb_half">Половина</string>
+    <string name="mushaf_hizb_three">Три</string>
+    <string name="mushaf_hizb_quarters">четверти</string>
 </resources>

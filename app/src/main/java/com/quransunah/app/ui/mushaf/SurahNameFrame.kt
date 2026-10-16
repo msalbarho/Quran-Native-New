@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -26,13 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
@@ -102,7 +99,7 @@ fun SurahNameFrame(
     ) {
         val frameWidth = maxWidth
         val frameHeight = maxHeight
-        val shape = RoundedCornerShape(22.dp)
+        val shape = HorizontalIslamicPlaque
         val stroke = paper.accent.copy(alpha = if (night) 0.42f else 0.30f)
         Box(
             modifier = Modifier
@@ -116,15 +113,10 @@ fun SurahNameFrame(
             MosqueEnd(alignStart = false, width = frameHeight * 1.68f, alpha = if (night) 0.50f else 0.40f)
             Canvas(Modifier.fillMaxSize()) {
                 val inset = 3.5.dp.toPx()
-                drawRoundRect(
+                drawPath(
+                    path = islamicPlaquePath(size.width, size.height, PlaqueAxis.Horizontal, inset),
                     color = paper.accent.copy(alpha = if (night) 0.22f else 0.16f),
-                    topLeft = Offset(inset, inset),
-                    size = Size(
-                        (size.width - inset * 2f).coerceAtLeast(0f),
-                        (size.height - inset * 2f).coerceAtLeast(0f),
-                    ),
-                    cornerRadius = CornerRadius(16.dp.toPx(), 16.dp.toPx()),
-                    style = Stroke(width = 0.8.dp.toPx()),
+                    style = Stroke(width = 0.8.dp.toPx(), join = StrokeJoin.Round),
                 )
             }
         }

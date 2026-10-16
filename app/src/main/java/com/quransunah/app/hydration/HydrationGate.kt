@@ -27,9 +27,6 @@ class HydrationGate @Inject constructor(
     private val _state = MutableStateFlow<HydrationState>(HydrationState.Pending)
     val state: StateFlow<HydrationState> = _state
 
-    val keepSplash: Boolean
-        get() = _state.value is HydrationState.Pending
-
     suspend fun hydrate() {
         _state.value = HydrationState.Pending
         val result = runCatching {

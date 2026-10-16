@@ -104,11 +104,7 @@ internal fun IslamicEdgePattern(
     val accent = LocalPaperColors.current.accent
     val context = LocalContext.current
     val floral = remember(accent, ActiveOrnamentStyle) {
-        if (ActiveOrnamentStyle == OrnamentStyle.FLORAL) {
-            floralArtwork(context, accent.copy(alpha = OrnamentFillAlpha))
-        } else {
-            null
-        }
+        if (ActiveOrnamentStyle == OrnamentStyle.FLORAL) prepareFloralArtwork(context, accent) else null
     }
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
         Box(
@@ -171,10 +167,32 @@ private fun ornamentFadeMask(fade: IslamicOrnamentFade, maxAlpha: Float): Brush 
 }
 
 private val floralLock = Any()
+private var cachedFloralSource: FloralSource? = null
 private var floralCacheKey: Int = Int.MIN_VALUE
 private var floralCache: ImageBitmap? = null
 
-/** Rasterize the supplied sheet once per tint. Outside the paths the bitmap stays transparent. */
+/** Parse the sheet once. Rasterizing waits until the theme accent is known. */
+internal fun warmupFloralOrnament(context: android.content.Context) {
+    synchronized(floralLock) {
+        floralSource(context.applicationContext)
+    }
+}
+
+/**
+ * Rasterize the current accent while the splash is still up.
+ * The paint color matches the previous per-tint sheet, including fill-and-stroke overlap.
+ */
+internal fun prepareFloralArtwork(context: android.content.Context, accent: Color): ImageBitmap =
+    floralArtwork(context.applicationContext, accent.copy(alpha = OrnamentFillAlpha))
+
+/** Drop the raster under memory pressure. The parsed path stays so the next draw does not reread the XML. */
+internal fun trimFloralOrnament() {
+    synchronized(floralLock) {
+        floralCache = null
+        floralCacheKey = Int.MIN_VALUE
+    }
+}
+
 private fun floralArtwork(context: android.content.Context, tint: Color): ImageBitmap {
     val key = tint.toArgb()
     synchronized(floralLock) {
@@ -189,26 +207,44 @@ private fun floralArtwork(context: android.content.Context, tint: Color): ImageB
 }
 
 private fun renderFloralSheet(context: android.content.Context, tintArgb: Int): ImageBitmap {
-    val xml = context.applicationContext.assets.open(FloralAsset).bufferedReader().use { it.readText() }
-    val viewportWidth = xml.attr("viewportWidth")?.toFloatOrNull()?.toInt()?.coerceAtLeast(1) ?: 1
-    val viewportHeight = xml.attr("viewportHeight")?.toFloatOrNull()?.toInt()?.coerceAtLeast(1) ?: 1
-    val strokeWidth = xml.attr("strokeWidth")?.toFloatOrNull() ?: 0.25f
-    val pathData = xml.attr("pathData")
-    val bitmap = Bitmap.createBitmap(viewportWidth, viewportHeight, Bitmap.Config.ARGB_8888)
-    if (pathData != null) {
-        val path = PathParser.createPathFromPathData(pathData).apply {
-            fillType = AndroidPath.FillType.EVEN_ODD
-        }
+    val source = floralSource(context)
+    val bitmap = Bitmap.createBitmap(source.viewportWidth, source.viewportHeight, Bitmap.Config.ARGB_8888)
+    val path = source.path
+    if (path != null) {
         val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
             color = tintArgb
             style = android.graphics.Paint.Style.FILL_AND_STROKE
-            this.strokeWidth = strokeWidth
+            this.strokeWidth = source.strokeWidth
             strokeJoin = android.graphics.Paint.Join.ROUND
         }
         AndroidCanvas(bitmap).drawPath(path, paint)
     }
     return bitmap.asImageBitmap()
 }
+
+private fun floralSource(context: android.content.Context): FloralSource {
+    cachedFloralSource?.let { return it }
+    val xml = context.applicationContext.assets.open(FloralAsset).bufferedReader().use { it.readText() }
+    val pathData = xml.attr("pathData")
+    val path = pathData?.let { data ->
+        PathParser.createPathFromPathData(data).apply {
+            fillType = AndroidPath.FillType.EVEN_ODD
+        }
+    }
+    return FloralSource(
+        viewportWidth = xml.attr("viewportWidth")?.toFloatOrNull()?.toInt()?.coerceAtLeast(1) ?: 1,
+        viewportHeight = xml.attr("viewportHeight")?.toFloatOrNull()?.toInt()?.coerceAtLeast(1) ?: 1,
+        strokeWidth = xml.attr("strokeWidth")?.toFloatOrNull() ?: 0.25f,
+        path = path,
+    ).also { cachedFloralSource = it }
+}
+
+private data class FloralSource(
+    val viewportWidth: Int,
+    val viewportHeight: Int,
+    val strokeWidth: Float,
+    val path: AndroidPath?,
+)
 
 private fun String.attr(name: String): String? =
     Regex("""android:$name="([^"]+)"""").find(this)?.groupValues?.get(1)

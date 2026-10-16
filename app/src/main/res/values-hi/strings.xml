@@ -326,4 +326,9 @@
     <string name="index_search_all">आयत, नंबर या सूरा का नाम खोजें…</string>
     <string name="memorization_plan_custom_name">हिफ्ज़ योजना</string>
     <string name="memorization_plan_sequential_name">क्रमिक हिफ्ज़</string>
+    <string name="mushaf_hizb_full">हिज़्ब</string>
+    <string name="mushaf_hizb_quarter">चौथाई</string>
+    <string name="mushaf_hizb_half">आधा</string>
+    <string name="mushaf_hizb_three">तीन</string>
+    <string name="mushaf_hizb_quarters">चौथाई</string>
 </resources>

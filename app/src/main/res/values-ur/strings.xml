@@ -326,4 +326,9 @@
     <string name="index_search_all">آیت، نمبر یا سورۃ کے نام سے تلاش کریں…</string>
     <string name="memorization_plan_custom_name">حفظ کا منصوبہ</string>
     <string name="memorization_plan_sequential_name">ترتیب وار حفظ</string>
+    <string name="mushaf_hizb_full">حزب</string>
+    <string name="mushaf_hizb_quarter">ربع</string>
+    <string name="mushaf_hizb_half">نصف</string>
+    <string name="mushaf_hizb_three">تین</string>
+    <string name="mushaf_hizb_quarters">ارباع</string>
 </resources>

@@ -326,6 +326,11 @@
     <string name="index_search_all">Vers, Nummer oder Surenname suchen…</string>
     <string name="memorization_plan_custom_name">Auswendiglern-Plan</string>
     <string name="memorization_plan_sequential_name">Fortlaufendes Auswendiglernen</string>
+    <string name="mushaf_hizb_full">Hizb</string>
+    <string name="mushaf_hizb_quarter">Viertel</string>
+    <string name="mushaf_hizb_half">Halb</string>
+    <string name="mushaf_hizb_three">Drei</string>
+    <string name="mushaf_hizb_quarters">Viertel</string>
 </resources>
 
 

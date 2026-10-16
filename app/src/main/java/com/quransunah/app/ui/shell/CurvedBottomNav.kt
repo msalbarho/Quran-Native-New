@@ -48,14 +48,14 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.quransunah.app.R
+import com.quransunah.app.ui.mushaf.HorizontalIslamicPlaque
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewTheme
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 import kotlin.math.roundToInt
 
-val BottomNavBarHeight = 50.dp
-private val NavBarShape = RoundedCornerShape(18.dp)
+val BottomNavBarHeight = 57.5.dp
 private val NavBubbleShape = RoundedCornerShape(14.dp)
 private val NavBubbleWidth = 56.dp
 private val NavBubbleHeight = 42.dp
@@ -157,9 +157,9 @@ fun CurvedBottomNav(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(BottomNavBarHeight)
-                .clip(NavBarShape)
+                .clip(HorizontalIslamicPlaque)
                 .background(paper.chromeFill)
-                .border(1.dp, paper.accent.copy(alpha = if (night) 0.40f else 0.26f), NavBarShape),
+                .border(1.dp, paper.accent.copy(alpha = if (night) 0.40f else 0.26f), HorizontalIslamicPlaque),
         ) {
         IslamicEdgePattern(Modifier.matchParentSize())
         Box(Modifier.fillMaxSize()) {
@@ -223,8 +223,8 @@ fun CurvedBottomNav(
                                 Text(
                                     text = stringResource(item.labelRes),
                                     color = tint,
-                                    fontSize = 9.sp,
-                                    lineHeight = 11.sp,
+                                    fontSize = 9.9.sp,
+                                    lineHeight = 12.1.sp,
                                     textAlign = TextAlign.Center,
                                     maxLines = 1,
                                     softWrap = false,

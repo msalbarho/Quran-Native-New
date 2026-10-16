@@ -326,4 +326,9 @@
     <string name="index_search_all">Oyat, raqam yoki sura nomini qidiring…</string>
     <string name="memorization_plan_custom_name">Hifz rejasi</string>
     <string name="memorization_plan_sequential_name">Ketma-ket hifz</string>
+    <string name="mushaf_hizb_full">Hizb</string>
+    <string name="mushaf_hizb_quarter">Rub</string>
+    <string name="mushaf_hizb_half">Yarim</string>
+    <string name="mushaf_hizb_three">Uch</string>
+    <string name="mushaf_hizb_quarters">rub</string>
 </resources>

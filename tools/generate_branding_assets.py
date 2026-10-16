@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "public"
@@ -18,8 +18,11 @@ DENSITIES = {
     "xxxhdpi": 4.0,
 }
 
-# Adaptive foreground is 108dp; keep the circular mark inside the 72dp safe zone.
-ADAPTIVE_SAFE_SCALE = 72 / 108
+# Adaptive foreground is 108dp. The artwork's letters reach the source edges, so the
+# square is fit to the 66dp safe-zone diameter and the rest of the canvas is ivory.
+ADAPTIVE_ART_SCALE = 66 / 108
+# Sampled from the light edge of public/icon.jpg (not the corner ornaments).
+LAUNCHER_BG = (252, 236, 214, 255)
 
 GENERATED_STEMS = {
     "mipmap": ("ic_launcher", "ic_launcher_round"),
@@ -32,27 +35,11 @@ GENERATED_STEMS = {
 }
 
 
-def fit_center(src: Image.Image, canvas: int, scale: float = 1.0) -> Image.Image:
-    out = Image.new("RGBA", (canvas, canvas), (0, 0, 0, 0))
-    inner = max(1, int(round(canvas * scale)))
-    resized = src.convert("RGBA").resize((inner, inner), Image.Resampling.LANCZOS)
-    offset = (canvas - inner) // 2
-    out.alpha_composite(resized, (offset, offset))
-    return out
-
-
 def circular_mask(size: int) -> Image.Image:
     hi = size * 4
     circle = Image.new("L", (hi, hi), 0)
     ImageDraw.Draw(circle).ellipse((0, 0, hi - 1, hi - 1), fill=255)
     return circle.resize((size, size), Image.Resampling.LANCZOS)
-
-
-def round_icon(src: Image.Image, size: int) -> Image.Image:
-    squared = src.convert("RGBA").resize((size, size), Image.Resampling.LANCZOS)
-    mask = circular_mask(size)
-    squared.putalpha(ImageChops.multiply(squared.getchannel("A"), mask))
-    return squared
 
 
 def notification_white(src: Image.Image, size: int) -> Image.Image:
@@ -73,12 +60,116 @@ def notification_black(src: Image.Image, size: int) -> Image.Image:
     return out.resize((size, size), Image.Resampling.LANCZOS)
 
 
-def save_webp(image: Image.Image, path: Path, *, lossless: bool = False) -> None:
+def save_webp(image: Image.Image, path: Path, *, lossless: bool = False, quality: int = 88) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if lossless:
         image.save(path, format="WEBP", lossless=True, method=6)
     else:
-        image.save(path, format="WEBP", quality=88, method=6)
+        image.save(path, format="WEBP", quality=quality, method=6)
+
+
+# One full-screen illustration. Density copies would repeat a large bitmap, and
+# the source must not be squared or enlarged.
+SPLASH_MAX_EDGE = 1440
+
+
+def write_splash(splash: Image.Image) -> None:
+    for path in list(RES.rglob("splash.png")) + list(RES.rglob("splash.webp")):
+        path.unlink(missing_ok=True)
+    image = splash.convert("RGB")
+    width, height = image.size
+    long_edge = max(width, height)
+    if long_edge > SPLASH_MAX_EDGE:
+        scale = SPLASH_MAX_EDGE / long_edge
+        image = image.resize(
+            (max(1, int(round(width * scale))), max(1, int(round(height * scale)))),
+            Image.Resampling.LANCZOS,
+        )
+    save_webp(image, RES / "drawable-nodpi" / "splash.webp", quality=92)
+
+
+def ink_alpha(src: Image.Image, *, lo: float = 18, hi: float = 55) -> Image.Image:
+    """Silhouette alpha: ivory background stays clear, brown and gold strokes stay solid."""
+    rgb = src.convert("RGB")
+    bg = LAUNCHER_BG[:3]
+    pixels = rgb.load()
+    width, height = rgb.size
+    alpha = Image.new("L", (width, height))
+    out = alpha.load()
+    span = hi - lo
+    for y in range(height):
+        for x in range(width):
+            red, green, blue = pixels[x, y]
+            distance = (
+                (red - bg[0]) ** 2 + (green - bg[1]) ** 2 + (blue - bg[2]) ** 2
+            ) ** 0.5
+            if distance <= lo:
+                out[x, y] = 0
+            elif distance >= hi:
+                out[x, y] = 255
+            else:
+                out[x, y] = int(round((distance - lo) * 255 / span))
+    return alpha
+
+
+def foreground_layer(src: Image.Image, canvas: int, scale: float) -> Image.Image:
+    inner = max(1, int(round(canvas * scale)))
+    resized = src.convert("RGB").resize((inner, inner), Image.Resampling.LANCZOS)
+    out = Image.new("RGB", (canvas, canvas), LAUNCHER_BG[:3])
+    offset = (canvas - inner) // 2
+    out.paste(resized, (offset, offset))
+    return out
+
+
+def monochrome_layer(alpha: Image.Image, canvas: int, scale: float) -> Image.Image:
+    inner = max(1, int(round(canvas * scale)))
+    scaled = alpha.resize((inner, inner), Image.Resampling.LANCZOS)
+    glyph = Image.new("RGBA", (inner, inner), (255, 255, 255, 0))
+    glyph.putalpha(scaled)
+    out = Image.new("RGBA", (canvas, canvas), (0, 0, 0, 0))
+    offset = (canvas - inner) // 2
+    out.alpha_composite(glyph, (offset, offset))
+    return out
+
+
+def legacy_square(src: Image.Image, size: int) -> Image.Image:
+    return src.convert("RGB").resize((size, size), Image.Resampling.LANCZOS)
+
+
+def legacy_round(src: Image.Image, size: int) -> Image.Image:
+    image = src.convert("RGBA").resize((size, size), Image.Resampling.LANCZOS)
+    image.putalpha(circular_mask(size))
+    return image
+
+
+def write_launcher_icons(icon: Image.Image) -> None:
+    """Replace launcher mipmaps and adaptive layers. Does not touch splash or notification art."""
+    image = icon.convert("RGB")
+    alpha = ink_alpha(image)
+    write_density(
+        "mipmap",
+        "ic_launcher",
+        lambda s: legacy_square(image, max(1, int(round(48 * s)))),
+        lossless=True,
+    )
+    write_density(
+        "mipmap",
+        "ic_launcher_round",
+        lambda s: legacy_round(image, max(1, int(round(48 * s)))),
+        lossless=True,
+    )
+    write_density(
+        "drawable",
+        "ic_launcher_foreground",
+        lambda s: foreground_layer(image, max(1, int(round(108 * s))), ADAPTIVE_ART_SCALE),
+        lossless=True,
+    )
+    write_density(
+        "drawable",
+        "ic_launcher_monochrome",
+        lambda s: monochrome_layer(alpha, max(1, int(round(108 * s))), ADAPTIVE_ART_SCALE),
+        lossless=True,
+    )
 
 
 def write_density(folder_prefix: str, stem: str, factory, *, lossless: bool = False) -> None:
@@ -113,38 +204,17 @@ def delete_legacy_assets() -> None:
 
 
 def main() -> None:
-    icon = Image.open(PUBLIC / "icon.png")
+    icon_path = PUBLIC / "icon.jpg"
+    if not icon_path.is_file():
+        icon_path = PUBLIC / "icon.png"
+    icon = Image.open(icon_path)
     splash = Image.open(PUBLIC / "splash.png")
     favicon_path = PUBLIC / "favicon.png"
     favicon = Image.open(favicon_path) if favicon_path.is_file() else icon
 
     delete_legacy_assets()
 
-    write_density(
-        "mipmap",
-        "ic_launcher",
-        lambda s: icon.convert("RGBA").resize(
-            (max(1, int(round(48 * s))), max(1, int(round(48 * s)))),
-            Image.Resampling.LANCZOS,
-        ),
-    )
-    write_density(
-        "mipmap",
-        "ic_launcher_round",
-        lambda s: round_icon(icon, max(1, int(round(48 * s)))),
-    )
-    write_density(
-        "drawable",
-        "ic_launcher_foreground",
-        lambda s: fit_center(icon, max(1, int(round(108 * s))), scale=ADAPTIVE_SAFE_SCALE),
-        lossless=True,
-    )
-    write_density(
-        "drawable",
-        "ic_launcher_monochrome",
-        lambda s: notification_white(icon, max(1, int(round(108 * s)))),
-        lossless=True,
-    )
+    write_launcher_icons(icon)
     write_density(
         "drawable",
         "ic_stat_playback",
@@ -157,16 +227,8 @@ def main() -> None:
         lambda s: notification_black(favicon, max(1, int(round(108 * s)))),
         lossless=True,
     )
-    write_density(
-        "drawable",
-        "splash",
-        lambda s: splash.convert("RGB").resize(
-            (max(1, int(round(360 * s))), max(1, int(round(360 * s)))),
-            Image.Resampling.LANCZOS,
-        ),
-        lossless=True,
-    )
-    print("Generated WebP launcher icons from public/icon.png and splash resources from public/splash.png")
+    write_splash(splash)
+    print(f"Generated WebP launcher icons from {icon_path.name} and splash resources from public/splash.png")
 
 
 if __name__ == "__main__":

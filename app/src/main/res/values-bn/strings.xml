@@ -326,4 +326,9 @@
     <string name="index_search_all">আয়াত, নম্বর বা সূরার নাম খুঁজুন…</string>
     <string name="memorization_plan_custom_name">হিফজের পরিকল্পনা</string>
     <string name="memorization_plan_sequential_name">ধারাবাহিক হিফজ</string>
+    <string name="mushaf_hizb_full">হিজব</string>
+    <string name="mushaf_hizb_quarter">সিকি</string>
+    <string name="mushaf_hizb_half">অর্ধেক</string>
+    <string name="mushaf_hizb_three">তিন</string>
+    <string name="mushaf_hizb_quarters">সিকি</string>
 </resources>

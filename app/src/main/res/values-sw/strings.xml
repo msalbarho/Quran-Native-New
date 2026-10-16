@@ -326,4 +326,9 @@
     <string name="index_search_all">Tafuta aya, namba au jina la surah…</string>
     <string name="memorization_plan_custom_name">Mpango wa kuhifadhi</string>
     <string name="memorization_plan_sequential_name">Kuhifadhi kwa mpangilio</string>
+    <string name="mushaf_hizb_full">Hizb</string>
+    <string name="mushaf_hizb_quarter">Robo</string>
+    <string name="mushaf_hizb_half">Nusu</string>
+    <string name="mushaf_hizb_three">Tatu</string>
+    <string name="mushaf_hizb_quarters">robo</string>
 </resources>

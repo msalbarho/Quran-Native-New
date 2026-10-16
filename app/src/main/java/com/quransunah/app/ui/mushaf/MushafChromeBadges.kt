@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -34,9 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -320,7 +317,7 @@ private fun MushafSideBadgeBox(
 ) {
     val paper = LocalPaperColors.current
     val night = LocalNightMode.current
-    val shape = RoundedCornerShape(12.dp)
+    val shape = VerticalIslamicPlaque
     Box(
         modifier = Modifier
             .width(width)
@@ -342,15 +339,10 @@ private fun MushafSideBadgeBox(
         )
         Canvas(Modifier.matchParentSize()) {
             val inset = 3.dp.toPx()
-            drawRoundRect(
+            drawPath(
+                path = islamicPlaquePath(size.width, size.height, PlaqueAxis.Vertical, inset),
                 color = paper.decorPattern,
-                topLeft = Offset(inset, inset),
-                size = Size(
-                    (size.width - inset * 2f).coerceAtLeast(0f),
-                    (size.height - inset * 2f).coerceAtLeast(0f),
-                ),
-                cornerRadius = CornerRadius(8.dp.toPx(), 8.dp.toPx()),
-                style = Stroke(width = 0.8.dp.toPx()),
+                style = Stroke(width = 0.8.dp.toPx(), join = StrokeJoin.Round),
             )
         }
         content()

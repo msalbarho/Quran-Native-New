@@ -1,6 +1,9 @@
 package com.quransunah.app.ui.shell
 
 import android.app.Activity
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.Build
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -10,14 +13,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,15 +44,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -59,12 +66,15 @@ import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.quransunah.app.R
@@ -105,32 +115,37 @@ import com.quransunah.app.ui.study.WordSheet
 import com.quransunah.app.ui.theme.HolyQuranTheme
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
+import kotlin.math.roundToInt
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
-private const val BRAND_SPLASH_MIN_MS = 1_250L
+private const val SplashMinVisibleMs = 250L
 
 @Composable
 fun HolyQuranApp(viewModel: HolyQuranViewModel) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val hydration by viewModel.hydration.collectAsStateWithLifecycle()
-    var brandMinElapsed by remember { mutableStateOf(false) }
+    var splashMinElapsed by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        delay(BRAND_SPLASH_MIN_MS)
-        brandMinElapsed = true
+        delay(SplashMinVisibleMs)
+        splashMinElapsed = true
     }
     HolyQuranTheme(paletteId = settings.palette, nightMode = settings.nightMode) {
         when (val state = hydration) {
-            is HydrationState.Failed -> HydrationError(state.message) { viewModel.retryHydration() }
-            HydrationState.Pending, HydrationState.Ready -> {
-                val showBrandSplash = state is HydrationState.Pending || !brandMinElapsed
-                if (showBrandSplash) {
-                    BrandSplash(isPreparing = state is HydrationState.Pending)
-                } else {
-                    ReadyShell(viewModel)
-                }
+            is HydrationState.Failed -> {
+                SideEffect { SplashFrameCache.release() }
+                HydrationError(state.message) { viewModel.retryHydration() }
+            }
+            HydrationState.Pending -> BrandSplash(isPreparing = true)
+            HydrationState.Ready -> if (splashMinElapsed) {
+                SideEffect { SplashFrameCache.release() }
+                ReadyShell(viewModel)
+            } else {
+                BrandSplash(isPreparing = true)
             }
         }
     }
@@ -138,34 +153,70 @@ fun HolyQuranApp(viewModel: HolyQuranViewModel) {
 
 @Composable
 private fun BrandSplash(isPreparing: Boolean) {
+    val splashBackground = colorResource(R.color.splash_background)
+    val context = LocalContext.current
+    val accent = LocalPaperColors.current.accent
+    LaunchedEffect(accent) {
+        withContext(Dispatchers.IO) {
+            runCatching { prepareFloralArtwork(context, accent) }
+        }
+    }
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        DisposableEffect(view) {
+            val window = (view.context as? Activity)?.window
+            val restoreNavContrast = window != null &&
+                Build.VERSION.SDK_INT >= 29 &&
+                window.isNavigationBarContrastEnforced
+            val restoreStatusContrast = window != null &&
+                Build.VERSION.SDK_INT >= 29 &&
+                window.isStatusBarContrastEnforced
+            onDispose {
+                if (window != null && Build.VERSION.SDK_INT >= 29) {
+                    window.isNavigationBarContrastEnforced = restoreNavContrast
+                    window.isStatusBarContrastEnforced = restoreStatusContrast
+                }
+            }
+        }
+        SideEffect {
+            val window = (view.context as? Activity)?.window ?: return@SideEffect
+            window.statusBarColor = Color.Transparent.toArgb()
+            window.navigationBarColor = Color.Transparent.toArgb()
+            if (Build.VERSION.SDK_INT >= 29) {
+                window.isNavigationBarContrastEnforced = false
+                window.isStatusBarContrastEnforced = false
+            }
+            val controller = WindowCompat.getInsetsController(window, view)
+            // Foliage and carpet sit behind the bars; white glyphs stay readable there.
+            controller.isAppearanceLightStatusBars = false
+            controller.isAppearanceLightNavigationBars = false
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(androidx.compose.ui.graphics.Color.Black)
+            .background(splashBackground)
             .clipToBounds(),
-        contentAlignment = Alignment.Center,
     ) {
-        Image(
-            painter = painterResource(R.drawable.splash),
-            contentDescription = null,
-            modifier = Modifier.fillMaxHeight(),
-            contentScale = ContentScale.FillHeight,
-        )
+        SplashArtwork(Modifier.fillMaxSize())
         if (isPreparing) {
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(horizontal = 24.dp, vertical = 32.dp),
+                    .navigationBarsPadding()
+                    .padding(horizontal = 24.dp, vertical = 24.dp)
+                    .background(splashBackground, RoundedCornerShape(16.dp))
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 CircularProgressIndicator(
-                    color = androidx.compose.ui.graphics.Color(0xFFD4A017),
+                    color = Color(0xFFD4A017),
                     strokeWidth = 2.dp,
                     modifier = Modifier.size(28.dp),
                 )
                 Text(
                     text = stringResource(R.string.hydration_preparing_title),
-                    color = androidx.compose.ui.graphics.Color.White,
+                    color = Color(0xFF3D342E),
                     fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
@@ -173,7 +224,7 @@ private fun BrandSplash(isPreparing: Boolean) {
                 )
                 Text(
                     text = stringResource(R.string.hydration_preparing_hint),
-                    color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.82f),
+                    color = Color(0xFF6B5C52),
                     fontSize = 12.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(top = 4.dp),
@@ -181,6 +232,260 @@ private fun BrandSplash(isPreparing: Boolean) {
             }
         }
     }
+}
+
+internal object SplashFrameCache {
+    private val lock = Any()
+    private var frame: SplashFrame? = null
+
+    fun warmup(context: android.content.Context) {
+        obtain(context.applicationContext)
+    }
+
+    fun obtain(context: android.content.Context): SplashFrame? {
+        synchronized(lock) {
+            frame?.let { return it }
+            val built = decode(context.applicationContext) ?: return null
+            frame = built
+            return built
+        }
+    }
+
+    fun release() {
+        synchronized(lock) {
+            frame = null
+        }
+    }
+
+    private fun decode(context: android.content.Context): SplashFrame? {
+        val decoded = BitmapFactory.decodeResource(context.resources, R.drawable.splash) ?: return null
+        val source = if (decoded.config == Bitmap.Config.ARGB_8888 && !decoded.isMutable) {
+            decoded
+        } else {
+            decoded.copy(Bitmap.Config.ARGB_8888, false).also { decoded.recycle() }
+        }
+        return SplashFrame(
+            artwork = source.asImageBitmap(),
+            top = splashEdgeWash(source, SplashEdge.Top),
+            bottom = splashEdgeWash(source, SplashEdge.Bottom),
+            left = splashEdgeWash(source, SplashEdge.Left),
+            right = splashEdgeWash(source, SplashEdge.Right),
+        )
+    }
+}
+
+internal data class SplashFrame(
+    val artwork: ImageBitmap,
+    val top: ImageBitmap,
+    val bottom: ImageBitmap,
+    val left: ImageBitmap,
+    val right: ImageBitmap,
+)
+
+@Composable
+private fun SplashArtwork(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val frame = remember { SplashFrameCache.obtain(context) } ?: return
+    val artwork = frame.artwork
+    val topWash = frame.top
+    val bottomWash = frame.bottom
+    val leftWash = frame.left
+    val rightWash = frame.right
+    Canvas(modifier) {
+        val scale = minOf(size.width / artwork.width, size.height / artwork.height)
+        val drawW = (artwork.width * scale).roundToInt().coerceAtLeast(1)
+        val drawH = (artwork.height * scale).roundToInt().coerceAtLeast(1)
+        val left = ((size.width - drawW) / 2f).roundToInt()
+        val top = ((size.height - drawH) / 2f).roundToInt()
+        val overlap = 2
+        if (left > 0) {
+            drawImage(
+                leftWash,
+                dstOffset = IntOffset(0, 0),
+                dstSize = IntSize(left + overlap, size.height.roundToInt().coerceAtLeast(1)),
+                filterQuality = FilterQuality.Low,
+            )
+            drawImage(
+                rightWash,
+                dstOffset = IntOffset((left + drawW - overlap).coerceAtLeast(0), 0),
+                dstSize = IntSize(
+                    (size.width.roundToInt() - (left + drawW) + overlap).coerceAtLeast(1),
+                    size.height.roundToInt().coerceAtLeast(1),
+                ),
+                filterQuality = FilterQuality.Low,
+            )
+        }
+        if (top > 0) {
+            drawImage(
+                topWash,
+                dstOffset = IntOffset(0, 0),
+                dstSize = IntSize(size.width.roundToInt().coerceAtLeast(1), top + overlap),
+                filterQuality = FilterQuality.Low,
+            )
+            drawImage(
+                bottomWash,
+                dstOffset = IntOffset(0, (top + drawH - overlap).coerceAtLeast(0)),
+                dstSize = IntSize(
+                    size.width.roundToInt().coerceAtLeast(1),
+                    (size.height.roundToInt() - (top + drawH) + overlap).coerceAtLeast(1),
+                ),
+                filterQuality = FilterQuality.Low,
+            )
+        }
+        drawImage(
+            artwork,
+            dstOffset = IntOffset(left, top),
+            dstSize = IntSize(drawW, drawH),
+            filterQuality = FilterQuality.High,
+        )
+    }
+}
+
+private enum class SplashEdge { Top, Bottom, Left, Right }
+
+/** Soft continuation of one edge so the square artwork can fill taller or wider screens. */
+private fun splashEdgeWash(source: Bitmap, edge: SplashEdge): ImageBitmap {
+    val sw = source.width
+    val sh = source.height
+    val vertical = edge == SplashEdge.Top || edge == SplashEdge.Bottom
+    val strip = if (vertical) {
+        val stripH = (sh * 0.2f).toInt().coerceIn(1, sh)
+        val y = if (edge == SplashEdge.Top) 0 else sh - stripH
+        Bitmap.createBitmap(source, 0, y, sw, stripH)
+    } else {
+        val stripW = (sw * 0.2f).toInt().coerceIn(1, sw)
+        val x = if (edge == SplashEdge.Left) 0 else sw - stripW
+        Bitmap.createBitmap(source, x, 0, stripW, sh)
+    }
+    val outW = if (vertical) 96 else 36
+    val outH = if (vertical) 36 else 96
+    val wash = Bitmap.createScaledBitmap(strip, outW, outH, true)
+    boxBlur(wash, radius = 6)
+    val join = if (vertical) {
+        val y = if (edge == SplashEdge.Top) 0 else sh - 1
+        Bitmap.createScaledBitmap(Bitmap.createBitmap(source, 0, y, sw, 1), outW, 1, true)
+    } else {
+        val x = if (edge == SplashEdge.Left) 0 else sw - 1
+        Bitmap.createScaledBitmap(Bitmap.createBitmap(source, x, 0, 1, sh), 1, outH, true)
+    }
+    blendWashJoin(wash, join, edge)
+    return wash.asImageBitmap()
+}
+
+private fun blendWashJoin(wash: Bitmap, join: Bitmap, edge: SplashEdge) {
+    val width = wash.width
+    val height = wash.height
+    val pixels = IntArray(width * height)
+    wash.getPixels(pixels, 0, width, 0, 0, width, height)
+    val blend = 12
+    if (edge == SplashEdge.Top || edge == SplashEdge.Bottom) {
+        val row = IntArray(width)
+        join.getPixels(row, 0, width, 0, 0, width, 1)
+        val steps = blend.coerceAtMost(height)
+        for (step in 0 until steps) {
+            val amount = 1f - step / steps.toFloat()
+            val y = if (edge == SplashEdge.Top) height - 1 - step else step
+            for (x in 0 until width) {
+                val index = y * width + x
+                pixels[index] = lerpArgb(pixels[index], row[x], amount)
+            }
+        }
+    } else {
+        val column = IntArray(height)
+        join.getPixels(column, 0, 1, 0, 0, 1, height)
+        val steps = blend.coerceAtMost(width)
+        for (step in 0 until steps) {
+            val amount = 1f - step / steps.toFloat()
+            val x = if (edge == SplashEdge.Left) width - 1 - step else step
+            for (y in 0 until height) {
+                val index = y * width + x
+                pixels[index] = lerpArgb(pixels[index], column[y], amount)
+            }
+        }
+    }
+    wash.setPixels(pixels, 0, width, 0, 0, width, height)
+}
+
+private fun boxBlur(bitmap: Bitmap, radius: Int) {
+    if (radius < 1) return
+    val width = bitmap.width
+    val height = bitmap.height
+    val src = IntArray(width * height)
+    bitmap.getPixels(src, 0, width, 0, 0, width, height)
+    val tmp = IntArray(src.size)
+    blurHorizontal(src, tmp, width, height, radius)
+    blurVertical(tmp, src, width, height, radius)
+    bitmap.setPixels(src, 0, width, 0, 0, width, height)
+}
+
+private fun blurHorizontal(src: IntArray, dst: IntArray, width: Int, height: Int, radius: Int) {
+    val divisor = radius * 2 + 1
+    for (y in 0 until height) {
+        var sumA = 0
+        var sumR = 0
+        var sumG = 0
+        var sumB = 0
+        val row = y * width
+        for (offset in -radius..radius) {
+            val color = src[row + offset.coerceIn(0, width - 1)]
+            sumA += color ushr 24 and 0xFF
+            sumR += color ushr 16 and 0xFF
+            sumG += color ushr 8 and 0xFF
+            sumB += color and 0xFF
+        }
+        for (x in 0 until width) {
+            dst[row + x] = argb(sumA / divisor, sumR / divisor, sumG / divisor, sumB / divisor)
+            val remove = src[row + (x - radius).coerceIn(0, width - 1)]
+            val add = src[row + (x + radius + 1).coerceIn(0, width - 1)]
+            sumA += (add ushr 24 and 0xFF) - (remove ushr 24 and 0xFF)
+            sumR += (add ushr 16 and 0xFF) - (remove ushr 16 and 0xFF)
+            sumG += (add ushr 8 and 0xFF) - (remove ushr 8 and 0xFF)
+            sumB += (add and 0xFF) - (remove and 0xFF)
+        }
+    }
+}
+
+private fun blurVertical(src: IntArray, dst: IntArray, width: Int, height: Int, radius: Int) {
+    val divisor = radius * 2 + 1
+    for (x in 0 until width) {
+        var sumA = 0
+        var sumR = 0
+        var sumG = 0
+        var sumB = 0
+        for (offset in -radius..radius) {
+            val color = src[offset.coerceIn(0, height - 1) * width + x]
+            sumA += color ushr 24 and 0xFF
+            sumR += color ushr 16 and 0xFF
+            sumG += color ushr 8 and 0xFF
+            sumB += color and 0xFF
+        }
+        for (y in 0 until height) {
+            dst[y * width + x] = argb(sumA / divisor, sumR / divisor, sumG / divisor, sumB / divisor)
+            val remove = src[(y - radius).coerceIn(0, height - 1) * width + x]
+            val add = src[(y + radius + 1).coerceIn(0, height - 1) * width + x]
+            sumA += (add ushr 24 and 0xFF) - (remove ushr 24 and 0xFF)
+            sumR += (add ushr 16 and 0xFF) - (remove ushr 16 and 0xFF)
+            sumG += (add ushr 8 and 0xFF) - (remove ushr 8 and 0xFF)
+            sumB += (add and 0xFF) - (remove and 0xFF)
+        }
+    }
+}
+
+private fun argb(alpha: Int, red: Int, green: Int, blue: Int): Int {
+    return (alpha.coerceIn(0, 255) shl 24) or
+        (red.coerceIn(0, 255) shl 16) or
+        (green.coerceIn(0, 255) shl 8) or
+        blue.coerceIn(0, 255)
+}
+
+private fun lerpArgb(from: Int, to: Int, amount: Float): Int {
+    val t = amount.coerceIn(0f, 1f)
+    fun channel(shift: Int): Int {
+        val start = from ushr shift and 0xFF
+        val end = to ushr shift and 0xFF
+        return (start + (end - start) * t).toInt()
+    }
+    return argb(channel(24), channel(16), channel(8), channel(0))
 }
 
 @Composable
@@ -678,11 +983,9 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                 pageNumber = pageNumber,
                 onClick = { pagePickerOpen = true },
                 modifier = Modifier
-                    .align(
-                        if (pageNumber % 2 == 1) Alignment.BottomEnd else Alignment.BottomStart,
-                    )
+                    .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                    .padding(bottom = 8.dp),
             )
         }
 

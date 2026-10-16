@@ -326,4 +326,9 @@
     <string name="index_search_all">Søk etter ayah, nummer eller surahnavn…</string>
     <string name="memorization_plan_custom_name">Memoreringsplan</string>
     <string name="memorization_plan_sequential_name">Sekvensiell memorering</string>
+    <string name="mushaf_hizb_full">Hizb</string>
+    <string name="mushaf_hizb_quarter">Kvarter</string>
+    <string name="mushaf_hizb_half">Halv</string>
+    <string name="mushaf_hizb_three">Tre</string>
+    <string name="mushaf_hizb_quarters">kvarter</string>
 </resources>

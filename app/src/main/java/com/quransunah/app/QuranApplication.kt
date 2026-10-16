@@ -8,6 +8,9 @@ import com.quransunah.app.data.audio.AyatTimingStore
 import com.quransunah.app.fonts.QcfFontManager
 import com.quransunah.app.ui.index.PlaceArtCache
 import com.quransunah.app.ui.mushaf.MedinaPageLayoutStore
+import com.quransunah.app.ui.shell.SplashFrameCache
+import com.quransunah.app.ui.shell.trimFloralOrnament
+import com.quransunah.app.ui.shell.warmupFloralOrnament
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -29,6 +32,8 @@ class QuranApplication : Application() {
         super.onCreate()
         CrashFileLogger.install(this)
         silenceMedia3Logs()
+        appScope.launch { runCatching { SplashFrameCache.warmup(this@QuranApplication) } }
+        appScope.launch { runCatching { warmupFloralOrnament(this@QuranApplication) } }
         if (::fontManager.isInitialized) {
             appScope.launch { runCatching { fontManager.ensureMaps() } }
         }
@@ -43,6 +48,7 @@ class QuranApplication : Application() {
             ayatTimingStore.trim(keep = 1)
             PlaceArtCache.trim()
             MedinaPageLayoutStore.clear()
+            trimFloralOrnament()
         } else if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
             fontManager.trimPageFaces()
             ayatTimingStore.trim(keep = 2)

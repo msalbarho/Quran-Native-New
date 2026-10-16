@@ -326,6 +326,11 @@
     <string name="index_search_all">Cari ayat, nomor, atau nama surah…</string>
     <string name="memorization_plan_custom_name">Rencana hafalan</string>
     <string name="memorization_plan_sequential_name">Hafalan berurutan</string>
+    <string name="mushaf_hizb_full">Hizb</string>
+    <string name="mushaf_hizb_quarter">Perempat</string>
+    <string name="mushaf_hizb_half">Setengah</string>
+    <string name="mushaf_hizb_three">Tiga</string>
+    <string name="mushaf_hizb_quarters">perempat</string>
 </resources>
 
 

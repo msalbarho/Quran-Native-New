@@ -326,4 +326,9 @@
     <string name="index_search_all">ⵔⵣⵓ ⵜⴰⵢⴰⵜ, ⵓⵟⵟⵓⵏ ⵏⵖ ⵉⵙⵎ ⵏ ⵜⵙⵓⵔⵜ…</string>
     <string name="memorization_plan_custom_name">ⵓⵙⵙⵉⵙⵎ ⵏ ⵓⴃⴹⵓ</string>
     <string name="memorization_plan_sequential_name">ⴰⵃⴼⴰⴹ ⵙ ⵓⵎⵢⴰⵡ</string>
+    <string name="mushaf_hizb_full">ⵃⵉⵣⴱ</string>
+    <string name="mushaf_hizb_quarter">ⵕⵓⴱⵄ</string>
+    <string name="mushaf_hizb_half">ⴰⵣⴳⵏ</string>
+    <string name="mushaf_hizb_three">ⴽⵕⴰⴹ</string>
+    <string name="mushaf_hizb_quarters">ⵉⵕⵓⴱⵄⵏ</string>
 </resources>

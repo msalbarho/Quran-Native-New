@@ -326,4 +326,9 @@
     <string name="index_search_all">ਆਯਤ, ਨੰਬਰ ਜਾਂ ਸੂਰਹ ਦਾ ਨਾਮ ਲੱਭੋ…</string>
     <string name="memorization_plan_custom_name">ਹਿਫ਼ਜ਼ ਯੋਜਨਾ</string>
     <string name="memorization_plan_sequential_name">ਤਰਤੀਬਵਾਰ ਹਿਫ਼ਜ਼</string>
+    <string name="mushaf_hizb_full">ਹਿਜ਼ਬ</string>
+    <string name="mushaf_hizb_quarter">ਚੌਥਾਈ</string>
+    <string name="mushaf_hizb_half">ਅੱਧ</string>
+    <string name="mushaf_hizb_three">ਤਿੰਨ</string>
+    <string name="mushaf_hizb_quarters">ਚੌਥਾਈਆਂ</string>
 </resources>

@@ -326,4 +326,9 @@
     <string name="index_search_all">Li ayet, jimare an navê sûreyê bigere…</string>
     <string name="memorization_plan_custom_name">Plana jiberkirinê</string>
     <string name="memorization_plan_sequential_name">Jiberkirina rêzkirî</string>
+    <string name="mushaf_hizb_full">Hizb</string>
+    <string name="mushaf_hizb_quarter">Çarek</string>
+    <string name="mushaf_hizb_half">Nîv</string>
+    <string name="mushaf_hizb_three">Sê</string>
+    <string name="mushaf_hizb_quarters">çarek</string>
 </resources>

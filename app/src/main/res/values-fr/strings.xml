@@ -326,6 +326,11 @@
     <string name="index_search_all">Rechercher un verset, un numéro ou une sourate…</string>
     <string name="memorization_plan_custom_name">Plan de mémorisation</string>
     <string name="memorization_plan_sequential_name">Mémorisation séquentielle</string>
+    <string name="mushaf_hizb_full">Hizb</string>
+    <string name="mushaf_hizb_quarter">Quart</string>
+    <string name="mushaf_hizb_half">Demi</string>
+    <string name="mushaf_hizb_three">Trois</string>
+    <string name="mushaf_hizb_quarters">quarts</string>
 </resources>
 
 

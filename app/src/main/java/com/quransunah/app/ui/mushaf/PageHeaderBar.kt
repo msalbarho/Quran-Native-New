@@ -113,7 +113,7 @@ fun PageHeaderBar(
             .padding(horizontal = ChromeTokens.HorizontalInset)
             .padding(top = ChromeTokens.HeaderTopGap, bottom = ChromeTokens.HeaderBottomGap),
     ) {
-        val shape = RoundedCornerShape(14.dp)
+        val shape = HorizontalIslamicPlaque
         Box(
             modifier = Modifier
                 .fillMaxWidth()
