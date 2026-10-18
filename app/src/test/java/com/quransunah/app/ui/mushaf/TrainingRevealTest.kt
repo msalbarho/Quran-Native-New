@@ -14,6 +14,25 @@ class TrainingRevealTest {
     )
 
     @Test
+    fun hintUsesVersePositionAndNeverTreatsPageContinuationAsFirstWord() {
+        for (surah in 1..114) {
+            assertFalse(trainingWordHidden(false, surah, 1, 10, true, emptySet(), emptySet(), 1, true))
+            assertTrue(trainingWordHidden(false, surah, 1, 11, true, emptySet(), emptySet(), 2, true))
+            assertTrue(trainingWordHidden(false, surah, 1, 10, true, emptySet(), emptySet(), 1, false))
+            assertFalse(trainingWordHidden(true, surah, 1, 12, true, emptySet(), emptySet(), 3, true))
+        }
+    }
+
+    @Test
+    fun nextWordSkipsHintAndAlreadyVisibleSingleWordVerse() {
+        val verse = words.filter { it.ayah == 255 }
+        val next = progressiveTrainingStep(TrainingRevealState(), 2 to 255, verse, true)!!
+        assertEquals(setOf(2), next.revealedWordIds)
+        assertEquals(setOf(2, 3), progressiveTrainingStep(next, 2 to 255, verse, true)!!.revealedWordIds)
+        assertEquals(null, progressiveTrainingStep(next, 2 to 256, words.filter { it.ayah == 256 }, true))
+    }
+
+    @Test
     fun nextWordRevealsOneWordThenTheNextVerse() {
         val ayah = 2 to 255
         val first = progressiveTrainingStep(TrainingRevealState(), ayah, words.filter { it.ayah == 255 })

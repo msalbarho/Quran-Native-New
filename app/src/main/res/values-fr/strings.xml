@@ -331,6 +331,8 @@
     <string name="mushaf_hizb_half">Demi</string>
     <string name="mushaf_hizb_three">Trois</string>
     <string name="mushaf_hizb_quarters">quarts</string>
+    <string name="training_hint">Indice</string>
+    <string name="reading_word_hint">Appuyez longuement sur un mot du Coran pour écouter, ouvrir le tafsir, enregistrer votre position et partager sous forme de texte, d’image ou de vidéo.</string>
 </resources>
 
 

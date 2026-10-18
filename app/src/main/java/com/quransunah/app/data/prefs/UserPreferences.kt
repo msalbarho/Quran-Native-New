@@ -36,6 +36,7 @@ data class UserSettings(
     val onboardingDone: Boolean = false,
     val coachMarkDone: Boolean = false,
     val trainingHintDone: Boolean = false,
+    val readingHintDone: Boolean = false,
     val lastReciterId: Int = AppConstants.DEFAULT_SURAH_RECITER_ID,
     val lastListeningSurah: Int = 1,
     val lastRepeatMode: String = SurahRepeatMode.REMAINING.name,
@@ -68,6 +69,7 @@ class UserPreferences @Inject constructor(
             onboardingDone = prefs[Keys.ONBOARDING] ?: false,
             coachMarkDone = prefs[Keys.COACH] ?: false,
             trainingHintDone = prefs[Keys.TRAINING_HINT] ?: false,
+            readingHintDone = prefs[Keys.READING_HINT] ?: false,
             lastReciterId = prefs[Keys.RECITER] ?: AppConstants.DEFAULT_SURAH_RECITER_ID,
             lastListeningSurah = (prefs[Keys.LISTENING_SURAH] ?: 1).coerceIn(1, AppConstants.SURAH_COUNT),
             lastRepeatMode = prefs[Keys.REPEAT] ?: SurahRepeatMode.REMAINING.name,
@@ -117,6 +119,10 @@ class UserPreferences @Inject constructor(
 
     suspend fun setLastTab(tab: String) {
         dataStore.edit { it[Keys.LAST_TAB] = tab }
+    }
+
+    suspend fun setReadingHintDone(done: Boolean = true) {
+        dataStore.edit { it[Keys.READING_HINT] = done }
     }
 
     suspend fun setTrainingHintDone(done: Boolean = true) {
@@ -261,6 +267,7 @@ class UserPreferences @Inject constructor(
         val TEXT_SIZE = floatPreferencesKey("text_size_sp")
         val ONBOARDING = booleanPreferencesKey("onboarding_done")
         val COACH = booleanPreferencesKey("coach_mark_done")
+        val READING_HINT = booleanPreferencesKey("reading_hint_done")
         val TRAINING_HINT = booleanPreferencesKey("training_hint_done")
         val RECITER = intPreferencesKey("last_reciter_id")
         val LISTENING_SURAH = intPreferencesKey("last_listening_surah")

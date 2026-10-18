@@ -331,4 +331,6 @@
     <string name="mushaf_hizb_half">Половина</string>
     <string name="mushaf_hizb_three">Три</string>
     <string name="mushaf_hizb_quarters">четверти</string>
+    <string name="training_hint">Подсказка</string>
+    <string name="reading_word_hint">Нажмите и удерживайте любое слово Корана, чтобы прослушать его, открыть тафсир, сохранить место чтения и поделиться текстом, изображением или видео.</string>
 </resources>

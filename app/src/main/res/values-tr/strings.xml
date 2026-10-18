@@ -331,6 +331,8 @@
     <string name="mushaf_hizb_half">Yarım</string>
     <string name="mushaf_hizb_three">Üç</string>
     <string name="mushaf_hizb_quarters">çeyrek</string>
+    <string name="training_hint">İpucu</string>
+    <string name="reading_word_hint">Dinlemek, tefsiri açmak, okuduğunuz yeri kaydetmek ve metin, resim veya video olarak paylaşmak için herhangi bir Kur’an kelimesine uzun basın.</string>
 </resources>
 
 

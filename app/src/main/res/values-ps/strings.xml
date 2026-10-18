@@ -331,4 +331,6 @@
     <string name="mushaf_hizb_half">نیم</string>
     <string name="mushaf_hizb_three">درې</string>
     <string name="mushaf_hizb_quarters">ربعې</string>
+    <string name="training_hint">اشاره</string>
+    <string name="reading_word_hint">د قرآن پر هرې کلمې اوږد فشار ورکړئ، څو یې واورئ، تفسیر پرانیزئ، خپل ځای خوندي کړئ او د متن، انځور یا ویډیو په بڼه یې شریک کړئ.</string>
 </resources>

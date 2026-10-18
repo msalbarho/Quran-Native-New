@@ -331,4 +331,6 @@
     <string name="mushaf_hizb_half">आधा</string>
     <string name="mushaf_hizb_three">तीन</string>
     <string name="mushaf_hizb_quarters">चौथाई</string>
+    <string name="training_hint">संकेत</string>
+    <string name="reading_word_hint">क़ुरआन के किसी भी शब्द को देर तक दबाकर सुनें, तफ़सीर खोलें, पढ़ने का स्थान सहेजें और टेक्स्ट, चित्र या वीडियो के रूप में साझा करें।</string>
 </resources>

@@ -331,4 +331,6 @@
     <string name="mushaf_hizb_half">ਅੱਧ</string>
     <string name="mushaf_hizb_three">ਤਿੰਨ</string>
     <string name="mushaf_hizb_quarters">ਚੌਥਾਈਆਂ</string>
+    <string name="training_hint">ਇਸ਼ਾਰਾ</string>
+    <string name="reading_word_hint">ਕੁਰਆਨ ਦੇ ਕਿਸੇ ਵੀ ਸ਼ਬਦ ਨੂੰ ਦੇਰ ਤੱਕ ਦਬਾ ਕੇ ਸੁਣੋ, ਤਫ਼ਸੀਰ ਖੋਲ੍ਹੋ, ਪੜ੍ਹਨ ਦੀ ਥਾਂ ਸੰਭਾਲੋ ਅਤੇ ਲਿਖਤ, ਤਸਵੀਰ ਜਾਂ ਵੀਡੀਓ ਵਜੋਂ ਸਾਂਝਾ ਕਰੋ।</string>
 </resources>

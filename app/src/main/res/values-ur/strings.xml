@@ -331,4 +331,6 @@
     <string name="mushaf_hizb_half">نصف</string>
     <string name="mushaf_hizb_three">تین</string>
     <string name="mushaf_hizb_quarters">ارباع</string>
+    <string name="training_hint">اشارہ</string>
+    <string name="reading_word_hint">قرآن کے کسی بھی لفظ کو دیر تک دبائیں تاکہ سن سکیں، تفسیر کھول سکیں، اپنی جگہ محفوظ کر سکیں اور متن، تصویر یا ویڈیو کے طور پر شیئر کر سکیں۔</string>
 </resources>

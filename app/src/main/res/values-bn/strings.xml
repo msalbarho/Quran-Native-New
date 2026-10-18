@@ -331,4 +331,6 @@
     <string name="mushaf_hizb_half">অর্ধেক</string>
     <string name="mushaf_hizb_three">তিন</string>
     <string name="mushaf_hizb_quarters">সিকি</string>
+    <string name="training_hint">ইঙ্গিত</string>
+    <string name="reading_word_hint">কুরআনের যেকোনো শব্দ চেপে ধরে শুনুন, তাফসির খুলুন, পড়ার অবস্থান সংরক্ষণ করুন এবং লেখা, ছবি বা ভিডিও হিসেবে শেয়ার করুন।</string>
 </resources>

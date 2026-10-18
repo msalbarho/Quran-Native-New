@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.quransunah.app.R
-import com.quransunah.app.ui.mushaf.HorizontalIslamicPlaque
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewTheme
 import com.quransunah.app.ui.theme.LocalNightMode
@@ -157,9 +156,9 @@ fun CurvedBottomNav(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(BottomNavBarHeight)
-                .clip(HorizontalIslamicPlaque)
+                .clip(BottomNavBracketShape)
                 .background(paper.chromeFill)
-                .border(1.dp, paper.accent.copy(alpha = if (night) 0.40f else 0.26f), HorizontalIslamicPlaque),
+                .border(1.dp, paper.accent.copy(alpha = if (night) 0.40f else 0.26f), BottomNavBracketShape),
         ) {
         IslamicEdgePattern(Modifier.matchParentSize())
         Box(Modifier.fillMaxSize()) {

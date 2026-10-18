@@ -331,4 +331,6 @@
     <string name="mushaf_hizb_half">Yarim</string>
     <string name="mushaf_hizb_three">Uch</string>
     <string name="mushaf_hizb_quarters">rub</string>
+    <string name="training_hint">Ishora</string>
+    <string name="reading_word_hint">Tinglash, tafsirni ochish, o‘qish joyingizni saqlash va matn, rasm yoki video sifatida ulashish uchun Qur’ondagi istalgan so‘zni bosib turing.</string>
 </resources>

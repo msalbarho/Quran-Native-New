@@ -331,4 +331,6 @@
     <string name="mushaf_hizb_half">Halv</string>
     <string name="mushaf_hizb_three">Tre</string>
     <string name="mushaf_hizb_quarters">kvarter</string>
+    <string name="training_hint">Hint</string>
+    <string name="reading_word_hint">Trykk og hold på et ord i Koranen for å lytte, åpne tafsir, lagre lesestedet og dele som tekst, bilde eller video.</string>
 </resources>

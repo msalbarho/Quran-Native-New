@@ -3,6 +3,8 @@ package com.quransunah.app.ui.mushaf
 import androidx.compose.runtime.compositionLocalOf
 
 /** Word ids revealed one at a time. Empty outside training. */
+internal val LocalTrainingFirstWordHint = compositionLocalOf { false }
+
 val LocalTrainingRevealedWordIds = compositionLocalOf { emptySet<Int>() }
 
 internal data class TrainingWordRef(
@@ -26,10 +28,12 @@ internal fun trainingWordHidden(
     hideAyahText: Boolean,
     revealedAyahs: Set<Pair<Int, Int>>,
     revealedWordIds: Set<Int>,
+    wordPosition: Int = 1,
+    firstWordHint: Boolean = false,
 ): Boolean {
     if (!hideAyahText || isAyahMarker) return false
     if ((surah to ayah) in revealedAyahs) return false
-    return wordId !in revealedWordIds
+    return wordId !in revealedWordIds && !(firstWordHint && wordPosition == 1)
 }
 
 /**
@@ -41,11 +45,12 @@ internal fun progressiveTrainingStep(
     state: TrainingRevealState,
     ayah: Pair<Int, Int>,
     ayahWords: List<TrainingWordRef>,
+    firstWordHint: Boolean = false,
 ): TrainingRevealState? {
     if (ayah in state.revealedAyahs) return null
     val next = ayahWords
         .sortedBy { it.position }
-        .firstOrNull { it.id !in state.revealedWordIds }
+        .firstOrNull { it.id !in state.revealedWordIds && !(firstWordHint && it.position == 1) }
         ?: return null
     return state.copy(
         selected = ayah,

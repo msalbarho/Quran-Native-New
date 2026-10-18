@@ -331,4 +331,6 @@
     <string name="mushaf_hizb_half">Rabi</string>
     <string name="mushaf_hizb_three">Uku</string>
     <string name="mushaf_hizb_quarters">rubu</string>
+    <string name="training_hint">Alama</string>
+    <string name="reading_word_hint">Danna ka riƙe kowace kalma a Alƙur’ani don sauraro, buɗe tafsiri, adana inda ka tsaya, da rabawa a matsayin rubutu, hoto ko bidiyo.</string>
 </resources>

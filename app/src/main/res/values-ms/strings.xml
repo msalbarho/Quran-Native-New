@@ -331,5 +331,7 @@
     <string name="mushaf_hizb_half">Separuh</string>
     <string name="mushaf_hizb_three">Tiga</string>
     <string name="mushaf_hizb_quarters">suku</string>
+    <string name="training_hint">Petunjuk</string>
+    <string name="reading_word_hint">Tekan lama mana-mana perkataan al-Quran untuk mendengar, membuka tafsir, menyimpan tempat bacaan dan berkongsi sebagai teks, imej atau video.</string>
 </resources>
 

@@ -14,6 +14,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -524,6 +526,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
     val pendingPagerPage by viewModel.pendingPagerPage.collectAsStateWithLifecycle()
     val picker by viewModel.picker.collectAsStateWithLifecycle()
     val indexTab by viewModel.indexTab.collectAsStateWithLifecycle()
+    var firstWordHint by remember { mutableStateOf(false) }
     var trainingTextHidden by remember { mutableStateOf(true) }
     var revealedTrainingAyahs by remember { mutableStateOf(emptySet<Pair<Int, Int>>()) }
     var revealedTrainingWordIds by remember { mutableStateOf(emptySet<Int>()) }
@@ -586,6 +589,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
         }
         trainingWasOpen = tab == AppTab.Training
         trainingTextHidden = true
+        firstWordHint = false
         revealedTrainingAyahs = emptySet()
         revealedTrainingWordIds = emptySet()
         if (tab != AppTab.Training) {
@@ -721,6 +725,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                 CompositionLocalProvider(
                     LocalLayoutDirection provides meaningsPagerDirection,
                     com.quransunah.app.ui.mushaf.LocalTrainingRevealedWordIds provides revealedTrainingWordIds,
+                    com.quransunah.app.ui.mushaf.LocalTrainingFirstWordHint provides (tab == AppTab.Training && firstWordHint),
                 ) {
                 HorizontalPager(
                         state = pagerState,
@@ -937,7 +942,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                         var ayah: Pair<Int, Int>? = start
                         var state = snapshot
                         var guard = 0
-                        while (ayah != null && guard < 3) {
+                        while (ayah != null && guard < 6236) {
                             guard += 1
                             val words = viewModel.trainingBodyWords(ayah.first, ayah.second).map { word ->
                                 com.quransunah.app.ui.mushaf.TrainingWordRef(
@@ -947,7 +952,7 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                                     word.wordIndex,
                                 )
                             }
-                            val step = com.quransunah.app.ui.mushaf.progressiveTrainingStep(state, ayah, words)
+                            val step = com.quransunah.app.ui.mushaf.progressiveTrainingStep(state, ayah, words, firstWordHint)
                             if (step != null) {
                                 val revealedId = (step.revealedWordIds - state.revealedWordIds).first()
                                 selectedTrainingAyah = step.selected
@@ -964,17 +969,26 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                     }
                 },
                 onShowAll = {
+                    firstWordHint = false
                     revealedTrainingAyahs = revealedTrainingAyahs + currentPageAyahs
                 },
                 onHideAll = {
+                    firstWordHint = false
                     trainingTextHidden = true
                     val pageWordIds = trainingWords.map { it.id }.toSet()
                     revealedTrainingAyahs = revealedTrainingAyahs - currentPageAyahs
                     revealedTrainingWordIds = revealedTrainingWordIds - pageWordIds
                 },
                 showAllEnabled = !allTrainingAyahsRevealed,
-                hideAllEnabled = currentPageAyahs.any { it in revealedTrainingAyahs } ||
+                hideAllEnabled = firstWordHint || !trainingTextHidden || currentPageAyahs.any { it in revealedTrainingAyahs } ||
                     trainingWords.any { it.id in revealedTrainingWordIds },
+                hintActive = firstWordHint,
+                onToggleHint = {
+                    firstWordHint = !firstWordHint
+                    trainingTextHidden = true
+                    revealedTrainingAyahs = emptySet()
+                    revealedTrainingWordIds = emptySet()
+                },
                 onMore = { trainingMoreOpen = true },
                 modifier = Modifier.align(Alignment.TopCenter),
             )
@@ -1078,6 +1092,14 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
             )
         }
 
+        if (tab == AppTab.Reading && navVisible && !settings.readingHintDone) {
+            ReadingWordHint(
+                onDismiss = viewModel::markReadingHintDone,
+                modifier = Modifier.align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(start = 8.dp, end = 8.dp, bottom = BottomNavBarHeight + 8.dp),
+            )
+        }
         if (tab == AppTab.Training && !settings.trainingHintDone) {
             TrainingHintOverlay(onDismiss = viewModel::markTrainingHintDone)
         }
@@ -1185,6 +1207,38 @@ private fun ReadyShell(viewModel: HolyQuranViewModel) {
                     autoGuideDismissed = true
                 },
             )
+        }
+    }
+}
+
+@Composable
+private fun ReadingWordHint(onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+    val paper = LocalPaperColors.current
+    val direction = LocalLayoutDirection.current
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Row(
+            modifier = modifier.fillMaxWidth()
+                .background(androidx.compose.ui.graphics.lerp(paper.surface, paper.chromeFill, 0.15f), RoundedCornerShape(12.dp))
+                .border(1.dp, paper.accent, RoundedCornerShape(12.dp))
+                .padding(horizontal = 6.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            androidx.compose.material3.IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
+                Box(Modifier.size(26.dp).background(paper.chromeFill, CircleShape), contentAlignment = Alignment.Center) {
+                    Icon(painterResource(R.drawable.ic_close), stringResource(R.string.close),
+                        tint = paper.textStrong, modifier = Modifier.size(17.dp))
+                }
+            }
+            CompositionLocalProvider(LocalLayoutDirection provides direction) {
+                Text(
+                    text = stringResource(R.string.reading_word_hint),
+                    color = paper.textStrong, fontSize = 13.sp, lineHeight = 18.sp,
+                    textAlign = TextAlign.Start,
+                    style = TextStyle(textDirection = androidx.compose.ui.text.style.TextDirection.Content),
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 }

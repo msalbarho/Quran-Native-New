@@ -331,4 +331,6 @@
     <string name="mushaf_hizb_half">ⴰⵣⴳⵏ</string>
     <string name="mushaf_hizb_three">ⴽⵕⴰⴹ</string>
     <string name="mushaf_hizb_quarters">ⵉⵕⵓⴱⵄⵏ</string>
+    <string name="training_hint">ⴰⵙⵎⵎⵍ</string>
+    <string name="reading_word_hint">ⴰⴷⵔ ⵖⴼ ⴽⵔⴰ ⵏ ⵜⴰⴳⵓⵔⵉ ⵏ ⵍⵇⵓⵔⴰⵏ ⵙ ⵜⵉⵣⵉ ⵖⵣⵣⵉⴼⵏ ⵃⵎⴰ ⴰⴷ ⵜⵙⵙⴼⵍⴷⴷ, ⴰⴷ ⵜⵔⵥⵎⴷ ⴰⴼⵙⵙⴰⵔ, ⴰⴷ ⵜⵃⴹⵓⴷ ⴰⴷⵖⴰⵔ ⵏⵏⴽ, ⴰⴷ ⵜⴱⴹⵓⴷ ⵙ ⵓⴹⵕⵉⵚ, ⵜⴰⵡⵍⴰⴼⵜ ⵏⵖ ⴰⴱⵉⴷⵢⵓ.</string>
 </resources>

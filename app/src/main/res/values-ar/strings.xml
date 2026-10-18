@@ -331,4 +331,6 @@
     <string name="mushaf_hizb_half">نصف</string>
     <string name="mushaf_hizb_three">ثلاثة</string>
     <string name="mushaf_hizb_quarters">أرباع</string>
+    <string name="training_hint">تلميح</string>
+    <string name="reading_word_hint">اضغط مطولًا على أي كلمة قرآنية لتستمع، وتفتح التفسير، وتحفظ موضعك، وتشارك كنص أو كصورة أو كفيديو.</string>
 </resources>

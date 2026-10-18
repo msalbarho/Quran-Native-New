@@ -331,6 +331,8 @@
     <string name="mushaf_hizb_half">نصف</string>
     <string name="mushaf_hizb_three">سه</string>
     <string name="mushaf_hizb_quarters">ارباع</string>
+    <string name="training_hint">راهنما</string>
+    <string name="reading_word_hint">روی هر واژهٔ قرآنی نگه دارید تا گوش دهید، تفسیر را باز کنید، جای خود را ذخیره کنید و به‌صورت متن، تصویر یا ویدیو به اشتراک بگذارید.</string>
 </resources>
 
 

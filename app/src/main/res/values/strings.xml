@@ -338,4 +338,6 @@
     <string name="mushaf_hizb_half">Half</string>
     <string name="mushaf_hizb_three">Three</string>
     <string name="mushaf_hizb_quarters">quarters</string>
+    <string name="training_hint">Hint</string>
+    <string name="reading_word_hint">Long-press any Quranic word to listen, open tafsir, save your place, and share as text, an image, or a video.</string>
 </resources>

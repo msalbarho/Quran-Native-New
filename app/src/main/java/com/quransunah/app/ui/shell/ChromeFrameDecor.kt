@@ -11,10 +11,13 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.unit.dp
+import com.quransunah.app.ui.mushaf.PlaqueAxis
+import com.quransunah.app.ui.mushaf.islamicPlaquePath
 import com.quransunah.app.ui.theme.LocalPaperColors
 import kotlin.math.PI
 import kotlin.math.cos
@@ -34,6 +37,7 @@ enum class ChromeFrameOrientation {
 fun ChromeFrameDecor(
     modifier: Modifier = Modifier,
     orientation: ChromeFrameOrientation = ChromeFrameOrientation.Horizontal,
+    plaqueEnds: Boolean = false,
 ) {
     val paper = LocalPaperColors.current
     val fill = paper.chromeFill
@@ -50,16 +54,20 @@ fun ChromeFrameDecor(
         if (width <= 1f || height <= 1f) return@Canvas
         val minSide = min(width, height)
         val radius = ChromeTokens.Corner.toPx().coerceAtMost(minSide * 0.18f)
-        val framePath = Path().apply {
-            addRoundRect(
-                RoundRect(
-                    left = 0f,
-                    top = 0f,
-                    right = width,
-                    bottom = height,
-                    cornerRadius = CornerRadius(radius, radius),
-                ),
-            )
+        val framePath = if (plaqueEnds) {
+            islamicPlaquePath(width, height, PlaqueAxis.Horizontal)
+        } else {
+            Path().apply {
+                addRoundRect(
+                    RoundRect(
+                        left = 0f,
+                        top = 0f,
+                        right = width,
+                        bottom = height,
+                        cornerRadius = CornerRadius(radius, radius),
+                    ),
+                )
+            }
         }
         clipPath(framePath) {
         val outerStroke = (minSide * 0.0375f).coerceIn(0.55.dp.toPx(), 1.1.dp.toPx())
@@ -74,7 +82,11 @@ fun ChromeFrameDecor(
         val girihTile = (minSide * 0.72f).coerceIn(18f, 28f)
         val vertical = orientation == ChromeFrameOrientation.Vertical
 
-        drawRoundRect(color = fill, cornerRadius = CornerRadius(radius, radius))
+        if (plaqueEnds) {
+            drawPath(framePath, fill)
+        } else {
+            drawRoundRect(color = fill, cornerRadius = CornerRadius(radius, radius))
+        }
 
         var gy = 0f
         while (gy < height + girihTile) {
@@ -146,22 +158,35 @@ fun ChromeFrameDecor(
         drawRect(brush = fadeFar, topLeft = fadeB, size = fadeSize)
         drawRect(color = fill, topLeft = clearOffset, size = clearSize)
 
-        val outerRx = (radius - outerInset * 0.35f).coerceAtLeast(0f)
-        val innerRx = (radius - innerInset * 0.45f).coerceAtLeast(0f)
-        drawRoundRect(
-            color = frame,
-            topLeft = Offset(outerInset, outerInset),
-            size = Size((width - outerInset * 2f).coerceAtLeast(0f), (height - outerInset * 2f).coerceAtLeast(0f)),
-            cornerRadius = CornerRadius(outerRx, outerRx),
-            style = Stroke(width = outerStroke),
-        )
-        drawRoundRect(
-            color = frameInner,
-            topLeft = Offset(innerInset, innerInset),
-            size = Size((width - innerInset * 2f).coerceAtLeast(0f), (height - innerInset * 2f).coerceAtLeast(0f)),
-            cornerRadius = CornerRadius(innerRx, innerRx),
-            style = Stroke(width = innerStroke),
-        )
+        if (plaqueEnds) {
+            drawPath(
+                islamicPlaquePath(width, height, PlaqueAxis.Horizontal, outerInset),
+                color = frame,
+                style = Stroke(width = outerStroke, join = StrokeJoin.Round),
+            )
+            drawPath(
+                islamicPlaquePath(width, height, PlaqueAxis.Horizontal, innerInset),
+                color = frameInner,
+                style = Stroke(width = innerStroke, join = StrokeJoin.Round),
+            )
+        } else {
+            val outerRx = (radius - outerInset * 0.35f).coerceAtLeast(0f)
+            val innerRx = (radius - innerInset * 0.45f).coerceAtLeast(0f)
+            drawRoundRect(
+                color = frame,
+                topLeft = Offset(outerInset, outerInset),
+                size = Size((width - outerInset * 2f).coerceAtLeast(0f), (height - outerInset * 2f).coerceAtLeast(0f)),
+                cornerRadius = CornerRadius(outerRx, outerRx),
+                style = Stroke(width = outerStroke),
+            )
+            drawRoundRect(
+                color = frameInner,
+                topLeft = Offset(innerInset, innerInset),
+                size = Size((width - innerInset * 2f).coerceAtLeast(0f), (height - innerInset * 2f).coerceAtLeast(0f)),
+                cornerRadius = CornerRadius(innerRx, innerRx),
+                style = Stroke(width = innerStroke),
+            )
+        }
         }
     }
 }

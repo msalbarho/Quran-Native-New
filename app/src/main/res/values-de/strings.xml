@@ -331,6 +331,8 @@
     <string name="mushaf_hizb_half">Halb</string>
     <string name="mushaf_hizb_three">Drei</string>
     <string name="mushaf_hizb_quarters">Viertel</string>
+    <string name="training_hint">Hinweis</string>
+    <string name="reading_word_hint">Halte ein beliebiges Wort im Koran gedrückt, um es anzuhören, den Tafsir zu öffnen, deine Lesestelle zu speichern und es als Text, Bild oder Video zu teilen.</string>
 </resources>
 
 

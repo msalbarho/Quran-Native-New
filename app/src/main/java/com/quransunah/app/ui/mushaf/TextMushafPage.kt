@@ -600,6 +600,8 @@ private fun TextMushafWord(
             hideAyahText = hideAyahText,
             revealedAyahs = revealedAyahs,
             revealedWordIds = LocalTrainingRevealedWordIds.current,
+            wordPosition = word.position,
+            firstWordHint = LocalTrainingFirstWordHint.current,
         ) -> Color.Transparent
         ayahHighlighted -> ChromeTokens.PlaybackAyahBlue
         word.isAyahMarker -> glyphColor

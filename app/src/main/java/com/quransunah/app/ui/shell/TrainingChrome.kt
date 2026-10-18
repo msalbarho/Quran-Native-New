@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,6 +52,8 @@ internal fun TrainingTopBar(
     onHideAll: () -> Unit,
     showAllEnabled: Boolean,
     hideAllEnabled: Boolean,
+    hintActive: Boolean,
+    onToggleHint: () -> Unit,
     onMore: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -94,6 +97,15 @@ internal fun TrainingTopBar(
             onClick = onHideAll,
             iconSize = 14.dp,
             modifier = Modifier.weight(1f),
+        )
+        TrainingAction(
+            iconRes = R.drawable.ic_guide_touch,
+            label = stringResource(R.string.training_hint),
+            enabled = true,
+            onClick = onToggleHint,
+            selected = hintActive,
+            iconSize = 14.dp,
+            modifier = Modifier.weight(0.7f),
         )
         TrainingAction(
             iconRes = R.drawable.ic_more_horiz,
@@ -257,13 +269,15 @@ private fun TrainingAction(
     modifier: Modifier = Modifier,
     contentDescription: String = label,
     iconSize: Dp = 18.dp,
+    selected: Boolean = false,
 ) {
     val paper = LocalPaperColors.current
     val color = if (enabled) paper.textStrong else paper.textMuted.copy(alpha = 0.4f)
     Column(
         modifier = modifier
+            .background(if (selected) paper.accentSoft else androidx.compose.ui.graphics.Color.Transparent, RoundedCornerShape(8.dp))
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .semantics { this.contentDescription = contentDescription }
+            .semantics { this.contentDescription = contentDescription; this.selected = selected }
             .padding(horizontal = 2.dp, vertical = 2.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterVertically),

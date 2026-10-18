@@ -48,7 +48,7 @@ import com.quransunah.app.ui.shell.ChromeFrameDecor
 import com.quransunah.app.ui.theme.LocalPaperColors
 
 private val PageNumberHeight = 24.dp
-private val PageNumberWidth = PageNumberHeight * 364f / 151f
+private val PageNumberWidth = PageNumberHeight * 364f / 151f + 10.dp
 private val ErrorRed = Color(0xFFB42318)
 
 @Composable
@@ -75,7 +75,7 @@ fun PageNumberBadge(
             .semantics { contentDescription = label },
         contentAlignment = Alignment.Center,
     ) {
-        ChromeFrameDecor(modifier = Modifier.matchParentSize())
+        ChromeFrameDecor(modifier = Modifier.matchParentSize(), plaqueEnds = true)
         Text(
             text = UiNumbers.format(pageNumber, locale),
             color = paper.darkAccent,

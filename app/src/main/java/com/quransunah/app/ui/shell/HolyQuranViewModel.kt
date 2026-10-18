@@ -345,6 +345,10 @@ class HolyQuranViewModel @Inject constructor(
         _picker.value = ShellPicker.TrainingHistory
     }
 
+    fun markReadingHintDone() {
+        viewModelScope.launch { preferences.setReadingHintDone() }
+    }
+
     fun markTrainingHintDone() {
         viewModelScope.launch { preferences.setTrainingHintDone() }
     }

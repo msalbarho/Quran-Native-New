@@ -331,4 +331,6 @@
     <string name="mushaf_hizb_half">Nusu</string>
     <string name="mushaf_hizb_three">Tatu</string>
     <string name="mushaf_hizb_quarters">robo</string>
+    <string name="training_hint">Kidokezo</string>
+    <string name="reading_word_hint">Bonyeza na ushikilie neno lolote la Qurani ili kusikiliza, kufungua tafsiri, kuhifadhi mahali ulipo na kushiriki kama maandishi, picha au video.</string>
 </resources>

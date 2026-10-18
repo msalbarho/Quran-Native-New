@@ -331,4 +331,6 @@
     <string name="mushaf_hizb_half">Nîv</string>
     <string name="mushaf_hizb_three">Sê</string>
     <string name="mushaf_hizb_quarters">çarek</string>
+    <string name="training_hint">Nîşan</string>
+    <string name="reading_word_hint">Li ser her peyveke Qur’anê dirêj bitikîne da ku guhdarî bikî, tefsîrê vekî, cihê xwe tomar bikî û wek nivîs, wêne an vîdyo parve bikî.</string>
 </resources>

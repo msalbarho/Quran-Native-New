@@ -314,6 +314,7 @@ private fun MedinaCanvasPageBody(
     }
     val slotCount = AppConstants.LINES_PER_PAGE
     val slotHeightPx = if (canvasSize.height > 0) canvasSize.height / slotCount.toFloat() else 0f
+    val firstWordHint = LocalTrainingFirstWordHint.current
     val revealedWordIds = LocalTrainingRevealedWordIds.current
 
     Box(modifier = modifier) {
@@ -401,6 +402,8 @@ private fun MedinaCanvasPageBody(
                                     hideAyahText = hideAyahText,
                                     revealedAyahs = revealedAyahs,
                                     revealedWordIds = revealedWordIds,
+                                    wordPosition = word.word.position,
+                                    firstWordHint = firstWordHint,
                                 )
                             ) {
                                 Color.Transparent.toArgb()
@@ -530,6 +533,10 @@ private fun Paint.applyGlyphColor(
     playbackBlue: Int,
 ) {
     when {
+        glyph == Color.Transparent.toArgb() -> {
+            color = glyph
+            colorFilter = null
+        }
         highlighted -> {
             color = playbackBlue
             colorFilter = null
