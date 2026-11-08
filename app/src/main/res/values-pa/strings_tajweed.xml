@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">ਤਜਵੀਦ ਰੰਗ ਮਾਰਗਦਰਸ਼ਕ</string>
+    <string name="tajweed_colors">ਤਜਵੀਦ ਦੇ ਰੰਗ</string>
+    <string name="tajweed_rule_1">ਮੱਦ ਲਾਜ਼ਿਮ: ੬ ਹਰਕਤਾਂ</string>
+    <string name="tajweed_rule_2">ਮੱਦ ਵਾਜਿਬ ਮੁੱਤਸਿਲ: ੪–੫ ਹਰਕਤਾਂ</string>
+    <string name="tajweed_rule_3">ਮੱਦ ਜਾਇਜ਼ ਮੁਨਫ਼ਸਿਲ: ੨, ੪ ਜਾਂ ੫ ਹਰਕਤਾਂ</string>
+    <string name="tajweed_rule_4">ਕੁਦਰਤੀ ਮੱਦ / ਇਵਜ਼: ੨ ਹਰਕਤਾਂ</string>
+    <string name="tajweed_rule_5">ਇਖ਼ਫ਼ਾ, ਗੁੰਨੇ ਨਾਲ ਇਦਗ਼ਾਮ ਅਤੇ ਗੁੰਨਾ</string>
+    <string name="tajweed_rule_6">ਤਫ਼ਖ਼ੀਮ: ਭਾਰੀ ਅੱਖਰ ਅਤੇ ਰਾ</string>
+    <string name="tajweed_rule_7">ਕ਼ਲਕ਼ਲਾ</string>
+    <string name="tajweed_rule_8">ਨਾ ਪੜ੍ਹੇ ਜਾਣ ਵਾਲੇ ਅੱਖਰ: ਹਮਜ਼ਤੁਲ ਵਸਲ, ਸ਼ਮਸੀ ਲਾਮ ਆਦਿ</string>
+    <string-array name="mushaf_header_numbers">
+        <item>ਇੱਕ</item>
+        <item>ਦੋ</item>
+        <item>ਤਿੰਨ</item>
+        <item>ਚਾਰ</item>
+        <item>ਪੰਜ</item>
+        <item>ਛੇ</item>
+        <item>ਸੱਤ</item>
+        <item>ਅੱਠ</item>
+        <item>ਨੌਂ</item>
+        <item>ਦਸ</item>
+        <item>ਗਿਆਰਾਂ</item>
+        <item>ਬਾਰਾਂ</item>
+        <item>ਤੇਰਾਂ</item>
+        <item>ਚੌਦਾਂ</item>
+        <item>ਪੰਦਰਾਂ</item>
+        <item>ਸੋਲਾਂ</item>
+        <item>ਸਤਾਰਾਂ</item>
+        <item>ਅਠਾਰਾਂ</item>
+        <item>ਉੱਨੀ</item>
+        <item>ਵੀਹ</item>
+        <item>ਇੱਕੀ</item>
+        <item>ਬਾਈ</item>
+        <item>ਤੇਈ</item>
+        <item>ਚੌਵੀ</item>
+        <item>ਪੱਚੀ</item>
+        <item>ਛੱਬੀ</item>
+        <item>ਸਤਾਈ</item>
+        <item>ਅਠਾਈ</item>
+        <item>ਉਨੱਤੀ</item>
+        <item>ਤੀਹ</item>
+        <item>ਇਕੱਤੀ</item>
+        <item>ਬੱਤੀ</item>
+        <item>ਤੇਤੀ</item>
+        <item>ਚੌਂਤੀ</item>
+        <item>ਪੈਂਤੀ</item>
+        <item>ਛੱਤੀ</item>
+        <item>ਸੈਂਤੀ</item>
+        <item>ਅਠੱਤੀ</item>
+        <item>ਉਨਤਾਲੀ</item>
+        <item>ਚਾਲੀ</item>
+        <item>ਇਕਤਾਲੀ</item>
+        <item>ਬਿਆਲੀ</item>
+        <item>ਤਰਤਾਲੀ</item>
+        <item>ਚੁਤਾਲੀ</item>
+        <item>ਪੰਤਾਲੀ</item>
+        <item>ਛਿਆਲੀ</item>
+        <item>ਸੰਤਾਲੀ</item>
+        <item>ਅਠਤਾਲੀ</item>
+        <item>ਉਨੰਜਾ</item>
+        <item>ਪੰਜਾਹ</item>
+        <item>ਇਕਵੰਜਾ</item>
+        <item>ਬਵੰਜਾ</item>
+        <item>ਤਰਵੰਜਾ</item>
+        <item>ਚੁਰੰਜਾ</item>
+        <item>ਪਚਵੰਜਾ</item>
+        <item>ਛਪੰਜਾ</item>
+        <item>ਸਤਵੰਜਾ</item>
+        <item>ਅਠਵੰਜਾ</item>
+        <item>ਉਨਾਹਠ</item>
+        <item>ਸੱਠ</item>
+    </string-array>
+</resources>

@@ -22,6 +22,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,8 +53,8 @@ import com.quransunah.app.ui.theme.LocalDisplayFontFamily
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 
-private val HomeCardShape = RoundedCornerShape(18.dp)
-private val HomeActionShape = RoundedCornerShape(14.dp)
+private val HomeCardShape = GoldCornerFrameShape(16.dp)
+private val HomeActionShape = GoldCornerFrameShape(10.dp)
 
 /**
  * A deliberately small starting point for the app. The four cards are the
@@ -70,6 +72,11 @@ fun HomeScreen(
     onOpenIndex: () -> Unit,
     onOpenSavedPlaces: () -> Unit,
     onOpenSettings: () -> Unit,
+    wirdPlan: com.quransunah.app.core.WirdPlan.State? = null,
+    todayEpochDay: Long = 0L,
+    onStartWird: () -> Unit = {},
+    onSaveWird: (Int) -> Unit = {},
+    onRemoveWird: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
@@ -87,10 +94,7 @@ fun HomeScreen(
     Box(
         modifier = modifier.background(paper.pageBackground),
     ) {
-        IslamicEdgePattern(
-            Modifier.matchParentSize(),
-            fade = IslamicOrnamentFade.VerticalHome,
-        )
+        TiledOrnamentBackground(Modifier.matchParentSize())
         Column(
             modifier = Modifier
                 .statusBarsPadding()
@@ -180,6 +184,25 @@ fun HomeScreen(
             compact = true,
         )
 
+        Spacer(Modifier.height(12.dp))
+
+        var wirdSetupOpen by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+        WirdCard(
+            state = wirdPlan,
+            todayEpochDay = todayEpochDay,
+            onStartReading = onStartWird,
+            onOpenSetup = { wirdSetupOpen = true },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        if (wirdSetupOpen) {
+            WirdSetupDialog(
+                currentDays = wirdPlan?.takeIf { !it.finished }?.days,
+                onConfirm = { onSaveWird(it); wirdSetupOpen = false },
+                onRemove = if (wirdPlan != null) ({ onRemoveWird(); wirdSetupOpen = false }) else null,
+                onDismiss = { wirdSetupOpen = false },
+            )
+        }
+
         }
     }
 }
@@ -234,7 +257,7 @@ private fun HomeRouteCard(
         compact -> 0.60f
         else -> 0.68f
     }
-    val borderColor = paper.accent.copy(alpha = if (nightMode) 0.34f else if (featured) 0.24f else 0.16f)
+    val borderColor = ChromeTokens.Gold
     val shadowElevation = when {
         nightMode -> if (featured) 6.dp else 3.dp
         featured -> 14.dp
@@ -253,7 +276,7 @@ private fun HomeRouteCard(
             )
             .clip(HomeCardShape)
             .background(background)
-            .border(width = 1.dp, color = borderColor, shape = HomeCardShape)
+            .border(width = ChromeTokens.GoldStroke, color = borderColor, shape = HomeCardShape)
             .semantics { this.contentDescription = cardDescription }
             .clickable(onClick = onClick),
     ) {
@@ -423,7 +446,7 @@ private fun SecondaryHomeAction(
             .size(42.dp)
             .clip(HomeActionShape)
             .background(paper.pageBody)
-            .border(1.dp, paper.tone500.copy(alpha = 0.72f), HomeActionShape)
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, HomeActionShape)
             .semantics { contentDescription = description }
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,

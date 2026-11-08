@@ -12,6 +12,9 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
+// Recitation engines: whisper.cpp native build (on by default).
+val enableWhisperNative = (project.findProperty("whisperNative") ?: "true").toString().toBoolean()
+
 val unifiedDbSource = rootProject.file("public/db/quran_unified.db")
 val quranDbContentHash = MessageDigest.getInstance("SHA-256").let { digest ->
     unifiedDbSource.inputStream().use { input ->
@@ -34,18 +37,24 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "com.quransunah.app"
     compileSdk = 36
+    // NDK for the vendored whisper.cpp (recitation engine #2). Override with -PwhisperNative=false to skip.
+    ndkVersion = "27.0.12077973"
 
     defaultConfig {
         applicationId = "com.quransunah.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 25
-        versionName = "4.2.0"
+        versionCode = 28
+        versionName = "4.3.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "QURAN_DB_CONTENT_HASH", "\"$quranDbContentHash\"")
         buildConfigField("long", "QURAN_DB_CONTENT_BYTES", "${unifiedDbSource.length()}L")
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
+        }
+        buildConfigField("boolean", "WHISPER_NATIVE", enableWhisperNative.toString())
+        if (enableWhisperNative) {
+            externalNativeBuild { cmake { arguments += listOf("-DANDROID_STL=c++_shared", "-DCMAKE_BUILD_TYPE=Release", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON") } }
         }
     }
 
@@ -126,7 +135,13 @@ android {
             excludes += "META-INF/NOTICE*"
             excludes += "META-INF/*.kotlin_module"
         }
+        // sherpa-onnx (onnxruntime statically linked) is large; keep native libs compressed in the APK.
+        jniLibs { useLegacyPackaging = true }
     }
+    if (enableWhisperNative) {
+        externalNativeBuild { cmake { path = file("src/main/cpp/CMakeLists.txt"); version = "3.22.1" } }
+    }
+    testOptions { unitTests { isReturnDefaultValues = true } }
     sourceSets {
         getByName("androidTest").assets.srcDir("$projectDir/schemas")
     }
@@ -165,13 +180,20 @@ val pythonCommandPrefix: List<String> = when (pythonExecutable) {
     else -> listOf(pythonExecutable)
 }
 
-val convertQcf4Fonts by tasks.registering(Exec::class) {
+// Medina page fonts: 604 coloured QPC V4 tajweed fonts public/fonts/qcf4/p1.ttf..p604.ttf (COLR v0 + CPAL),
+// packaged as they are. Nothing is converted any more (the old 47-face WOFF2 conversion from D:\quran-app is gone).
+val convertQcf4Fonts by tasks.registering {
     group = "assets"
-    description = "Convert React QCF4 WOFF2 faces to TTF (never package WOFF2)."
-    val dest = rootProject.file("public/fonts/qcf4/QCF4_Hafs_47.ttf")
-    onlyIf { pythonCommandPrefix.isNotEmpty() && !dest.isFile }
-    workingDir = rootProject.projectDir
-    commandLine(pythonCommandPrefix + listOf("tools/convert_qcf4_faces.py"))
+    description = "Verify the 604 QPC V4 page fonts are present in public/fonts/qcf4."
+    val dir = rootProject.file("public/fonts/qcf4")
+    inputs.dir(dir)
+    doLast {
+        val missing = (1..604).filter { !dir.resolve("p$it.ttf").isFile }
+        check(missing.isEmpty()) {
+            "Missing QPC V4 page fonts in ${dir}: ${missing.take(10).joinToString { "p$it.ttf" }}" +
+                (if (missing.size > 10) " … (${missing.size} missing)" else "")
+        }
+    }
 }
 
 val optimizePackagedFonts by tasks.registering(Exec::class) {
@@ -305,6 +327,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)
+    testImplementation("org.json:json:20240303")
     testImplementation("org.xerial:sqlite-jdbc:3.47.2.0")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

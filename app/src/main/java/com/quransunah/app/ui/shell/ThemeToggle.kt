@@ -30,12 +30,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.quransunah.app.R
 
-private val Sun = Color(0xFFF7F0E4)
-private val SunDeep = Color(0xFFE9DCC0)
-private val SunEdge = Color(0xFFD9C9A6)
-private val Moon = Color(0xFF4A5968)
-private val Star = Color(0xFF4A5968)
-
 private val MoonPathData =
     "M8.2 4.35a8.05 8.05 0 1 0 9.55 11.9 6.55 6.55 0 1 1-6.7-11.35 8.05 8.05 0 0 0-2.85-.55Z"
 
@@ -53,6 +47,7 @@ fun ThemeToggle(
         label = "theme-toggle",
     )
     val label = stringResource(if (night) R.string.theme_to_light else R.string.theme_to_dark)
+    val ink = com.quransunah.app.ui.theme.LocalPaperColors.current.textStrong
     val moonPath = remember { PathParser().parsePathString(MoonPathData).toPath() }
 
     Box(
@@ -70,45 +65,45 @@ fun ThemeToggle(
         Canvas(Modifier.matchParentSize()) {
             val pad = size.minDimension * 0.03f
             if (progress < 0.96f) {
-                drawMoon(moonPath, pad, 1f - progress)
+                drawMoon(moonPath, pad, 1f - progress, ink)
             }
             if (progress > 0.04f) {
-                drawSun(pad, progress)
+                drawSun(pad, progress, ink)
             }
         }
     }
 }
 
-private fun DrawScope.drawSun(pad: Float, alpha: Float) {
+private fun DrawScope.drawSun(pad: Float, alpha: Float, ink: Color) {
     val cx = size.width / 2f
     val cy = size.height / 2f
     val radius = size.minDimension * 0.28f
     for (index in 0 until 8) {
         rotate(index * 45f, Offset(cx, cy)) {
             drawRoundRect(
-                color = SunDeep.copy(alpha = alpha),
+                color = ink.copy(alpha = alpha),
                 topLeft = Offset(cx - size.minDimension * 0.035f, pad),
                 size = Size(size.minDimension * 0.07f, size.minDimension * 0.15f),
                 cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.minDimension * 0.035f),
             )
         }
     }
-    drawCircle(color = Sun.copy(alpha = alpha), radius = radius, center = Offset(cx, cy))
+    drawCircle(color = ink.copy(alpha = alpha), radius = radius, center = Offset(cx, cy))
     drawCircle(
-        color = SunEdge.copy(alpha = alpha),
+        color = ink.copy(alpha = alpha),
         radius = radius,
         center = Offset(cx, cy),
         style = Stroke(width = size.minDimension * 0.04f),
     )
 }
 
-private fun DrawScope.drawMoon(moon: Path, pad: Float, alpha: Float) {
+private fun DrawScope.drawMoon(moon: Path, pad: Float, alpha: Float, ink: Color) {
     val scale = (size.minDimension - pad * 2f) / 24f
     withTransform({
         translate(left = (size.width - 24f * scale) / 2f, top = (size.height - 24f * scale) / 2f)
         scale(scaleX = scale, scaleY = scale, pivot = Offset.Zero)
     }) {
-        drawPath(moon, Moon.copy(alpha = alpha))
+        drawPath(moon, ink.copy(alpha = alpha))
         fun sparkle(cx: Float, cy: Float, sparkleSize: Float) {
             val tip = sparkleSize / 2f
             val waist = sparkleSize * 0.12f
@@ -123,7 +118,7 @@ private fun DrawScope.drawMoon(moon: Path, pad: Float, alpha: Float) {
                 lineTo(cx - waist, cy - waist)
                 close()
             }
-            drawPath(path, Star.copy(alpha = alpha))
+            drawPath(path, ink.copy(alpha = alpha))
         }
         sparkle(16.35f, 5.15f, 4.6f)
         sparkle(19.55f, 8.45f, 3.3f)

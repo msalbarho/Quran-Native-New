@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">تلاوت جانچنے کا انجن</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (آلے پر)</string>
+    <string name="recitation_engine_zipformer_desc">ڈیفالٹ۔ آف لائن، فوری، تلفظ کو حرف بہ حرف جانچتا ہے۔</string>
+    <string name="recitation_engine_whisper">Whisper Quran (آلے پر)</string>
+    <string name="recitation_engine_whisper_desc">ایک بار ڈاؤن لوڈ کے بعد آف لائن (~78 MB)۔</string>
+    <string name="recitation_engine_android">اینڈرائیڈ اسپیچ ریکگنیشن</string>
+    <string name="recitation_engine_android_desc">فون کا اندرونی شناخت کنندہ (انٹرنیٹ درکار ہو سکتا ہے)۔</string>
+    <string name="recitation_engine_unavailable">اس آلے پر دستیاب نہیں</string>
+    <string name="recitation_whisper_download">Whisper ماڈل ڈاؤن لوڈ کریں</string>
+    <string name="recitation_whisper_downloading">ڈاؤن لوڈ ہو رہا ہے… %1$d%%</string>
+    <string name="recitation_whisper_ready">ماڈل تیار ہے</string>
+    <string name="recitation_whisper_delete">ماڈل حذف کریں</string>
+    <string name="recitation_whisper_failed">ڈاؤن لوڈ ناکام: %1$s</string>
+    <string name="recitation_license_model">Zipformer Quran 3.1 لائسنس (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">sherpa-onnx لائسنس (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">ایپ Quran Lab کے Zipformer Quran 3.1 ماڈل کے ذریعے آپ کی تلاوت آپ کے آلے پر بغیر انٹرنیٹ کے سنتی ہے اور ہر لفظ ادا کرتے ہی اسے رنگ دیتی ہے۔</string>
+    <string name="recitation_disclaimer">تلاوت اور تجوید کی خودکار جانچ غلط ہو سکتی ہے۔ یہ کسی مستند استاد کا متبادل نہیں اور کسی کی تلاوت پر شرعی حکم نہیں ہے۔</string>
+    <string name="recitation_understood">سمجھ گیا</string>
+    <string name="recitation_close">بند کریں</string>
+    <string name="training_show_ayah">آیت دکھائیں</string>
+    <string name="training_select">منتخب کریں</string>
+    <string name="training_select_surah">سورت پر جائیں</string>
+    <string name="training_select_page">صفحہ نمبر پر جائیں</string>
+    <string name="training_go_to_page">جائیں</string>
+    <string name="training_scope_open">تلاوت کھولیں</string>
+    <string name="training_scope_page">موجودہ صفحہ</string>
+    <string name="training_range_format_hint">ہر حد کو سورت:آیت کی صورت میں لکھیں (مثلاً 2:5)۔</string>
+    <string name="training_apply_range">حصہ لاگو کریں</string>
+    <string name="training_previous">پچھلا</string>
+    <string name="training_next">اگلا</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s الفاظ</string>
+    <string name="training_legend_correct">درست</string>
+    <string name="training_legend_wrong">غلط</string>
+    <string name="training_legend_missing">چھوٹا ہوا</string>
+</resources>

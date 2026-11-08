@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">دليل ألوان التجويد</string>
+    <string name="tajweed_colors">ألوان التجويد</string>
+    <string name="tajweed_rule_1">مدّ لازم: ٦ حركات</string>
+    <string name="tajweed_rule_2">مدّ واجب متصل: ٤–٥ حركات</string>
+    <string name="tajweed_rule_3">مدّ جائز منفصل: ٢ أو ٤ أو ٥ حركات</string>
+    <string name="tajweed_rule_4">مدّ طبيعي / عوض: حركتان</string>
+    <string name="tajweed_rule_5">إخفاء، إدغام بغنة، ومواضع الغنة</string>
+    <string name="tajweed_rule_6">تفخيم: حروف الاستعلاء والراء</string>
+    <string name="tajweed_rule_7">قلقلة</string>
+    <string name="tajweed_rule_8">حروف لا تُلفظ: همزة الوصل ولام شمسية وغيرها</string>
+</resources>

@@ -70,87 +70,9 @@ internal val SajdahBadgeHeight = 48.dp
 /** Gap between paired hizb + sajdah squares (4–6px). */
 internal val SideBadgePairGap = 5.dp
 
-/** Physical top-right of the page (LTR box so End = screen right for the user). */
-internal val MushafSideBadgeAlign = Alignment.TopEnd
-
 /** Match header/nav chrome: same horizontal inset as [ChromeTokens.HorizontalInset]. */
 internal fun mushafSideBadgeInsetPx(density: androidx.compose.ui.unit.Density): Int =
     with(density) { ChromeTokens.HorizontalInset.roundToPx() }
-
-/** Match header/nav chrome inset on the physical right edge. */
-internal fun Modifier.mushafSideBadgeAnchor(yOffsetPx: Int, density: androidx.compose.ui.unit.Density): Modifier =
-    offset {
-        IntOffset(-mushafSideBadgeInsetPx(density), yOffsetPx)
-    }
-
-@Composable
-fun HizbFrameBadge(
-    parts: HizbBadgeParts,
-    visible: Boolean,
-    modifier: Modifier = Modifier,
-    onTap: () -> Unit = {},
-) {
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        AnimatedVisibility(
-            visible = visible,
-            enter = badgeEnter(),
-            exit = badgeExit(),
-            modifier = modifier,
-        ) {
-            HizbBadgeBox(parts = parts, height = HizbBadgeHeight, onTap = onTap)
-        }
-    }
-}
-
-@Composable
-fun SajdahFrameBadge(
-    visible: Boolean,
-    modifier: Modifier = Modifier,
-    onTap: () -> Unit = {},
-) {
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        AnimatedVisibility(
-            visible = visible,
-            enter = badgeEnter(),
-            exit = badgeExit(),
-            modifier = modifier,
-        ) {
-            SajdahBadgeBox(height = SajdahBadgeHeight, onTap = onTap)
-        }
-    }
-}
-
-/**
- * When hizb/quarter and sajdah share a line: two independent squares in a horizontal row.
- * RTL: hizb on the right (inline-start), sajdah immediately to its left, with a small gap.
- * The whole cluster fades/slides with chrome visibility.
- */
-@Composable
-fun MushafPairedSideBadges(
-    hizbBadge: HizbBadgeParts,
-    visible: Boolean,
-    modifier: Modifier = Modifier,
-    onTap: () -> Unit = {},
-) {
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        AnimatedVisibility(
-            visible = visible,
-            enter = badgeEnter(),
-            exit = badgeExit(),
-            modifier = modifier,
-        ) {
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(SideBadgePairGap),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    HizbBadgeBox(parts = hizbBadge, height = HizbBadgeHeight, onTap = onTap)
-                    SajdahBadgeBox(height = HizbBadgeHeight, onTap = onTap)
-                }
-            }
-        }
-    }
-}
 
 @Composable
 private fun HizbBadgeBox(
@@ -316,7 +238,6 @@ private fun MushafSideBadgeBox(
     content: @Composable () -> Unit,
 ) {
     val paper = LocalPaperColors.current
-    val night = LocalNightMode.current
     val shape = VerticalIslamicPlaque
     Box(
         modifier = Modifier
@@ -324,7 +245,7 @@ private fun MushafSideBadgeBox(
             .height(height)
             .clip(shape)
             .background(paper.chromeFill)
-            .border(1.dp, paper.accent.copy(alpha = if (night) 0.42f else 0.30f), shape)
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, shape)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,

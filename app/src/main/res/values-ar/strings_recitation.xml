@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">محرك تصحيح التلاوة</string>
+    <string name="recitation_engine_zipformer">محرك Zipformer القرآني (على الجهاز)</string>
+    <string name="recitation_engine_zipformer_desc">الافتراضي. يعمل دون إنترنت ولحظيًا، ويفحص النطق حرفًا حرفًا.</string>
+    <string name="recitation_engine_whisper">Whisper القرآني (على الجهاز)</string>
+    <string name="recitation_engine_whisper_desc">يعمل دون إنترنت بعد تنزيل لمرة واحدة (نحو 78 ميغابايت).</string>
+    <string name="recitation_engine_android">التعرّف الصوتي في أندرويد</string>
+    <string name="recitation_engine_android_desc">المتعرّف المدمج في الهاتف (قد يحتاج إنترنت).</string>
+    <string name="recitation_engine_unavailable">غير متوفر على هذا الجهاز</string>
+    <string name="recitation_whisper_download">تنزيل نموذج Whisper</string>
+    <string name="recitation_whisper_downloading">جارٍ التنزيل… %1$d%%</string>
+    <string name="recitation_whisper_ready">النموذج جاهز</string>
+    <string name="recitation_whisper_delete">حذف النموذج</string>
+    <string name="recitation_whisper_failed">تعذّر التنزيل: %1$s</string>
+    <string name="recitation_license_model">ترخيص Zipformer Quran 3.1 (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">ترخيص sherpa-onnx (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">يستمع التطبيق إلى تلاوتك على جهازك دون إنترنت ويلوّن الكلمات فور نطقها باستخدام نموذج Zipformer Quran 3.1 من Quran Lab.</string>
+    <string name="recitation_disclaimer">التصحيح الآلي للتلاوة والتجويد قد يخطئ، ولا يغني عن معلّم متقن، وليس حكمًا شرعيًا على تلاوة أحد.</string>
+    <string name="recitation_understood">فهمت</string>
+    <string name="recitation_close">إغلاق</string>
+    <string name="training_show_ayah">عرض آية</string>
+    <string name="training_select">تحديد</string>
+    <string name="training_select_surah">الانتقال إلى السورة</string>
+    <string name="training_select_page">الانتقال إلى رقم الصفحة</string>
+    <string name="training_go_to_page">اذهب</string>
+    <string name="training_scope_open">تسميع مفتوح</string>
+    <string name="training_scope_page">الصفحة الحالية</string>
+    <string name="training_range_format_hint">اكتب كل حد بصيغة السورة:الآية، مثل 2:5.</string>
+    <string name="training_apply_range">اعتماد المقطع</string>
+    <string name="training_previous">السابقة</string>
+    <string name="training_next">التالية</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s كلمة</string>
+    <string name="training_legend_correct">صحيح</string>
+    <string name="training_legend_wrong">خطأ</string>
+    <string name="training_legend_missing">ناقص</string>
+</resources>

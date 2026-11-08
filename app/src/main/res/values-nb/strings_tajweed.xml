@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">Fargeveiledning for tajwid</string>
+    <string name="tajweed_colors">Tajwid-farger</string>
+    <string name="tajweed_rule_1">Madd lazim: 6 tellinger</string>
+    <string name="tajweed_rule_2">Madd wajib muttasil: 4–5 tellinger</string>
+    <string name="tajweed_rule_3">Madd jaiz munfasil: 2, 4 eller 5 tellinger</string>
+    <string name="tajweed_rule_4">Naturlig madd / erstatningsforlengelse: 2 tellinger</string>
+    <string name="tajweed_rule_5">Ikhfa, idgham med ghunnah og nasalisering</string>
+    <string name="tajweed_rule_6">Tafkhim: emfatiske bokstaver og ra</string>
+    <string name="tajweed_rule_7">Qalqalah: etterklang</string>
+    <string name="tajweed_rule_8">Uuttalte bokstaver: hamzat al-wasl, sol-lam osv.</string>
+    <string-array name="mushaf_header_numbers">
+        <item>en</item>
+        <item>to</item>
+        <item>tre</item>
+        <item>fire</item>
+        <item>fem</item>
+        <item>seks</item>
+        <item>sju</item>
+        <item>åtte</item>
+        <item>ni</item>
+        <item>ti</item>
+        <item>elleve</item>
+        <item>tolv</item>
+        <item>tretten</item>
+        <item>fjorten</item>
+        <item>femten</item>
+        <item>seksten</item>
+        <item>sytten</item>
+        <item>atten</item>
+        <item>nitten</item>
+        <item>tjue</item>
+        <item>tjueen</item>
+        <item>tjueto</item>
+        <item>tjuetre</item>
+        <item>tjuefire</item>
+        <item>tjuefem</item>
+        <item>tjueseks</item>
+        <item>tjuesju</item>
+        <item>tjueåtte</item>
+        <item>tjueni</item>
+        <item>tretti</item>
+        <item>trettien</item>
+        <item>trettito</item>
+        <item>trettitre</item>
+        <item>trettifire</item>
+        <item>trettifem</item>
+        <item>trettiseks</item>
+        <item>trettisju</item>
+        <item>trettiåtte</item>
+        <item>trettini</item>
+        <item>førti</item>
+        <item>førtien</item>
+        <item>førtito</item>
+        <item>førtitre</item>
+        <item>førtifire</item>
+        <item>førtifem</item>
+        <item>førtiseks</item>
+        <item>førtisju</item>
+        <item>førtiåtte</item>
+        <item>førtini</item>
+        <item>femti</item>
+        <item>femtien</item>
+        <item>femtito</item>
+        <item>femtitre</item>
+        <item>femtifire</item>
+        <item>femtifem</item>
+        <item>femtiseks</item>
+        <item>femtisju</item>
+        <item>femtiåtte</item>
+        <item>femtini</item>
+        <item>seksti</item>
+    </string-array>
+</resources>

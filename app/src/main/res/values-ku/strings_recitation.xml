@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">Motora kontrolkirina xwendinê</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (li ser amûrê)</string>
+    <string name="recitation_engine_zipformer_desc">Standard. Bê înternet, di cih de, bilêvkirinê tîp bi tîp kontrol dike.</string>
+    <string name="recitation_engine_whisper">Whisper Quran (li ser amûrê)</string>
+    <string name="recitation_engine_whisper_desc">Piştî daxistineke yekcarî bê înternet (~78 MB).</string>
+    <string name="recitation_engine_android">Naskirina axaftinê ya Android</string>
+    <string name="recitation_engine_android_desc">Naskerê hundirîn ê telefonê (dibe ku înternet pêwîst be).</string>
+    <string name="recitation_engine_unavailable">Li ser vê amûrê tune ye</string>
+    <string name="recitation_whisper_download">Modela Whisper daxe</string>
+    <string name="recitation_whisper_downloading">Tê daxistin… %1$d%%</string>
+    <string name="recitation_whisper_ready">Model amade ye</string>
+    <string name="recitation_whisper_delete">Modelê jê bibe</string>
+    <string name="recitation_whisper_failed">Daxistin bi ser neket: %1$s</string>
+    <string name="recitation_license_model">Lîsansa Zipformer Quran 3.1 (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">Lîsansa sherpa-onnx (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">Sepan li ser amûra te bê înternet guh dide xwendina te û her peyvê dema tu dibêjî reng dike, bi modela Zipformer Quran 3.1 ya Quran Lab.</string>
+    <string name="recitation_disclaimer">Kontrola otomatîk a xwendin û tecwîdê dikare şaş be. Ew cihê mamosteyekî jêhatî nagire û ne biryareke olî ye li ser xwendina kesî.</string>
+    <string name="recitation_understood">Fêm kir</string>
+    <string name="recitation_close">Bigire</string>
+    <string name="training_show_ayah">Ayetê nîşan bide</string>
+    <string name="training_select">Hilbijêre</string>
+    <string name="training_select_surah">Here sûreyê</string>
+    <string name="training_select_page">Here hejmara rûpelê</string>
+    <string name="training_go_to_page">Here</string>
+    <string name="training_scope_open">Xwendinê veke</string>
+    <string name="training_scope_page">Rûpela niha</string>
+    <string name="training_range_format_hint">Her dawiyê wek sûre:ayet binivîse (mînak 2:5).</string>
+    <string name="training_apply_range">Beşê bicîh bîne</string>
+    <string name="training_previous">Berê</string>
+    <string name="training_next">Pêş</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s peyv</string>
+    <string name="training_legend_correct">Rast</string>
+    <string name="training_legend_wrong">Şaş</string>
+    <string name="training_legend_missing">Kêm</string>
+</resources>

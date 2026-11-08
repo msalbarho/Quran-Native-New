@@ -11,19 +11,6 @@ import androidx.compose.ui.graphics.Color
 object ThemeTokens {
     /** Authentic warm gold for the sun/moon toggle (`#D4AF37`). */
     val SunGold = Color(0xFFD4AF37)
-    val SunGoldBright = Color(0xFFFFC107)
-    val SunGoldDeep = Color(0xFF9A7B22)
-
-    /** Interactive / selection stroke (palette accent). */
-    val DarkAccent: Color
-        @Composable get() = LocalPaperColors.current.darkAccent
-
-    val DarkAccentInner: Color
-        @Composable get() = LocalPaperColors.current.darkAccentInner
-
-    /** Soft girih/star pattern tint. */
-    val DecorPattern: Color
-        @Composable get() = LocalPaperColors.current.decorPattern
 
     /** Ayah number glyph on the medallion (not the backdrop image). */
     val AyahMarker: Color

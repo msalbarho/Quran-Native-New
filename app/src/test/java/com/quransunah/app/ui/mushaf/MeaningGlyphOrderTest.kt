@@ -29,7 +29,23 @@ class MeaningGlyphOrderTest {
     }
 
     @Test
+    fun sajdahV4GlyphsAreNotSynthesized() {
+        val words = loadAyah("instr(text_hafs, ?) > 0", SajdahAyah.MARK.toString())
+        val marker = words.last { it.isAyahMarker }
+        val previous = words[words.indexOf(marker) - 1]
+        // 604 page fonts: the overline + mark are part of the word's own v4 glyph run.
+        assertEquals(null, SajdahAyah.numberLigature(marker, previous))
+        assertEquals(null, SajdahAyah.overlayLigature(previous, marker))
+    }
+
+    @Test
     fun sajdahSignStaysBeforeTheAyahNumber() {
+        // Legacy 47-face behaviour (DB codes) stays available behind the switch.
+        SajdahAyah.synthesizeSlots = true
+        try { legacySajdah() } finally { SajdahAyah.synthesizeSlots = false }
+    }
+
+    private fun legacySajdah() {
         val words = loadAyah("instr(text_hafs, ?) > 0", SajdahAyah.MARK.toString())
         val painted = paint(words)
         val marker = words.last { it.isAyahMarker }

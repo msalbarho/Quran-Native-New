@@ -123,13 +123,14 @@ fun MeaningsPage(
     val selectorLabel = stringResource(R.string.translation_selector, languageName)
     val inspection = LocalInspectionMode.current
     var titleFace by remember(fontManager) { mutableStateOf(fontManager?.peekSurahTitleTypeface()) }
-    var pageFace by remember(pageNumber, fontManager) {
-        mutableStateOf(fontManager?.peekPageTypeface(pageNumber))
+    val pageNight = com.quransunah.app.ui.theme.LocalNightMode.current
+    var pageFace by remember(pageNumber, fontManager, pageNight) {
+        mutableStateOf(fontManager?.peekPageTypeface(pageNumber, pageNight))
     }
-    LaunchedEffect(pageNumber, fontManager) {
+    LaunchedEffect(pageNumber, fontManager, pageNight) {
         if (fontManager != null && !inspection) {
             titleFace = fontManager.loadSurahTitleTypeface()
-            pageFace = fontManager.loadPageTypeface(pageNumber)
+            pageFace = fontManager.loadPageTypeface(pageNumber, pageNight)
         }
     }
     val pageFamily = pageFace?.let { FontFamily(it) } ?: FontFamily.Serif

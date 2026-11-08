@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">Enjin semakan bacaan</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (pada peranti)</string>
+    <string name="recitation_engine_zipformer_desc">Lalai. Luar talian, masa nyata, menyemak sebutan huruf demi huruf.</string>
+    <string name="recitation_engine_whisper">Whisper Quran (pada peranti)</string>
+    <string name="recitation_engine_whisper_desc">Luar talian selepas sekali muat turun (~78 MB).</string>
+    <string name="recitation_engine_android">Pengecaman pertuturan Android</string>
+    <string name="recitation_engine_android_desc">Pengecam terbina dalam telefon (mungkin memerlukan internet).</string>
+    <string name="recitation_engine_unavailable">Tidak tersedia pada peranti ini</string>
+    <string name="recitation_whisper_download">Muat turun model Whisper</string>
+    <string name="recitation_whisper_downloading">Memuat turun… %1$d%%</string>
+    <string name="recitation_whisper_ready">Model sedia</string>
+    <string name="recitation_whisper_delete">Padam model</string>
+    <string name="recitation_whisper_failed">Muat turun gagal: %1$s</string>
+    <string name="recitation_license_model">Lesen Zipformer Quran 3.1 (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">Lesen sherpa-onnx (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">Aplikasi mendengar bacaan anda pada peranti tanpa internet dan mewarnakan setiap perkataan semasa anda menyebutnya, menggunakan model Zipformer Quran 3.1 oleh Quran Lab.</string>
+    <string name="recitation_disclaimer">Semakan bacaan dan tajwid automatik boleh tersilap. Ia tidak menggantikan guru yang bertauliah dan bukan hukum agama terhadap bacaan sesiapa.</string>
+    <string name="recitation_understood">Faham</string>
+    <string name="recitation_close">Tutup</string>
+    <string name="training_show_ayah">Tunjuk ayat</string>
+    <string name="training_select">Pilih</string>
+    <string name="training_select_surah">Pergi ke surah</string>
+    <string name="training_select_page">Pergi ke nombor halaman</string>
+    <string name="training_go_to_page">Pergi</string>
+    <string name="training_scope_open">Buka tasmik</string>
+    <string name="training_scope_page">Halaman semasa</string>
+    <string name="training_range_format_hint">Masukkan setiap hujung sebagai surah:ayat (contohnya 2:5).</string>
+    <string name="training_apply_range">Guna petikan</string>
+    <string name="training_previous">Sebelumnya</string>
+    <string name="training_next">Seterusnya</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s perkataan</string>
+    <string name="training_legend_correct">Betul</string>
+    <string name="training_legend_wrong">Salah</string>
+    <string name="training_legend_missing">Tertinggal</string>
+</resources>

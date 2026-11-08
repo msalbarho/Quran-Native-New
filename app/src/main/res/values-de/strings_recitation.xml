@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">Prüfmodul für die Rezitation</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (auf dem Gerät)</string>
+    <string name="recitation_engine_zipformer_desc">Standard. Offline, in Echtzeit, prüft die Aussprache Buchstabe für Buchstabe.</string>
+    <string name="recitation_engine_whisper">Whisper Quran (auf dem Gerät)</string>
+    <string name="recitation_engine_whisper_desc">Offline nach einmaligem Download (~78 MB).</string>
+    <string name="recitation_engine_android">Android-Spracherkennung</string>
+    <string name="recitation_engine_android_desc">Die eingebaute Spracherkennung des Telefons (benötigt evtl. Internet).</string>
+    <string name="recitation_engine_unavailable">Auf diesem Gerät nicht verfügbar</string>
+    <string name="recitation_whisper_download">Whisper-Modell herunterladen</string>
+    <string name="recitation_whisper_downloading">Wird heruntergeladen… %1$d%%</string>
+    <string name="recitation_whisper_ready">Modell bereit</string>
+    <string name="recitation_whisper_delete">Modell löschen</string>
+    <string name="recitation_whisper_failed">Download fehlgeschlagen: %1$s</string>
+    <string name="recitation_license_model">Lizenz Zipformer Quran 3.1 (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">Lizenz sherpa-onnx (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">Die App hört deine Rezitation auf deinem Gerät ohne Internet und färbt jedes Wort beim Sprechen ein – mit dem Modell Zipformer Quran 3.1 von Quran Lab.</string>
+    <string name="recitation_disclaimer">Die automatische Prüfung von Rezitation und Tajwid kann sich irren. Sie ersetzt keinen qualifizierten Lehrer und ist kein religiöses Urteil über die Rezitation von irgendjemandem.</string>
+    <string name="recitation_understood">Verstanden</string>
+    <string name="recitation_close">Schließen</string>
+    <string name="training_show_ayah">Vers anzeigen</string>
+    <string name="training_select">Auswählen</string>
+    <string name="training_select_surah">Zur Sure</string>
+    <string name="training_select_page">Zur Seitennummer</string>
+    <string name="training_go_to_page">Los</string>
+    <string name="training_scope_open">Rezitation öffnen</string>
+    <string name="training_scope_page">Aktuelle Seite</string>
+    <string name="training_range_format_hint">Gib jeden Endpunkt als Sure:Vers ein (zum Beispiel 2:5).</string>
+    <string name="training_apply_range">Abschnitt übernehmen</string>
+    <string name="training_previous">Zurück</string>
+    <string name="training_next">Weiter</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s Wörter</string>
+    <string name="training_legend_correct">Richtig</string>
+    <string name="training_legend_wrong">Falsch</string>
+    <string name="training_legend_missing">Fehlend</string>
+</resources>

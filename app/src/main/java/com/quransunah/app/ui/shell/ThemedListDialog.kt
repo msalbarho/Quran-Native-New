@@ -39,20 +39,36 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.quransunah.app.R
+import com.quransunah.app.ui.shell.ChromeTokens
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 
-private val DialogShape = RoundedCornerShape(30.dp)
-private val ChoiceShape = RoundedCornerShape(14.dp)
+private val DialogShape = GoldCornerFrameShape(20.dp)
+private val ChoiceShape = GoldCornerFrameShape(14.dp)
 
 @Composable
 fun ThemedListDialog(
     title: String,
     onDismiss: () -> Unit,
     header: @Composable ColumnScope.() -> Unit = {},
+    dismissOnOutsideTap: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val paper = LocalPaperColors.current
+    val outsideTap = if (dismissOnOutsideTap) {
+        Modifier.clickable(
+            interactionSource = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+            indication = null,
+            onClick = onDismiss,
+        )
+    } else Modifier
+    val swallowTap = if (dismissOnOutsideTap) {
+        Modifier.clickable(
+            interactionSource = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+            indication = null,
+            onClick = {},
+        )
+    } else Modifier
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -60,6 +76,7 @@ fun ThemedListDialog(
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
+                .then(outsideTap)
                 .imePadding()
                 .padding(horizontal = 18.dp, vertical = 16.dp),
             contentAlignment = Alignment.Center,
@@ -68,19 +85,17 @@ fun ThemedListDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .then(swallowTap)
                     .shadow(4.dp, DialogShape)
                     .clip(DialogShape)
-                    .border(1.dp, paper.accent.copy(alpha = 0.16f), DialogShape)
+                    .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, DialogShape)
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(paper.chromeFill, paper.pageBody, paper.pageBackground),
                         ),
                     ),
             ) {
-            IslamicEdgePattern(
-                Modifier.matchParentSize(),
-                fade = IslamicOrnamentFade.Vertical,
-            )
+            TiledOrnamentBackground(Modifier.matchParentSize())
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -125,7 +140,7 @@ fun ThemedListDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 14.dp, vertical = 12.dp)
-                        .clip(RoundedCornerShape(14.dp))
+                        .clip(GoldCornerFrameShape(14.dp))
                         .background(paper.accent)
                         .clickable(role = Role.Button, onClick = onDismiss)
                         .padding(vertical = 12.dp),
@@ -154,18 +169,13 @@ fun ThemedLanguageCard(
     } else {
         lerp(paper.surface, paper.chromeFill, 0.24f)
     }
-    val stroke = if (active) {
-        paper.accent.copy(alpha = 0.55f)
-    } else {
-        paper.accent.copy(alpha = if (night) 0.28f else 0.16f)
-    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 52.dp)
             .clip(ChoiceShape)
             .background(fill)
-            .border(1.dp, stroke, ChoiceShape)
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, ChoiceShape)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,

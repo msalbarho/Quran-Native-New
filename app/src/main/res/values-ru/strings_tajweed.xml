@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">Цветовая памятка по таджвиду</string>
+    <string name="tajweed_colors">Цвета таджвида</string>
+    <string name="tajweed_rule_1">Мадд лязим: 6 счётов</string>
+    <string name="tajweed_rule_2">Мадд ваджиб муттасыль: 4–5 счётов</string>
+    <string name="tajweed_rule_3">Мадд джаиз мунфасыль: 2, 4 или 5 счётов</string>
+    <string name="tajweed_rule_4">Естественный мадд / ивад: 2 счёта</string>
+    <string name="tajweed_rule_5">Ихфа, идгам с гунной и назализация</string>
+    <string name="tajweed_rule_6">Тафхим: эмфатические буквы и ра</string>
+    <string name="tajweed_rule_7">Калькаля: отзвук</string>
+    <string name="tajweed_rule_8">Непроизносимые буквы: хамзат аль-васль, солнечный лям и др.</string>
+    <string-array name="mushaf_header_numbers">
+        <item>один</item>
+        <item>два</item>
+        <item>три</item>
+        <item>четыре</item>
+        <item>пять</item>
+        <item>шесть</item>
+        <item>семь</item>
+        <item>восемь</item>
+        <item>девять</item>
+        <item>десять</item>
+        <item>одиннадцать</item>
+        <item>двенадцать</item>
+        <item>тринадцать</item>
+        <item>четырнадцать</item>
+        <item>пятнадцать</item>
+        <item>шестнадцать</item>
+        <item>семнадцать</item>
+        <item>восемнадцать</item>
+        <item>девятнадцать</item>
+        <item>двадцать</item>
+        <item>двадцать один</item>
+        <item>двадцать два</item>
+        <item>двадцать три</item>
+        <item>двадцать четыре</item>
+        <item>двадцать пять</item>
+        <item>двадцать шесть</item>
+        <item>двадцать семь</item>
+        <item>двадцать восемь</item>
+        <item>двадцать девять</item>
+        <item>тридцать</item>
+        <item>тридцать один</item>
+        <item>тридцать два</item>
+        <item>тридцать три</item>
+        <item>тридцать четыре</item>
+        <item>тридцать пять</item>
+        <item>тридцать шесть</item>
+        <item>тридцать семь</item>
+        <item>тридцать восемь</item>
+        <item>тридцать девять</item>
+        <item>сорок</item>
+        <item>сорок один</item>
+        <item>сорок два</item>
+        <item>сорок три</item>
+        <item>сорок четыре</item>
+        <item>сорок пять</item>
+        <item>сорок шесть</item>
+        <item>сорок семь</item>
+        <item>сорок восемь</item>
+        <item>сорок девять</item>
+        <item>пятьдесят</item>
+        <item>пятьдесят один</item>
+        <item>пятьдесят два</item>
+        <item>пятьдесят три</item>
+        <item>пятьдесят четыре</item>
+        <item>пятьдесят пять</item>
+        <item>пятьдесят шесть</item>
+        <item>пятьдесят семь</item>
+        <item>пятьдесят восемь</item>
+        <item>пятьдесят девять</item>
+        <item>шестьдесят</item>
+    </string-array>
+</resources>

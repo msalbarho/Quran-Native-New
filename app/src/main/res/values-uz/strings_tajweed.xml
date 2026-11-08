@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">Tajvid ranglari qo‘llanmasi</string>
+    <string name="tajweed_colors">Tajvid ranglari</string>
+    <string name="tajweed_rule_1">Maddi lozim: 6 harakat</string>
+    <string name="tajweed_rule_2">Maddi vojib muttasil: 4–5 harakat</string>
+    <string name="tajweed_rule_3">Maddi joiz munfasil: 2, 4 yoki 5 harakat</string>
+    <string name="tajweed_rule_4">Tabiiy madd / ivaz: 2 harakat</string>
+    <string name="tajweed_rule_5">Ixfo, g‘unnali idg‘om va g‘unna o‘rinlari</string>
+    <string name="tajweed_rule_6">Tafxim: isti‘lo harflari va ro</string>
+    <string name="tajweed_rule_7">Qalqala</string>
+    <string name="tajweed_rule_8">O‘qilmaydigan harflar: vasl hamzasi, shamsiy lom va boshqalar</string>
+    <string-array name="mushaf_header_numbers">
+        <item>bir</item>
+        <item>ikki</item>
+        <item>uch</item>
+        <item>toʻrt</item>
+        <item>besh</item>
+        <item>olti</item>
+        <item>yetti</item>
+        <item>sakkiz</item>
+        <item>toʻqqiz</item>
+        <item>oʻn</item>
+        <item>oʻn bir</item>
+        <item>oʻn ikki</item>
+        <item>oʻn uch</item>
+        <item>oʻn toʻrt</item>
+        <item>oʻn besh</item>
+        <item>oʻn olti</item>
+        <item>oʻn yetti</item>
+        <item>oʻn sakkiz</item>
+        <item>oʻn toʻqqiz</item>
+        <item>yigirma</item>
+        <item>yigirma bir</item>
+        <item>yigirma ikki</item>
+        <item>yigirma uch</item>
+        <item>yigirma toʻrt</item>
+        <item>yigirma besh</item>
+        <item>yigirma olti</item>
+        <item>yigirma yetti</item>
+        <item>yigirma sakkiz</item>
+        <item>yigirma toʻqqiz</item>
+        <item>oʻttiz</item>
+        <item>oʻttiz bir</item>
+        <item>oʻttiz ikki</item>
+        <item>oʻttiz uch</item>
+        <item>oʻttiz toʻrt</item>
+        <item>oʻttiz besh</item>
+        <item>oʻttiz olti</item>
+        <item>oʻttiz yetti</item>
+        <item>oʻttiz sakkiz</item>
+        <item>oʻttiz toʻqqiz</item>
+        <item>qirq</item>
+        <item>qirq bir</item>
+        <item>qirq ikki</item>
+        <item>qirq uch</item>
+        <item>qirq toʻrt</item>
+        <item>qirq besh</item>
+        <item>qirq olti</item>
+        <item>qirq yetti</item>
+        <item>qirq sakkiz</item>
+        <item>qirq toʻqqiz</item>
+        <item>ellik</item>
+        <item>ellik bir</item>
+        <item>ellik ikki</item>
+        <item>ellik uch</item>
+        <item>ellik toʻrt</item>
+        <item>ellik besh</item>
+        <item>ellik olti</item>
+        <item>ellik yetti</item>
+        <item>ellik sakkiz</item>
+        <item>ellik toʻqqiz</item>
+        <item>oltmish</item>
+    </string-array>
+</resources>

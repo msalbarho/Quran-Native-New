@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">Moteur de vérification de la récitation</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (sur l\'appareil)</string>
+    <string name="recitation_engine_zipformer_desc">Par défaut. Hors ligne, en temps réel, vérifie la prononciation lettre par lettre.</string>
+    <string name="recitation_engine_whisper">Whisper Quran (sur l\'appareil)</string>
+    <string name="recitation_engine_whisper_desc">Hors ligne après un téléchargement unique (~78 Mo).</string>
+    <string name="recitation_engine_android">Reconnaissance vocale Android</string>
+    <string name="recitation_engine_android_desc">Le moteur de reconnaissance intégré du téléphone (peut nécessiter Internet).</string>
+    <string name="recitation_engine_unavailable">Non disponible sur cet appareil</string>
+    <string name="recitation_whisper_download">Télécharger le modèle Whisper</string>
+    <string name="recitation_whisper_downloading">Téléchargement… %1$d%%</string>
+    <string name="recitation_whisper_ready">Modèle prêt</string>
+    <string name="recitation_whisper_delete">Supprimer le modèle</string>
+    <string name="recitation_whisper_failed">Échec du téléchargement : %1$s</string>
+    <string name="recitation_license_model">Licence Zipformer Quran 3.1 (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">Licence sherpa-onnx (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">L\'application écoute votre récitation sur votre appareil, sans Internet, et colore chaque mot au fur et à mesure, grâce au modèle Zipformer Quran 3.1 de Quran Lab.</string>
+    <string name="recitation_disclaimer">La vérification automatique de la récitation et du tajwid peut se tromper. Elle ne remplace pas un enseignant qualifié et ne constitue pas un avis religieux sur la récitation de quiconque.</string>
+    <string name="recitation_understood">J\'ai compris</string>
+    <string name="recitation_close">Fermer</string>
+    <string name="training_show_ayah">Afficher le verset</string>
+    <string name="training_select">Sélectionner</string>
+    <string name="training_select_surah">Aller à la sourate</string>
+    <string name="training_select_page">Aller au numéro de page</string>
+    <string name="training_go_to_page">Aller</string>
+    <string name="training_scope_open">Ouvrir la récitation</string>
+    <string name="training_scope_page">Page actuelle</string>
+    <string name="training_range_format_hint">Saisissez chaque borne sous la forme sourate:verset (par exemple 2:5).</string>
+    <string name="training_apply_range">Appliquer le passage</string>
+    <string name="training_previous">Précédent</string>
+    <string name="training_next">Suivant</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s mots</string>
+    <string name="training_legend_correct">Correct</string>
+    <string name="training_legend_wrong">Erroné</string>
+    <string name="training_legend_missing">Manquant</string>
+</resources>

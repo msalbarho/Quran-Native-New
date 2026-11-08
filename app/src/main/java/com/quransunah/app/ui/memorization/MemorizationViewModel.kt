@@ -89,23 +89,6 @@ class MemorizationViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MemorizationUiState())
 
-    fun markMastered(id: String) {
-        viewModelScope.launch {
-            memorizationRepository.setState(id, MemorizationState.MASTERED, System.currentTimeMillis())
-            advanceSequentialQueue()
-        }
-    }
-
-    fun markLearning(id: String) {
-        viewModelScope.launch {
-            memorizationRepository.setState(id, MemorizationState.LEARNING, System.currentTimeMillis())
-        }
-    }
-
-    fun markTrainingAyahMastered(surah: Int, ayah: Int) = rateTrainingAyah(surah, ayah, MemorizationState.MASTERED)
-
-    fun markTrainingAyahForReview(surah: Int, ayah: Int) = rateTrainingAyah(surah, ayah, MemorizationState.LEARNING)
-
     private fun rateTrainingAyah(surah: Int, ayah: Int, state: MemorizationState) {
         viewModelScope.launch {
             val id = MemorizationItem.idFor(surah, ayah)
@@ -141,67 +124,6 @@ class MemorizationViewModel @Inject constructor(
 
     fun delete(id: String) {
         viewModelScope.launch { memorizationRepository.untrack(id) }
-    }
-
-    fun createPlanFromTrackedItems() {
-        viewModelScope.launch {
-            val items = memorizationRepository.observeItems().first()
-            val first = items.minWithOrNull(compareBy<MemorizationItem> { it.surah }.thenBy { it.ayah }) ?: return@launch
-            val last = items.maxWithOrNull(compareBy<MemorizationItem> { it.surah }.thenBy { it.ayah }) ?: first
-            val now = System.currentTimeMillis()
-            val plan = MemorizationPlan(
-                id = MemorizationPlan.idFor(first.surah, first.ayah, last.surah, last.ayah),
-                name = localizedString(R.string.memorization_plan_custom_name),
-                startSurah = first.surah,
-                startAyah = first.ayah,
-                endSurah = last.surah,
-                endAyah = last.ayah,
-                dailyTarget = 5,
-                createdAt = now,
-                updatedAt = now,
-            )
-            if (isValidAyahRange(plan)) memorizationRepository.savePlan(plan)
-        }
-    }
-
-    fun startSequentialPlan() {
-        viewModelScope.launch {
-            if (memorizationRepository.observeItems().first().isNotEmpty()) return@launch
-            val now = System.currentTimeMillis()
-            val endAyah = SurahAyahCounts.ayahCount(114)
-            val dailyTarget = 3
-            val plan = MemorizationPlan(
-                id = MemorizationPlan.idFor(1, 1, 114, endAyah),
-                name = localizedString(R.string.memorization_plan_sequential_name),
-                startSurah = 1,
-                startAyah = 1,
-                endSurah = 114,
-                endAyah = endAyah,
-                dailyTarget = dailyTarget,
-                createdAt = now,
-                updatedAt = now,
-            )
-            memorizationRepository.savePlan(plan)
-            SurahAyahCounts.range(1, 1, 1, dailyTarget).forEach { (surah, ayah) ->
-                val words = mushafRepository.getAyahWords(surah, ayah)
-                val text = words.filterNot { it.isAyahMarker }.joinToString(" ") { it.textHafs }.trim()
-                if (text.isNotBlank()) {
-                    memorizationRepository.track(
-                        MemorizationItem(
-                            id = MemorizationItem.idFor(surah, ayah),
-                            surah = surah,
-                            ayah = ayah,
-                            pageNumber = mushafRepository.getPageForAyah(surah, ayah),
-                            ayahText = text,
-                            state = MemorizationState.LEARNING,
-                            reviewCount = 0,
-                            createdAt = now,
-                            updatedAt = now,
-                        ),
-                    )
-                }
-            }
-        }
     }
 
     private suspend fun advanceSequentialQueue() {

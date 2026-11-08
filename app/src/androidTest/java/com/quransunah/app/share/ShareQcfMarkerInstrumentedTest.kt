@@ -24,7 +24,7 @@ class ShareQcfMarkerInstrumentedTest {
     @Test
     fun pageFaceDrawsIkhlasMarkerGlyph() = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val fonts = QcfFontManager(context)
+        val fonts = QcfFontManager(context, com.quransunah.app.fonts.QpcV4Glyphs(context))
         fonts.ensureMaps()
         val pageFace = fonts.loadPageTypeface(604)
 

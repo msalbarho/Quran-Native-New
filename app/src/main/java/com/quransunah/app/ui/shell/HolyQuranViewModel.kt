@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 enum class AppTab(val route: String) {
     Home("home"),
@@ -108,6 +109,9 @@ class HolyQuranViewModel @Inject constructor(
     val fontManager: QcfFontManager,
 ) : ViewModel() {
 
+    private val _headerQuarter = MutableStateFlow<List<com.quransunah.app.domain.model.DivisionInfo>>(emptyList())
+    val headerQuarters = _headerQuarter.asStateFlow()
+
     val hydration: StateFlow<HydrationState> = hydrationGate.state
     val playback: StateFlow<PlaybackSnapshot> = audioPlayer.snapshot
     val settings: StateFlow<UserSettings> = preferences.settings.stateIn(
@@ -137,6 +141,37 @@ class HolyQuranViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(5_000),
         AppConstants.TEXT_MUSHAF_DEFAULT_SP,
     )
+
+    val wirdPlan: StateFlow<com.quransunah.app.core.WirdPlan.State?> = preferences.wirdPlan
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    fun todayEpochDay(): Long {
+        val now = System.currentTimeMillis()
+        return (now + java.util.TimeZone.getDefault().getOffset(now)) / 86_400_000L
+    }
+
+    fun startWirdPlan(days: Int) {
+        viewModelScope.launch { preferences.startWirdPlan(days, todayEpochDay()) }
+    }
+
+    fun clearWirdPlan() {
+        viewModelScope.launch { preferences.clearWirdPlan() }
+    }
+
+    fun openTodayWird() {
+        val range = wirdPlan.value?.current ?: return
+        jumpToIndexPage(IndexJump(pageNumber = range.first))
+    }
+
+    /** Ticks off today's wird when the reader reaches its last page in the Mushaf. */
+    private fun checkWirdProgress(page: Int) {
+        if (_tab.value != AppTab.Reading) return
+        val plan = wirdPlan.value ?: return
+        val next = com.quransunah.app.core.WirdPlan.completedAfterVisit(plan, page)
+        if (next != plan.completed) {
+            viewModelScope.launch { preferences.setWirdCompleted(next) }
+        }
+    }
 
     private val _currentPage = MutableStateFlow(1)
     val currentPage: StateFlow<Int> = _currentPage.asStateFlow()
@@ -335,22 +370,8 @@ class HolyQuranViewModel @Inject constructor(
         _picker.value = ShellPicker.Settings
     }
 
-    fun openProgressPicker() {
-        _searchOpen.value = false
-        _picker.value = ShellPicker.Progress
-    }
-
-    fun openTrainingHistory() {
-        _searchOpen.value = false
-        _picker.value = ShellPicker.TrainingHistory
-    }
-
     fun markReadingHintDone() {
         viewModelScope.launch { preferences.setReadingHintDone() }
-    }
-
-    fun markTrainingHintDone() {
-        viewModelScope.launch { preferences.setTrainingHintDone() }
     }
 
     fun completeOnboarding() {
@@ -373,6 +394,7 @@ class HolyQuranViewModel @Inject constructor(
     fun goToPage(pageNumber: Int) {
         val clamped = pageNumber.coerceIn(1, AppConstants.TOTAL_PAGES)
         _currentPage.value = clamped
+        checkWirdProgress(clamped)
         val cached = _pageCache.value[clamped]
         if (cached != null) _page.value = cached
         viewModelScope.launch(Dispatchers.Default) {
@@ -557,6 +579,38 @@ class HolyQuranViewModel @Inject constructor(
     suspend fun trainingBodyWords(surah: Int, ayah: Int) =
         mushafRepository.getAyahWords(surah, ayah).filter { !it.isAyahMarker }
 
+    /**
+     * Words of one ayah (strictly this surah:ayah, ayah-end marker included) with the mushaf page whose V4 font
+     * draws each word. Only AYAH lines are scanned: BASMALLAH lines are filled with Al-Fatiha 1:1's words on every
+     * page, so they must never be used to resolve a word's page.
+     */
+    suspend fun trainingAyahPageWords(surah: Int, ayah: Int): List<Pair<Int, com.quransunah.app.domain.model.QuranWord>> {
+        val ayahWords = mushafRepository.getAyahWords(surah, ayah).sortedBy { it.id }
+        if (ayahWords.isEmpty()) return emptyList()
+        val wanted = ayahWords.map { it.id }.toSet()
+        val pageOf = HashMap<Int, Int>()
+        val pageWord = HashMap<Int, com.quransunah.app.domain.model.QuranWord>()
+        val start = trainingAyahPage(surah, ayah)
+        for (page in start..(start + 2).coerceAtMost(AppConstants.TOTAL_PAGES)) {
+            ensurePage(page)
+            _pageCache.value[page]?.lines.orEmpty()
+                .filter { it.lineType == com.quransunah.app.domain.model.LineType.AYAH }
+                .flatMap { it.words }
+                .filter { it.id in wanted && it.surah == surah && it.ayah == ayah }
+                .forEach { w -> if (pageOf.putIfAbsent(w.id, page) == null) pageWord[w.id] = w }
+            if (pageOf.size == wanted.size) break
+        }
+        return ayahWords.map { w -> (pageOf[w.id] ?: start) to (pageWord[w.id] ?: w) }
+    }
+
+    suspend fun trainingWordsFromAyah(surah: Int, ayah: Int) = withContext(Dispatchers.IO) {
+        mushafRepository.getTrainingWordsFromAyah(surah, ayah)
+    }
+
+    suspend fun trainingWordsBetweenAyahs(from: Pair<Int, Int>, to: Pair<Int, Int>) = withContext(Dispatchers.IO) {
+        mushafRepository.getTrainingWordsBetweenAyahs(from.first, from.second, to.first, to.second)
+    }
+
     suspend fun trainingAyahPage(surah: Int, ayah: Int): Int =
         mushafRepository.getPageForAyah(surah, ayah).coerceIn(1, AppConstants.TOTAL_PAGES)
 
@@ -621,9 +675,6 @@ class HolyQuranViewModel @Inject constructor(
             }
         }
     }
-
-    fun readingHighlight(playback: PlaybackSnapshot): ReadingHighlight =
-        highlightFrom(playback, _jumpHighlight.value, _selectedWord.value, _overlay.value)
 
     private fun highlightFrom(
         playback: PlaybackSnapshot,
@@ -720,7 +771,7 @@ class HolyQuranViewModel @Inject constructor(
             _surahsByNumber.value = mushafRepository.getSurahs().associateBy { it.number }
         }
         runCatching { mushafRepository.getDivisions() }
-        runCatching { mushafRepository.getQuarters() }
+        runCatching { _headerQuarter.value = mushafRepository.getQuarters() }
         runCatching { mushafRepository.getSajdas() }
         applyMarkersToCache()
     }

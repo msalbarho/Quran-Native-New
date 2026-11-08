@@ -3,8 +3,9 @@ package com.quransunah.app.core
 import com.quransunah.app.BuildConfig
 
 object AppConstants {
-    fun qcf4FaceAsset(faceNumber: Int): String =
-        "fonts/qcf4/QCF4_Hafs_%02d.ttf".format(java.util.Locale.US, faceNumber.coerceIn(1, 47))
+    /** Coloured QPC V4 tajweed page font (one per Madinah page, `public/fonts/qcf4/pN.ttf`). */
+    fun qcf4PageAsset(pageNumber: Int): String =
+        "fonts/qcf4/p${pageNumber.coerceIn(1, TOTAL_PAGES)}.ttf"
 
     const val TOTAL_PAGES = 604
     const val LINES_PER_PAGE = 15
@@ -12,7 +13,9 @@ object AppConstants {
     /** Side inset as a fraction of page width (was 0.045; reduced for a wider text column). */
     const val MUSHAF_HORIZONTAL_INSET = 0.028f
     const val HYDRATION_TIMEOUT_MS = 20_000L
-    const val PAGE_FONT_CACHE_SIZE = 8
+    /** Page Typefaces kept in memory: current page ±[PAGE_FONT_PRELOAD_RADIUS] plus slack. */
+    const val PAGE_FONT_CACHE_SIZE = 10
+    const val PAGE_FONT_PRELOAD_RADIUS = 3
     const val PAGE_DATA_CACHE_SIZE = 16
     const val PAGE_CACHE_RADIUS = 4
     const val PAGE_SWIPE_COMMIT_PX = 50f

@@ -108,8 +108,8 @@ fun TextMushafPage(
     val paper = LocalPaperColors.current
     val night = LocalNightMode.current
     val inspection = LocalInspectionMode.current
-    var pageFace by remember(pageNumber, fontManager) {
-        mutableStateOf(if (inspection) Typeface.DEFAULT else fontManager?.peekPageTypeface(pageNumber))
+    var pageFace by remember(pageNumber, fontManager, night) {
+        mutableStateOf(if (inspection) Typeface.DEFAULT else fontManager?.peekPageTypeface(pageNumber, night))
     }
     var titleFace by remember(fontManager) {
         mutableStateOf(fontManager?.peekSurahTitleTypeface())
@@ -117,9 +117,10 @@ fun TextMushafPage(
     var uthmanicFace by remember(fontManager) {
         mutableStateOf(fontManager?.peekUthmanicTypeface())
     }
-    LaunchedEffect(pageNumber, fontManager, inspection) {
+    LaunchedEffect(pageNumber, fontManager, inspection, night) {
         if (inspection || fontManager == null) return@LaunchedEffect
-        pageFace = fontManager.loadPageTypeface(pageNumber)
+        fontManager.setNightPalette(night)
+        pageFace = fontManager.loadPageTypeface(pageNumber, night)
         if (titleFace == null) titleFace = fontManager.loadSurahTitleTypeface()
         if (uthmanicFace == null) uthmanicFace = fontManager.loadUthmanicTypeface()
         fontManager.preloadNeighbors(pageNumber)
@@ -327,72 +328,7 @@ private fun TextMushafParagraph(
                 onLongPress = onLongPress,
             )
         }
-        Box(Modifier.matchParentSize()) {
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                Box(Modifier.matchParentSize()) {
-                    val hizbY = hizbCenterY
-                val sajdaY = sajdaCenterY
-                val pairCenterY =
-                    if (hizbY != null &&
-                        sajdaY != null &&
-                        hizbBadge != null &&
-                        abs(hizbY - sajdaY) < with(density) { 18.dp.toPx() }
-                    ) {
-                        (hizbY + sajdaY) / 2f
-                    } else {
-                        null
-                    }
-                if (pairCenterY != null && hizbBadge != null) {
-                    MushafPairedSideBadges(
-                        hizbBadge = hizbBadge,
-                        visible = chromeVisible,
-                        onTap = onBadgeTap,
-                        modifier = Modifier
-                            .align(MushafSideBadgeAlign)
-                            .zIndex(3f)
-                            .offset {
-                                IntOffset(
-                                    0,
-                                    (pairCenterY - with(density) { HizbBadgeHeight.toPx() / 2f }).roundToInt(),
-                                )
-                            },
-                    )
-                } else {
-                    if (hizbY != null && hizbBadge != null) {
-                        HizbFrameBadge(
-                            parts = hizbBadge,
-                            visible = chromeVisible,
-                            onTap = onBadgeTap,
-                            modifier = Modifier
-                                .align(MushafSideBadgeAlign)
-                                .zIndex(3f)
-                                .offset {
-                                    IntOffset(
-                                        0,
-                                        (hizbY - with(density) { HizbBadgeHeight.toPx() / 2f }).roundToInt(),
-                                    )
-                                },
-                        )
-                    }
-                    if (sajdaY != null) {
-                        SajdahFrameBadge(
-                            visible = chromeVisible,
-                            onTap = onBadgeTap,
-                            modifier = Modifier
-                                .align(MushafSideBadgeAlign)
-                                .zIndex(3f)
-                                .offset {
-                                    IntOffset(
-                                        0,
-                                        (sajdaY - with(density) { SajdahBadgeHeight.toPx() / 2f }).roundToInt(),
-                                    )
-                                },
-                        )
-                    }
-                }
-                }
-            }
-        }
+
     }
 }
 
@@ -591,25 +527,29 @@ private fun TextMushafWord(
     }
     val size = if (word.isAyahMarker) fontSize * 0.92f else fontSize
     val shape = RoundedCornerShape(6.dp)
+    val hidden = trainingWordHidden(
+        isAyahMarker = word.isAyahMarker,
+        surah = word.surah,
+        ayah = word.ayah,
+        wordId = word.id,
+        hideAyahText = hideAyahText,
+        revealedAyahs = revealedAyahs,
+        revealedWordIds = LocalTrainingRevealedWordIds.current,
+        wordPosition = word.position,
+        firstWordHint = LocalTrainingFirstWordHint.current,
+    )
+    val mark = if (word.isAyahMarker) null else LocalTrainingWordMarks.current[word.id]
+    val focused = LocalTrainingFocusWordId.current == word.id && !word.isAyahMarker && !hidden
     val paintColor = when {
-        trainingWordHidden(
-            isAyahMarker = word.isAyahMarker,
-            surah = word.surah,
-            ayah = word.ayah,
-            wordId = word.id,
-            hideAyahText = hideAyahText,
-            revealedAyahs = revealedAyahs,
-            revealedWordIds = LocalTrainingRevealedWordIds.current,
-            wordPosition = word.position,
-            firstWordHint = LocalTrainingFirstWordHint.current,
-        ) -> Color.Transparent
+        hidden -> Color.Transparent
+        mark != null -> trainingMarkColor(mark)
         ayahHighlighted -> ChromeTokens.PlaybackAyahBlue
         word.isAyahMarker -> glyphColor
         else -> glyphColor
     }
     val wordModifier = Modifier
         .then(
-            if (selected && !ayahHighlighted) {
+            if ((selected && !ayahHighlighted) || focused) {
                 Modifier
                     .clip(shape)
                     .background(highlightColor)

@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -33,8 +34,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
@@ -158,9 +165,11 @@ fun CurvedBottomNav(
                 .height(BottomNavBarHeight)
                 .clip(BottomNavBracketShape)
                 .background(paper.chromeFill)
-                .border(1.dp, paper.accent.copy(alpha = if (night) 0.40f else 0.26f), BottomNavBracketShape),
+                .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, BottomNavBracketShape),
         ) {
-        IslamicEdgePattern(Modifier.matchParentSize())
+        TiledOrnamentBackground(Modifier.matchParentSize())
+        BottomNavMosqueEnd(alignStart = true)
+        BottomNavMosqueEnd(alignStart = false)
         Box(Modifier.fillMaxSize()) {
                 if (bubbleX > 0f) {
                     Box(
@@ -219,15 +228,10 @@ fun CurvedBottomNav(
                                     contentScale = androidx.compose.ui.layout.ContentScale.Fit,
                                     modifier = iconModifier,
                                 )
-                                Text(
+                                FitBarLabel(
                                     text = stringResource(item.labelRes),
                                     color = tint,
-                                    fontSize = 9.9.sp,
-                                    lineHeight = 12.1.sp,
-                                    textAlign = TextAlign.Center,
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    overflow = TextOverflow.Ellipsis,
+                                    fontSize = 11.5.sp,
                                     modifier = Modifier.fillMaxWidth(),
                                 )
                             }
@@ -248,6 +252,61 @@ fun CurvedBottomNav(
         }
         }
         }
+    }
+}
+
+@Composable
+internal fun BoxScope.BottomNavMosqueEnd(alignStart: Boolean) {
+    val paper = LocalPaperColors.current
+    val night = LocalNightMode.current
+    val sideWidth = BottomNavBarHeight * 1.68f
+    val outerIsLeft = alignStart == (LocalLayoutDirection.current == LayoutDirection.Ltr)
+    Box(
+        modifier = Modifier
+            .align(if (alignStart) Alignment.CenterStart else Alignment.CenterEnd)
+            .width(sideWidth)
+            .fillMaxHeight()
+            .clipToBounds(),
+    ) {
+        Image(
+            painter = painterResource(R.drawable.surah_mosque_silhouette),
+            contentDescription = null,
+            alignment = if (alignStart) Alignment.CenterStart else Alignment.CenterEnd,
+            contentScale = ContentScale.Crop,
+            colorFilter = ColorFilter.tint(paper.accent, BlendMode.SrcIn),
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = 1.24f
+                    scaleY = 1.24f
+                    transformOrigin = TransformOrigin(
+                        pivotFractionX = if (outerIsLeft) 0f else 1f,
+                        pivotFractionY = 0.5f,
+                    )
+                    alpha = if (night) 0.28f else 0.22f
+                },
+        )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(
+                    Brush.horizontalGradient(
+                        colorStops = if (alignStart) {
+                            arrayOf(
+                                0f to Color.Transparent,
+                                0.62f to Color.Transparent,
+                                1f to paper.chromeFill,
+                            )
+                        } else {
+                            arrayOf(
+                                0f to paper.chromeFill,
+                                0.38f to Color.Transparent,
+                                1f to Color.Transparent,
+                            )
+                        },
+                    ),
+                ),
+        )
     }
 }
 

@@ -149,6 +149,47 @@ class HeaderGlyphFitTest {
         assertEquals(listOf(9), HeaderGlyphFit.surahsOnPage(page))
     }
 
+    @Test
+    fun page604HeaderSelectsOnlyIkhlas() {
+        val page = MushafPage(604, listOf(112, 113, 114).mapIndexed { index, number ->
+            MushafLine(index * 4 + 1, LineType.SURAH_NAME, true, number, emptyList())
+        }, 30, 60)
+        assertEquals(112, HeaderGlyphFit.firstSurahOnPage(page))
+    }
+
+    @Test
+    fun firstSurahIncludesContinuationBeforeANewSurahBanner() {
+        val page = MushafPage(1, listOf(
+            MushafLine(5, LineType.SURAH_NAME, true, 3, emptyList()),
+            MushafLine(1, LineType.AYAH, false, null,
+                listOf(QuranWord(1, 2, 286, 1, "", ""))),
+        ), 3, 6)
+        assertEquals(2, HeaderGlyphFit.firstSurahOnPage(page))
+    }
+
+    @Test
+    fun everyAvailableSmallSurahHasAnIndependentInkRegion() {
+        val map = loadQbsmlMap()
+        for (number in 2..114) {
+            val slice = QbsmlHeaderSlices.forSurah(number, map.single[number].orEmpty()) {
+                map.combined.getValue(it.joinToString("-"))
+            }
+            assertTrue("small header missing for surah $number", slice != null)
+            slice!!
+            assertTrue(slice.glyph.codePointAt(0) in 0xF174..0xF1D5)
+            assertTrue(slice.left >= 0f && slice.left < slice.right && slice.right <= 1f)
+            assertTrue(slice.top >= 0f && slice.top < slice.bottom && slice.bottom <= 1f)
+        }
+        for ((key, glyph) in map.combined) {
+            val slices = key.split("-").map { number ->
+                QbsmlHeaderSlices.forSurah(number.toInt(), "") { glyph }!!
+            }
+            slices.zipWithNext().forEach { (right, left) ->
+                assertTrue("neighbor names overlap for $key", right.left > left.right)
+            }
+        }
+    }
+
     private fun loadQbsmlMap(): QbsmlTables {
         val file = File("src/main/assets/json/qcf4-qbsml-map.json")
         val raw = file.readText()

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">Модуль проверки чтения</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (на устройстве)</string>
+    <string name="recitation_engine_zipformer_desc">По умолчанию. Офлайн, в реальном времени, проверяет произношение буква за буквой.</string>
+    <string name="recitation_engine_whisper">Whisper Quran (на устройстве)</string>
+    <string name="recitation_engine_whisper_desc">Офлайн после однократной загрузки (~78 МБ).</string>
+    <string name="recitation_engine_android">Распознавание речи Android</string>
+    <string name="recitation_engine_android_desc">Встроенный распознаватель телефона (может потребоваться интернет).</string>
+    <string name="recitation_engine_unavailable">Недоступно на этом устройстве</string>
+    <string name="recitation_whisper_download">Скачать модель Whisper</string>
+    <string name="recitation_whisper_downloading">Загрузка… %1$d%%</string>
+    <string name="recitation_whisper_ready">Модель готова</string>
+    <string name="recitation_whisper_delete">Удалить модель</string>
+    <string name="recitation_whisper_failed">Ошибка загрузки: %1$s</string>
+    <string name="recitation_license_model">Лицензия Zipformer Quran 3.1 (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">Лицензия sherpa-onnx (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">Приложение слушает ваше чтение на устройстве без интернета и окрашивает каждое слово по мере произнесения, используя модель Zipformer Quran 3.1 от Quran Lab.</string>
+    <string name="recitation_disclaimer">Автоматическая проверка чтения и таджвида может ошибаться. Она не заменяет квалифицированного учителя и не является религиозным суждением о чьём-либо чтении.</string>
+    <string name="recitation_understood">Понятно</string>
+    <string name="recitation_close">Закрыть</string>
+    <string name="training_show_ayah">Показать аят</string>
+    <string name="training_select">Выбрать</string>
+    <string name="training_select_surah">Перейти к суре</string>
+    <string name="training_select_page">Перейти к странице</string>
+    <string name="training_go_to_page">Перейти</string>
+    <string name="training_scope_open">Открыть чтение</string>
+    <string name="training_scope_page">Текущая страница</string>
+    <string name="training_range_format_hint">Введите каждую границу как сура:аят (например, 2:5).</string>
+    <string name="training_apply_range">Применить отрывок</string>
+    <string name="training_previous">Назад</string>
+    <string name="training_next">Далее</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s слов</string>
+    <string name="training_legend_correct">Верно</string>
+    <string name="training_legend_wrong">Ошибка</string>
+    <string name="training_legend_missing">Пропущено</string>
+</resources>

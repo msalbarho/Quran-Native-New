@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">তিলাওয়াত যাচাই ইঞ্জিন</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (ডিভাইসে)</string>
+    <string name="recitation_engine_zipformer_desc">ডিফল্ট। অফলাইন, রিয়েল-টাইম, উচ্চারণ অক্ষরে অক্ষরে যাচাই করে।</string>
+    <string name="recitation_engine_whisper">Whisper Quran (ডিভাইসে)</string>
+    <string name="recitation_engine_whisper_desc">একবার ডাউনলোডের পর অফলাইন (~78 MB)।</string>
+    <string name="recitation_engine_android">Android কণ্ঠ শনাক্তকরণ</string>
+    <string name="recitation_engine_android_desc">ফোনের অন্তর্নির্মিত শনাক্তকারী (ইন্টারনেট লাগতে পারে)।</string>
+    <string name="recitation_engine_unavailable">এই ডিভাইসে উপলব্ধ নয়</string>
+    <string name="recitation_whisper_download">Whisper মডেল ডাউনলোড করুন</string>
+    <string name="recitation_whisper_downloading">ডাউনলোড হচ্ছে… %1$d%%</string>
+    <string name="recitation_whisper_ready">মডেল প্রস্তুত</string>
+    <string name="recitation_whisper_delete">মডেল মুছুন</string>
+    <string name="recitation_whisper_failed">ডাউনলোড ব্যর্থ: %1$s</string>
+    <string name="recitation_license_model">Zipformer Quran 3.1 লাইসেন্স (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">sherpa-onnx লাইসেন্স (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">অ্যাপটি Quran Lab-এর Zipformer Quran 3.1 মডেল ব্যবহার করে আপনার ডিভাইসে ইন্টারনেট ছাড়াই আপনার তিলাওয়াত শোনে এবং প্রতিটি শব্দ বলার সাথে সাথে রঙিন করে।</string>
+    <string name="recitation_disclaimer">তিলাওয়াত ও তাজবিদের স্বয়ংক্রিয় যাচাই ভুল হতে পারে। এটি যোগ্য শিক্ষকের বিকল্প নয় এবং কারও তিলাওয়াত সম্পর্কে ধর্মীয় রায় নয়।</string>
+    <string name="recitation_understood">বুঝেছি</string>
+    <string name="recitation_close">বন্ধ করুন</string>
+    <string name="training_show_ayah">আয়াত দেখান</string>
+    <string name="training_select">নির্বাচন</string>
+    <string name="training_select_surah">সূরায় যান</string>
+    <string name="training_select_page">পৃষ্ঠা নম্বরে যান</string>
+    <string name="training_go_to_page">যান</string>
+    <string name="training_scope_open">তিলাওয়াত খুলুন</string>
+    <string name="training_scope_page">বর্তমান পৃষ্ঠা</string>
+    <string name="training_range_format_hint">প্রতিটি সীমা সূরা:আয়াত আকারে লিখুন (যেমন 2:5)।</string>
+    <string name="training_apply_range">অংশ প্রয়োগ করুন</string>
+    <string name="training_previous">আগের</string>
+    <string name="training_next">পরের</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s শব্দ</string>
+    <string name="training_legend_correct">সঠিক</string>
+    <string name="training_legend_wrong">ভুল</string>
+    <string name="training_legend_missing">বাদ পড়েছে</string>
+</resources>

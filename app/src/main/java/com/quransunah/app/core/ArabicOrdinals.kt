@@ -107,35 +107,4 @@ object ArabicOrdinals {
         return HizbBadgeParts(kind, hizbNumber)
     }
 
-    /** Split a page quarter label into stacked badge lines, matching React `formatPageQuarterBadgeLines`. */
-    fun quarterBadgeLines(rawLabel: String): List<String> {
-        val label = rawLabel.replace(Regex("\\s+"), " ").trim()
-        if (label.isEmpty()) return emptyList()
-        val match = Regex("الحزب\\s+(.+)$").find(label) ?: return listOf(label)
-        val hizbNumber = parseMasculine(match.groupValues[1].trim()) ?: return listOf(label)
-        val prefix = label.substring(0, match.range.first).trim()
-        val lines = ArrayList<String>()
-        when {
-            prefix.isEmpty() -> lines += "الحزب"
-            prefix == "ربع" -> {
-                lines += "ربع"
-                lines += "الحزب"
-            }
-            prefix == "نصف" -> {
-                lines += "نصف"
-                lines += "الحزب"
-            }
-            prefix == "ثلاثة أرباع" || prefix == "ثلاث أرباع" -> {
-                lines += "ثلاث"
-                lines += "أرباع"
-                lines += "الحزب"
-            }
-            else -> {
-                lines += prefix.split(' ')
-                lines += "الحزب"
-            }
-        }
-        lines += quranDigits(hizbNumber)
-        return lines
-    }
 }

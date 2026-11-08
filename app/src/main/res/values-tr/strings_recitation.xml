@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">Tilavet kontrol motoru</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (cihazda)</string>
+    <string name="recitation_engine_zipformer_desc">Varsayılan. Çevrimdışı, gerçek zamanlı, telaffuzu harf harf kontrol eder.</string>
+    <string name="recitation_engine_whisper">Whisper Quran (cihazda)</string>
+    <string name="recitation_engine_whisper_desc">Tek seferlik indirmeden sonra çevrimdışı (~78 MB).</string>
+    <string name="recitation_engine_android">Android konuşma tanıma</string>
+    <string name="recitation_engine_android_desc">Telefonun yerleşik tanıyıcısı (internet gerekebilir).</string>
+    <string name="recitation_engine_unavailable">Bu cihazda kullanılamıyor</string>
+    <string name="recitation_whisper_download">Whisper modelini indir</string>
+    <string name="recitation_whisper_downloading">İndiriliyor… %%%1$d</string>
+    <string name="recitation_whisper_ready">Model hazır</string>
+    <string name="recitation_whisper_delete">Modeli sil</string>
+    <string name="recitation_whisper_failed">İndirme başarısız: %1$s</string>
+    <string name="recitation_license_model">Zipformer Quran 3.1 lisansı (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">sherpa-onnx lisansı (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">Uygulama, Quran Lab’in Zipformer Quran 3.1 modelini kullanarak tilavetinizi cihazınızda internetsiz dinler ve her kelimeyi söyledikçe renklendirir.</string>
+    <string name="recitation_disclaimer">Otomatik tilavet ve tecvit kontrolü yanılabilir. Yetkin bir hocanın yerini tutmaz ve kimsenin tilaveti hakkında dini bir hüküm değildir.</string>
+    <string name="recitation_understood">Anladım</string>
+    <string name="recitation_close">Kapat</string>
+    <string name="training_show_ayah">Ayeti göster</string>
+    <string name="training_select">Seç</string>
+    <string name="training_select_surah">Sureye git</string>
+    <string name="training_select_page">Sayfa numarasına git</string>
+    <string name="training_go_to_page">Git</string>
+    <string name="training_scope_open">Tilaveti aç</string>
+    <string name="training_scope_page">Geçerli sayfa</string>
+    <string name="training_range_format_hint">Her uç noktayı sure:ayet şeklinde girin (örneğin 2:5).</string>
+    <string name="training_apply_range">Bölümü uygula</string>
+    <string name="training_previous">Önceki</string>
+    <string name="training_next">Sonraki</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s kelime</string>
+    <string name="training_legend_correct">Doğru</string>
+    <string name="training_legend_wrong">Yanlış</string>
+    <string name="training_legend_missing">Eksik</string>
+</resources>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">ਤਿਲਾਵਤ ਜਾਂਚ ਇੰਜਣ</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (ਡਿਵਾਈਸ ਉੱਤੇ)</string>
+    <string name="recitation_engine_zipformer_desc">ਡਿਫਾਲਟ। ਔਫਲਾਈਨ, ਰੀਅਲ-ਟਾਈਮ, ਉਚਾਰਨ ਨੂੰ ਅੱਖਰ-ਅੱਖਰ ਜਾਂਚਦਾ ਹੈ।</string>
+    <string name="recitation_engine_whisper">Whisper Quran (ਡਿਵਾਈਸ ਉੱਤੇ)</string>
+    <string name="recitation_engine_whisper_desc">ਇੱਕ ਵਾਰ ਡਾਊਨਲੋਡ ਤੋਂ ਬਾਅਦ ਔਫਲਾਈਨ (~78 MB)।</string>
+    <string name="recitation_engine_android">Android ਬੋਲੀ ਪਛਾਣ</string>
+    <string name="recitation_engine_android_desc">ਫ਼ੋਨ ਦਾ ਅੰਦਰੂਨੀ ਪਛਾਣਕਾਰ (ਇੰਟਰਨੈੱਟ ਦੀ ਲੋੜ ਹੋ ਸਕਦੀ ਹੈ)।</string>
+    <string name="recitation_engine_unavailable">ਇਸ ਡਿਵਾਈਸ ਉੱਤੇ ਉਪਲਬਧ ਨਹੀਂ</string>
+    <string name="recitation_whisper_download">Whisper ਮਾਡਲ ਡਾਊਨਲੋਡ ਕਰੋ</string>
+    <string name="recitation_whisper_downloading">ਡਾਊਨਲੋਡ ਹੋ ਰਿਹਾ ਹੈ… %1$d%%</string>
+    <string name="recitation_whisper_ready">ਮਾਡਲ ਤਿਆਰ ਹੈ</string>
+    <string name="recitation_whisper_delete">ਮਾਡਲ ਮਿਟਾਓ</string>
+    <string name="recitation_whisper_failed">ਡਾਊਨਲੋਡ ਅਸਫਲ: %1$s</string>
+    <string name="recitation_license_model">Zipformer Quran 3.1 ਲਾਇਸੈਂਸ (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">sherpa-onnx ਲਾਇਸੈਂਸ (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">ਐਪ Quran Lab ਦੇ Zipformer Quran 3.1 ਮਾਡਲ ਨਾਲ ਤੁਹਾਡੀ ਤਿਲਾਵਤ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਉੱਤੇ ਬਿਨਾਂ ਇੰਟਰਨੈੱਟ ਸੁਣਦੀ ਹੈ ਅਤੇ ਹਰ ਸ਼ਬਦ ਬੋਲਦੇ ਹੀ ਉਸਨੂੰ ਰੰਗ ਦਿੰਦੀ ਹੈ।</string>
+    <string name="recitation_disclaimer">ਤਿਲਾਵਤ ਅਤੇ ਤਜਵੀਦ ਦੀ ਆਟੋਮੈਟਿਕ ਜਾਂਚ ਗਲਤ ਹੋ ਸਕਦੀ ਹੈ। ਇਹ ਕਿਸੇ ਯੋਗ ਉਸਤਾਦ ਦੀ ਥਾਂ ਨਹੀਂ ਲੈਂਦੀ ਅਤੇ ਕਿਸੇ ਦੀ ਤਿਲਾਵਤ ਬਾਰੇ ਧਾਰਮਿਕ ਫ਼ੈਸਲਾ ਨਹੀਂ ਹੈ।</string>
+    <string name="recitation_understood">ਸਮਝ ਗਿਆ</string>
+    <string name="recitation_close">ਬੰਦ ਕਰੋ</string>
+    <string name="training_show_ayah">ਆਇਤ ਦਿਖਾਓ</string>
+    <string name="training_select">ਚੁਣੋ</string>
+    <string name="training_select_surah">ਸੂਰਤ ਉੱਤੇ ਜਾਓ</string>
+    <string name="training_select_page">ਪੰਨਾ ਨੰਬਰ ਉੱਤੇ ਜਾਓ</string>
+    <string name="training_go_to_page">ਜਾਓ</string>
+    <string name="training_scope_open">ਤਿਲਾਵਤ ਖੋਲ੍ਹੋ</string>
+    <string name="training_scope_page">ਮੌਜੂਦਾ ਪੰਨਾ</string>
+    <string name="training_range_format_hint">ਹਰ ਸੀਮਾ ਨੂੰ ਸੂਰਤ:ਆਇਤ ਵਜੋਂ ਲਿਖੋ (ਜਿਵੇਂ 2:5)।</string>
+    <string name="training_apply_range">ਹਿੱਸਾ ਲਾਗੂ ਕਰੋ</string>
+    <string name="training_previous">ਪਿਛਲਾ</string>
+    <string name="training_next">ਅਗਲਾ</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s ਸ਼ਬਦ</string>
+    <string name="training_legend_correct">ਸਹੀ</string>
+    <string name="training_legend_wrong">ਗਲਤ</string>
+    <string name="training_legend_missing">ਛੁੱਟਿਆ</string>
+</resources>

@@ -63,6 +63,8 @@ private const val OVERLAY_MID = 0x66000000.toInt()
 private const val TEXT_WHITE = 0xFFF7F4EE.toInt()
 private const val BASMALAH_GOLD = 0xFFC5A059.toInt()
 /** Accent for Medina-style ayah-end marks on dark share slides. */
+private const val TEXT_BACKDROP = 0x8C000000.toInt()
+private const val AYAH_MARKER_FILL = 0xFF1B2433.toInt()
 private const val AYAH_MARKER_ACCENT = 0xFFD4B06A.toInt()
 private const val MAX_SLIDE_US = 280_000_000L
 private const val INTRO_NAME_ONLY_MS = 2_200L
@@ -81,15 +83,26 @@ class AyahShareExporter @Inject constructor(
     private val fontManager: QcfFontManager,
     private val reciterCatalog: ReciterCatalog,
 ) {
+    private val backgroundCache = object : android.util.LruCache<String, Bitmap>(24 * 1024 * 1024) {
+        override fun sizeOf(key: String, value: Bitmap): Int = value.allocationByteCount
+    }
+    private val brandingBitmap by lazy {
+        context.assets.open("share-brand/icon.jpg").use { BitmapFactory.decodeStream(it) }
+            ?: error("Project branding icon unavailable")
+    }
+    internal fun arabicBrandingName(): String {
+        val configuration=android.content.res.Configuration(context.resources.configuration).apply {
+            setLocale(java.util.Locale.forLanguageTag("ar"))
+        }
+        return context.createConfigurationContext(configuration).getString(R.string.app_name)
+    }
+
+    internal fun promotionalWatermarkLabel():String = arabicBrandingName()+" - تلاوة واستماع"
+
     suspend fun shareImage(content: AyahShareContent) = withContext(Dispatchers.IO) {
         fontManager.ensureMaps()
         val verse = content.verses.firstOrNull() ?: return@withContext
-        val bitmap = renderSlide(
-            content = content,
-            verse = verse,
-            mode = SharePaintMode.FULL,
-            backgroundAsset = ShareBackgrounds.pick(),
-        )
+        val bitmap = renderMaker(content,verse,VideoMakerOptions(),null,1080,1920,displayVerses=content.verses)
         val file = writeJpeg(bitmap, "ayah-${content.surah}-${verse.ayah}.jpg")
         bitmap.recycle()
         saveToGalleryThenShare(
@@ -170,6 +183,239 @@ class AyahShareExporter @Inject constructor(
         )
     }
 
+    /** Offline-safe editor preview uses the very same renderer as the MP4. */
+    suspend fun makerPreview(content: AyahShareContent, options: VideoMakerOptions, word: Int? = 1, progress: Float = .5f, elapsedUs: Long = 0L, totalUs: Long = 1L, onGeometry: ((MakerPreviewGeometry)->Unit)? = null): Bitmap =
+        withContext(Dispatchers.IO) {
+            fontManager.ensureMaps()
+            renderMaker(content, content.verses.first(), options, word, 540, 960, progress, elapsedUs, totalUs, onGeometry=onGeometry)
+        }
+
+    suspend fun makeVideo(content: AyahShareContent, reciterId: String, options: VideoMakerOptions): File = withContext(Dispatchers.IO) {
+        fontManager.ensureMaps()
+        val reciter = reciterCatalog.ayahReciter(reciterId) ?: error("Choose a reciter")
+        val frames = ArrayList<File>()
+        val durations = ArrayList<Long>()
+        val clips = ArrayList<ShareTimedClip>()
+        val timeline = org.json.JSONArray()
+        var timelineStartUs = 0L
+        data class PreparedVerse(val verse: AyahShareVerse, val clip: ShareTimedClip, val segments: List<WordSegment>)
+        val prepared = ArrayList<PreparedVerse>()
+        val timingStore = QulWordTimings(context)
+        content.verses.forEachIndexed { verseIndex, verse ->
+            val source = downloadAyahAudio(reciter, content.surah, verse.ayah).first()
+            val qulId = when (reciter.id) { "123" -> 18; "92" -> 26; else -> null }
+            val originalSegments = qulId?.let { timingStore.load(content.surah, verse.ayah, it) }.orEmpty()
+            if (qulId != null) check(originalSegments.isNotEmpty()) { "Word timings unavailable. Please retry with internet access." }
+            // Word timestamps are highlight anchors, NOT safe audio crop boundaries.
+            // Preserve the complete source ayah, including its real consonant attack and margins.
+            val clip = ShareAudioClip.prepareMaker(source, File(shareDir(), "maker-${verse.ayah}.wav"),
+                fromMs = 0L, toMs = null, fadeIn = false, fadeOut = false)
+            clips += clip
+            val segments = originalSegments.cursorSegments(clip.durationUs)
+            timeline.put(org.json.JSONObject().put("ayah", verse.ayah).put("startUs", timelineStartUs)
+                .put("durationUs", clip.durationUs).put("cropOffsetMs", 0)
+                .put("words", org.json.JSONArray().apply {
+                    segments.forEach { put(org.json.JSONArray(listOf(it.position, it.startMs, it.endMs))) }
+                }))
+            timelineStartUs += clip.durationUs
+            prepared += PreparedVerse(verse, clip, segments)
+        }
+        val totalUs = clips.sumOf { it.durationUs }
+        var verseStartUs = 0L
+        prepared.forEach { item ->
+            makerRenderFrames(item.segments, item.clip.durationUs,
+                options.trackingMode in listOf(0,2,4) || options.backgrounds.size > 1).forEach { interval ->
+                val localUs = interval.startUs + interval.durationUs / 2
+                val word = item.segments.firstOrNull { it.position == interval.word && localUs / 1000 in it.startMs until it.endMs }
+                val progress = word?.let { ((localUs / 1000f - it.startMs) / (it.endMs - it.startMs).coerceAtLeast(1)).coerceIn(0f,1f) } ?: 0f
+                val bitmap = renderMaker(content, item.verse, options, interval.word, 1080, 1920,
+                    progress, verseStartUs + localUs, totalUs)
+                frames += writeJpeg(bitmap, "maker-frame-${frames.size}.jpg")
+                bitmap.recycle(); durations += interval.durationUs
+            }
+            verseStartUs += item.clip.durationUs
+        }
+        val output = File(shareDir(), "quran-${content.surah}-${content.fromAyah}-${content.toAyah}-${System.currentTimeMillis()}.mp4")
+        val combined = ShareAudioClip.concatenateMaker(clips, File(shareDir(), "maker-selection.wav"))
+        File(shareDir(), "last-maker-timeline.json").writeText(timeline.toString(2))
+        val encoded = File(shareDir(), "maker-encoded.mp4")
+        if (encoded.exists()) encoded.delete()
+        exportVideo(frames, listOf(combined), encoded, durations, options.motion, cleanAudio = true)
+        val encoderDelayUs = ShareAudioClip.makerEncoderDelayUs(encoded, combined.file)
+        File(shareDir(), "last-maker-sync.txt").writeText("measuredVideoDelayUs=$encoderDelayUs\n")
+        MakerAvSync.align(encoded, output, encoderDelayUs)
+        output
+    }
+
+    suspend fun saveMakerVideo(file: File): Uri = withContext(Dispatchers.IO) {
+        ShareGallerySaver.saveVideo(context, file, file.name) ?: error("Could not save video")
+    }
+
+    fun shareMakerVideo(file: File, tikTok: Boolean = false) {
+        if (!tikTok) { launchShare(file, "video/mp4", "القرآن الكريم"); return }
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "video/mp4"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            clipData = android.content.ClipData.newRawUri("Quran video", uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        val target = listOf("com.zhiliaoapp.musically", "com.ss.android.ugc.trill").firstOrNull { pkg ->
+            intent.setPackage(pkg).resolveActivity(context.packageManager) != null
+        }
+        if (target != null) { intent.setPackage(target); context.startActivity(intent) }
+        else launchShare(file, "video/mp4", "القرآن الكريم")
+    }
+
+    suspend fun shareImagePreview(content: AyahShareContent): Bitmap = withContext(Dispatchers.IO) {
+        fontManager.ensureMaps()
+        renderMaker(content,content.verses.first(),VideoMakerOptions(),null,1080,1920,displayVerses=content.verses)
+    }
+
+    suspend fun markerPreview(number: Int, color: Int = 0xFFD4B06A.toInt()): Bitmap = withContext(Dispatchers.IO) {
+        val bitmap = createBitmap(420, 420)
+        val canvas = Canvas(bitmap)
+        canvas.drawColor(if (color == 0xFF000000.toInt()) 0xFFF8F3E8.toInt() else 0xFF161C24.toInt())
+        HafsAyahMarker.draw(canvas, fontManager.loadUthmanicTypeface() ?: Typeface.DEFAULT,
+            number, 210f, 210f, 310f, color)
+        bitmap
+    }
+
+    suspend fun makeMakerImage(content: AyahShareContent, options: VideoMakerOptions): File = withContext(Dispatchers.IO) {
+        fontManager.ensureMaps()
+        val image = renderMaker(content, content.verses.first(), options, null, 1080, 1920, displayVerses=content.verses)
+        writeJpeg(image, "quran-image-${System.currentTimeMillis()}.jpg").also { image.recycle() }
+    }
+    suspend fun saveMakerImage(file: File): Uri = withContext(Dispatchers.IO) {
+        ShareGallerySaver.saveImage(context,file,file.name) ?: error("Could not save image")
+    }
+
+    private suspend fun renderMaker(content: AyahShareContent, verse: AyahShareVerse, options: VideoMakerOptions,
+                                    activeWord: Int?, width: Int, height: Int, activeProgress: Float = 0f,
+                                    elapsedUs: Long = 0L, totalUs: Long = 1L, displayVerses: List<AyahShareVerse> = listOf(verse), onGeometry: ((MakerPreviewGeometry)->Unit)? = null): Bitmap {
+        val bitmap = createBitmap(width, height)
+        val canvas = Canvas(bitmap)
+        val backgrounds = options.backgrounds.ifEmpty { listOf(options.background) }
+        val mix = makerBackgroundMix(elapsedUs,totalUs,backgrounds.size)
+        drawCoverBackground(canvas, backgrounds[mix.from])
+        if (mix.from != mix.to) drawCoverBackground(canvas, backgrounds[mix.to], (mix.blend*255).toInt())
+        drawDarkOverlay(canvas)
+        val hafs = fontManager.loadUthmanicTypeface() ?: Typeface.DEFAULT
+        val pageFace = if (options.font == 0) fontManager.loadPageTypeface(verse.pageNumber, night = true) else null
+        val qcf = options.font == 0 && verse.qcfText.any { it.code in 0xFB50..0xFEFF || it.code in 0xE000..0xF8FF } && pageFace != Typeface.DEFAULT
+        val face = if (qcf) pageFace!! else if (options.font == 2) Typeface.create("serif",Typeface.NORMAL) else hafs
+        val words = (if (qcf) verse.qcfText else verse.uthmanicText).trim().split(Regex("\\s+"))
+        val starts = words.indices.map { index -> words.take(index).sumOf { it.length+1 } }
+        val text = android.text.SpannableStringBuilder()
+        displayVerses.forEachIndexed { index,item ->
+            val itemPage=if(options.font==0)fontManager.loadPageTypeface(item.pageNumber,night=true)else null
+            val itemQcf=options.font==0 && item.qcfText.any { it.code in 0xFB50..0xFEFF || it.code in 0xE000..0xF8FF } && itemPage!=Typeface.DEFAULT
+            val itemFace=if(itemQcf)itemPage!! else if(options.font==2)Typeface.create("serif",Typeface.NORMAL)else hafs
+            val itemWords=(if(itemQcf)item.qcfText else item.uthmanicText).trim().split(Regex("\\s+"))
+            val begin=text.length
+            text.append(itemWords.joinToString(" "))
+            text.setSpan(object:android.text.style.MetricAffectingSpan() {
+                override fun updateDrawState(tp:TextPaint){tp.typeface=itemFace;tp.color=TEXT_WHITE;tp.colorFilter=PorterDuffColorFilter(TEXT_WHITE,PorterDuff.Mode.SRC_IN)}
+                override fun updateMeasureState(tp:TextPaint){tp.typeface=itemFace}
+            },begin,text.length,android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            if(options.marker)HafsAyahMarker.appendInline(text,hafs,item.ayah,options.markerColor,itemWords.last(),itemFace)
+            if(index<displayVerses.lastIndex)text.append(" ")
+        }
+        if (activeWord != null) words.indices.forEach { index ->
+            val recited = if (options.trackingMode == 1) index < activeWord else index == activeWord-1
+            if (recited && options.trackingMode in listOf(1,3,4)) {
+                text.setSpan(object : android.text.style.CharacterStyle() {
+                    override fun updateDrawState(tp: TextPaint) {
+                        tp.colorFilter = PorterDuffColorFilter(options.highlightColor,PorterDuff.Mode.SRC_IN)
+                        if (options.trackingMode == 4) tp.setShadowLayer(width*.012f,0f,0f,options.highlightColor)
+                    }
+                },starts[index],starts[index]+words[index].length,android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+        }
+        val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            typeface=face; textSize=width*.080f*options.textScale; color=TEXT_WHITE
+            colorFilter=PorterDuffColorFilter(TEXT_WHITE,PorterDuff.Mode.SRC_IN)
+            if(options.glow) setShadowLayer(width*.014f,0f,0f,options.highlightColor)
+        }
+        val maxWidth=(width*.82f).toInt()
+        fun layout()=android.text.StaticLayout.Builder.obtain(text,0,text.length,paint,maxWidth)
+            .setAlignment(android.text.Layout.Alignment.ALIGN_CENTER).setTextDirection(android.text.TextDirectionHeuristics.RTL)
+            .setLineSpacing(0f,1.45f).setHyphenationFrequency(android.text.Layout.HYPHENATION_FREQUENCY_NONE).build()
+        var body=layout()
+        while(body.height>height*.48f && paint.textSize>width*.025f){paint.textSize*=.9f;body=layout()}
+        val visibleWidth=(0 until body.lineCount).maxOf { body.getLineRight(it)-body.getLineLeft(it) }
+        val bodyX=(width*options.ayahX).coerceIn(visibleWidth/2f,width-visibleWidth/2f)-maxWidth/2f
+        val titleFace=if(options.showTitle)fontManager.loadSurahTitleTypeface() else null
+        val title=if(options.showTitle)visualPua(fontManager.surahNameLigature(content.surah).orEmpty()) else ""
+        val titlePaint=ligaturePaint(titleFace ?: hafs,width*.10f,AYAH_MARKER_ACCENT)
+        fitWidth(titlePaint,title,width*.70f,20f)
+        val titleBounds=Rect();if(title.isNotEmpty())titlePaint.getTextBounds(title,0,title.length,titleBounds)
+        val geometry=makerVerticalPlacement(options.ayahY,options.titleY,body.height.toFloat()/height,
+            titleBounds.height().toFloat()/height,options.showTitle,options.translation)
+        onGeometry?.invoke(geometry)
+        val bodyY=geometry.ayahCenterY*height-body.height/2f
+        if(options.textBackdrop) drawTextBackdrop(canvas,bodyY,bodyY+body.height)
+        canvas.save();canvas.translate(bodyX,bodyY)
+        if(activeWord!=null && options.trackingMode in listOf(0,2)) {
+            val trackingPaint=Paint(Paint.ANTI_ALIAS_FLAG).apply { color=options.highlightColor; strokeWidth=width*.006f;strokeCap=Paint.Cap.ROUND }
+            val filledLines=linkedMapOf<Int,android.graphics.RectF>()
+            words.indices.forEach { index ->
+                val complete=index<activeWord-1
+                if(complete || index==activeWord-1) {
+                    val path=android.graphics.Path();val bounds=android.graphics.RectF()
+                    val line=body.getLineForOffset(starts[index])
+                    val next=starts.getOrNull(index+1)
+                    val end=starts[index]+words[index].length+if(options.trackingMode==0 && next!=null && body.getLineForOffset(next)==line)1 else 0
+                    body.getSelectionPath(starts[index],end,path);path.computeBounds(bounds,true)
+                    val fraction=if(complete) 1f else activeProgress.coerceIn(0f,1f)
+                    if(options.trackingMode==0) {
+                        val filled=android.graphics.RectF(bounds.right-bounds.width()*fraction,bounds.top,bounds.right,bounds.bottom)
+                        filledLines[line]?.union(filled) ?: run { filledLines[line]=filled }
+                    } else if(!complete) {
+                        val y=body.getLineBaseline(line)+paint.fontMetrics.descent+width*.008f
+                        canvas.drawLine(bounds.right,y,bounds.right-bounds.width()*fraction,y,trackingPaint)
+                    }
+                }
+            }
+            if(options.trackingMode==0) {
+                trackingPaint.alpha=90
+                filledLines.values.forEach { canvas.drawRoundRect(it,paint.textSize*.10f,paint.textSize*.10f,trackingPaint) }
+            }
+        }
+        body.draw(canvas);canvas.restore()
+        if(options.showTitle)canvas.drawText(title,width*options.titleX,
+            height*geometry.titleCenterY-(titleBounds.top+titleBounds.bottom)/2f,titlePaint)
+        val english=displayVerses.mapNotNull { it.englishTranslation }.joinToString("\n")
+        if(options.translation && english.isNotBlank()) {
+            val en=TextPaint(Paint.ANTI_ALIAS_FLAG).apply { color=TEXT_WHITE;textSize=width*.026f }
+            val translation=android.text.StaticLayout.Builder.obtain(english,0,english.length,en,maxWidth)
+                .setAlignment(android.text.Layout.Alignment.ALIGN_CENTER).build()
+            canvas.save();canvas.translate((width*options.ayahX-maxWidth/2f).coerceIn(0f,(width-maxWidth).toFloat()),bodyY+body.height+width*.075f);translation.draw(canvas);canvas.restore()
+        }
+        drawBranding(canvas)
+        return bitmap
+    }
+
+    private fun drawBranding(canvas: Canvas) {
+        val width=canvas.width.toFloat();val height=canvas.height.toFloat()
+        val stripHeight=height*.065f
+        canvas.drawRect(0f,height-stripHeight,width,height,Paint().apply { color=0xAA111923.toInt() })
+        val iconSize=stripHeight*.68f
+        val label=promotionalWatermarkLabel()
+        val paint=TextPaint(Paint.ANTI_ALIAS_FLAG).apply { typeface=Typeface.DEFAULT_BOLD;textSize=width*.028f;color=0xFFE3C98C.toInt() }
+        val textWidth=kotlin.math.ceil(paint.measureText(label).toDouble()).toInt()+2
+        val text=android.text.StaticLayout.Builder.obtain(label,0,label.length,paint,textWidth)
+            .setTextDirection(android.text.TextDirectionHeuristics.RTL).setIncludePad(false).build()
+        val total=textWidth+iconSize+width*.02f;val left=(width-total)/2f;val cy=height-stripHeight/2f
+        canvas.save();canvas.translate(left,cy-text.height/2f);text.draw(canvas);canvas.restore()
+        val x=left+textWidth+width*.02f
+        val destination=android.graphics.RectF(x,cy-iconSize/2f,x+iconSize,cy+iconSize/2f)
+        val path=android.graphics.Path().apply { addRoundRect(destination,iconSize*.18f,iconSize*.18f,android.graphics.Path.Direction.CW) }
+        canvas.save();canvas.clipPath(path)
+        canvas.drawBitmap(brandingBitmap,coverSrcRect(brandingBitmap.width,brandingBitmap.height,iconSize.toInt(),iconSize.toInt()),destination,Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG))
+        canvas.restore()
+    }
+
     private suspend fun renderSlide(
         content: AyahShareContent,
         verse: AyahShareVerse,
@@ -181,7 +427,8 @@ class AyahShareExporter @Inject constructor(
         val titleFace = fontManager.loadSurahTitleTypeface()
             ?: fontManager.loadUthmanicTypeface()
             ?: Typeface.create(Typeface.SERIF, Typeface.BOLD)
-        val pageFace = fontManager.loadPageTypeface(verse.pageNumber)
+        // Share art is always light text on a dark photo, so use the dark tajweed palette (white base layer).
+        val pageFace = fontManager.loadPageTypeface(verse.pageNumber, night = true)
         val uthmanicFace = fontManager.loadUthmanicTypeface()
             ?: Typeface.create(Typeface.SERIF, Typeface.NORMAL)
         val bitmap = createBitmap(canvasWidth, canvasHeight)
@@ -204,8 +451,9 @@ class AyahShareExporter @Inject constructor(
         val basmalah = if (showBasmalah) fontManager.displayBasmalahLigature() else ""
         val qcfBody = verse.qcfText.trim()
         val markerRaw = verse.markerLigature?.takeIf { it.isNotBlank() }
-        val pageFaceReady = pageFace != Typeface.DEFAULT &&
-            qcfBody.any { it.code in 0xE000..0xF8FF } &&
+        val pageFaceReady = pageFace != Typeface.DEFAULT && pageFace != uthmanicFace &&
+            // QPC V4 page glyphs live in U+FB50..U+FEFF (older QCF builds used the PUA)
+            qcfBody.any { it.code in 0xE000..0xF8FF || it.code in 0xFB50..0xFEFF } &&
             fontManager.canDrawLigature(qcfBody, pageFace) &&
             (markerRaw == null || fontManager.canDrawLigature(markerRaw, pageFace))
         val usePageFace = pageFaceReady
@@ -245,13 +493,15 @@ class AyahShareExporter @Inject constructor(
                 reverseAyah = usePageFace,
             )
         }
+        drawBranding(canvas)
         return bitmap
     }
 
-    private fun drawCoverBackground(canvas: Canvas, fileName: String) {
+    private fun drawCoverBackground(canvas: Canvas, fileName: String, alpha: Int = 255) {
         val width = canvas.width
         val height = canvas.height
-        val source = runCatching {
+        val cacheKey = "$fileName-$width-$height"
+        val source = backgroundCache.get(cacheKey) ?: runCatching {
             context.assets.open(ShareBackgrounds.assetPath(fileName)).use { stream ->
                 decodeSampledBitmap(stream, width, height)
             }
@@ -260,10 +510,11 @@ class AyahShareExporter @Inject constructor(
             canvas.drawColor(0xFF1A140F.toInt())
             return
         }
+        backgroundCache.put(cacheKey,source)
         val src = coverSrcRect(source.width, source.height, width, height)
-        val filter = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+        val filter = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply { this.alpha = alpha }
         canvas.drawBitmap(source, src, Rect(0, 0, width, height), filter)
-        source.recycle()
+
     }
 
     private fun drawDarkOverlay(canvas: Canvas) {
@@ -327,6 +578,7 @@ class AyahShareExporter @Inject constructor(
         val maxAyahHeight = height * 0.52f
         val wordCount = ayahSource.split(Regex("\\s+")).count { it.isNotBlank() }
         val ayahPaint = ligaturePaint(ayahFace, ayahFontSize(wordCount, width), TEXT_WHITE)
+            .apply { colorFilter = PorterDuffColorFilter(TEXT_WHITE, PorterDuff.Mode.SRC_IN) } // single white tone, no COLR tajweed colours
         val lines = wrapFitted(ayahPaint, ayahSource, maxWidth, maxAyahHeight)
         val numberPaint = ligaturePaint(numberFace, width * 0.038f, TEXT_WHITE)
         val ayahH = lines.size * lineHeight(ayahPaint)
@@ -334,6 +586,7 @@ class AyahShareExporter @Inject constructor(
         val gap = height * 0.03f
         val block = ayahH + gap + numberH
         var y = (height * 0.48f - block / 2f).coerceAtLeast(height * 0.18f)
+        drawTextBackdrop(canvas, y, y + block)
         y = drawAyahTextLines(
             canvas = canvas,
             lines = lines,
@@ -370,6 +623,7 @@ class AyahShareExporter @Inject constructor(
         if (basmalah.isNotEmpty()) fitWidth(basmalahPaint, basmalah, maxWidth, 30f)
         val wordCount = ayahSource.split(Regex("\\s+")).count { it.isNotBlank() }
         val ayahPaint = ligaturePaint(ayahFace, ayahFontSize(wordCount, width), TEXT_WHITE)
+            .apply { colorFilter = PorterDuffColorFilter(TEXT_WHITE, PorterDuff.Mode.SRC_IN) } // single white tone, no COLR tajweed colours
         val numberPaint = ligaturePaint(numberFace, width * 0.036f, TEXT_WHITE)
         val maxAyahHeight = height * 0.42f
         val lines = wrapFitted(ayahPaint, ayahSource, maxWidth, maxAyahHeight)
@@ -382,6 +636,7 @@ class AyahShareExporter @Inject constructor(
             (if (basmalahH > 0f) sectionGap + basmalahH else 0f) +
             sectionGap + ayahH + sectionGap + numberH
         var y = (height * 0.46f - block / 2f).coerceIn(height * 0.12f, height * 0.78f - block)
+        drawTextBackdrop(canvas, y, y + block)
 
         drawCentered(canvas, surahTitle, y + surahH * 0.55f, surahPaint)
         y += surahH
@@ -423,7 +678,7 @@ class AyahShareExporter @Inject constructor(
             val isLast = index == lines.lastIndex
             when {
                 isLast && !markerLigature.isNullOrBlank() && reverseAyah ->
-                    drawAyahLineWithMarker(canvas, line, markerLigature, baseline, ayahPaint)
+                    drawAyahLineWithMarker(canvas, line, markerLigature, baseline, ayahPaint, ayahNumber, numberFace)
                 isLast ->
                     drawAyahLineWithEndNumber(
                         canvas = canvas,
@@ -449,49 +704,10 @@ class AyahShareExporter @Inject constructor(
         markerLigature: String,
         baseline: Float,
         bodyPaint: TextPaint,
+        ayahNumber: Int,
+        numberFace: Typeface,
     ) {
-        if (bodyText.isBlank()) {
-            val markerPaint = markerPaint(bodyPaint)
-            drawAyahMarkerBackground(canvas, markerLigature, canvas.width / 2f, baseline, bodyPaint, markerPaint)
-            canvas.drawText(visualPua(markerLigature), canvas.width / 2f, baseline, markerPaint)
-            return
-        }
-        val gap = bodyPaint.textSize * 0.14f
-        val bodyWidth = bodyPaint.measureText(bodyText)
-        val markerPaint = markerPaint(bodyPaint)
-        val markerWidth = markerPaint.measureText(markerLigature)
-        val totalWidth = bodyWidth + gap + markerWidth
-        val rightEdge = canvas.width / 2f + totalWidth / 2f
-        val bodyCenterX = rightEdge - bodyWidth / 2f
-        val markerCenterX = rightEdge - bodyWidth - gap - markerWidth / 2f
-        canvas.drawText(visualPua(bodyText), bodyCenterX, baseline, bodyPaint)
-        drawAyahMarkerBackground(canvas, markerLigature, markerCenterX, baseline, bodyPaint, markerPaint)
-        canvas.drawText(visualPua(markerLigature), markerCenterX, baseline, markerPaint)
-    }
-
-    /**
-     * Share slides always paint a dark overlay and light text, so the night
-     * overlay stays readable on every packaged background.
-     */
-    private fun drawAyahMarkerBackground(
-        canvas: Canvas,
-        markerLigature: String,
-        centerX: Float,
-        baseline: Float,
-        bodyPaint: TextPaint,
-        markerPaint: TextPaint,
-    ) {
-        val drawn = visualPua(markerLigature)
-        val runLeft = centerX - markerPaint.measureText(drawn) / 2f
-        val numberUnits = Character.charCount(markerLigature.codePointAt(0))
-        val beforeNumber = drawn.dropLast(numberUnits)
-        val originX = runLeft + markerPaint.measureText(beforeNumber)
-        val backgroundPaint = TextPaint(bodyPaint).apply {
-            colorFilter = null
-            clearShadowLayer()
-            textAlign = Paint.Align.LEFT
-        }
-        canvas.drawText(ayahBackgroundGlyph(night = true), originX, baseline, backgroundPaint)
+        drawAyahLineWithEndNumber(canvas, visualPua(bodyText), ayahNumber, baseline, bodyPaint, numberFace)
     }
 
     private fun drawAyahLineWithEndNumber(
@@ -502,24 +718,27 @@ class AyahShareExporter @Inject constructor(
         bodyPaint: TextPaint,
         numberFace: Typeface,
     ) {
-        val endNumber = EasternArabic.format(ayahNumber)
-        val numberPaint = ligaturePaint(numberFace, bodyPaint.textSize * 0.88f, AYAH_MARKER_ACCENT)
-        val gap = bodyPaint.textSize * 0.14f
+        val bodyBounds = Rect()
+        if (bodyText.isNotEmpty()) bodyPaint.getTextBounds(bodyText, 0, bodyText.length, bodyBounds)
+        val height = maxOf(bodyPaint.textSize * .8f, bodyBounds.height().toFloat()) * .9f
+        val markerWidth = height * 1.05f
+        val gap = bodyPaint.textSize * .20f
         val bodyWidth = bodyPaint.measureText(bodyText)
-        val numberWidth = numberPaint.measureText(endNumber)
-        val totalWidth = bodyWidth + gap + numberWidth
-        val rightEdge = canvas.width / 2f + totalWidth / 2f
-        val bodyCenterX = rightEdge - bodyWidth / 2f
-        val numberCenterX = rightEdge - bodyWidth - gap - numberWidth / 2f
-        canvas.drawText(bodyText, bodyCenterX, baseline, bodyPaint)
-        canvas.drawText(endNumber, numberCenterX, baseline, numberPaint)
+        val total = bodyWidth + if (bodyText.isEmpty()) 0f else gap + markerWidth
+        val right = canvas.width / 2f + total / 2f
+        if (bodyText.isNotEmpty()) canvas.drawText(bodyText, right - bodyWidth / 2f, baseline, bodyPaint)
+        val markerX = if (bodyText.isEmpty()) canvas.width / 2f else right - bodyWidth - gap - markerWidth / 2f
+        val markerY = baseline + if (bodyBounds.isEmpty) -height * .35f else (bodyBounds.top + bodyBounds.bottom) / 2f
+        HafsAyahMarker.draw(canvas, numberFace, ayahNumber, markerX, markerY, height)
     }
-
-    private fun markerPaint(base: TextPaint): TextPaint {
-        return TextPaint(base).apply {
-            color = AYAH_MARKER_ACCENT
-            colorFilter = PorterDuffColorFilter(AYAH_MARKER_ACCENT, PorterDuff.Mode.SRC_IN)
-        }
+    /** Semi-transparent black box behind the text block: background -> overlay -> text. */
+    private fun drawTextBackdrop(canvas: Canvas, top: Float, bottom: Float) {
+        val padX = canvas.width * 0.05f
+        val padY = canvas.height * 0.025f
+        val rect = android.graphics.RectF(padX, top - padY, canvas.width - padX, bottom + padY)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = TEXT_BACKDROP }
+        val r = canvas.width * 0.04f
+        canvas.drawRoundRect(rect, r, r, paint)
     }
 
     private fun ligaturePaint(typeface: Typeface, size: Float, color: Int): TextPaint {
@@ -596,7 +815,10 @@ class AyahShareExporter @Inject constructor(
         else -> canvasWidth * 0.040f
     }
 
-    private fun visualPua(text: String): String = text.reversed()
+    // Legacy QCF PUA glyphs are bidi-neutral and must be pre-reversed; QPC V4 glyphs (U+FB50..U+FEFF)
+    // are strong RTL, so the text stack already orders them right to left.
+    private fun visualPua(text: String): String =
+        if (text.any { it.code in 0xE000..0xF8FF }) text.reversed() else text
 
     private fun coverSrcRect(srcW: Int, srcH: Int, dstW: Int, dstH: Int): Rect {
         val srcAspect = srcW.toFloat() / srcH
@@ -692,10 +914,13 @@ class AyahShareExporter @Inject constructor(
         slides: List<File>,
         audioClips: List<ShareTimedClip>,
         output: File,
+        frameDurations: List<Long>? = null,
+        motion: Boolean = false,
+        cleanAudio: Boolean = false,
     ) {
-        require(slides.isNotEmpty() && slides.size == audioClips.size)
+        require(slides.isNotEmpty() && (frameDurations?.size == slides.size || slides.size == audioClips.size))
         val videoItems = slides.mapIndexed { index, file ->
-            val durationUs = audioClips[index].durationUs.coerceAtMost(MAX_SLIDE_US)
+            val durationUs = (frameDurations?.get(index) ?: audioClips[index].durationUs).coerceAtMost(MAX_SLIDE_US)
             EditedMediaItem.Builder(MediaItem.fromUri(Uri.fromFile(file)))
                 .setDurationUs(durationUs)
                 .setFrameRate(30)
@@ -713,8 +938,13 @@ class AyahShareExporter @Inject constructor(
         val composition = Composition.Builder(videoSequence, audioSequence)
             .setEffects(
                 Effects(
-                    listOf(ShareEchoAudioProcessor()),
-                    emptyList(),
+                    if (cleanAudio) emptyList() else listOf(ShareEchoAudioProcessor()),
+                    if (motion) listOf(androidx.media3.effect.MatrixTransformation { timeUs ->
+                        android.graphics.Matrix().apply {
+                            val scale = 1f + .025f * (1f - kotlin.math.cos(timeUs / 4_000_000.0).toFloat())
+                            postScale(scale, scale)
+                        }
+                    }) else emptyList(),
                 ),
             )
             .build()
@@ -722,6 +952,7 @@ class AyahShareExporter @Inject constructor(
         withContext(Dispatchers.Main) {
             suspendCancellableCoroutine { continuation ->
                 val encoderFactory = DefaultEncoderFactory.Builder(context)
+                    .apply { if (cleanAudio) setRequestedAudioEncoderSettings(androidx.media3.transformer.AudioEncoderSettings.Builder().setBitrate(192_000).build()) }
                     .setRequestedVideoEncoderSettings(
                         VideoEncoderSettings.Builder()
                             .setBitrate(SHARE_VIDEO_BITRATE)
@@ -729,6 +960,7 @@ class AyahShareExporter @Inject constructor(
                     )
                     .build()
                 val transformer = Transformer.Builder(context)
+                    .apply { if (cleanAudio) setAudioMimeType(MimeTypes.AUDIO_AAC) }
                     .setVideoMimeType(MimeTypes.VIDEO_H264)
                     .setEncoderFactory(encoderFactory)
                     .addListener(object : Transformer.Listener {
@@ -821,6 +1053,7 @@ class AyahShareExporter @Inject constructor(
             type = mime
             putExtra(Intent.EXTRA_STREAM, uri)
             putExtra(Intent.EXTRA_SUBJECT, title)
+            clipData=android.content.ClipData.newRawUri("Quran video",uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }

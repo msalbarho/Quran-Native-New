@@ -9,8 +9,10 @@ import androidx.compose.ui.unit.TextUnit
 internal const val AYAH_BACKGROUND_LIGHT = "\uE000"
 internal const val AYAH_BACKGROUND_NIGHT = "\uE001"
 
-internal fun ayahBackgroundGlyph(night: Boolean): String =
-    if (night) AYAH_BACKGROUND_NIGHT else AYAH_BACKGROUND_LIGHT
+internal fun ayahBackgroundGlyph(@Suppress("UNUSED_PARAMETER") night: Boolean): String =
+    // The 604 QPC V4 page fonts draw the complete coloured ayah medallion in the marker glyph itself;
+    // the 47-face backdrop glyphs (U+E000/U+E001) do not exist there.
+    ""
 
 /** Ayah-marker glyph is slightly smaller than body text (matches React / TextMushaf). */
 internal const val AYAH_MARKER_GLYPH_SCALE = 0.92f

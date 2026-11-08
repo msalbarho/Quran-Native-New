@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">Mwongozo wa rangi za tajwidi</string>
+    <string name="tajweed_colors">Rangi za tajwidi</string>
+    <string name="tajweed_rule_1">Maddi lazim: haraka 6</string>
+    <string name="tajweed_rule_2">Maddi wajib muttasil: haraka 4–5</string>
+    <string name="tajweed_rule_3">Maddi jaiz munfasil: haraka 2, 4 au 5</string>
+    <string name="tajweed_rule_4">Maddi ya kawaida / iwadh: haraka 2</string>
+    <string name="tajweed_rule_5">Ikhfaa, idgham yenye ghunna na sehemu za ghunna</string>
+    <string name="tajweed_rule_6">Tafkhim: herufi nzito na ra</string>
+    <string name="tajweed_rule_7">Qalqala</string>
+    <string name="tajweed_rule_8">Herufi zisizotamkwa: hamzatul wasl, lam shamsiya, n.k.</string>
+    <string-array name="mushaf_header_numbers">
+        <item>moja</item>
+        <item>mbili</item>
+        <item>tatu</item>
+        <item>nne</item>
+        <item>tano</item>
+        <item>sita</item>
+        <item>saba</item>
+        <item>nane</item>
+        <item>tisa</item>
+        <item>kumi</item>
+        <item>kumi na moja</item>
+        <item>kumi na mbili</item>
+        <item>kumi na tatu</item>
+        <item>kumi na nne</item>
+        <item>kumi na tano</item>
+        <item>kumi na sita</item>
+        <item>kumi na saba</item>
+        <item>kumi na nane</item>
+        <item>kumi na tisa</item>
+        <item>ishirini</item>
+        <item>ishirini na moja</item>
+        <item>ishirini na mbili</item>
+        <item>ishirini na tatu</item>
+        <item>ishirini na nne</item>
+        <item>ishirini na tano</item>
+        <item>ishirini na sita</item>
+        <item>ishirini na saba</item>
+        <item>ishirini na nane</item>
+        <item>ishirini na tisa</item>
+        <item>thelathini</item>
+        <item>thelathini na moja</item>
+        <item>thelathini na mbili</item>
+        <item>thelathini na tatu</item>
+        <item>thelathini na nne</item>
+        <item>thelathini na tano</item>
+        <item>thelathini na sita</item>
+        <item>thelathini na saba</item>
+        <item>thelathini na nane</item>
+        <item>thelathini na tisa</item>
+        <item>arobaini</item>
+        <item>arobaini na moja</item>
+        <item>arobaini na mbili</item>
+        <item>arobaini na tatu</item>
+        <item>arobaini na nne</item>
+        <item>arobaini na tano</item>
+        <item>arobaini na sita</item>
+        <item>arobaini na saba</item>
+        <item>arobaini na nane</item>
+        <item>arobaini na tisa</item>
+        <item>hamsini</item>
+        <item>hamsini na moja</item>
+        <item>hamsini na mbili</item>
+        <item>hamsini na tatu</item>
+        <item>hamsini na nne</item>
+        <item>hamsini na tano</item>
+        <item>hamsini na sita</item>
+        <item>hamsini na saba</item>
+        <item>hamsini na nane</item>
+        <item>hamsini na tisa</item>
+        <item>sitini</item>
+    </string-array>
+</resources>

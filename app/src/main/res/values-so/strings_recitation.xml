@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">Matoorka hubinta akhriska</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (qalabka)</string>
+    <string name="recitation_engine_zipformer_desc">Caadi. Internet la\'aan, waqti dhab ah, wuxuu hubiyaa ku dhawaaqa xaraf xaraf.</string>
+    <string name="recitation_engine_whisper">Whisper Quran (qalabka)</string>
+    <string name="recitation_engine_whisper_desc">Internet la\'aan kadib hal mar soo dejin (~78 MB).</string>
+    <string name="recitation_engine_android">Aqoonsiga codka Android</string>
+    <string name="recitation_engine_android_desc">Aqoonsadaha ku dhex jira taleefanka (waxaa laga yaabaa inuu u baahdo internet).</string>
+    <string name="recitation_engine_unavailable">Laguma heli karo qalabkan</string>
+    <string name="recitation_whisper_download">Soo deji moodelka Whisper</string>
+    <string name="recitation_whisper_downloading">Waa la soo dejinayaa… %1$d%%</string>
+    <string name="recitation_whisper_ready">Moodelku waa diyaar</string>
+    <string name="recitation_whisper_delete">Tirtir moodelka</string>
+    <string name="recitation_whisper_failed">Soo dejintu way guuldareysatay: %1$s</string>
+    <string name="recitation_license_model">Shatiga Zipformer Quran 3.1 (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">Shatiga sherpa-onnx (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">Barnaamijku wuxuu dhegeystaa akhriskaaga qalabkaaga internet la\'aan wuxuuna midabeeyaa eray kasta markaad dhahdo, isagoo isticmaalaya moodelka Zipformer Quran 3.1 ee Quran Lab.</string>
+    <string name="recitation_disclaimer">Hubinta tooska ah ee akhriska iyo tajwiidka way khaldami kartaa. Ma beddesho macallin aqoon leh mana aha xukun diimeed oo ku saabsan akhriska qof kasta.</string>
+    <string name="recitation_understood">Waan fahmay</string>
+    <string name="recitation_close">Xir</string>
+    <string name="training_show_ayah">Muuji aayadda</string>
+    <string name="training_select">Dooro</string>
+    <string name="training_select_surah">U gudub suurad</string>
+    <string name="training_select_page">U gudub lambarka bogga</string>
+    <string name="training_go_to_page">Gal</string>
+    <string name="training_scope_open">Fur akhriska</string>
+    <string name="training_scope_page">Bogga hadda</string>
+    <string name="training_range_format_hint">Geli xad kasta sida suurad:aayad (tusaale 2:5).</string>
+    <string name="training_apply_range">Dabaq qaybta</string>
+    <string name="training_previous">Hore</string>
+    <string name="training_next">Xiga</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s erey</string>
+    <string name="training_legend_correct">Sax</string>
+    <string name="training_legend_wrong">Khalad</string>
+    <string name="training_legend_missing">Ka maqan</string>
+</resources>

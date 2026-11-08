@@ -182,7 +182,7 @@ class StudyViewModel @Inject constructor(
                     selectedReciterId = ayahReciter,
                     videoReciterId = videoReciter,
                     videoFromAyah = word.ayah,
-                    videoToAyah = word.ayah,
+                    videoToAyah = (word.ayah + AppConstants.SHARE_AYAH_RANGE_MAX - 1).coerceAtMost(SurahAyahCounts.ayahCount(word.surah)),
                     tafsirOpen = false,
                     tafsirText = null,
                     tafsirError = null,
@@ -234,7 +234,7 @@ class StudyViewModel @Inject constructor(
         _ui.update {
             it.copy(
                 videoFromAyah = from,
-                videoToAyah = it.videoToAyah.coerceIn(from, toMax),
+                videoToAyah = toMax, // a new start always offers the full 10-ayah range
             )
         }
     }
@@ -243,7 +243,7 @@ class StudyViewModel @Inject constructor(
         val word = _ui.value.word ?: return
         val from = _ui.value.videoFromAyah
         val max = SurahAyahCounts.ayahCount(word.surah)
-        val toMax = (from + AppConstants.SHARE_AYAH_RANGE_MAX).coerceAtMost(max)
+        val toMax = (from + AppConstants.SHARE_AYAH_RANGE_MAX - 1).coerceAtMost(max)
         _ui.update { it.copy(videoToAyah = ayah.coerceIn(from, toMax)) }
     }
 
@@ -304,7 +304,7 @@ class StudyViewModel @Inject constructor(
                     bookmarked = bookmarked,
                     trackedForMemorization = trackedForMemorization,
                     videoFromAyah = nextRecord.ayah,
-                    videoToAyah = nextRecord.ayah,
+                    videoToAyah = (nextRecord.ayah + AppConstants.SHARE_AYAH_RANGE_MAX - 1).coerceAtMost(SurahAyahCounts.ayahCount(nextRecord.surah)),
                 )
             }
             playWord(nextRecord)
@@ -313,6 +313,21 @@ class StudyViewModel @Inject constructor(
         _ui.update { it.copy(word = record) }
         playWord(record)
         return record
+    }
+
+    fun saveReadingPage(page: com.quransunah.app.domain.model.MushafPage?, onSaved: () -> Unit) {
+        val first = page?.lines?.flatMap { it.words }?.firstOrNull { !it.isAyahMarker } ?: return
+        viewModelScope.launch {
+            val words = mushafRepository.getAyahWords(first.surah, first.ayah)
+            bookmarkRepository.save(ReadingBookmark(
+                id = ReadingBookmark.idFor(first.surah, first.ayah),
+                surah = first.surah, ayah = first.ayah, pageNumber = page.pageNumber,
+                wordId = first.id, wordIndex = first.wordIndex,
+                ayahText = words.filter { !it.isAyahMarker }.joinToString(" ") { it.textHafs },
+                savedAt = System.currentTimeMillis(),
+            ))
+            onSaved()
+        }
     }
 
     fun toggleBookmark() {
@@ -338,30 +353,6 @@ class StudyViewModel @Inject constructor(
                 )
                 _ui.update { it.copy(bookmarked = true) }
             }
-        }
-    }
-
-    fun addCurrentAyahToMemorization() {
-        val ui = _ui.value
-        val word = ui.word ?: return
-        if (ui.trackedForMemorization) return
-        viewModelScope.launch {
-            val id = MemorizationItem.idFor(word.surah, word.ayah)
-            val now = System.currentTimeMillis()
-            memorizationRepository.track(
-                MemorizationItem(
-                    id = id,
-                    surah = word.surah,
-                    ayah = word.ayah,
-                    pageNumber = ui.pageNumber,
-                    ayahText = ui.ayahText,
-                    state = MemorizationState.LEARNING,
-                    reviewCount = 0,
-                    createdAt = now,
-                    updatedAt = now,
-                ),
-            )
-            _ui.update { it.copy(trackedForMemorization = true) }
         }
     }
 
@@ -426,10 +417,13 @@ class StudyViewModel @Inject constructor(
         }
     }
 
+    suspend fun makerContent(): AyahShareContent? = shareContent(_ui.value.videoFromAyah, _ui.value.videoToAyah)
+    val videoMakerExporter: AyahShareExporter get() = shareExporter
+
     fun shareVideo() {
         val reciterId = _ui.value.videoReciterId
         if (reciterId.isBlank()) {
-            _ui.update { it.copy(shareError = "اختر قارئاً لإنشاء الفيديو") }
+            _ui.update { it.copy(shareError = SHARE_ERROR_NO_RECITER) }
             return
         }
         viewModelScope.launch {
@@ -437,7 +431,7 @@ class StudyViewModel @Inject constructor(
             _ui.update { it.copy(sharing = true, shareError = null) }
             runCatching { shareExporter.shareVideo(content, reciterId) }
                 .onFailure { error ->
-                    _ui.update { it.copy(shareError = error.message ?: "تعذّرت مشاركة الفيديو") }
+                    _ui.update { it.copy(shareError = error.message ?: SHARE_ERROR_VIDEO_FAILED) }
                 }
             _ui.update { it.copy(sharing = false) }
         }
@@ -492,6 +486,7 @@ class StudyViewModel @Inject constructor(
                 qcfText = body.joinToString(" ") { it.textLigature.ifBlank { it.textHafs } }.trim(),
                 uthmanicText = body.joinToString(" ") { it.textHafs }.trim(),
                 markerLigature = shareMarkerLigature(words),
+                englishTranslation = translationRepository.getAyahTranslation("en", word.surah, ayah),
             )
         }
         return AyahShareContent(
@@ -523,3 +518,6 @@ class StudyViewModel @Inject constructor(
         super.onCleared()
     }
 }
+
+internal const val SHARE_ERROR_NO_RECITER = "share_error:no_reciter"
+internal const val SHARE_ERROR_VIDEO_FAILED = "share_error:video_failed"

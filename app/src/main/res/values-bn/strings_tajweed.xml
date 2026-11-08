@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">তাজবিদের রঙের নির্দেশিকা</string>
+    <string name="tajweed_colors">তাজবিদের রং</string>
+    <string name="tajweed_rule_1">মাদ লাজিম: ৬ হারাকাত</string>
+    <string name="tajweed_rule_2">মাদ ওয়াজিব মুত্তাসিল: ৪–৫ হারাকাত</string>
+    <string name="tajweed_rule_3">মাদ জায়েজ মুনফাসিল: ২, ৪ বা ৫ হারাকাত</string>
+    <string name="tajweed_rule_4">স্বাভাবিক মাদ / ইওয়াজ: ২ হারাকাত</string>
+    <string name="tajweed_rule_5">ইখফা, গুন্নাহসহ ইদগাম ও গুন্নাহর স্থান</string>
+    <string name="tajweed_rule_6">তাফখিম: ইস্তিলা হরফ ও রা</string>
+    <string name="tajweed_rule_7">কলকলাহ</string>
+    <string name="tajweed_rule_8">অনুচ্চারিত হরফ: হামজাতুল ওয়াসল, সৌর লাম ইত্যাদি</string>
+    <string-array name="mushaf_header_numbers">
+        <item>এক</item>
+        <item>দুই</item>
+        <item>তিন</item>
+        <item>চার</item>
+        <item>পাঁচ</item>
+        <item>ছয়</item>
+        <item>সাত</item>
+        <item>আট</item>
+        <item>নয়</item>
+        <item>দশ</item>
+        <item>এগারো</item>
+        <item>বারো</item>
+        <item>তেরো</item>
+        <item>চৌদ্দ</item>
+        <item>পনেরো</item>
+        <item>ষোলো</item>
+        <item>সতেরো</item>
+        <item>আঠারো</item>
+        <item>উনিশ</item>
+        <item>বিশ</item>
+        <item>একুশ</item>
+        <item>বাইশ</item>
+        <item>তেইশ</item>
+        <item>চব্বিশ</item>
+        <item>পঁচিশ</item>
+        <item>ছাব্বিশ</item>
+        <item>সাতাশ</item>
+        <item>আঠাশ</item>
+        <item>ঊনত্রিশ</item>
+        <item>ত্রিশ</item>
+        <item>একত্রিশ</item>
+        <item>বত্রিশ</item>
+        <item>তেত্রিশ</item>
+        <item>চৌত্রিশ</item>
+        <item>পঁয়ত্রিশ</item>
+        <item>ছত্রিশ</item>
+        <item>সাঁইত্রিশ</item>
+        <item>আটত্রিশ</item>
+        <item>ঊনচল্লিশ</item>
+        <item>চল্লিশ</item>
+        <item>একচল্লিশ</item>
+        <item>বিয়াল্লিশ</item>
+        <item>তেতাল্লিশ</item>
+        <item>চুয়াল্লিশ</item>
+        <item>পঁয়তাল্লিশ</item>
+        <item>ছেচল্লিশ</item>
+        <item>সাতচল্লিশ</item>
+        <item>আটচল্লিশ</item>
+        <item>ঊনপঞ্চাশ</item>
+        <item>পঞ্চাশ</item>
+        <item>একান্ন</item>
+        <item>বাহান্ন</item>
+        <item>তিপ্পান্ন</item>
+        <item>চুয়ান্ন</item>
+        <item>পঞ্চান্ন</item>
+        <item>ছাপ্পান্ন</item>
+        <item>সাতান্ন</item>
+        <item>আটান্ন</item>
+        <item>ঊনষাট</item>
+        <item>ষাট</item>
+    </string-array>
+</resources>

@@ -19,6 +19,8 @@ interface MushafRepository {
     suspend fun getSajdas(): List<SajdaMarker>
     suspend fun getPageMeta(pageNumber: Int): PageMeta
     suspend fun getAyahWords(surah: Int, ayah: Int): List<QuranWord>
+    suspend fun getTrainingWordsFromAyah(surah: Int, ayah: Int): List<QuranWord>
+    suspend fun getTrainingWordsBetweenAyahs(fromSurah: Int, fromAyah: Int, toSurah: Int, toAyah: Int): List<QuranWord>
     suspend fun getPageForAyah(surah: Int, ayah: Int): Int
     suspend fun getSurahForPage(pageNumber: Int): Int
     suspend fun meaningForWord(wordId: Int): String?

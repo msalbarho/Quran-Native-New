@@ -7,6 +7,7 @@ data class AyahShareVerse(
     val uthmanicText: String,
     /** QCF Medina ayah-end mark (and sajdah number glyph when applicable). */
     val markerLigature: String? = null,
+    val englishTranslation: String? = null,
 )
 
 data class AyahShareContent(

@@ -45,6 +45,7 @@ import com.quransunah.app.core.AppConstants
 import com.quransunah.app.core.EasternArabic
 import com.quransunah.app.core.UiNumbers
 import com.quransunah.app.ui.shell.ChromeFrameDecor
+import com.quransunah.app.ui.shell.goldFrame
 import com.quransunah.app.ui.theme.LocalPaperColors
 
 private val PageNumberHeight = 24.dp
@@ -122,6 +123,7 @@ fun PagePickerDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(paper.pageBody, RoundedCornerShape(16.dp))
+                .goldFrame(RoundedCornerShape(16.dp))
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">Injini ya kukagua kisomo</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (kwenye kifaa)</string>
+    <string name="recitation_engine_zipformer_desc">Chaguo-msingi. Nje ya mtandao, papo hapo, hukagua matamshi herufi kwa herufi.</string>
+    <string name="recitation_engine_whisper">Whisper Quran (kwenye kifaa)</string>
+    <string name="recitation_engine_whisper_desc">Nje ya mtandao baada ya kupakua mara moja (~MB 78).</string>
+    <string name="recitation_engine_android">Utambuzi wa sauti wa Android</string>
+    <string name="recitation_engine_android_desc">Kitambuzi kilichojengwa ndani ya simu (huenda kikahitaji intaneti).</string>
+    <string name="recitation_engine_unavailable">Haipatikani kwenye kifaa hiki</string>
+    <string name="recitation_whisper_download">Pakua modeli ya Whisper</string>
+    <string name="recitation_whisper_downloading">Inapakua… %1$d%%</string>
+    <string name="recitation_whisper_ready">Modeli iko tayari</string>
+    <string name="recitation_whisper_delete">Futa modeli</string>
+    <string name="recitation_whisper_failed">Upakuaji umeshindwa: %1$s</string>
+    <string name="recitation_license_model">Leseni ya Zipformer Quran 3.1 (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">Leseni ya sherpa-onnx (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">Programu inasikiliza kisomo chako kwenye kifaa bila intaneti na kupaka rangi kila neno unapolitamka, kwa kutumia modeli ya Zipformer Quran 3.1 ya Quran Lab.</string>
+    <string name="recitation_disclaimer">Ukaguzi wa kiotomatiki wa kisomo na tajwidi unaweza kukosea. Hauchukui nafasi ya mwalimu aliyehitimu na si hukumu ya kidini juu ya kisomo cha mtu yeyote.</string>
+    <string name="recitation_understood">Nimeelewa</string>
+    <string name="recitation_close">Funga</string>
+    <string name="training_show_ayah">Onyesha aya</string>
+    <string name="training_select">Chagua</string>
+    <string name="training_select_surah">Nenda kwenye sura</string>
+    <string name="training_select_page">Nenda kwenye nambari ya ukurasa</string>
+    <string name="training_go_to_page">Nenda</string>
+    <string name="training_scope_open">Fungua kisomo</string>
+    <string name="training_scope_page">Ukurasa wa sasa</string>
+    <string name="training_range_format_hint">Andika kila mwisho kama sura:aya (kwa mfano 2:5).</string>
+    <string name="training_apply_range">Tumia sehemu</string>
+    <string name="training_previous">Iliyotangulia</string>
+    <string name="training_next">Inayofuata</string>
+    <string name="training_ayah_word_progress">Maneno %1$s / %2$s</string>
+    <string name="training_legend_correct">Sahihi</string>
+    <string name="training_legend_wrong">Kosa</string>
+    <string name="training_legend_missing">Limekosekana</string>
+</resources>

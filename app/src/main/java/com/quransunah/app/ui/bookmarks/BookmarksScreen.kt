@@ -1,5 +1,7 @@
 package com.quransunah.app.ui.bookmarks
 
+import com.quransunah.app.ui.shell.GoldCornerFrame
+import com.quransunah.app.ui.shell.GoldCornerFrameShape
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -49,11 +51,12 @@ import com.quransunah.app.ui.mushaf.UthmanicText
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewFixtures
 import com.quransunah.app.ui.preview.PreviewTheme
+import com.quransunah.app.ui.shell.ChromeTokens
 import com.quransunah.app.ui.theme.LocalAppFontFamily
 import com.quransunah.app.ui.theme.LocalPaperColors
 import java.util.Calendar
 
-private val PillShape = RoundedCornerShape(999.dp)
+private val PillShape = GoldCornerFrameShape(12.dp)
 
 @Composable
 fun BookmarksScreen(
@@ -281,7 +284,9 @@ private fun BookmarkCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(GoldCornerFrame)
             .background(paper.pageBody)
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, GoldCornerFrame)
             .clickable(onClick = onJump)
             .padding(top = 8.dp, bottom = 14.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

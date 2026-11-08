@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">موتور بررسی تلاوت</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (روی دستگاه)</string>
+    <string name="recitation_engine_zipformer_desc">پیش‌فرض. آفلاین، هم‌زمان، تلفظ را حرف به حرف بررسی می‌کند.</string>
+    <string name="recitation_engine_whisper">Whisper Quran (روی دستگاه)</string>
+    <string name="recitation_engine_whisper_desc">آفلاین پس از یک بار دانلود (حدود ۷۸ مگابایت).</string>
+    <string name="recitation_engine_android">تشخیص گفتار اندروید</string>
+    <string name="recitation_engine_android_desc">تشخیص‌دهندهٔ داخلی گوشی (ممکن است به اینترنت نیاز داشته باشد).</string>
+    <string name="recitation_engine_unavailable">روی این دستگاه در دسترس نیست</string>
+    <string name="recitation_whisper_download">دانلود مدل Whisper</string>
+    <string name="recitation_whisper_downloading">در حال دانلود… %1$d%%</string>
+    <string name="recitation_whisper_ready">مدل آماده است</string>
+    <string name="recitation_whisper_delete">حذف مدل</string>
+    <string name="recitation_whisper_failed">دانلود ناموفق بود: %1$s</string>
+    <string name="recitation_license_model">مجوز Zipformer Quran 3.1 (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">مجوز sherpa-onnx (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">برنامه با استفاده از مدل Zipformer Quran 3.1 ساخت Quran Lab، تلاوت شما را روی دستگاه و بدون اینترنت می‌شنود و هر کلمه را هنگام ادا رنگ می‌کند.</string>
+    <string name="recitation_disclaimer">بررسی خودکار تلاوت و تجوید ممکن است اشتباه کند. جایگزین استاد واجد شرایط نیست و حکمی شرعی دربارهٔ تلاوت هیچ‌کس نیست.</string>
+    <string name="recitation_understood">متوجه شدم</string>
+    <string name="recitation_close">بستن</string>
+    <string name="training_show_ayah">نمایش آیه</string>
+    <string name="training_select">انتخاب</string>
+    <string name="training_select_surah">رفتن به سوره</string>
+    <string name="training_select_page">رفتن به شمارهٔ صفحه</string>
+    <string name="training_go_to_page">برو</string>
+    <string name="training_scope_open">باز کردن تلاوت</string>
+    <string name="training_scope_page">صفحهٔ فعلی</string>
+    <string name="training_range_format_hint">هر سر بازه را به صورت سوره:آیه وارد کنید (مثلاً 2:5).</string>
+    <string name="training_apply_range">اعمال بخش</string>
+    <string name="training_previous">قبلی</string>
+    <string name="training_next">بعدی</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s کلمه</string>
+    <string name="training_legend_correct">درست</string>
+    <string name="training_legend_wrong">نادرست</string>
+    <string name="training_legend_missing">جاافتاده</string>
+</resources>

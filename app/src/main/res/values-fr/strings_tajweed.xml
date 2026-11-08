@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">Guide des couleurs du tajwid</string>
+    <string name="tajweed_colors">Couleurs du tajwid</string>
+    <string name="tajweed_rule_1">Madd lazim : 6 temps</string>
+    <string name="tajweed_rule_2">Madd wajib muttasil : 4–5 temps</string>
+    <string name="tajweed_rule_3">Madd jaiz munfasil : 2, 4 ou 5 temps</string>
+    <string name="tajweed_rule_4">Madd naturel / de compensation : 2 temps</string>
+    <string name="tajweed_rule_5">Ikhfa, idgham avec ghounna et nasalisation</string>
+    <string name="tajweed_rule_6">Tafkhim : lettres emphatiques et ra</string>
+    <string name="tajweed_rule_7">Qalqala : écho</string>
+    <string name="tajweed_rule_8">Lettres non prononcées : hamzat al-wasl, lam solaire, etc.</string>
+    <string-array name="mushaf_header_numbers">
+        <item>un</item>
+        <item>deux</item>
+        <item>trois</item>
+        <item>quatre</item>
+        <item>cinq</item>
+        <item>six</item>
+        <item>sept</item>
+        <item>huit</item>
+        <item>neuf</item>
+        <item>dix</item>
+        <item>onze</item>
+        <item>douze</item>
+        <item>treize</item>
+        <item>quatorze</item>
+        <item>quinze</item>
+        <item>seize</item>
+        <item>dix-sept</item>
+        <item>dix-huit</item>
+        <item>dix-neuf</item>
+        <item>vingt</item>
+        <item>vingt et un</item>
+        <item>vingt-deux</item>
+        <item>vingt-trois</item>
+        <item>vingt-quatre</item>
+        <item>vingt-cinq</item>
+        <item>vingt-six</item>
+        <item>vingt-sept</item>
+        <item>vingt-huit</item>
+        <item>vingt-neuf</item>
+        <item>trente</item>
+        <item>trente et un</item>
+        <item>trente-deux</item>
+        <item>trente-trois</item>
+        <item>trente-quatre</item>
+        <item>trente-cinq</item>
+        <item>trente-six</item>
+        <item>trente-sept</item>
+        <item>trente-huit</item>
+        <item>trente-neuf</item>
+        <item>quarante</item>
+        <item>quarante et un</item>
+        <item>quarante-deux</item>
+        <item>quarante-trois</item>
+        <item>quarante-quatre</item>
+        <item>quarante-cinq</item>
+        <item>quarante-six</item>
+        <item>quarante-sept</item>
+        <item>quarante-huit</item>
+        <item>quarante-neuf</item>
+        <item>cinquante</item>
+        <item>cinquante et un</item>
+        <item>cinquante-deux</item>
+        <item>cinquante-trois</item>
+        <item>cinquante-quatre</item>
+        <item>cinquante-cinq</item>
+        <item>cinquante-six</item>
+        <item>cinquante-sept</item>
+        <item>cinquante-huit</item>
+        <item>cinquante-neuf</item>
+        <item>soixante</item>
+    </string-array>
+</resources>

@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -68,10 +69,9 @@ import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 
 private val PickerBackdrop = Color(0x6B0F172A)
-private val SidePanelShape = RoundedCornerShape(ChromeTokens.SidePanelCorner)
-private val SettingsModalShape = RoundedCornerShape(28.dp)
-private val IndexModalShape = RoundedCornerShape(30.dp)
-private val TrainingControlShape = RoundedCornerShape(999.dp)
+private val SidePanelShape = GoldCornerFrameShape(ChromeTokens.SidePanelCorner)
+private val SettingsModalShape = GoldCornerFrameShape(20.dp)
+private val IndexModalShape = GoldCornerFrameShape(20.dp)
 
 @Composable
 fun ShellPickerHost(
@@ -172,7 +172,7 @@ fun ShellPickerHost(
 }
 
 @Composable
-private fun IndexModal(
+internal fun IndexModal(
     onClose: () -> Unit,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -211,16 +211,14 @@ private fun IndexModal(
                             ),
                         ),
                     )
+                    .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, IndexModalShape)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
                         onClick = {},
                     ),
             ) {
-                IslamicEdgePattern(
-                    Modifier.matchParentSize(),
-                    fade = IslamicOrnamentFade.Vertical,
-                )
+                TiledOrnamentBackground(Modifier.matchParentSize())
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -277,6 +275,7 @@ private fun CenteredPickerCard(
                 .shadow(18.dp, SidePanelShape)
                 .clip(SidePanelShape)
                 .background(paper.pageBody)
+                .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, SidePanelShape)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -340,16 +339,14 @@ private fun SettingsSideSheet(
                                 ),
                             ),
                         )
+                        .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, SettingsModalShape)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
                             onClick = {},
                         ),
                 ) {
-                    IslamicEdgePattern(
-                        Modifier.matchParentSize(),
-                        fade = IslamicOrnamentFade.Vertical,
-                    )
+                    TiledOrnamentBackground(Modifier.matchParentSize())
                     Column(Modifier.fillMaxSize()) {
                         SettingsPickerHeader(onClose = onClose)
                         SettingsScreen(

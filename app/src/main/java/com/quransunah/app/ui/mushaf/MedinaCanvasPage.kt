@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -40,6 +41,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import com.quransunah.app.core.AppConstants
 import com.quransunah.app.core.ArabicOrdinals
 import com.quransunah.app.core.HizbBadgeParts
@@ -92,6 +94,7 @@ fun MedinaCanvasPage(
     highlightAyah: Pair<Int, Int>? = null,
     hideAyahText: Boolean = false,
     revealedAyahs: Set<Pair<Int, Int>> = emptySet(),
+    tajweedEnabled: Boolean = true,
     chromeVisible: Boolean = true,
     surahsByNumber: Map<Int, SurahInfo> = emptyMap(),
     quarter: QuarterMarker? = null,
@@ -100,6 +103,7 @@ fun MedinaCanvasPage(
     onWordLongPress: (WordRecord) -> Unit,
     onEmptyTap: () -> Unit = {},
     onSurahNameLongPress: () -> Unit = {},
+    pageFit: MedinaPageFit = MedinaPageFit.Fill,
 ) {
     BoxWithConstraints(
         modifier = modifier
@@ -107,6 +111,72 @@ fun MedinaCanvasPage(
             .background(LocalPaperColors.current.mushafPaper)
             .clipToBounds(),
     ) {
+        if (pageFit == MedinaPageFit.FitScreen) {
+            val box = fittedMedinaPageBox(maxWidth.value, maxHeight.value)
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                MedinaCanvasPageBody(
+                    pageNumber = pageNumber,
+                    lines = lines,
+                    fontManager = fontManager,
+                    glyphColor = glyphColor,
+                    highlightColor = highlightColor,
+                    highlightWordId = highlightWordId,
+                    highlightAyah = highlightAyah,
+                    hideAyahText = hideAyahText,
+                    revealedAyahs = revealedAyahs,
+                    tajweedEnabled = tajweedEnabled,
+                    chromeVisible = chromeVisible,
+                    surahsByNumber = surahsByNumber,
+                    quarter = quarter,
+                    sajda = sajda,
+                    onWordTap = onWordTap,
+                    onWordLongPress = onWordLongPress,
+                    onEmptyTap = onEmptyTap,
+                    onSurahNameLongPress = onSurahNameLongPress,
+                    modifier = Modifier
+                        .width(box.width.dp)
+                        .height(box.height.dp)
+                        .clipToBounds(),
+                )
+            }
+            return@BoxWithConstraints
+        }
+        if (pageFit == MedinaPageFit.OriginalScroll) {
+            val scrollState = rememberScrollState()
+            LaunchedEffect(pageNumber) { scrollState.scrollTo(0) }
+            val box = originalMedinaPageBox(maxWidth.value)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState),
+            ) {
+                MedinaCanvasPageBody(
+                    pageNumber = pageNumber,
+                    lines = lines,
+                    fontManager = fontManager,
+                    glyphColor = glyphColor,
+                    highlightColor = highlightColor,
+                    highlightWordId = highlightWordId,
+                    highlightAyah = highlightAyah,
+                    hideAyahText = hideAyahText,
+                    revealedAyahs = revealedAyahs,
+                    tajweedEnabled = tajweedEnabled,
+                    chromeVisible = chromeVisible,
+                    surahsByNumber = surahsByNumber,
+                    quarter = quarter,
+                    sajda = sajda,
+                    onWordTap = onWordTap,
+                    onWordLongPress = onWordLongPress,
+                    onEmptyTap = onEmptyTap,
+                    onSurahNameLongPress = onSurahNameLongPress,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(box.height.dp)
+                        .clipToBounds(),
+                )
+            }
+            return@BoxWithConstraints
+        }
         val landscape = maxWidth > maxHeight
         if (landscape) {
             val scrollState = rememberScrollState()
@@ -129,6 +199,7 @@ fun MedinaCanvasPage(
                     highlightAyah = highlightAyah,
                     hideAyahText = hideAyahText,
                     revealedAyahs = revealedAyahs,
+                    tajweedEnabled = tajweedEnabled,
                     chromeVisible = chromeVisible,
                     surahsByNumber = surahsByNumber,
                     quarter = quarter,
@@ -154,6 +225,7 @@ fun MedinaCanvasPage(
                 highlightAyah = highlightAyah,
                 hideAyahText = hideAyahText,
                 revealedAyahs = revealedAyahs,
+                tajweedEnabled = tajweedEnabled,
                 chromeVisible = chromeVisible,
                 surahsByNumber = surahsByNumber,
                 quarter = quarter,
@@ -179,6 +251,7 @@ private fun MedinaCanvasPageBody(
     highlightAyah: Pair<Int, Int>?,
     hideAyahText: Boolean,
     revealedAyahs: Set<Pair<Int, Int>>,
+    tajweedEnabled: Boolean,
     chromeVisible: Boolean,
     surahsByNumber: Map<Int, SurahInfo>,
     quarter: QuarterMarker?,
@@ -190,24 +263,34 @@ private fun MedinaCanvasPageBody(
     modifier: Modifier,
 ) {
     val inspection = LocalInspectionMode.current
-    var pageTypeface by remember(pageNumber, inspection) {
+    val nightPalette = LocalNightMode.current
+    var pageTypeface by remember(pageNumber, inspection, nightPalette) {
         mutableStateOf(
-            if (inspection) Typeface.DEFAULT else fontManager?.peekPageTypeface(pageNumber),
+            if (inspection) Typeface.DEFAULT else fontManager?.peekPageTypeface(pageNumber, nightPalette),
         )
+    }
+    var markerTypeface by remember(pageNumber, inspection) {
+        mutableStateOf(if (inspection) Typeface.DEFAULT else fontManager?.peekPageTypeface(pageNumber, false))
     }
     var uthmanicTypeface by remember { mutableStateOf(fontManager?.peekUthmanicTypeface()) }
     var titleTypeface by remember { mutableStateOf(fontManager?.peekSurahTitleTypeface()) }
     var canvasSize by remember { mutableStateOf(IntSize.Zero) }
     var plan by remember { mutableStateOf<MedinaPagePlan?>(null) }
 
-    LaunchedEffect(pageNumber, inspection) {
+    LaunchedEffect(pageNumber, inspection, nightPalette) {
         if (inspection || fontManager == null) {
+            markerTypeface = Typeface.DEFAULT
             pageTypeface = Typeface.DEFAULT
             uthmanicTypeface = Typeface.DEFAULT
             titleTypeface = Typeface.DEFAULT
             return@LaunchedEffect
         }
-        pageTypeface = fontManager.loadPageTypeface(pageNumber)
+        fontManager.setNightPalette(nightPalette)
+        // Only CPAL differs: marker outlines and all existing layout measurements stay unchanged.
+        val originalMarkerFace = fontManager.loadPageTypeface(pageNumber, false)
+        val bodyFace = fontManager.loadPageTypeface(pageNumber, nightPalette)
+        markerTypeface = originalMarkerFace
+        pageTypeface = bodyFace
         if (titleTypeface == null) {
             titleTypeface = fontManager.loadSurahTitleTypeface()
         }
@@ -254,7 +337,7 @@ private fun MedinaCanvasPageBody(
             pageNumber = pageNumber,
             width = canvasSize.width,
             height = canvasSize.height,
-            faceNumber = fontManager?.faceNumberForPage(pageNumber) ?: pageNumber,
+            faceNumber = (fontManager?.faceNumberForPage(pageNumber) ?: pageNumber) * 2 + if (nightPalette) 1 else 0,
             titleReady = titleTypeface != null,
             firstWordId = firstWordId,
             lastWordId = lastWordId,
@@ -303,19 +386,12 @@ private fun MedinaCanvasPageBody(
         }
     }
 
-    val quarterLineIndex = remember(lines, quarter) {
-        lineSlotIndex(lines, findQuarterMarkerLineNumber(lines, quarter))
-    }
-    val sajdaLineIndex = remember(lines, sajda) {
-        lineSlotIndex(lines, findSajdaMarkerLineNumber(lines, sajda))
-    }
-    val hizbBadge = remember(quarter) {
-        ArabicOrdinals.hizbBadgeParts(quarter?.label.orEmpty())
-    }
     val slotCount = AppConstants.LINES_PER_PAGE
     val slotHeightPx = if (canvasSize.height > 0) canvasSize.height / slotCount.toFloat() else 0f
     val firstWordHint = LocalTrainingFirstWordHint.current
     val revealedWordIds = LocalTrainingRevealedWordIds.current
+    val wordMarks = LocalTrainingWordMarks.current
+    val focusWordId = LocalTrainingFocusWordId.current
 
     Box(modifier = modifier) {
         Canvas(
@@ -380,43 +456,66 @@ private fun MedinaCanvasPageBody(
                             word.word.ayah == highlightAyah.second
                         val wordMatch = highlightWordId != null && highlightWordId == word.word.id
                         val highlighted = ayahMatch || wordMatch
+                        pagePaint.typeface = if (word.word.isAyahMarker) markerTypeface ?: pageTypeface else pageTypeface
                         val marker = word.marker
-                        if (word.word.isAyahMarker && word.body.isNotEmpty() && pageTypeface != null) {
+                        val background = ayahBackgroundGlyph(night)
+                        if (background.isNotEmpty() && word.word.isAyahMarker && word.body.isNotEmpty() && pageTypeface != null) {
                             pagePaint.color = glyph
                             pagePaint.colorFilter = null
                             nativeCanvas.drawText(
-                                ayahBackgroundGlyph(night),
+                                background,
                                 word.x,
                                 word.baseline,
                                 pagePaint,
                             )
                         }
+                        val hidden = trainingWordHidden(
+                            isAyahMarker = word.word.isAyahMarker,
+                            surah = word.word.surah,
+                            ayah = word.word.ayah,
+                            wordId = word.word.id,
+                            hideAyahText = hideAyahText,
+                            revealedAyahs = revealedAyahs,
+                            revealedWordIds = revealedWordIds,
+                            wordPosition = word.word.position,
+                            firstWordHint = firstWordHint,
+                        )
+                        val mark = if (word.word.isAyahMarker) null else wordMarks[word.word.id]
+                        if (
+                            focusWordId != null &&
+                            focusWordId == word.word.id &&
+                            !word.word.isAyahMarker &&
+                            !hidden
+                        ) {
+                            pagePaint.style = Paint.Style.STROKE
+                            pagePaint.strokeWidth = 2.2f
+                            pagePaint.color = gold
+                            pagePaint.colorFilter = null
+                            nativeCanvas.drawRect(word.x, word.boxTop, word.x + word.width, word.boxBottom, pagePaint)
+                            pagePaint.style = Paint.Style.FILL
+                        }
                         pagePaint.applyGlyphColor(
-                            highlighted = highlighted,
-                            glyph = if (
-                                trainingWordHidden(
-                                    isAyahMarker = word.word.isAyahMarker,
-                                    surah = word.word.surah,
-                                    ayah = word.word.ayah,
-                                    wordId = word.word.id,
-                                    hideAyahText = hideAyahText,
-                                    revealedAyahs = revealedAyahs,
-                                    revealedWordIds = revealedWordIds,
-                                    wordPosition = word.word.position,
-                                    firstWordHint = firstWordHint,
-                                )
-                            ) {
+                            monochrome = !tajweedEnabled,
+                            preservePalette = word.word.isAyahMarker,
+                            highlighted = highlighted && mark == null,
+                            glyph = if (hidden) {
                                 Color.Transparent.toArgb()
                             } else {
                                 glyph
                             },
                             playbackBlue = playbackBlue,
+                            tint = mark?.let { trainingMarkColor(it).toArgb() },
                         )
-                        if (word.body.isNotEmpty()) {
+                        // COLR glyphs keep their palette colours whatever the paint colour, so a hidden
+                        // (training) word is skipped instead of being drawn transparent.
+                        if (word.body.isNotEmpty() && pagePaint.color != Color.Transparent.toArgb()) {
                             nativeCanvas.drawText(word.body, word.x, word.baseline, pagePaint)
                         }
                         if (!marker.isNullOrEmpty()) {
+                            pagePaint.typeface = markerTypeface ?: pageTypeface
                             pagePaint.applyGlyphColor(
+                                monochrome = !tajweedEnabled,
+                                preservePalette = true,
                                 highlighted = highlighted,
                                 glyph = glyph,
                                 playbackBlue = playbackBlue,
@@ -467,79 +566,41 @@ private fun MedinaCanvasPageBody(
                     )
                 }
             }
-            val pairedLineIndex =
-                if (quarterLineIndex != null &&
-                    sajdaLineIndex != null &&
-                    quarterLineIndex == sajdaLineIndex &&
-                    hizbBadge != null
-                ) {
-                    quarterLineIndex
-                } else {
-                    null
-                }
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                Box(Modifier.matchParentSize()) {
-                    if (pairedLineIndex != null && hizbBadge != null) {
-                        val centerY = (pairedLineIndex + 0.5f) * slotHeightPx
-                        MushafPairedSideBadges(
-                            hizbBadge = hizbBadge,
-                            visible = chromeVisible,
-                            onTap = onEmptyTap,
-                            modifier = Modifier
-                                .align(MushafSideBadgeAlign)
-                                .mushafSideBadgeAnchor(
-                                    yOffsetPx = (centerY - with(density) { HizbBadgeHeight.toPx() / 2f }).roundToInt(),
-                                    density = density,
-                                ),
-                        )
-                    } else {
-                        if (quarterLineIndex != null && hizbBadge != null) {
-                            val centerY = (quarterLineIndex + 0.5f) * slotHeightPx
-                            HizbFrameBadge(
-                                parts = hizbBadge,
-                                visible = chromeVisible,
-                                onTap = onEmptyTap,
-                                modifier = Modifier
-                                    .align(MushafSideBadgeAlign)
-                                    .mushafSideBadgeAnchor(
-                                        yOffsetPx = (centerY - with(density) { HizbBadgeHeight.toPx() / 2f }).roundToInt(),
-                                        density = density,
-                                    ),
-                            )
-                        }
-                        if (sajdaLineIndex != null) {
-                            val centerY = (sajdaLineIndex + 0.5f) * slotHeightPx
-                            SajdahFrameBadge(
-                                visible = chromeVisible,
-                                onTap = onEmptyTap,
-                                modifier = Modifier
-                                    .align(MushafSideBadgeAlign)
-                                    .mushafSideBadgeAnchor(
-                                        yOffsetPx = (centerY - with(density) { SajdahBadgeHeight.toPx() / 2f }).roundToInt(),
-                                        density = density,
-                                    ),
-                            )
-                        }
-                    }
-                }
-            }
+
         }
     }
 }
 
-private fun Paint.applyGlyphColor(
+internal fun Paint.applyGlyphColor(
+    monochrome: Boolean,
     highlighted: Boolean,
     glyph: Int,
     playbackBlue: Int,
+    preservePalette: Boolean = false,
+    tint: Int? = null,
 ) {
+    if (preservePalette) {
+        color = glyph
+        colorFilter = null
+        return
+    }
     when {
         glyph == Color.Transparent.toArgb() -> {
             color = glyph
             colorFilter = null
         }
+        tint != null -> {
+            color = tint
+            colorFilter = android.graphics.PorterDuffColorFilter(tint, android.graphics.PorterDuff.Mode.SRC_IN)
+        }
         highlighted -> {
+            // Tint every COLR layer (palette colours ignore Paint.color).
             color = playbackBlue
-            colorFilter = null
+            colorFilter = android.graphics.PorterDuffColorFilter(playbackBlue, android.graphics.PorterDuff.Mode.SRC_IN)
+        }
+        monochrome -> {
+            color = glyph
+            colorFilter = android.graphics.PorterDuffColorFilter(glyph, android.graphics.PorterDuff.Mode.SRC_IN)
         }
         else -> {
             color = glyph

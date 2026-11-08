@@ -1,5 +1,7 @@
 package com.quransunah.app.ui.study
 
+import com.quransunah.app.ui.shell.GoldCornerFrame
+import com.quransunah.app.ui.shell.GoldCornerFrameShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,6 +35,7 @@ import com.quransunah.app.R
 import com.quransunah.app.core.EasternArabic
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewTheme
+import com.quransunah.app.ui.shell.ChromeTokens
 import com.quransunah.app.ui.theme.LocalAppFontFamily
 import com.quransunah.app.ui.theme.LocalDisplayFontFamily
 import com.quransunah.app.ui.theme.LocalPaperColors
@@ -87,14 +90,14 @@ fun TafsirSheetContent(
     bodySizeSp: Float = 17f,
 ) {
     val paper = LocalPaperColors.current
-    val shape = RoundedCornerShape(16.dp)
+    val shape = GoldCornerFrameShape(16.dp)
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .clip(shape)
-            .border(1.dp, paper.tone500, shape)
-            .background(paper.pageBody),
+            .background(paper.pageBody)
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, shape),
     ) {
         Row(
             modifier = Modifier

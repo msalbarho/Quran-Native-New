@@ -1,5 +1,8 @@
 package com.quransunah.app.ui.study
 
+import androidx.compose.material3.MaterialTheme
+import com.quransunah.app.ui.shell.GoldCornerFrame
+import com.quransunah.app.ui.shell.GoldCornerFrameShape
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
@@ -107,8 +110,8 @@ import com.quransunah.app.ui.mushaf.WordRecord
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewFixtures
 import com.quransunah.app.ui.preview.PreviewTheme
-import com.quransunah.app.ui.shell.IslamicEdgePattern
-import com.quransunah.app.ui.shell.IslamicOrnamentFade
+import com.quransunah.app.ui.shell.ChromeTokens
+import com.quransunah.app.ui.shell.TiledOrnamentBackground
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 import kotlinx.coroutines.delay
@@ -140,7 +143,7 @@ private fun ellipsizeReciterName(measurer: TextMeasurer, text: String, maxWidthP
 
 private val CloseRedLight = Color(0xFFC53030)
 private val CloseRedDark = Color.White
-private val WordSheetShape = RoundedCornerShape(28.dp)
+private val WordSheetShape = GoldCornerFrameShape(20.dp)
 private val WordSheetMotion = tween<Float>(durationMillis = 200)
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -159,6 +162,7 @@ fun WordSheet(
     val scope = rememberCoroutineScope()
     val inspection = LocalInspectionMode.current
     val selected = ui.word ?: word
+    var makerOpen by remember { mutableStateOf(false) }
 
     val transitionState = remember { MutableTransitionState(false) }
     var everOpened by remember { mutableStateOf(false) }
@@ -239,7 +243,7 @@ fun WordSheet(
             onVideoFrom = viewModel::setVideoFrom,
             onVideoTo = viewModel::setVideoTo,
             onSelectVideoReciter = viewModel::selectVideoReciter,
-            onShareVideo = viewModel::shareVideo,
+            onShareVideo = { makerOpen = true },
             modifier = contentModifier,
         )
     }
@@ -250,10 +254,7 @@ fun WordSheet(
                 colors = listOf(paper.chromeFill, paper.pageBody, paper.pageBackground),
             ),
         )) {
-            IslamicEdgePattern(
-                Modifier.matchParentSize(),
-                fade = IslamicOrnamentFade.Vertical,
-            )
+            TiledOrnamentBackground(Modifier.matchParentSize())
             Column(Modifier.fillMaxSize()) {
                 WordSheetHeader(onClose = requestClose)
                 body(Modifier.weight(1f))
@@ -302,21 +303,19 @@ fun WordSheet(
                                 Brush.verticalGradient(
                                     colors = listOf(
                                         paper.chromeFill,
-                                        paper.pageBody,
-                                        paper.pageBackground,
+                                            paper.pageBody,
+                                            paper.pageBackground,
+                                        ),
                                     ),
-                                ),
                             )
+                            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, WordSheetShape)
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
                                 onClick = {},
                             ),
                     ) {
-                        IslamicEdgePattern(
-                            Modifier.matchParentSize(),
-                            fade = IslamicOrnamentFade.Vertical,
-                        )
+                        TiledOrnamentBackground(Modifier.matchParentSize())
                         Column(Modifier.fillMaxSize()) {
                             WordSheetHeader(onClose = requestClose)
                             body(Modifier.weight(1f))
@@ -326,6 +325,8 @@ fun WordSheet(
             }
         }
     }
+
+    if (makerOpen && !inspection) VideoMaker(viewModel, ui) { makerOpen = false }
 
     if (ui.tafsirOpen && !inspection) {
         TafsirSheet(
@@ -439,8 +440,8 @@ fun WordSheetContent(
                 text = ui.ayahText.ifBlank { word.uthmanic },
                 fontManager = fontManager,
                 color = if (night) paper.textStrong else Color.Black,
-                fontSize = 22.sp,
-                lineHeight = 40.sp,
+                fontSize = 24.2.sp, // +10% (4.3.1)
+                lineHeight = 44.sp,
                 maxLines = 6,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -576,42 +577,7 @@ fun WordSheetContent(
                 )
             }
             SheetSection {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                    VideoFromAyahField(
-                        ayah = ui.videoFromAyah,
-                        onClick = { onVideoFrom(word.ayah) },
-                        modifier = Modifier.weight(1f),
-                    )
-                    VideoToAyahDropdown(
-                        fromAyah = ui.videoFromAyah,
-                        toAyah = ui.videoToAyah,
-                        maxAyah = maxAyah,
-                        onSelect = onVideoTo,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-                ReciterDropdown(
-                    reciters = reciterLabels,
-                    selectedId = ui.videoReciterId,
-                    expanded = false,
-                    onExpanded = {},
-                    onSelect = onSelectVideoReciter,
-                    label = stringResource(R.string.word_video_reader),
-                )
-                AccentFillButton(
-                    label = stringResource(
-                        if (ui.sharing) R.string.word_wait_video else R.string.word_share_video,
-                    ),
-                    onClick = onShareVideo,
-                    enabled = !ui.sharing && ui.videoReciterId.isNotBlank(),
-                )
-                Text(
-                    text = stringResource(R.string.word_wait_video),
-                    color = paper.textMuted,
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                AccentFillButton(label = "فيديو جديد • آيات، خلفية، تنسيق، مشاركة", onClick = onShareVideo, enabled = !ui.sharing)
             }
             if (ui.sharing) {
                 LinearProgressIndicator(
@@ -620,7 +586,12 @@ fun WordSheetContent(
                     trackColor = paper.tone500.copy(alpha = 0.35f),
                 )
             }
-            ui.shareError?.let { error ->
+            ui.shareError?.let { rawError ->
+                val error = when (rawError) {
+                    SHARE_ERROR_NO_RECITER -> stringResource(R.string.word_choose_reader)
+                    SHARE_ERROR_VIDEO_FAILED -> stringResource(R.string.word_share_video_failed)
+                    else -> rawError
+                }
                 Text(
                     error,
                     color = closeColor,
@@ -676,7 +647,7 @@ private fun SheetSection(
 ) {
     val paper = LocalPaperColors.current
     val night = LocalNightMode.current
-    val shape = RoundedCornerShape(16.dp)
+    val shape = GoldCornerFrameShape(16.dp)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -799,7 +770,7 @@ private fun SheetChipButton(
     modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
-    val shape = RoundedCornerShape(12.dp)
+    val shape = GoldCornerFrameShape(12.dp)
     val border = if (emphasized) paper.accent else paper.accent.copy(alpha = 0.28f)
     val fill = if (emphasized) paper.accent.copy(alpha = 0.16f) else Color.Transparent
     Box(
@@ -892,7 +863,7 @@ private fun AccentFillButton(
     enabled: Boolean = true,
 ) {
     val paper = LocalPaperColors.current
-    val shape = RoundedCornerShape(12.dp)
+    val shape = GoldCornerFrameShape(12.dp)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -977,17 +948,89 @@ private fun ReciterDropdown(
 }
 
 @Composable
-private fun VideoFromAyahField(
-    ayah: Int,
-    onClick: () -> Unit,
+private fun VideoFromAyahDropdown(
+    fromAyah: Int,
+    maxAyah: Int,
+    onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    CompactSelectorField(
-        value = EasternArabic.format(ayah),
+    // Start may go back up to (range max - 1) ayahs before the long-pressed ayah, so the
+    // selected range can still contain it; the "to" list then follows the chosen start.
+    val options = remember(maxAyah, fromAyah) {
+
+        // every ayah of the surah; the "to" list then offers from..from+9
+
+        ((1..maxAyah.coerceAtLeast(1)).toList() + fromAyah).distinct().sorted()
+
+    }
+    AyahNumberDropdown(
+        value = fromAyah,
         label = stringResource(R.string.audio_range_from),
-        onClick = onClick,
+        options = options,
+        onSelect = onSelect,
         modifier = modifier,
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AyahNumberDropdown(
+    value: Int,
+    label: String,
+    options: List<Int>,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val menuScroll = rememberScrollState()
+    val itemPx = with(LocalDensity.current) { 48.dp.toPx() }
+    LaunchedEffect(expanded) {
+        // open the list positioned on the current ayah (a couple of rows above it stay visible)
+        if (expanded) {
+            val index = options.indexOf(value).coerceAtLeast(0)
+            menuScroll.scrollTo(((index - 2).coerceAtLeast(0) * itemPx).toInt())
+        }
+    }
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier,
+    ) {
+        CompactSelectorField(
+            value = EasternArabic.format(value),
+            label = label,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                .fillMaxWidth(),
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            scrollState = menuScroll,
+        ) {
+            options.forEach { ayah ->
+                val selected = ayah == value
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            EasternArabic.format(ayah),
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                        )
+                    },
+                    modifier = if (selected) {
+                        Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f))
+                    } else {
+                        Modifier
+                    },
+                    onClick = {
+                        onSelect(ayah)
+                        expanded = false
+                    },
+                )
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1002,7 +1045,7 @@ private fun VideoToAyahDropdown(
     val options = remember(fromAyah, maxAyah) {
         val start = fromAyah.coerceIn(1, maxAyah.coerceAtLeast(1))
         val firstNext = (start + 1).coerceAtMost(maxAyah.coerceAtLeast(1))
-        val end = (start + AppConstants.SHARE_AYAH_RANGE_MAX).coerceAtMost(maxAyah.coerceAtLeast(1))
+        val end = (start + AppConstants.SHARE_AYAH_RANGE_MAX - 1).coerceAtMost(maxAyah.coerceAtLeast(1))
         val following = if (firstNext <= end && firstNext != start) {
             (firstNext..end).toList()
         } else {

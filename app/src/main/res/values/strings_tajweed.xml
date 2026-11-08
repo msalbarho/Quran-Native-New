@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">Tajweed color guide</string>
+    <string name="tajweed_colors">Tajweed colors</string>
+    <string name="tajweed_rule_1">Madd lazim: 6 counts</string>
+    <string name="tajweed_rule_2">Madd wajib muttasil: 4–5 counts</string>
+    <string name="tajweed_rule_3">Madd jaiz munfasil: 2, 4 or 5 counts</string>
+    <string name="tajweed_rule_4">Natural madd / madd iwadh: 2 counts</string>
+    <string name="tajweed_rule_5">Ikhfa, idgham with ghunnah, and ghunnah</string>
+    <string name="tajweed_rule_6">Tafkhim: emphatic letters and ra</string>
+    <string name="tajweed_rule_7">Qalqalah</string>
+    <string name="tajweed_rule_8">Unpronounced letters: hamzat al-wasl, solar lam, etc.</string>
+    <string-array name="mushaf_header_numbers">
+        <item>one</item>
+        <item>two</item>
+        <item>three</item>
+        <item>four</item>
+        <item>five</item>
+        <item>six</item>
+        <item>seven</item>
+        <item>eight</item>
+        <item>nine</item>
+        <item>ten</item>
+        <item>eleven</item>
+        <item>twelve</item>
+        <item>thirteen</item>
+        <item>fourteen</item>
+        <item>fifteen</item>
+        <item>sixteen</item>
+        <item>seventeen</item>
+        <item>eighteen</item>
+        <item>nineteen</item>
+        <item>twenty</item>
+        <item>twenty-one</item>
+        <item>twenty-two</item>
+        <item>twenty-three</item>
+        <item>twenty-four</item>
+        <item>twenty-five</item>
+        <item>twenty-six</item>
+        <item>twenty-seven</item>
+        <item>twenty-eight</item>
+        <item>twenty-nine</item>
+        <item>thirty</item>
+        <item>thirty-one</item>
+        <item>thirty-two</item>
+        <item>thirty-three</item>
+        <item>thirty-four</item>
+        <item>thirty-five</item>
+        <item>thirty-six</item>
+        <item>thirty-seven</item>
+        <item>thirty-eight</item>
+        <item>thirty-nine</item>
+        <item>forty</item>
+        <item>forty-one</item>
+        <item>forty-two</item>
+        <item>forty-three</item>
+        <item>forty-four</item>
+        <item>forty-five</item>
+        <item>forty-six</item>
+        <item>forty-seven</item>
+        <item>forty-eight</item>
+        <item>forty-nine</item>
+        <item>fifty</item>
+        <item>fifty-one</item>
+        <item>fifty-two</item>
+        <item>fifty-three</item>
+        <item>fifty-four</item>
+        <item>fifty-five</item>
+        <item>fifty-six</item>
+        <item>fifty-seven</item>
+        <item>fifty-eight</item>
+        <item>fifty-nine</item>
+        <item>sixty</item>
+    </string-array>
+</resources>

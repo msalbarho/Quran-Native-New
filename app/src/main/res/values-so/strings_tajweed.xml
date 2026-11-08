@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">Hagaha midabbada tajwiidka</string>
+    <string name="tajweed_colors">Midabbada tajwiidka</string>
+    <string name="tajweed_rule_1">Maddi laasim: 6 xarako</string>
+    <string name="tajweed_rule_2">Maddi waajib muttasil: 4–5 xarako</string>
+    <string name="tajweed_rule_3">Maddi jaa’is munfasil: 2, 4 ama 5 xarako</string>
+    <string name="tajweed_rule_4">Maddi dabiici / ciwad: 2 xarako</string>
+    <string name="tajweed_rule_5">Ikhfaa, idghaam ghunna leh iyo meelaha ghunna</string>
+    <string name="tajweed_rule_6">Tafkhiim: xarfaha culus iyo ra</string>
+    <string name="tajweed_rule_7">Qalqala</string>
+    <string name="tajweed_rule_8">Xarfo aan la dhawaaqin: hamzatul wasl, laamka shamsiga iwm.</string>
+    <string-array name="mushaf_header_numbers">
+        <item>kow</item>
+        <item>laba</item>
+        <item>saddex</item>
+        <item>afar</item>
+        <item>shan</item>
+        <item>lix</item>
+        <item>toddoba</item>
+        <item>siddeed</item>
+        <item>sagaal</item>
+        <item>toban</item>
+        <item>kow iyo toban</item>
+        <item>laba iyo toban</item>
+        <item>saddex iyo toban</item>
+        <item>afar iyo toban</item>
+        <item>shan iyo toban</item>
+        <item>lix iyo toban</item>
+        <item>toddoba iyo toban</item>
+        <item>siddeed iyo toban</item>
+        <item>sagaal iyo toban</item>
+        <item>labaatan</item>
+        <item>kow iyo labaatan</item>
+        <item>laba iyo labaatan</item>
+        <item>saddex iyo labaatan</item>
+        <item>afar iyo labaatan</item>
+        <item>shan iyo labaatan</item>
+        <item>lix iyo labaatan</item>
+        <item>toddoba iyo labaatan</item>
+        <item>siddeed iyo labaatan</item>
+        <item>sagaal iyo labaatan</item>
+        <item>soddon</item>
+        <item>kow iyo soddon</item>
+        <item>laba iyo soddon</item>
+        <item>saddex iyo soddon</item>
+        <item>afar iyo soddon</item>
+        <item>shan iyo soddon</item>
+        <item>lix iyo soddon</item>
+        <item>toddoba iyo soddon</item>
+        <item>siddeed iyo soddon</item>
+        <item>sagaal iyo soddon</item>
+        <item>afartan</item>
+        <item>kow iyo afartan</item>
+        <item>laba iyo afartan</item>
+        <item>saddex iyo afartan</item>
+        <item>afar iyo afartan</item>
+        <item>shan iyo afartan</item>
+        <item>lix iyo afartan</item>
+        <item>toddoba iyo afartan</item>
+        <item>siddeed iyo afartan</item>
+        <item>sagaal iyo afartan</item>
+        <item>konton</item>
+        <item>kow iyo konton</item>
+        <item>laba iyo konton</item>
+        <item>saddex iyo konton</item>
+        <item>afar iyo konton</item>
+        <item>shan iyo konton</item>
+        <item>lix iyo konton</item>
+        <item>toddoba iyo konton</item>
+        <item>siddeed iyo konton</item>
+        <item>sagaal iyo konton</item>
+        <item>lixdan</item>
+    </string-array>
+</resources>

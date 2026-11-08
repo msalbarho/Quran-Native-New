@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">Amnir n yiniyen n tjwid</string>
+    <string name="tajweed_colors">Iniyen n tjwid</string>
+    <string name="tajweed_rule_1">Madd lazim: 6 n lḥarakat</string>
+    <string name="tajweed_rule_2">Madd wajib muttasil: 4–5 n lḥarakat</string>
+    <string name="tajweed_rule_3">Madd jaiz munfasil: 2, 4 neɣ 5 n lḥarakat</string>
+    <string name="tajweed_rule_4">Madd agaman / iwadh: 2 n lḥarakat</string>
+    <string name="tajweed_rule_5">Ikhfa, idgham s ghunna d imukan n ghunna</string>
+    <string name="tajweed_rule_6">Tafkhim: isekkilen izuran d ra</string>
+    <string name="tajweed_rule_7">Qalqalah</string>
+    <string name="tajweed_rule_8">Isekkilen ur ittwanṭaqen: hamzat al-wasl, lam shamsiyya…</string>
+    <string-array name="mushaf_header_numbers">
+        <item>ⵢⴰⵏ</item>
+        <item>ⵙⵉⵏ</item>
+        <item>ⴽⵕⴰⴹ</item>
+        <item>ⴽⴽⵓⵥ</item>
+        <item>ⵙⵎⵎⵓⵙ</item>
+        <item>ⵙⴹⵉⵚ</item>
+        <item>ⵙⴰ</item>
+        <item>ⵜⴰⵎ</item>
+        <item>ⵜⵥⴰ</item>
+        <item>ⵎⵔⴰⵡ</item>
+        <item>ⵢⴰⵏ ⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⵉⵏ ⴷ ⵎⵔⴰⵡ</item>
+        <item>ⴽⵕⴰⴹ ⴷ ⵎⵔⴰⵡ</item>
+        <item>ⴽⴽⵓⵥ ⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⵎⵎⵓⵙ ⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⴹⵉⵚ ⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⴰ ⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵜⴰⵎ ⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵜⵥⴰ ⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⵉⵏ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵢⴰⵏ ⴷ ⵙⵉⵏ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⵉⵏ ⴷ ⵙⵉⵏ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⴽⵕⴰⴹ ⴷ ⵙⵉⵏ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⴽⴽⵓⵥ ⴷ ⵙⵉⵏ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⵎⵎⵓⵙ ⴷ ⵙⵉⵏ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⴹⵉⵚ ⴷ ⵙⵉⵏ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⴰ ⴷ ⵙⵉⵏ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵜⴰⵎ ⴷ ⵙⵉⵏ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵜⵥⴰ ⴷ ⵙⵉⵏ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⴽⵕⴰⴹ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵢⴰⵏ ⴷ ⴽⵕⴰⴹ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⵉⵏ ⴷ ⴽⵕⴰⴹ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⴽⵕⴰⴹ ⴷ ⴽⵕⴰⴹ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⴽⴽⵓⵥ ⴷ ⴽⵕⴰⴹ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⵎⵎⵓⵙ ⴷ ⴽⵕⴰⴹ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⴹⵉⵚ ⴷ ⴽⵕⴰⴹ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⴰ ⴷ ⴽⵕⴰⴹ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵜⴰⵎ ⴷ ⴽⵕⴰⴹ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵜⵥⴰ ⴷ ⴽⵕⴰⴹ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⴽⴽⵓⵥ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵢⴰⵏ ⴷ ⴽⴽⵓⵥ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⵉⵏ ⴷ ⴽⴽⵓⵥ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⴽⵕⴰⴹ ⴷ ⴽⴽⵓⵥ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⴽⴽⵓⵥ ⴷ ⴽⴽⵓⵥ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⵎⵎⵓⵙ ⴷ ⴽⴽⵓⵥ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⴹⵉⵚ ⴷ ⴽⴽⵓⵥ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⴰ ⴷ ⴽⴽⵓⵥ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵜⴰⵎ ⴷ ⴽⴽⵓⵥ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵜⵥⴰ ⴷ ⴽⴽⵓⵥ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⵎⵎⵓⵙ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵢⴰⵏ ⴷ ⵙⵎⵎⵓⵙ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⵉⵏ ⴷ ⵙⵎⵎⵓⵙ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⴽⵕⴰⴹ ⴷ ⵙⵎⵎⵓⵙ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⴽⴽⵓⵥ ⴷ ⵙⵎⵎⵓⵙ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⵎⵎⵓⵙ ⴷ ⵙⵎⵎⵓⵙ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⴹⵉⵚ ⴷ ⵙⵎⵎⵓⵙ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⴰ ⴷ ⵙⵎⵎⵓⵙ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵜⴰⵎ ⴷ ⵙⵎⵎⵓⵙ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵜⵥⴰ ⴷ ⵙⵎⵎⵓⵙ ⵉⴷ ⵎⵔⴰⵡ</item>
+        <item>ⵙⴹⵉⵚ ⵉⴷ ⵎⵔⴰⵡ</item>
+    </string-array>
+</resources>

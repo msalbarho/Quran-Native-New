@@ -16,20 +16,33 @@ import org.junit.Test
 
 class MeaningReadingOrderTest {
     @Test
-    fun page71And604UseTheSameQcfFaceAsTheMushafMap() {
-        val map = File("src/main/assets/json/qcf4-font-map.json").readText()
-        assertTrue(map.contains("\"71\": \"QCF4_Hafs_06\""))
-        assertTrue(map.contains("\"604\": \"QCF4_Hafs_47\""))
-        val marker71 = markerLigature(3, 165)
+    fun page71And604UseTheirOwnColouredPageFonts() {
+        // One QPC V4 tajweed font per page (COLR/CPAL), no 47-face map any more.
+        assertEquals("fonts/qcf4/p71.ttf", com.quransunah.app.core.AppConstants.qcf4PageAsset(71))
+        assertEquals("fonts/qcf4/p604.ttf", com.quransunah.app.core.AppConstants.qcf4PageAsset(604))
+        val glyphs = File("src/main/assets/json/qpc-v4-glyphs.tsv").inputStream().use {
+            com.quransunah.app.fonts.QpcV4Glyphs.parse(it)
+        }
+        val marker71 = glyphs[markerWordId(3, 165)]!!
         assertEquals(1, marker71.length)
-        assertTrue(marker71[0].code in 0xE000..0xF8FF)
-        val marker604 = markerLigature(114, 6)
+        assertTrue(marker71[0].code in 0xFC41..0xFFFF)
+        val marker604 = glyphs[markerWordId(114, 6)]!!
         assertEquals(1, marker604.length)
-        assertTrue(marker604[0].code in 0xE000..0xF8FF)
-        // These shipped faces have included COLR/CPAL since the initial commit.
-        // The page map points at those files; the color tables are part of them.
-        assertTrue(fontHasColorTables(File("../public/fonts/qcf4/QCF4_Hafs_06.ttf")))
-        assertTrue(fontHasColorTables(File("../public/fonts/qcf4/QCF4_Hafs_47.ttf")))
+        assertTrue(marker604[0].code in 0xFC41..0xFFFF)
+        assertTrue(fontHasColorTables(File("../public/fonts/qcf4/p71.ttf")))
+        assertTrue(fontHasColorTables(File("../public/fonts/qcf4/p604.ttf")))
+    }
+
+    private fun markerWordId(surah: Int, ayah: Int): Int {
+        Class.forName("org.sqlite.JDBC")
+        return DriverManager.getConnection("jdbc:sqlite:${assetDb().absolutePath}").use { db ->
+            db.prepareStatement(
+                "SELECT word_id FROM words WHERE surah_id = ? AND ayah_number = ? AND is_ayah_marker = 1 ORDER BY word_id DESC LIMIT 1",
+            ).use { st ->
+                st.setInt(1, surah); st.setInt(2, ayah)
+                st.executeQuery().use { rows -> assertTrue(rows.next()); rows.getInt(1) }
+            }
+        }
     }
 
     @Test

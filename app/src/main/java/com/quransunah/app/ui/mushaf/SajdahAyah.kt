@@ -14,7 +14,14 @@ object SajdahAyah {
     const val MARK = '\u06E9'
     private val pua = 0xE000..0xF8FF
 
+    /**
+     * 604 QPC V4 page fonts: the sajdah word's glyph run already contains the overline and the mark, and the
+     * marker is the plain numbered medallion — no synthesized slots. Kept switchable for the old 47 faces.
+     */
+    @Volatile var synthesizeSlots: Boolean = false
+
     fun overlayLigature(word: WordRecord, next: WordRecord?): String? {
+        if (!synthesizeSlots) return null
         if (word.isAyahMarker || next?.isAyahMarker != true) return null
         if (!word.uthmanic.contains(MARK)) return null
         val wordCp = word.qcfLigature.lastOrNull()?.code ?: return null
@@ -26,6 +33,7 @@ object SajdahAyah {
     }
 
     fun numberLigature(word: WordRecord, previous: WordRecord?): String? {
+        if (!synthesizeSlots) return null
         if (!word.isAyahMarker || previous == null) return null
         if (!previous.uthmanic.contains(MARK)) return null
         val markerCp = word.qcfLigature.firstOrNull()?.code ?: return null

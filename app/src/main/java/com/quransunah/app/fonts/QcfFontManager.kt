@@ -20,9 +20,10 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 /**
- * Medina page faces are the same QCF4 Hafs files as React (`QCF4_Hafs_NN_W.woff2`),
- * converted to TTF. Each page uses its mapped face and the raw `qpc_ligature`
- * BMP PUA from `quran_unified.db` — no packed-plane remap.
+ * Medina pages use the 604 coloured QPC V4 tajweed fonts (`fonts/qcf4/pN.ttf`, COLR v0 + CPAL),
+ * one font per page, with per-word v4 codes from [QpcV4Glyphs]. Night mode uses the fonts' dark
+ * tajweed palette (CPAL 1), patched in place and cached as a file. Fonts come from a [FontSource]
+ * (bundled today; downloadable later).
  *
  * Decorative surah/juz/basmalah ligatures use `qbsml.ttf`. WOFF2 is never packaged.
  * Faces are loaded one-at-a-time on [Dispatchers.IO] and kept in a small Typeface LRU.
@@ -30,10 +31,22 @@ import kotlinx.serialization.json.jsonPrimitive
 @Singleton
 class QcfFontManager @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val v4Glyphs: QpcV4Glyphs,
 ) {
+    /** Source of the page fonts (bundled in the APK for now). */
+    val fontSource: FontSource = BundledFontSource(context)
+    /** Night palette currently used by the reader; set by the theme (see [setNightPalette]). */
+    @Volatile var nightPalette: Boolean = false
+        private set
+    private val nightDir: java.io.File by lazy {
+        java.io.File(context.cacheDir ?: context.filesDir, "qcf4-night").apply { mkdirs() }
+    }
+
     private val loadMutex = Mutex()
+    private val pageLoadMutex = Mutex()
     private val mapsMutex = Mutex()
-    private val faceCache = object : LinkedHashMap<Int, Typeface>(8, 0.75f, true) {
+    /** Key = page * 2 + (1 if night palette). Access-ordered LRU. */
+    private val faceCache = object : LinkedHashMap<Int, Typeface>(16, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Int, Typeface>?): Boolean {
             return size > AppConstants.PAGE_FONT_CACHE_SIZE
         }
@@ -51,20 +64,23 @@ class QcfFontManager @Inject constructor(
     @Volatile private var headerJuzMap: Map<Int, String> = emptyMap()
     @Volatile private var basmalahLigatureText: String = DEFAULT_BASMALAH_LIGATURE
 
-    fun faceNumberForPage(pageNumber: Int): Int {
-        val page = pageNumber.coerceIn(1, AppConstants.TOTAL_PAGES)
-        return pageFaceNumbers[page] ?: defaultFaceNumber(page)
-    }
+    /** One font per page: the "face" of a page is the page itself. */
+    fun faceNumberForPage(pageNumber: Int): Int = pageNumber.coerceIn(1, AppConstants.TOTAL_PAGES)
+
+    /** Called by the theme whenever night mode changes. */
+    fun setNightPalette(night: Boolean) { nightPalette = night }
+
+    private fun cacheKey(page: Int, night: Boolean): Int = faceNumberForPage(page) * 2 + if (night) 1 else 0
 
     fun packIdForPage(pageNumber: Int): Int = faceNumberForPage(pageNumber)
 
     fun familyForPage(pageNumber: Int): String {
         val face = faceNumberForPage(pageNumber)
-        return "QCF4_Hafs_%02d".format(java.util.Locale.US, face)
+        return "QPC_V4_p$face"
     }
 
     fun assetPathForPage(pageNumber: Int): String =
-        AppConstants.qcf4FaceAsset(faceNumberForPage(pageNumber))
+        AppConstants.qcf4PageAsset(faceNumberForPage(pageNumber))
 
     fun basmalahLigature(): String = basmalahLigatureText
 
@@ -97,8 +113,8 @@ class QcfFontManager @Inject constructor(
 
     fun juzHeaderLigature(juzNumber: Int): String? = headerJuzMap[juzNumber]
 
-    fun peekPageTypeface(pageNumber: Int): Typeface? =
-        synchronized(faceCache) { faceCache[faceNumberForPage(pageNumber)] }
+    fun peekPageTypeface(pageNumber: Int, night: Boolean = nightPalette): Typeface? =
+        synchronized(faceCache) { faceCache[cacheKey(pageNumber, night)] }
 
     fun peekBasmalahTypeface(pageNumber: Int): Typeface? = peekSurahTitleTypeface()
 
@@ -172,14 +188,14 @@ class QcfFontManager @Inject constructor(
         }
     }
 
-    suspend fun loadPageTypeface(pageNumber: Int): Typeface {
+    suspend fun loadPageTypeface(pageNumber: Int, night: Boolean = nightPalette): Typeface {
         ensureMaps()
-        val face = faceNumberForPage(pageNumber)
+        val face = cacheKey(pageNumber, night)
         synchronized(faceCache) { faceCache[face] }?.let { return it }
-        return loadMutex.withLock {
+        return pageLoadMutex.withLock {
             synchronized(faceCache) { faceCache[face] }?.let { return@withLock it }
             val loaded = withContext(Dispatchers.IO) {
-                loadTypeface(assetPathForPage(pageNumber))
+                loadPageFace(faceNumberForPage(pageNumber), night)
             }
             if (loaded != null && loaded != Typeface.DEFAULT) {
                 synchronized(faceCache) { faceCache[face] = loaded }
@@ -217,14 +233,15 @@ class QcfFontManager @Inject constructor(
         return (0xE900 + n - 1).toChar().toString()
     }
 
+    /** Loads current ±[AppConstants.PAGE_FONT_PRELOAD_RADIUS] pages off the main thread (nearest first). */
     suspend fun preloadNeighbors(pageNumber: Int) {
         val page = pageNumber.coerceIn(1, AppConstants.TOTAL_PAGES)
-        val currentFace = faceNumberForPage(page)
-        if (page > 1 && faceNumberForPage(page - 1) != currentFace) {
-            loadPageTypeface(page - 1)
-        }
-        if (page < AppConstants.TOTAL_PAGES && faceNumberForPage(page + 1) != currentFace) {
-            loadPageTypeface(page + 1)
+        val radius = AppConstants.PAGE_FONT_PRELOAD_RADIUS
+        fontSource.prefetch((page - 20).coerceAtLeast(1)..(page + 20).coerceAtMost(AppConstants.TOTAL_PAGES))
+        for (d in 1..radius) {
+            for (p in intArrayOf(page + d, page - d)) {
+                if (p in 1..AppConstants.TOTAL_PAGES) runCatching { loadPageTypeface(p) }
+            }
         }
         if (peekSurahTitleTypeface() == null) {
             loadSurahTitleTypeface()
@@ -247,6 +264,9 @@ class QcfFontManager @Inject constructor(
      */
     fun remapLigature(raw: String, @Suppress("UNUSED_PARAMETER") pageNumber: Int): String = raw
 
+    /** v4 page-font glyphs of a word (null if unknown). */
+    fun v4Glyphs(wordId: Int): String? = v4Glyphs.forWord(wordId)
+
     fun displayText(word: WordRecord, pageNumber: Int): String {
         val ligature = remapLigature(word.qcfLigature, pageNumber)
         return ligature.ifBlank { word.uthmanic }
@@ -264,6 +284,32 @@ class QcfFontManager @Inject constructor(
         }
     }
 
+    /** Light = the bundled font as is (palette 0). Night = palette 1 copied to palette 0, cached as a file. */
+    private fun loadPageFace(page: Int, night: Boolean): Typeface? {
+        if (!night) {
+            fontSource.file(page)?.let { f -> return runCatching { Typeface.createFromFile(f) }.getOrNull() }
+            return fontSource.assetPath(page)?.let { loadTypeface(it) }
+        }
+        val file = java.io.File(nightDir, "p$page-pal1.ttf")
+        if (!file.isFile || file.length() == 0L) {
+            val bytes = fontSource.bytes(page) ?: return null
+            ColrPalette.selectPalette(bytes, ColrPalette.DARK)
+            val tmp = java.io.File(nightDir, "p$page.tmp")
+            tmp.writeBytes(bytes)
+            if (!tmp.renameTo(file)) { tmp.delete(); return null }
+            trimNightDir()
+        }
+        file.setLastModified(System.currentTimeMillis())
+        return runCatching { Typeface.createFromFile(file) }.getOrNull()
+    }
+
+    /** Keeps the night-palette disk cache bounded (fonts are ~280 KB each). */
+    private fun trimNightDir() {
+        val files = nightDir.listFiles { f -> f.name.endsWith(".ttf") } ?: return
+        if (files.size <= NIGHT_DISK_CACHE_FILES) return
+        files.sortedBy { it.lastModified() }.take(files.size - NIGHT_DISK_CACHE_FILES).forEach { it.delete() }
+    }
+
     private fun loadTypeface(relativePath: String): Typeface? {
         return runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -275,7 +321,7 @@ class QcfFontManager @Inject constructor(
     }
 
     private fun loadGlyphMaps() {
-        pageFaceNumbers = loadPageFaceNumbers()
+        runCatching { v4Glyphs.forWord(1) } // parse the v4 glyph table off the main thread
         runCatching {
             val raw = context.assets.open(QBSML_MAP_ASSET).bufferedReader().use { it.readText() }
             val root = json.parseToJsonElement(raw).jsonObject
@@ -320,6 +366,7 @@ class QcfFontManager @Inject constructor(
 
     companion object {
         const val QBSML_MAP_ASSET = "json/qcf4-qbsml-map.json"
+        private const val NIGHT_DISK_CACHE_FILES = 60
         const val DEFAULT_BASMALAH_LIGATURE = "\uFAD0\uFAD1\uFAD2\uFAD3"
         private val FACE_NUMBER = Regex("(\\d+)$")
         private val PUA_RANGE = 0xE000..0xF8FF

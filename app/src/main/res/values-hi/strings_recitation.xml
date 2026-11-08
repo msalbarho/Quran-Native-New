@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">तिलावत जाँच इंजन</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (डिवाइस पर)</string>
+    <string name="recitation_engine_zipformer_desc">डिफ़ॉल्ट। ऑफ़लाइन, रियल-टाइम, उच्चारण को अक्षर-दर-अक्षर जाँचता है।</string>
+    <string name="recitation_engine_whisper">Whisper Quran (डिवाइस पर)</string>
+    <string name="recitation_engine_whisper_desc">एक बार डाउनलोड के बाद ऑफ़लाइन (~78 MB)।</string>
+    <string name="recitation_engine_android">Android वाक् पहचान</string>
+    <string name="recitation_engine_android_desc">फ़ोन का अंतर्निहित पहचानकर्ता (इंटरनेट की ज़रूरत हो सकती है)।</string>
+    <string name="recitation_engine_unavailable">इस डिवाइस पर उपलब्ध नहीं</string>
+    <string name="recitation_whisper_download">Whisper मॉडल डाउनलोड करें</string>
+    <string name="recitation_whisper_downloading">डाउनलोड हो रहा है… %1$d%%</string>
+    <string name="recitation_whisper_ready">मॉडल तैयार है</string>
+    <string name="recitation_whisper_delete">मॉडल हटाएँ</string>
+    <string name="recitation_whisper_failed">डाउनलोड विफल: %1$s</string>
+    <string name="recitation_license_model">Zipformer Quran 3.1 लाइसेंस (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">sherpa-onnx लाइसेंस (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">ऐप Quran Lab के Zipformer Quran 3.1 मॉडल से आपकी तिलावत आपके डिवाइस पर बिना इंटरनेट के सुनता है और हर शब्द बोलते ही उसे रंग देता है।</string>
+    <string name="recitation_disclaimer">तिलावत और तजवीद की स्वचालित जाँच गलत हो सकती है। यह किसी योग्य उस्ताद का विकल्प नहीं है और किसी की तिलावत पर धार्मिक निर्णय नहीं है।</string>
+    <string name="recitation_understood">समझ गया</string>
+    <string name="recitation_close">बंद करें</string>
+    <string name="training_show_ayah">आयत दिखाएँ</string>
+    <string name="training_select">चुनें</string>
+    <string name="training_select_surah">सूरह पर जाएँ</string>
+    <string name="training_select_page">पृष्ठ संख्या पर जाएँ</string>
+    <string name="training_go_to_page">जाएँ</string>
+    <string name="training_scope_open">तिलावत खोलें</string>
+    <string name="training_scope_page">वर्तमान पृष्ठ</string>
+    <string name="training_range_format_hint">हर सीमा को सूरह:आयत के रूप में लिखें (जैसे 2:5)।</string>
+    <string name="training_apply_range">अंश लागू करें</string>
+    <string name="training_previous">पिछला</string>
+    <string name="training_next">अगला</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s शब्द</string>
+    <string name="training_legend_correct">सही</string>
+    <string name="training_legend_wrong">गलत</string>
+    <string name="training_legend_missing">छूटा हुआ</string>
+</resources>

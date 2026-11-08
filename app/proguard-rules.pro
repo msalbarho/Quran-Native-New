@@ -36,3 +36,7 @@
     public static void v(...);
     public static void w(...);
 }
+
+# Recitation engines: sherpa-onnx JNI reads Kotlin config fields by name; whisper JNI bridge.
+-keep class com.k2fsa.sherpa.onnx.** { *; }
+-keep class com.quransunah.app.recitation.engine.WhisperLib { *; }

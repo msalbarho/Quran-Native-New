@@ -62,13 +62,6 @@ object LanguageRegistry {
 
     fun byTag(tag: String?): Language? = tag?.let { byTag[it.lowercase()] }
 
-    fun displayLabel(tag: String?): String = when (tag) {
-        null -> "System"
-        else -> byTag(tag)?.nativeName ?: tag
-    }
-
-    fun localeFor(tag: String): Locale = Locale.forLanguageTag(tag)
-
     /** Returns the best matching supported language tag for a raw Android locale. */
     fun matchTag(locale: Locale): String? {
         val fullTag = locale.toLanguageTag().lowercase()

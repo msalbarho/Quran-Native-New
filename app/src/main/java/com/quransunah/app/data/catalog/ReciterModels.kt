@@ -107,39 +107,7 @@ data class UnifiedReciter(
     val ayahAudio: AyahAudioConfig? = null,
 ) {
     companion object {
-        fun fromSurahReciter(reciter: SurahReciter): UnifiedReciter {
-            return UnifiedReciter(
-                id = reciter.id.toString(),
-                name = reciter.name,
-                letter = reciter.letter,
-                supportsSurahPlayback = true,
-                supportsAyahPlayback = false,
-                surahAudio = SurahAudioConfig(
-                    moshafs = reciter.moshafs.map { moshaf ->
-                        SurahMoshafConfig(
-                            id = moshaf.id,
-                            name = moshaf.name,
-                            server = moshaf.server,
-                            surahNumbers = moshaf.surahNumbers,
-                            rewayaId = moshaf.rewayaId,
-                        )
-                    },
-                ),
-            )
-        }
 
-        fun fromAyahReciter(reciter: AyahReciter): UnifiedReciter {
-            return UnifiedReciter(
-                id = reciter.id,
-                name = reciter.name,
-                supportsSurahPlayback = reciter.supportsSurahPlayback,
-                supportsAyahPlayback = true,
-                ayahAudio = AyahAudioConfig(
-                    type = reciter.type,
-                    baseUrl = reciter.baseUrl,
-                ),
-            )
-        }
     }
 }
 

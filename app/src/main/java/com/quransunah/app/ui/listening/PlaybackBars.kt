@@ -1,5 +1,7 @@
 package com.quransunah.app.ui.listening
 
+import com.quransunah.app.ui.shell.GoldCornerFrame
+import com.quransunah.app.ui.shell.GoldCornerFrameShape
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -64,14 +66,17 @@ import com.quransunah.app.fonts.QcfFontManager
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewFixtures
 import com.quransunah.app.ui.preview.PreviewTheme
+import com.quransunah.app.ui.shell.BottomNavBracketShape
+import com.quransunah.app.ui.shell.BottomNavMosqueEnd
 import com.quransunah.app.ui.shell.ChromeTokens
+import com.quransunah.app.ui.shell.TiledOrnamentBackground
 import com.quransunah.app.ui.theme.LocalAppFontFamily
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 
-private val ScreenPlayerShape = RoundedCornerShape(16.dp)
-private val TransportShape = RoundedCornerShape(14.dp)
-private val RepeatChipShape = RoundedCornerShape(18.dp)
+private val ScreenPlayerShape = GoldCornerFrameShape(16.dp)
+private val TransportShape = GoldCornerFrameShape(14.dp)
+private val RepeatChipShape = GoldCornerFrameShape(12.dp)
 private val StopRed = Color(0xFFB42318)
 
 /** RTL: left-pointing glyph = next, right-pointing glyph = previous. */
@@ -123,7 +128,7 @@ fun ScreenAudioPlayer(
             .shadow(10.dp, ScreenPlayerShape, clip = false)
             .clip(ScreenPlayerShape)
             .background(paper.chromeFill)
-            .border(1.6.dp, ChromeTokens.Gold, ScreenPlayerShape)
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, ScreenPlayerShape)
             .padding(horizontal = 13.dp, vertical = 14.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -184,7 +189,7 @@ fun ScreenAudioPlayer(
                     .padding(start = 7.dp)
                     .clip(TransportShape)
                     .background(paper.tone300)
-                    .border(1.dp, paper.tone500, TransportShape)
+                    .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, TransportShape)
                     .padding(horizontal = 7.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(7.dp),
@@ -369,7 +374,7 @@ fun CompactPlaybackBar(
         val travelY = (screenH - barH.intValue - bottomReserve - edge).coerceAtLeast(0f)
         return x.coerceIn(-maxX, maxX) to y.coerceIn(-travelY, 0f)
     }
-    Row(
+    Box(
         modifier = modifier
             .offset { IntOffset(offsetX.floatValue.roundToInt(), offsetY.floatValue.roundToInt()) }
             .onGloballyPositioned {
@@ -377,8 +382,9 @@ fun CompactPlaybackBar(
                 barH.intValue = it.size.height
             }
             .fillMaxWidth()
-            .clip(RoundedCornerShape(22.dp))
+            .clip(BottomNavBracketShape)
             .background(paper.chromeFill)
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, BottomNavBracketShape)
             .pointerInput(sessionKey) {
                 detectDragGestures { change, drag ->
                     change.consume()
@@ -387,7 +393,16 @@ fun CompactPlaybackBar(
                     offsetY.floatValue = next.second
                 }
             }
-            .padding(horizontal = 8.dp, vertical = 8.dp),
+    ) {
+        TiledOrnamentBackground(Modifier.matchParentSize())
+        // Mosque ends use fillMaxHeight(); keep them bounded to the bar (matchParentSize) so the
+        // wrap-content bar is not stretched to the full screen height.
+        Box(Modifier.matchParentSize()) {
+            BottomNavMosqueEnd(alignStart = true)
+            BottomNavMosqueEnd(alignStart = false)
+        }
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
@@ -488,6 +503,7 @@ fun CompactPlaybackBar(
                 tint = paper.textStrong,
             )
         }
+    }
     }
 }
 

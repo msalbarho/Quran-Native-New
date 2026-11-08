@@ -22,3 +22,26 @@ keystore.properties
 *.db-shm
 Thumbs.db
 
+
+# Private gated model (Zipformer Quran 3.1, NPL-1.2) — never commit or publish
+app/src/main/assets/zipformer/
+
+# Local tooling / caches / secrets
+.work/
+*.log
+.env
+.env.*
+*.pem
+*.p12
+secrets.properties
+*.onnx
+*.ort
+
+# QCF4 page fonts (local only)
+public/fonts/qcf4/
+
+
+# Excluded local historical copy and service credentials
+/25 4.2.0/
+google-services.json
+GoogleService-Info.plist

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">Tadschwīd-Farblegende</string>
+    <string name="tajweed_colors">Tadschwīd-Farben</string>
+    <string name="tajweed_rule_1">Madd lazim: 6 Zählzeiten</string>
+    <string name="tajweed_rule_2">Madd wajib muttasil: 4–5 Zählzeiten</string>
+    <string name="tajweed_rule_3">Madd jaiz munfasil: 2, 4 oder 5 Zählzeiten</string>
+    <string name="tajweed_rule_4">Natürliches Madd / Ersatzdehnung: 2 Zählzeiten</string>
+    <string name="tajweed_rule_5">Ikhfa, Idgham mit Ghunnah und Nasalierung</string>
+    <string name="tajweed_rule_6">Tafkhim: emphatische Buchstaben und Ra</string>
+    <string name="tajweed_rule_7">Qalqalah: Nachhall</string>
+    <string name="tajweed_rule_8">Nicht gesprochene Buchstaben: Hamzat al-Wasl, Sonnen-Lam usw.</string>
+    <string-array name="mushaf_header_numbers">
+        <item>eins</item>
+        <item>zwei</item>
+        <item>drei</item>
+        <item>vier</item>
+        <item>fünf</item>
+        <item>sechs</item>
+        <item>sieben</item>
+        <item>acht</item>
+        <item>neun</item>
+        <item>zehn</item>
+        <item>elf</item>
+        <item>zwölf</item>
+        <item>dreizehn</item>
+        <item>vierzehn</item>
+        <item>fünfzehn</item>
+        <item>sechzehn</item>
+        <item>siebzehn</item>
+        <item>achtzehn</item>
+        <item>neunzehn</item>
+        <item>zwanzig</item>
+        <item>einundzwanzig</item>
+        <item>zweiundzwanzig</item>
+        <item>dreiundzwanzig</item>
+        <item>vierundzwanzig</item>
+        <item>fünfundzwanzig</item>
+        <item>sechsundzwanzig</item>
+        <item>siebenundzwanzig</item>
+        <item>achtundzwanzig</item>
+        <item>neunundzwanzig</item>
+        <item>dreißig</item>
+        <item>einunddreißig</item>
+        <item>zweiunddreißig</item>
+        <item>dreiunddreißig</item>
+        <item>vierunddreißig</item>
+        <item>fünfunddreißig</item>
+        <item>sechsunddreißig</item>
+        <item>siebenunddreißig</item>
+        <item>achtunddreißig</item>
+        <item>neununddreißig</item>
+        <item>vierzig</item>
+        <item>einundvierzig</item>
+        <item>zweiundvierzig</item>
+        <item>dreiundvierzig</item>
+        <item>vierundvierzig</item>
+        <item>fünfundvierzig</item>
+        <item>sechsundvierzig</item>
+        <item>siebenundvierzig</item>
+        <item>achtundvierzig</item>
+        <item>neunundvierzig</item>
+        <item>fünfzig</item>
+        <item>einundfünfzig</item>
+        <item>zweiundfünfzig</item>
+        <item>dreiundfünfzig</item>
+        <item>vierundfünfzig</item>
+        <item>fünfundfünfzig</item>
+        <item>sechsundfünfzig</item>
+        <item>siebenundfünfzig</item>
+        <item>achtundfünfzig</item>
+        <item>neunundfünfzig</item>
+        <item>sechzig</item>
+    </string-array>
+</resources>

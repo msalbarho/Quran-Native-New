@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">Tecvit renk rehberi</string>
+    <string name="tajweed_colors">Tecvit renkleri</string>
+    <string name="tajweed_rule_1">Medd-i lâzım: 6 hareke</string>
+    <string name="tajweed_rule_2">Medd-i muttasıl: 4–5 hareke</string>
+    <string name="tajweed_rule_3">Medd-i munfasıl: 2, 4 veya 5 hareke</string>
+    <string name="tajweed_rule_4">Tabii med / ivaz meddi: 2 hareke</string>
+    <string name="tajweed_rule_5">İhfa, gunneli idgam ve gunne yerleri</string>
+    <string name="tajweed_rule_6">Kalın okuma: isti‘lâ harfleri ve ra</string>
+    <string name="tajweed_rule_7">Kalkale</string>
+    <string name="tajweed_rule_8">Okunmayan harfler: vasıl hemzesi, şemsî lam vb.</string>
+    <string-array name="mushaf_header_numbers">
+        <item>bir</item>
+        <item>iki</item>
+        <item>üç</item>
+        <item>dört</item>
+        <item>beş</item>
+        <item>altı</item>
+        <item>yedi</item>
+        <item>sekiz</item>
+        <item>dokuz</item>
+        <item>on</item>
+        <item>on bir</item>
+        <item>on iki</item>
+        <item>on üç</item>
+        <item>on dört</item>
+        <item>on beş</item>
+        <item>on altı</item>
+        <item>on yedi</item>
+        <item>on sekiz</item>
+        <item>on dokuz</item>
+        <item>yirmi</item>
+        <item>yirmi bir</item>
+        <item>yirmi iki</item>
+        <item>yirmi üç</item>
+        <item>yirmi dört</item>
+        <item>yirmi beş</item>
+        <item>yirmi altı</item>
+        <item>yirmi yedi</item>
+        <item>yirmi sekiz</item>
+        <item>yirmi dokuz</item>
+        <item>otuz</item>
+        <item>otuz bir</item>
+        <item>otuz iki</item>
+        <item>otuz üç</item>
+        <item>otuz dört</item>
+        <item>otuz beş</item>
+        <item>otuz altı</item>
+        <item>otuz yedi</item>
+        <item>otuz sekiz</item>
+        <item>otuz dokuz</item>
+        <item>kırk</item>
+        <item>kırk bir</item>
+        <item>kırk iki</item>
+        <item>kırk üç</item>
+        <item>kırk dört</item>
+        <item>kırk beş</item>
+        <item>kırk altı</item>
+        <item>kırk yedi</item>
+        <item>kırk sekiz</item>
+        <item>kırk dokuz</item>
+        <item>elli</item>
+        <item>elli bir</item>
+        <item>elli iki</item>
+        <item>elli üç</item>
+        <item>elli dört</item>
+        <item>elli beş</item>
+        <item>elli altı</item>
+        <item>elli yedi</item>
+        <item>elli sekiz</item>
+        <item>elli dokuz</item>
+        <item>altmış</item>
+    </string-array>
+</resources>

@@ -4,6 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,14 +23,19 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -42,6 +50,7 @@ import com.quransunah.app.domain.model.AyahSearchHit
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewFixtures
 import com.quransunah.app.ui.preview.PreviewTheme
+import com.quransunah.app.ui.shell.goldFrame
 import com.quransunah.app.ui.theme.LocalPaperColors
 
 @Composable
@@ -95,9 +104,25 @@ fun SearchPaneContent(
         OutlinedTextField(
             value = ui.query,
             onValueChange = onQueryChange,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(56.dp).testTag("mushaf-search-input"),
+            textStyle = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(fontSize = 14.sp, lineHeight = 20.sp),
             placeholder = {
-                Text(stringResource(R.string.search_placeholder), color = paper.textMuted)
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val hint = stringResource(R.string.search_placeholder)
+                    val measurer = rememberTextMeasurer()
+                    val density = LocalDensity.current
+                    val available = with(density) { maxWidth.toPx() }
+                    val hintStyle = LocalTextStyle.current.copy(fontSize = 12.sp, lineHeight = 18.sp)
+                    val size = remember(hint, hintStyle, available, measurer) {
+                        (48 downTo 4).firstOrNull { step ->
+                            measurer.measure(hint, hintStyle.copy(fontSize = (step / 4f).sp),
+                                softWrap = false).size.width <= available - 2f
+                        }?.div(4f) ?: 1f
+                    }
+                    Text(hint, color = paper.textMuted, style = hintStyle, fontSize = size.sp,
+                        maxLines = 1, softWrap = false,
+                        modifier = Modifier.fillMaxWidth().testTag("mushaf-search-placeholder"))
+                }
             },
             singleLine = true,
             leadingIcon = {
@@ -105,10 +130,11 @@ fun SearchPaneContent(
                     painter = painterResource(R.drawable.ic_search),
                     contentDescription = null,
                     tint = paper.accent,
+                    modifier = Modifier.size(20.dp).testTag("mushaf-search-icon"),
                 )
             },
-            trailingIcon = {
-                if (ui.query.isNotEmpty()) {
+            trailingIcon = if (ui.query.isNotEmpty()) {
+                {
                     IconButton(onClick = onClear) {
                         Icon(
                             painter = painterResource(R.drawable.ic_close),
@@ -116,7 +142,7 @@ fun SearchPaneContent(
                         )
                     }
                 }
-            },
+            } else null,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = paper.textStrong,
                 unfocusedTextColor = paper.textPrimary,
@@ -197,6 +223,7 @@ private fun SearchHitRow(hit: AyahSearchHit, onClick: () -> Unit) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(paper.tone300)
+            .goldFrame(RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
             .padding(14.dp),
     ) {

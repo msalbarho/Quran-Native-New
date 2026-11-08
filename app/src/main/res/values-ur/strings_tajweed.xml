@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">تجوید کے رنگوں کی رہنمائی</string>
+    <string name="tajweed_colors">تجوید کے رنگ</string>
+    <string name="tajweed_rule_1">مد لازم: ۶ حرکات</string>
+    <string name="tajweed_rule_2">مد واجب متصل: ۴–۵ حرکات</string>
+    <string name="tajweed_rule_3">مد جائز منفصل: ۲، ۴ یا ۵ حرکات</string>
+    <string name="tajweed_rule_4">مد طبیعی / عوض: ۲ حرکات</string>
+    <string name="tajweed_rule_5">اخفا، ادغام مع الغنہ اور غنہ کے مقامات</string>
+    <string name="tajweed_rule_6">تفخیم: حروف استعلاء اور راء</string>
+    <string name="tajweed_rule_7">قلقلہ</string>
+    <string name="tajweed_rule_8">نہ پڑھے جانے والے حروف: ہمزۂ وصل، لام شمسی وغیرہ</string>
+    <string-array name="mushaf_header_numbers">
+        <item>ایک</item>
+        <item>دو</item>
+        <item>تین</item>
+        <item>چار</item>
+        <item>پانچ</item>
+        <item>چھ</item>
+        <item>سات</item>
+        <item>آٹھ</item>
+        <item>نو</item>
+        <item>دس</item>
+        <item>گیارہ</item>
+        <item>بارہ</item>
+        <item>تیرہ</item>
+        <item>چودہ</item>
+        <item>پندرہ</item>
+        <item>سولہ</item>
+        <item>سترہ</item>
+        <item>اٹھارہ</item>
+        <item>انیس</item>
+        <item>بیس</item>
+        <item>اکیس</item>
+        <item>بائیس</item>
+        <item>تئیس</item>
+        <item>چوبیس</item>
+        <item>پچیس</item>
+        <item>چھبیس</item>
+        <item>ستائیس</item>
+        <item>اٹھائیس</item>
+        <item>انتیس</item>
+        <item>تیس</item>
+        <item>اکتیس</item>
+        <item>بتیس</item>
+        <item>تینتیس</item>
+        <item>چونتیس</item>
+        <item>پینتیس</item>
+        <item>چھتیس</item>
+        <item>سینتیس</item>
+        <item>اڑتیس</item>
+        <item>انتالیس</item>
+        <item>چالیس</item>
+        <item>اکتالیس</item>
+        <item>بیالیس</item>
+        <item>تینتالیس</item>
+        <item>چوالیس</item>
+        <item>پینتالیس</item>
+        <item>چھیالیس</item>
+        <item>سینتالیس</item>
+        <item>اڑتالیس</item>
+        <item>انچاس</item>
+        <item>پچاس</item>
+        <item>اکیاون</item>
+        <item>باون</item>
+        <item>ترپن</item>
+        <item>چون</item>
+        <item>پچپن</item>
+        <item>چھپن</item>
+        <item>ستاون</item>
+        <item>اٹھاون</item>
+        <item>انسٹھ</item>
+        <item>ساٹھ</item>
+    </string-array>
+</resources>

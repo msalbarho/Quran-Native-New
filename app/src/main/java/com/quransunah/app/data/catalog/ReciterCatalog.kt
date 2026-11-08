@@ -58,8 +58,6 @@ class ReciterCatalog @Inject constructor(
         return ayahReciters().firstOrNull { it.id == id } ?: defaultAyahReciter().takeIf { it.id == id }
     }
 
-    fun unifiedReciter(id: String): UnifiedReciter? = unifiedReciters().firstOrNull { it.id == id }
-
     fun moshaf(moshafId: Int): MoshafEdition? {
         surahReciters()
         return moshafById?.get(moshafId)

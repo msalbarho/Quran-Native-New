@@ -1,11 +1,29 @@
 package com.quransunah.app.ui.mushaf
 
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.graphics.Color
 
 /** Word ids revealed one at a time. Empty outside training. */
 internal val LocalTrainingFirstWordHint = compositionLocalOf { false }
 
 val LocalTrainingRevealedWordIds = compositionLocalOf { emptySet<Int>() }
+
+/** Word-recognition colours for training. Empty on the reading page. */
+val LocalTrainingWordMarks = compositionLocalOf { emptyMap<Int, TrainingWordMark>() }
+
+/** Word to outline after the user jumps to a recitation result. */
+val LocalTrainingFocusWordId = compositionLocalOf<Int?> { null }
+
+/** [Missing] = the reciter clearly passed this word (or a whole ayah) without saying it: shown red like an error. */
+enum class TrainingWordMark { Correct, PossibleError, Uncertain, Unread, Missing }
+
+fun trainingMarkColor(mark: TrainingWordMark): Color = when (mark) {
+    TrainingWordMark.Correct -> Color(0xFF1B8A4A)
+    TrainingWordMark.PossibleError -> Color(0xFFC62828)
+    TrainingWordMark.Uncertain -> Color(0xFFE65100)
+    TrainingWordMark.Unread -> Color(0xFF9AA0A6)
+    TrainingWordMark.Missing -> Color(0xFFC62828)
+}
 
 internal data class TrainingWordRef(
     val id: Int,

@@ -17,6 +17,7 @@ import com.quransunah.app.domain.model.PlaybackDomain
 import com.quransunah.app.domain.model.PlaybackProgress
 import com.quransunah.app.domain.model.SurahRepeatMode
 import com.quransunah.app.ui.theme.PaperPaletteId
+import com.quransunah.app.recitation.RecitationEngineId
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
@@ -50,6 +51,12 @@ data class UserSettings(
     val appLanguage: String? = null,
     /** Selected packaged translation. Independent of [appLanguage]. */
     val translationLanguage: String? = null,
+    /** Recitation checking engine (Zipformer Quran on-device by default). */
+    val recitationEngine: RecitationEngineId = RecitationEngineId.ZIPFORMER,
+    /** One-time Zipformer licence notice (automatic feedback can be wrong) was acknowledged. */
+    val zipformerNoticeSeen: Boolean = false,
+    /** Last real recitation summary. Null until the user saves one. */
+    val lastRecitationSummary: String? = null,
 )
 
 @Singleton
@@ -85,6 +92,9 @@ class UserPreferences @Inject constructor(
             translationLanguage = prefs[Keys.TRANSLATION_LANGUAGE]
                 ?.lowercase()
                 ?.takeIf { TranslationRegistry.forLanguage(it) != null },
+            recitationEngine = RecitationEngineId.fromId(prefs[Keys.RECITATION_ENGINE]),
+            zipformerNoticeSeen = prefs[Keys.ZIPFORMER_NOTICE] ?: false,
+            lastRecitationSummary = prefs[Keys.LAST_RECITATION_SUMMARY],
         )
     }.distinctUntilChanged()
 
@@ -112,6 +122,36 @@ class UserPreferences @Inject constructor(
             reciterId = prefs[Keys.PLAYBACK_RECITER_ID],
         )
     }.distinctUntilChanged()
+
+    /** Daily wird / khatma plan; null when the user has not set one. */
+    val wirdPlan: Flow<com.quransunah.app.core.WirdPlan.State?> = dataStore.data.map { prefs ->
+        val days = prefs[Keys.WIRD_DAYS] ?: 0
+        if (days <= 0) null else com.quransunah.app.core.WirdPlan.State(
+            days = days.coerceIn(com.quransunah.app.core.WirdPlan.MIN_DAYS, com.quransunah.app.core.WirdPlan.MAX_DAYS),
+            completed = (prefs[Keys.WIRD_COMPLETED] ?: 0).coerceIn(0, days),
+            startEpochDay = prefs[Keys.WIRD_START_DAY] ?: 0L,
+        )
+    }.distinctUntilChanged()
+
+    suspend fun startWirdPlan(days: Int, startEpochDay: Long) {
+        dataStore.edit {
+            it[Keys.WIRD_DAYS] = days.coerceIn(com.quransunah.app.core.WirdPlan.MIN_DAYS, com.quransunah.app.core.WirdPlan.MAX_DAYS)
+            it[Keys.WIRD_COMPLETED] = 0
+            it[Keys.WIRD_START_DAY] = startEpochDay
+        }
+    }
+
+    suspend fun setWirdCompleted(completed: Int) {
+        dataStore.edit { it[Keys.WIRD_COMPLETED] = completed.coerceAtLeast(0) }
+    }
+
+    suspend fun clearWirdPlan() {
+        dataStore.edit {
+            it.remove(Keys.WIRD_DAYS)
+            it.remove(Keys.WIRD_COMPLETED)
+            it.remove(Keys.WIRD_START_DAY)
+        }
+    }
 
     suspend fun setLastPage(page: Int) {
         dataStore.edit { it[Keys.LAST_PAGE] = page.coerceIn(1, AppConstants.TOTAL_PAGES) }
@@ -225,6 +265,21 @@ class UserPreferences @Inject constructor(
         }
     }
 
+    suspend fun setRecitationEngine(engine: RecitationEngineId) {
+        dataStore.edit { it[Keys.RECITATION_ENGINE] = engine.id }
+    }
+
+    suspend fun setZipformerNoticeSeen(seen: Boolean = true) {
+        dataStore.edit { it[Keys.ZIPFORMER_NOTICE] = seen }
+    }
+
+    suspend fun setLastRecitationSummary(encoded: String?) {
+        dataStore.edit { prefs ->
+            if (encoded.isNullOrBlank()) prefs.remove(Keys.LAST_RECITATION_SUMMARY)
+            else prefs[Keys.LAST_RECITATION_SUMMARY] = encoded
+        }
+    }
+
     suspend fun getSearchIndexVersion(): Int =
         dataStore.data.first()[Keys.SEARCH_INDEX_VERSION] ?: 0
 
@@ -259,6 +314,9 @@ class UserPreferences @Inject constructor(
     }
 
     private object Keys {
+        val RECITATION_ENGINE = stringPreferencesKey("recitation_engine")
+        val ZIPFORMER_NOTICE = booleanPreferencesKey("zipformer_notice_seen")
+        val LAST_RECITATION_SUMMARY = stringPreferencesKey("last_recitation_summary")
         val LAST_PAGE = intPreferencesKey("last_page")
         val LAST_TAB = stringPreferencesKey("last_tab")
         val PALETTE = stringPreferencesKey("palette")
@@ -288,6 +346,9 @@ class UserPreferences @Inject constructor(
         val SEARCH_INDEX_VERSION = intPreferencesKey("search_index_version")
         val APP_LANGUAGE = stringPreferencesKey("app_language")
         val TRANSLATION_LANGUAGE = stringPreferencesKey("translation_language")
+        val WIRD_DAYS = intPreferencesKey("wird_days")
+        val WIRD_COMPLETED = intPreferencesKey("wird_completed")
+        val WIRD_START_DAY = longPreferencesKey("wird_start_epoch_day")
     }
 
     private companion object {

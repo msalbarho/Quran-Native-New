@@ -51,6 +51,7 @@ import com.quransunah.app.core.UiNumbers
 import com.quransunah.app.domain.model.SurahInfo
 import com.quransunah.app.fonts.QcfFontManager
 import com.quransunah.app.ui.index.revelationPlace
+import com.quransunah.app.ui.shell.ChromeTokens
 import com.quransunah.app.ui.shell.IslamicEdgePattern
 import com.quransunah.app.ui.theme.LocalDisplayFontFamily
 import com.quransunah.app.ui.theme.LocalNightMode
@@ -99,27 +100,7 @@ fun SurahNameFrame(
     ) {
         val frameWidth = maxWidth
         val frameHeight = maxHeight
-        val shape = HorizontalIslamicPlaque
-        val stroke = paper.accent.copy(alpha = if (night) 0.42f else 0.30f)
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(shape)
-                .background(paper.chromeFill)
-                .border(1.dp, stroke, shape),
-        ) {
-            IslamicEdgePattern(Modifier.matchParentSize())
-            MosqueEnd(alignStart = true, width = frameHeight * 1.68f, alpha = if (night) 0.50f else 0.40f)
-            MosqueEnd(alignStart = false, width = frameHeight * 1.68f, alpha = if (night) 0.50f else 0.40f)
-            Canvas(Modifier.fillMaxSize()) {
-                val inset = 3.5.dp.toPx()
-                drawPath(
-                    path = islamicPlaquePath(size.width, size.height, PlaqueAxis.Horizontal, inset),
-                    color = paper.accent.copy(alpha = if (night) 0.22f else 0.16f),
-                    style = Stroke(width = 0.8.dp.toPx(), join = StrokeJoin.Round),
-                )
-            }
-        }
+        SurahFrameBackground(Modifier.fillMaxSize())
 
         if (ayahs != null || revelation != null) {
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
@@ -174,6 +155,44 @@ fun SurahNameFrame(
                 .widthIn(max = frameWidth * if (frameWidth < 300.dp) 0.44f else 0.50f)
                 .padding(bottom = 2.dp),
         )
+    }
+}
+
+/** Identical ornamental layer for in-page surah titles and the fixed reader header. */
+@Composable
+internal fun SurahFrameBackground(modifier: Modifier = Modifier) {
+    val paper = LocalPaperColors.current
+    val night = LocalNightMode.current
+    BoxWithConstraints(modifier) {
+        val frameHeight = maxHeight
+        val shape = HorizontalIslamicPlaque
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(shape)
+                .background(paper.chromeFill),
+        ) {
+            IslamicEdgePattern(Modifier.matchParentSize())
+            MosqueEnd(alignStart = true, width = frameHeight * 1.68f, alpha = if (night) 0.50f else 0.40f)
+            MosqueEnd(alignStart = false, width = frameHeight * 1.68f, alpha = if (night) 0.50f else 0.40f)
+            Canvas(Modifier.fillMaxSize()) {
+                val minSide = minOf(size.width, size.height)
+                val outerStroke = (minSide * 0.0375f).coerceIn(0.55.dp.toPx(), 1.1.dp.toPx())
+                val innerStroke = (minSide * 0.025f).coerceIn(0.45.dp.toPx(), 0.75.dp.toPx())
+                val outerInset = outerStroke * 0.85f
+                val innerInset = outerInset + innerStroke + (minSide * 0.02f).coerceAtLeast(0.35.dp.toPx())
+                drawPath(
+                    path = islamicPlaquePath(size.width, size.height, PlaqueAxis.Horizontal, outerInset),
+                    color = ChromeTokens.Gold,
+                    style = Stroke(width = outerStroke, join = StrokeJoin.Round),
+                )
+                drawPath(
+                    path = islamicPlaquePath(size.width, size.height, PlaqueAxis.Horizontal, innerInset),
+                    color = ChromeTokens.GoldInner,
+                    style = Stroke(width = innerStroke, join = StrokeJoin.Round),
+                )
+            }
+        }
     }
 }
 

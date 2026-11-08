@@ -44,7 +44,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
@@ -84,123 +87,156 @@ fun PageHeaderBar(
     showDivisionLabels: Boolean = true,
     meaningsSelected: Boolean = false,
     onSelectMeanings: (Boolean) -> Unit = {},
+    informationOnly: Boolean = false,
+    hizbLabel: String = "",
+    tajweedEnabled: Boolean = true,
+    onToggleTajweed: () -> Unit = {},
+    onTajweedGuide: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
-    val inspection = LocalInspectionMode.current
     val juzNumber = page?.juzNumber ?: 1
-    val surahNumbers = remember(page) { HeaderGlyphFit.surahsOnPage(page).take(1) }
-    var qbsmlMapsReady by remember { mutableStateOf(false) }
-    LaunchedEffect(fontManager) {
-        fontManager?.ensureMaps()
-        qbsmlMapsReady = fontManager != null
+    val surahNumbers = remember(page) { listOfNotNull(HeaderGlyphFit.firstSurahOnPage(page)) }
+    val languageTag = com.quransunah.app.core.ArabicRtl.currentTag(androidx.compose.ui.platform.LocalContext.current)
+    val surahFallback = remember(surahNumbers, surahNames, languageTag) {
+        val number = surahNumbers.firstOrNull()
+        number?.let { com.quransunah.app.ui.index.SurahNames.localized(languageTag, it) }
+            ?: HeaderGlyphFit.headerFallbackLabel(surahNumbers, surahNames)
     }
-    val surahFallback = remember(surahNumbers, surahNames) {
-        HeaderGlyphFit.headerFallbackLabel(surahNumbers, surahNames)
-    }
-    val juzFallback = stringResource(R.string.header_juz, UiNumbers.format(juzNumber, UiNumbers.resolvedLocale()))
-    val surahLigature = if (inspection || fontManager == null || !qbsmlMapsReady || surahNumbers.isEmpty()) {
-        ""
-    } else {
-        fontManager.headerSingleSurahLigature(surahNumbers.first())
-    }
-    val showSurah = pageNumber != 1 && surahLigature.isNotEmpty()
-    val juzLigature = if (inspection || fontManager == null) null else fontManager.juzHeaderLigature(juzNumber)
+    val resources = androidx.compose.ui.platform.LocalContext.current.resources
+    val juzWords = remember(juzNumber, languageTag, resources) { headerNumberWords(juzNumber, languageTag, resources) }
+    val juzFallback = stringResource(R.string.header_juz, juzWords)
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = ChromeTokens.HorizontalInset)
-            .padding(top = ChromeTokens.HeaderTopGap, bottom = ChromeTokens.HeaderBottomGap),
-    ) {
-        val shape = HorizontalIslamicPlaque
+    var headerFace by remember(fontManager) { mutableStateOf(fontManager?.peekQbsmlTypeface()) }
+    var headerMapsReady by remember(fontManager) { mutableStateOf(false) }
+    LaunchedEffect(fontManager, informationOnly) {
+        if (informationOnly && fontManager != null) {
+            fontManager.ensureMaps()
+            headerFace = fontManager.loadQbsmlTypeface()
+            headerMapsReady = true
+        }
+    }
+    val surahSlice = if (headerMapsReady && fontManager != null) {
+        surahNumbers.firstOrNull()?.let { number ->
+            QbsmlHeaderSlices.forSurah(number, fontManager.headerSingleSurahLigature(number),
+                fontManager::headerSurahLigature)
+        }
+    } else null
+    val juzSlice = if (headerMapsReady) fontManager?.juzHeaderLigature(juzNumber)
+        ?.takeIf { it.isNotEmpty() }?.let { HeaderGlyphSlice(it) } else null
+
+    androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalLayoutDirection provides androidx.compose.ui.unit.LayoutDirection.Rtl) {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
-                .height(ChromeTokens.HeaderHeight),
+                .padding(horizontal = ChromeTokens.HorizontalInset)
+                .padding(top = ChromeTokens.HeaderTopGap, bottom = ChromeTokens.HeaderBottomGap),
         ) {
+            val shape = HorizontalIslamicPlaque
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .clip(shape)
-                    .background(paper.chromeFill)
-                    .border(1.dp, paper.accent.copy(alpha = if (night) 0.40f else 0.26f), shape),
+                    .fillMaxWidth()
+                    .height(ChromeTokens.HeaderHeight),
             ) {
-                IslamicEdgePattern(Modifier.matchParentSize())
-            }
+                SurahFrameBackground(Modifier.fillMaxSize())
 
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(start = 4.dp, end = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (showDivisionLabels) {
-                    Row(
-                        modifier = Modifier
-                            .weight(1f, fill = true)
-                            .clipToBounds(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        if (showSurah) {
-                            QbsmlSurahGlyph(
-                                ligature = surahLigature,
-                                fontManager = fontManager,
-                                color = paper.textStrong,
-                                contentDescription = stringResource(R.string.header_open_surah_index, surahFallback),
-                                onClick = onOpenSurahIndex,
-                                modifier = Modifier.weight(1f, fill = false),
-                            )
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(start = if (informationOnly) 4.dp else 8.dp, end = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = if (informationOnly) Arrangement.SpaceEvenly else Arrangement.spacedBy(6.dp),
+                ) {
+                    if (informationOnly) {
+                        val face = headerFace
+                        if (surahSlice != null && face != null) {
+                            QbsmlHeaderLabel(surahSlice, face, surahFallback,
+                                Modifier.weight(1f).testTag("mushaf-header-surah"))
+                        } else HeaderInfoText(surahFallback, Modifier.weight(1f))
+                        HeaderInfoText(hizbLabel, Modifier.weight(1.6f), fontScale = 0.875f)
+                        if (page?.sajda != null) {
+                            HeaderInfoText(stringResource(R.string.mushaf_sajdah), Modifier.weight(0.65f))
                         }
-                        HeaderGlyph(
-                            ligature = juzLigature.orEmpty(),
-                            fallback = juzFallback,
-                            fontManager = fontManager,
-                            color = paper.textStrong,
-                            contentDescription = stringResource(R.string.header_open_juz_index, juzFallback),
-                            onClick = onOpenJuzIndex,
+                        if (juzSlice != null && face != null) {
+                            QbsmlHeaderLabel(juzSlice, face, juzFallback,
+                                Modifier.weight(1f).testTag("mushaf-header-juz"))
+                        } else HeaderInfoText(juzFallback, Modifier.weight(1f))
+                    } else {
+                        ReadingModeToggle(
+                            modifier = Modifier.weight(1.25f),
+                            meaningsSelected = meaningsSelected,
+                            night = night,
+                            onSelectMeanings = onSelectMeanings,
                         )
+                        SearchChip(
+                            modifier = Modifier.weight(1.25f),
+                            night = night,
+                            onClick = onSearch,
+                        )
+                        HeaderIconButton(
+                            modifier = Modifier.weight(1f),
+                            night = night,
+                            contentDescription = stringResource(R.string.bookmarks_save_current),
+                            onClick = onOpenBookmarks,
+                        ) {
+                            Icon(painterResource(R.drawable.ic_bookmark), null,
+                                tint = paper.textStrong, modifier = Modifier.size(18.dp))
+                        }
+                        HeaderIconButton(
+                            modifier = Modifier.weight(1f),
+                            night = night,
+                            contentDescription = stringResource(R.string.tajweed_colors),
+                            onClick = onToggleTajweed,
+                        ) {
+                            Icon(imageVector = PaletteIcon, contentDescription = null, tint = paper.textStrong,
+                                modifier = Modifier.size(18.dp).semantics { this.selected = tajweedEnabled })
+                        }
+                        HeaderIconButton(
+                            modifier = Modifier.weight(1f),
+                            night = night,
+                            contentDescription = stringResource(R.string.tajweed_guide),
+                            onClick = onTajweedGuide,
+                        ) {
+                            Icon(painterResource(R.drawable.ic_info_outline), null,
+                                tint = paper.textStrong,
+                                modifier = Modifier.size(18.dp).testTag("mushaf-header-info-icon"))
+                        }
+                        HeaderIconButton(
+                            modifier = Modifier.weight(1f),
+                            night = night,
+                            contentDescription = stringResource(if (night) R.string.theme_to_light else R.string.theme_to_dark),
+                            onClick = onThemeToggle,
+                        ) {
+                            ThemeToggle(night = night, onToggle = onThemeToggle,
+                                modifier = Modifier.clearAndSetSemantics {}, width = 18.dp, height = 18.dp)
+                        }
                     }
-                } else {
-                    Spacer(Modifier.weight(1f, fill = true))
-                }
-                ReadingModeToggle(
-                    meaningsSelected = meaningsSelected,
-                    night = night,
-                    onSelectMeanings = onSelectMeanings,
-                )
-                SearchChip(
-                    night = night,
-                    onClick = onSearch,
-                )
-                HeaderIconButton(
-                    night = night,
-                    contentDescription = stringResource(R.string.last_position_title),
-                    onClick = onOpenBookmarks,
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_bookmark),
-                        contentDescription = null,
-                        tint = paper.textStrong,
-                        modifier = Modifier.size(16.dp),
-                    )
-                }
-                HeaderIconButton(
-                    night = night,
-                    contentDescription = null,
-                    onClick = null,
-                ) {
-                    ThemeToggle(
-                        night = night,
-                        onToggle = onThemeToggle,
-                        width = 28.dp,
-                        height = 24.dp,
-                    )
+
                 }
             }
         }
+    }
+
+}
+
+@Composable
+private fun HeaderInfoText(text: String, modifier: Modifier, fontScale: Float = 1f) {
+    val measurer = androidx.compose.ui.text.rememberTextMeasurer()
+    val family = com.quransunah.app.ui.theme.LocalDisplayFontFamily.current
+    BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
+        val widthPx = constraints.maxWidth
+        val fontSize = remember(text, widthPx, family, measurer, fontScale) {
+            var size = 13f
+            while (size > 6f && measurer.measure(
+                androidx.compose.ui.text.AnnotatedString(text),
+                style = TextStyle(fontSize = size.sp, fontFamily = family),
+                maxLines = 1, softWrap = false,
+            ).size.width > widthPx) size -= 0.25f
+            (size * fontScale).sp
+        }
+        Text(text, color = LocalPaperColors.current.textStrong, fontSize = fontSize,
+            fontFamily = family, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center)
     }
 }
 
@@ -209,6 +245,7 @@ private fun ReadingModeToggle(
     meaningsSelected: Boolean,
     night: Boolean,
     onSelectMeanings: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
     val shape = RoundedCornerShape(8.dp)
@@ -217,50 +254,65 @@ private fun ReadingModeToggle(
         if (openMeanings) R.string.reading_mode_meanings else R.string.reading_mode_mushaf,
     )
     val iconTint = paper.textStrong
-    Row(
-        modifier = Modifier
-            .height(24.dp)
-            .wrapContentWidth(unbounded = true)
-            .clip(shape)
-            .background(headerChipFill(night))
-            .border(1.dp, headerChipStroke(night), shape)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = { onSelectMeanings(openMeanings) },
-            )
-            .padding(horizontal = 6.dp)
-            .semantics { contentDescription = label },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    val measurer = androidx.compose.ui.text.rememberTextMeasurer()
+    val density = LocalDensity.current
+    BoxWithConstraints(modifier = modifier.height(24.dp)
+        .clip(shape)
+        .background(headerChipFill(night))
+        .border(1.dp, headerChipStroke(night), shape)
+        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null,
+            onClick = { onSelectMeanings(openMeanings) })
+        .semantics { contentDescription = label },
     ) {
-        if (openMeanings) {
-            Icon(
-                imageVector = MaterialTranslateIcon,
-                contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(14.dp),
-            )
-        } else {
-            Icon(
-                painter = painterResource(R.drawable.ic_nav_quran),
-                contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(14.dp),
+        val labelWidth = (constraints.maxWidth - with(density) { 26.dp.roundToPx() }).coerceAtLeast(1)
+        val labelSize = remember(label, labelWidth, measurer) {
+            var size = 11f
+            while (size > 6f && measurer.measure(
+                androidx.compose.ui.text.AnnotatedString(label), style = TextStyle(fontSize = size.sp),
+                maxLines = 1, softWrap = false,
+            ).size.width > labelWidth) size -= 0.25f
+            size.sp
+        }
+        Row(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+        ) {
+            if (openMeanings) {
+                Icon(
+                    imageVector = MaterialTranslateIcon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(14.dp),
+                )
+            } else {
+                Icon(
+                    painter = painterResource(R.drawable.ic_nav_quran),
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(14.dp),
+                )
+            }
+            Text(
+                text = label,
+                color = iconTint,
+                fontSize = labelSize,
+                lineHeight = (labelSize.value + 2f).sp,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Clip,
+                style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
             )
         }
-        Text(
-            text = label,
-            color = iconTint,
-            fontSize = 11.sp,
-            lineHeight = 13.sp,
-            maxLines = 1,
-            softWrap = false,
-            overflow = TextOverflow.Clip,
-            style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
-        )
     }
 }
+
+/** Monochrome palette silhouette; its tint always follows the selected UI theme. */
+private val PaletteIcon = ImageVector.Builder("Palette", 24.dp, 24.dp, 24f, 24f).apply {
+    addPath(pathData = PathParser().parsePathString(
+        "M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10h1.77c1.66,0 3,-1.34 3,-3 0,-0.73 -0.28,-1.41 -0.73,-1.94 -0.08,-0.1 -0.13,-0.22 -0.13,-0.36 0,-0.28 0.22,-0.5 0.5,-0.5H18c3.31,0 6,-2.69 6,-6C24,5.67 18.63,2 12,2zM6.5,13C5.67,13 5,12.33 5,11.5S5.67,10 6.5,10 8,10.67 8,11.5 7.33,13 6.5,13zM9.5,8C8.67,8 8,7.33 8,6.5S8.67,5 9.5,5 11,5.67 11,6.5 10.33,8 9.5,8zM14.5,8C13.67,8 13,7.33 13,6.5S13.67,5 14.5,5 16,5.67 16,6.5 15.33,8 14.5,8zM18.5,12C17.67,12 17,11.33 17,10.5S17.67,9 18.5,9 20,9.67 20,10.5 19.33,12 18.5,12z"
+    ).toNodes(), fill = SolidColor(Color.Black), pathFillType = androidx.compose.ui.graphics.PathFillType.EvenOdd)
+}.build()
 
 /** Material Icons "Translate" (A / あ). Vector only; not a bitmap asset. */
 private val MaterialTranslateIcon: ImageVector = ImageVector.Builder(
@@ -282,14 +334,14 @@ private val MaterialTranslateIcon: ImageVector = ImageVector.Builder(
 private fun SearchChip(
     night: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
     val label = stringResource(R.string.header_search_mushaf)
     val shape = RoundedCornerShape(8.dp)
     Row(
-        modifier = Modifier
+        modifier = modifier
             .height(24.dp)
-            .widthIn(min = 36.dp)
             .clip(shape)
             .background(headerChipFill(night))
             .border(1.dp, headerChipStroke(night), shape)
@@ -298,7 +350,6 @@ private fun SearchChip(
                 indication = null,
                 onClick = onClick,
             )
-            .padding(horizontal = 6.dp)
             .semantics { contentDescription = label },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -306,137 +357,8 @@ private fun SearchChip(
         Icon(
             painter = painterResource(R.drawable.ic_search),
             contentDescription = null,
-            tint = if (night) paper.accent else paper.accentHover,
-            modifier = Modifier.size(14.dp),
-        )
-    }
-}
-
-@Composable
-private fun QbsmlSurahGlyph(
-    ligature: String,
-    fontManager: QcfFontManager?,
-    color: Color,
-    contentDescription: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val inspection = LocalInspectionMode.current
-    var typeface by remember { mutableStateOf(fontManager?.peekQbsmlTypeface()) }
-    LaunchedEffect(fontManager) {
-        if (fontManager != null && !inspection) {
-            typeface = fontManager.loadQbsmlTypeface()
-        }
-    }
-    val canDraw = typeface != null && fontManager?.canDrawLigature(ligature, typeface) == true
-    val clickModifier = modifier
-        .semantics { this.contentDescription = contentDescription }
-        .clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            onClick = onClick,
-        )
-    if (!canDraw || typeface == null || ligature.isEmpty()) {
-        return
-    }
-    val density = LocalDensity.current
-    val face = typeface
-    BoxWithConstraints(modifier = clickModifier.height(ChromeTokens.HeaderHeight)) {
-        val maxPx = with(density) { maxWidth.toPx() }.let { raw ->
-            if (raw.isFinite() && raw > 1f) raw else with(density) { 120.dp.toPx() }
-        }
-        val pxPerSp = with(density) { 1.sp.toPx() }
-        val fittedSp = HeaderGlyphFit.sizeSp(
-            text = ligature,
-            typeface = face,
-            maxWidthPx = maxPx,
-            ligature = true,
-            density = pxPerSp,
-        )
-        val paint = remember(face, fittedSp, pxPerSp) {
-            Paint(Paint.ANTI_ALIAS_FLAG or Paint.SUBPIXEL_TEXT_FLAG).apply {
-                this.typeface = face
-                textSize = fittedSp * pxPerSp
-                textAlign = Paint.Align.LEFT
-            }
-        }
-        paint.color = color.toArgb()
-        paint.textSize = fittedSp * pxPerSp
-        val bounds = Rect()
-        paint.getTextBounds(ligature, 0, ligature.length, bounds)
-        val advance = paint.measureText(ligature)
-        val widthPx = HeaderGlyphFit.visualWidthPx(paint, ligature).coerceIn(1f, maxPx)
-        val originX = HeaderGlyphFit.originXPx(
-            advancePx = advance,
-            inkLeftPx = bounds.left.toFloat(),
-            inkRightPx = bounds.right.toFloat(),
-            canvasWidthPx = widthPx,
-            ltr = false,
-        )
-        Canvas(
-            modifier = Modifier
-                .height(ChromeTokens.HeaderHeight)
-                .requiredWidth(with(density) { widthPx.toDp() }),
-        ) {
-            val native = drawContext.canvas.nativeCanvas
-            val fm = paint.fontMetrics
-            val y = size.height / 2f - (fm.ascent + fm.descent) / 2f
-            native.drawText(ligature, originX, y, paint)
-        }
-    }
-}
-
-@Composable
-private fun HeaderGlyph(
-    ligature: String,
-    fallback: String,
-    fontManager: QcfFontManager?,
-    color: Color,
-    contentDescription: String,
-    onClick: () -> Unit,
-    ltr: Boolean = false,
-) {
-    val inspection = LocalInspectionMode.current
-    var typeface by remember { mutableStateOf(fontManager?.peekSurahTitleTypeface()) }
-    LaunchedEffect(fontManager) {
-        if (fontManager != null && !inspection) {
-            typeface = fontManager.loadSurahTitleTypeface() ?: fontManager.loadUthmanicTypeface()
-        }
-    }
-    val canDrawLigature = remember(ligature, typeface) {
-        fontManager?.canDrawLigature(ligature, typeface) == true
-    }
-    val clickModifier = Modifier
-        .semantics { this.contentDescription = contentDescription }
-        .clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            onClick = onClick,
-        )
-    if (canDrawLigature && typeface != null) {
-        LigatureCanvas(
-            text = ligature,
-            typeface = typeface!!,
-            color = color,
-            ltr = ltr,
-            modifier = clickModifier,
-        )
-    } else {
-        Text(
-            text = fallback,
-            color = color,
-            fontSize = FallbackSize,
-            lineHeight = FallbackSize,
-            fontFamily = FontFamily.Serif,
-            textAlign = if (ltr) TextAlign.End else TextAlign.Start,
-            style = TextStyle(
-                textDirection = if (ltr) TextDirection.Ltr else TextDirection.Rtl,
-                platformStyle = PlatformTextStyle(includeFontPadding = false),
-            ),
-            maxLines = 1,
-            softWrap = false,
-            overflow = TextOverflow.Visible,
-            modifier = clickModifier.wrapContentWidth(unbounded = true),
+            tint = paper.textStrong,
+            modifier = Modifier.size(18.dp),
         )
     }
 }
@@ -500,13 +422,13 @@ private fun HeaderIconButton(
     night: Boolean,
     contentDescription: String?,
     onClick: (() -> Unit)?,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     val shape = RoundedCornerShape(8.dp)
     Box(
-        modifier = Modifier
+        modifier = modifier
             .height(24.dp)
-            .widthIn(min = 28.dp)
             .clip(shape)
             .background(headerChipFill(night))
             .border(1.dp, headerChipStroke(night), shape)
@@ -522,8 +444,7 @@ private fun HeaderIconButton(
                 } else {
                     Modifier
                 },
-            )
-            .padding(horizontal = 5.dp),
+            ),
         contentAlignment = Alignment.Center,
     ) {
         content()

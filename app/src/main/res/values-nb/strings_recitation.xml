@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">Motor for resitasjonskontroll</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (på enheten)</string>
+    <string name="recitation_engine_zipformer_desc">Standard. Frakoblet, i sanntid, kontrollerer uttalen bokstav for bokstav.</string>
+    <string name="recitation_engine_whisper">Whisper Quran (på enheten)</string>
+    <string name="recitation_engine_whisper_desc">Frakoblet etter én nedlasting (~78 MB).</string>
+    <string name="recitation_engine_android">Android talegjenkjenning</string>
+    <string name="recitation_engine_android_desc">Telefonens innebygde talegjenkjenning (kan kreve internett).</string>
+    <string name="recitation_engine_unavailable">Ikke tilgjengelig på denne enheten</string>
+    <string name="recitation_whisper_download">Last ned Whisper-modellen</string>
+    <string name="recitation_whisper_downloading">Laster ned… %1$d%%</string>
+    <string name="recitation_whisper_ready">Modellen er klar</string>
+    <string name="recitation_whisper_delete">Slett modellen</string>
+    <string name="recitation_whisper_failed">Nedlastingen mislyktes: %1$s</string>
+    <string name="recitation_license_model">Lisens for Zipformer Quran 3.1 (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">Lisens for sherpa-onnx (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">Appen lytter til resitasjonen din på enheten uten internett og fargelegger hvert ord mens du sier det, med modellen Zipformer Quran 3.1 fra Quran Lab.</string>
+    <string name="recitation_disclaimer">Automatisk kontroll av resitasjon og tajwid kan ta feil. Den erstatter ikke en kvalifisert lærer og er ingen religiøs dom over noens resitasjon.</string>
+    <string name="recitation_understood">Skjønner</string>
+    <string name="recitation_close">Lukk</string>
+    <string name="training_show_ayah">Vis verset</string>
+    <string name="training_select">Velg</string>
+    <string name="training_select_surah">Gå til sure</string>
+    <string name="training_select_page">Gå til sidenummer</string>
+    <string name="training_go_to_page">Gå</string>
+    <string name="training_scope_open">Åpne resitasjon</string>
+    <string name="training_scope_page">Gjeldende side</string>
+    <string name="training_range_format_hint">Skriv hvert endepunkt som sure:vers (for eksempel 2:5).</string>
+    <string name="training_apply_range">Bruk utdraget</string>
+    <string name="training_previous">Forrige</string>
+    <string name="training_next">Neste</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s ord</string>
+    <string name="training_legend_correct">Riktig</string>
+    <string name="training_legend_wrong">Feil</string>
+    <string name="training_legend_missing">Mangler</string>
+</resources>

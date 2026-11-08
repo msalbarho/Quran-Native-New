@@ -36,6 +36,7 @@ class MushafRepositoryImpl @Inject constructor(
     private val markersDao: MarkersDao,
     private val wordMeaningDao: WordMeaningDao,
     private val packaged: PackagedStoreManager,
+    private val v4Glyphs: com.quransunah.app.fonts.QpcV4Glyphs,
 ) : MushafRepository {
 
     private val warmupMutex = Mutex()
@@ -159,6 +160,17 @@ class MushafRepositoryImpl @Inject constructor(
 
     override suspend fun getAyahWords(surah: Int, ayah: Int): List<QuranWord> =
         mushafDao.getAyahWords(surah, ayah).map { it.toDomain() }
+
+    override suspend fun getTrainingWordsFromAyah(surah: Int, ayah: Int): List<QuranWord> =
+        mushafDao.getTrainingWordsFromAyah(surah, ayah).map { it.toDomain() }
+
+    override suspend fun getTrainingWordsBetweenAyahs(
+        fromSurah: Int,
+        fromAyah: Int,
+        toSurah: Int,
+        toAyah: Int,
+    ): List<QuranWord> = mushafDao.getTrainingWordsBetweenAyahs(fromSurah, fromAyah, toSurah, toAyah)
+        .map { it.toDomain() }
 
     override suspend fun getPageForAyah(surah: Int, ayah: Int): Int {
         ayahPageLookup?.pageForAyah(surah, ayah)?.let { return it }
@@ -409,7 +421,9 @@ class MushafRepositoryImpl @Inject constructor(
         surah = surahId,
         ayah = ayahNumber,
         wordIndex = wordPosition,
-        textLigature = qpcLigature?.ifBlank { null } ?: textHafs.orEmpty(),
+        // Glyphs for the 604 coloured page fonts (v4 codes); DB qpc_ligature = old 47-face codes.
+        textLigature = wordId?.let { v4Glyphs.forWord(it) }
+            ?: qpcLigature?.ifBlank { null } ?: textHafs.orEmpty(),
         textHafs = textHafs.orEmpty(),
         meaning = meaningByWordId[wordId],
         isAyahMarker = AyahMarkerRule.isMarker(isAyahMarker, textHafs.orEmpty(), qpcLigature.orEmpty()),

@@ -1,5 +1,7 @@
 package com.quransunah.app.ui.memorization
 
+import com.quransunah.app.ui.shell.GoldCornerFrame
+import com.quransunah.app.ui.shell.GoldCornerFrameShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,11 +39,12 @@ import com.quransunah.app.domain.model.MemorizationItem
 import com.quransunah.app.domain.model.MemorizationState
 import com.quransunah.app.fonts.QcfFontManager
 import com.quransunah.app.ui.mushaf.QcfGlyphText
+import com.quransunah.app.ui.shell.ChromeTokens
 import com.quransunah.app.ui.theme.LocalAppFontFamily
 import com.quransunah.app.ui.theme.LocalPaperColors
 
-private val MemorizationPill = RoundedCornerShape(999.dp)
-private val MemorizationCard = RoundedCornerShape(16.dp)
+private val MemorizationPill = GoldCornerFrameShape(12.dp)
+private val MemorizationCard = GoldCornerFrameShape(16.dp)
 
 @Composable
 fun MemorizationScreen(
@@ -85,7 +88,7 @@ private fun MemorizationStatusList(
 ) {
     val paper = LocalPaperColors.current
     Column(Modifier.fillMaxWidth().padding(top = 10.dp).clip(MemorizationCard)
-        .background(paper.pageBody).border(1.dp, paper.tone500, MemorizationCard).padding(12.dp)) {
+        .background(paper.pageBody).border(ChromeTokens.GoldStroke, ChromeTokens.Gold, MemorizationCard).padding(12.dp)) {
         Text(title, color = paper.textStrong, fontFamily = LocalAppFontFamily.current, fontWeight = FontWeight.Bold, fontSize = 15.sp)
         items.forEach { entry -> MemorizationStatusRow(entry, fontManager, onJump) }
     }
@@ -100,8 +103,8 @@ private fun MemorizationStatusRow(
     val paper = LocalPaperColors.current
     val item = entry.item
     val name = entry.surahName.ifBlank { stringResource(R.string.surah_fallback, EasternArabic.format(item.surah)) }
-    Row(Modifier.fillMaxWidth().padding(top = 7.dp).clip(RoundedCornerShape(10.dp))
-        .background(paper.tone300.copy(alpha = 0.55f)).clickable { onJump(item) }
+    Row(Modifier.fillMaxWidth().padding(top = 7.dp).clip(GoldCornerFrameShape(10.dp))
+        .background(paper.tone300.copy(alpha = 0.55f)).border(ChromeTokens.GoldStroke, ChromeTokens.Gold, GoldCornerFrameShape(10.dp)).clickable { onJump(item) }
         .padding(horizontal = 10.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             QcfGlyphText(
@@ -132,7 +135,7 @@ private fun MemorizationProgressCard(
             .padding(top = 10.dp)
             .clip(MemorizationCard)
             .background(paper.tone300.copy(alpha = 0.72f))
-            .border(1.dp, paper.darkAccent.copy(alpha = 0.38f), MemorizationCard)
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, MemorizationCard)
             .padding(14.dp),
     ) {
         Text(

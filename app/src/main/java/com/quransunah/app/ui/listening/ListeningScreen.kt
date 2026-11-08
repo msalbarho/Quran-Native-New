@@ -1,5 +1,7 @@
 package com.quransunah.app.ui.listening
 
+import com.quransunah.app.ui.shell.GoldCornerFrame
+import com.quransunah.app.ui.shell.GoldCornerFrameShape
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -76,8 +78,8 @@ import com.quransunah.app.fonts.QcfFontManager
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewFixtures
 import com.quransunah.app.ui.preview.PreviewTheme
-import com.quransunah.app.ui.shell.IslamicEdgePattern
-import com.quransunah.app.ui.shell.IslamicOrnamentFade
+import com.quransunah.app.ui.shell.ChromeTokens
+import com.quransunah.app.ui.shell.TiledOrnamentBackground
 import com.quransunah.app.ui.shell.ThemeToggle
 import com.quransunah.app.ui.theme.LocalAppFontFamily
 import com.quransunah.app.ui.theme.LocalDisplayFontFamily
@@ -85,8 +87,8 @@ import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 import com.quransunah.app.ui.theme.PaperColors
 
-private val PickerShape = RoundedCornerShape(16.dp)
-private val PlayShape = RoundedCornerShape(16.dp)
+private val PickerShape = GoldCornerFrameShape(16.dp)
+private val PlayShape = GoldCornerFrameShape(16.dp)
 
 private enum class ListeningPicker {
     Surah,
@@ -344,7 +346,7 @@ private fun listeningSurahName(
     return SurahNames.displayName(languageTag, number, stripped)
 }
 
-private val SheetShape = RoundedCornerShape(28.dp)
+private val SheetShape = GoldCornerFrameShape(20.dp)
 
 private fun listeningPlayerColor(paper: PaperColors, night: Boolean): Color {
     return if (night) paper.pageBody else paper.pageBody
@@ -406,10 +408,7 @@ private fun ListeningHeroPlayer(
             .fillMaxWidth()
             .background(player),
     ) {
-        IslamicEdgePattern(
-            Modifier.matchParentSize(),
-            fade = IslamicOrnamentFade.Vertical,
-        )
+        TiledOrnamentBackground(Modifier.matchParentSize())
         Column(Modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
@@ -772,7 +771,7 @@ private fun RepeatModeButton(
     val paper = LocalPaperColors.current
     val night = LocalNightMode.current
     val mark = if (selected) paper.pageBackground else paper.textMuted
-    val shape = RoundedCornerShape(16.dp)
+    val shape = GoldCornerFrameShape(16.dp)
     Column(
         modifier = modifier
             .heightIn(min = 46.dp)
@@ -780,7 +779,7 @@ private fun RepeatModeButton(
             .background(if (selected) paper.accent else if (night) paper.surface else paper.surface)
             .border(
                 width = 1.dp,
-                color = if (selected) paper.accent else paper.accent.copy(alpha = if (night) 0.32f else 0.18f),
+                color = ChromeTokens.Gold,
                 shape = shape,
             )
             .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
@@ -851,7 +850,7 @@ private fun ListeningControlSheet(
     val downloadBorder = when {
         downloadError -> errorRed
         allCached -> paper.accent
-        else -> paper.accent.copy(alpha = if (night) 0.28f else 0.16f)
+        else -> ChromeTokens.Gold
     }
     Box(
         modifier = Modifier
@@ -866,12 +865,9 @@ private fun ListeningControlSheet(
             )
             .clip(SheetShape)
             .background(sheetColor)
-            .border(1.dp, paper.accent.copy(alpha = if (night) 0.28f else 0.16f), SheetShape),
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, SheetShape),
     ) {
-        IslamicEdgePattern(
-            Modifier.matchParentSize(),
-            fade = IslamicOrnamentFade.Vertical,
-        )
+        TiledOrnamentBackground(Modifier.matchParentSize())
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1027,7 +1023,7 @@ private fun PickerRow(
             .background(cardColor)
             .border(
                 1.dp,
-                if (highlight) paper.accent.copy(alpha = if (night) 1f else 0.45f) else paper.accent.copy(alpha = if (night) 0.28f else 0.1f),
+                ChromeTokens.Gold,
                 PickerShape,
             )
             .clickable(enabled = enabled, onClick = onClick)
@@ -1089,13 +1085,13 @@ private fun RangePickerButton(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(1.dp, RoundedCornerShape(16.dp), clip = false)
-                .clip(RoundedCornerShape(16.dp))
+                .shadow(1.dp, GoldCornerFrameShape(16.dp), clip = false)
+                .clip(GoldCornerFrameShape(16.dp))
                 .background(if (LocalNightMode.current) paper.pageBody else paper.pageBody)
                 .border(
                     1.dp,
-                    if (open) paper.accent else paper.accent.copy(alpha = if (LocalNightMode.current) 0.28f else 0.16f),
-                    RoundedCornerShape(16.dp),
+                    ChromeTokens.Gold,
+                    GoldCornerFrameShape(16.dp),
                 )
                 .clickable(enabled = enabled, onClick = onClick)
                 .height(SelectorCardHeight)

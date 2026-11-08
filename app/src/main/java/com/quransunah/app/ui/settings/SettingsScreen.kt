@@ -1,5 +1,7 @@
 package com.quransunah.app.ui.settings
 
+import com.quransunah.app.ui.shell.GoldCornerFrame
+import com.quransunah.app.ui.shell.GoldCornerFrameShape
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -59,6 +61,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.quransunah.app.R
+import com.quransunah.app.recitation.RecitationEngines
+import com.quransunah.app.recitation.ui.LicenseTextDialog
 import com.quransunah.app.BuildConfig
 import com.quransunah.app.core.uiLayoutDirection
 import com.quransunah.app.core.AppConstants
@@ -72,6 +76,7 @@ import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewTheme
 import com.quransunah.app.ui.shell.ThemedLanguageCard
 import com.quransunah.app.ui.shell.ThemedListDialog
+import com.quransunah.app.ui.shell.ChromeTokens
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 import com.quransunah.app.ui.theme.PaperPaletteId
@@ -86,6 +91,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.quransunah.app.recitation.RecitationEngineId
+import com.quransunah.app.recitation.engine.ModelState
 
 @Composable
 fun SettingsScreen(
@@ -104,8 +111,18 @@ fun SettingsScreen(
     val viewModel: SettingsViewModel = hiltViewModel()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val whisperState by viewModel.whisperState.collectAsStateWithLifecycle()
     SettingsScreenContent(
         settings = settings,
+        recitation = RecitationSettingsState(
+            whisperModel = whisperState,
+            zipformerAvailable = viewModel.zipformerAvailable,
+            whisperAvailable = viewModel.whisperAvailable,
+            androidAvailable = viewModel.androidSpeechAvailable,
+        ),
+        onRecitationEngine = viewModel::setRecitationEngine,
+        onWhisperDownload = viewModel::downloadWhisper,
+        onWhisperDelete = viewModel::deleteWhisper,
         onNightMode = viewModel::setNightMode,
         onPalette = viewModel::setPalette,
         onMedinaMode = viewModel::setMedinaMode,
@@ -132,6 +149,10 @@ fun SettingsScreenContent(
     onMushafFontSizePreview: (Float) -> Unit = {},
     onLanguage: (String?) -> Unit = {},
     onOpenUserGuide: () -> Unit = {},
+    recitation: RecitationSettingsState = RecitationSettingsState(),
+    onRecitationEngine: (RecitationEngineId) -> Unit = {},
+    onWhisperDownload: () -> Unit = {},
+    onWhisperDelete: () -> Unit = {},
 ) {
     val paper = LocalPaperColors.current
     var aboutOpen by remember { mutableStateOf(false) }
@@ -196,37 +217,22 @@ fun SettingsScreenContent(
                 )
             }
         }
-        SettingsSection(title = stringResource(R.string.settings_user_guide)) {
-            Text(
-                text = stringResource(R.string.settings_user_guide_button),
-                color = paper.textStrong,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(paper.tone300)
-                    .border(1.dp, paper.tone500.copy(alpha = 0.88f), RoundedCornerShape(12.dp))
-                    .clickable(onClick = onOpenUserGuide)
-                    .padding(vertical = 12.dp, horizontal = 14.dp),
+        SettingsSection(title = stringResource(R.string.settings_recitation_engine)) {
+            RecitationEngineSettings(
+                selected = settings.recitationEngine,
+                state = recitation,
+                onSelect = onRecitationEngine,
+                onWhisperDownload = onWhisperDownload,
+                onWhisperDelete = onWhisperDelete,
             )
         }
-        SettingsSection(title = stringResource(R.string.settings_about)) {
-            Text(
-                text = stringResource(R.string.settings_about_button),
-                color = paper.textStrong,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(paper.tone300)
-                    .border(1.dp, paper.tone500.copy(alpha = 0.88f), RoundedCornerShape(12.dp))
-                    .clickable { aboutOpen = true }
-                    .padding(vertical = 12.dp, horizontal = 14.dp),
-            )
+        HorizontalDivider(
+            modifier = Modifier.padding(top = 18.dp, bottom = 12.dp),
+            color = paper.tone500.copy(alpha = 0.72f),
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            CompactSettingsLink(stringResource(R.string.settings_user_guide_button), onOpenUserGuide)
+            CompactSettingsLink(stringResource(R.string.settings_about_button)) { aboutOpen = true }
         }
     }
     }
@@ -247,14 +253,14 @@ private fun LanguageSettingRow(selected: String?, onSelect: (String?) -> Unit) {
     }
     val currentMark = selectedLanguage?.flag ?: DEVICE_LANGUAGE_ICON
     val night = LocalNightMode.current
-    val rowShape = RoundedCornerShape(16.dp)
+    val rowShape = GoldCornerFrameShape(16.dp)
     val rowFill = if (night) paper.tone400 else lerp(paper.surface, paper.chromeFill, 0.28f)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(rowShape)
             .background(rowFill)
-            .border(1.dp, paper.accent.copy(alpha = if (night) 0.4f else 0.22f), rowShape)
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, rowShape)
             .clickable(role = Role.Button) { dialogOpen = true }
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -301,7 +307,7 @@ private fun LanguagePickerDialog(
     }
     val showDevice = query.isBlank() || deviceLabel.lowercase().contains(query.trim().lowercase())
     val night = LocalNightMode.current
-    val fieldShape = RoundedCornerShape(14.dp)
+    val fieldShape = GoldCornerFrameShape(14.dp)
     val fieldFill = if (night) paper.tone400.copy(alpha = 0.72f) else lerp(paper.surface, paper.chromeFill, 0.28f)
     CompositionLocalProvider(LocalLayoutDirection provides uiLayoutDirection()) {
         ThemedListDialog(
@@ -407,7 +413,7 @@ private fun PaletteChoiceGrid(
 }
 
 @Composable
-private fun PaletteOption(
+internal fun PaletteOption(
     label: String,
     start: Color,
     end: Color,
@@ -417,7 +423,7 @@ private fun PaletteOption(
 ) {
     val paper = LocalPaperColors.current
     val night = LocalNightMode.current
-    val shape = RoundedCornerShape(16.dp)
+    val shape = GoldCornerFrameShape(16.dp)
     val resting = if (night) {
         paper.tone400.copy(alpha = 0.72f)
     } else {
@@ -429,7 +435,7 @@ private fun PaletteOption(
             .background(if (active) paper.accent.copy(alpha = 0.12f) else resting)
             .border(
                 width = if (active) 1.7.dp else 1.dp,
-                color = if (active) paper.accent else paper.tone500.copy(alpha = 0.78f),
+                color = ChromeTokens.Gold,
                 shape = shape,
             )
             .clickable(onClick = onClick)
@@ -506,13 +512,13 @@ private fun SegmentedTwoOptions(
 ) {
     val paper = LocalPaperColors.current
     val night = LocalNightMode.current
-    val shape = RoundedCornerShape(999.dp)
+    val shape = GoldCornerFrameShape(12.dp)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
             .background(if (night) paper.tone400 else lerp(paper.surface, paper.chromeFill, 0.35f))
-            .border(1.dp, paper.accent.copy(alpha = if (night) 0.38f else 0.2f), shape)
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, shape)
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
@@ -543,7 +549,7 @@ private fun SegmentedOption(
 ) {
     val paper = LocalPaperColors.current
     var fontSize by remember(label) { mutableStateOf(MushafOptionFont) }
-    val shape = RoundedCornerShape(999.dp)
+    val shape = GoldCornerFrameShape(12.dp)
     Text(
         text = label,
         color = if (selected) paper.pageBackground else paper.textStrong,
@@ -676,6 +682,7 @@ interface SettingsFontEntryPoint {
 @Composable
 private fun AboutAppDialog(onClose: () -> Unit) {
     val paper = LocalPaperColors.current
+    var license by remember { mutableStateOf<Pair<String, String>?>(null) }
     val context = LocalContext.current
     val email = stringResource(R.string.settings_contact_email)
     val githubUrl = stringResource(R.string.settings_about_github_url)
@@ -685,9 +692,10 @@ private fun AboutAppDialog(onClose: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(18.dp, RoundedCornerShape(16.dp))
-                .clip(RoundedCornerShape(16.dp))
-                .background(paper.pageBody),
+                .shadow(18.dp, GoldCornerFrameShape(16.dp))
+                .clip(GoldCornerFrameShape(16.dp))
+                .background(paper.pageBody)
+                .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, GoldCornerFrameShape(16.dp)),
         ) {
             CompositionLocalProvider(LocalLayoutDirection provides uiLayoutDirection()) {
             Row(
@@ -826,10 +834,54 @@ private fun AboutAppDialog(onClose: () -> Unit) {
                         }
                         .padding(vertical = 4.dp),
                 )
+                val modelTitle = stringResource(R.string.recitation_license_model)
+                val sherpaTitle = stringResource(R.string.recitation_license_sherpa)
+                AboutTextLink(modelTitle, bodyScript) { license = modelTitle to RecitationEngines.ZIPFORMER_LICENSE_ASSET }
+                AboutTextLink(sherpaTitle, bodyScript) { license = sherpaTitle to RecitationEngines.SHERPA_LICENSE_ASSET }
             }
         }
         }
     }
+    license?.let { (title, asset) -> LicenseTextDialog(title, asset) { license = null } }
+}
+
+/** Plain clickable text, same look as the privacy-policy / GitHub links. */
+@Composable
+private fun AboutTextLink(label: String, direction: TextDirection, onClick: () -> Unit) {
+    Text(
+        text = label,
+        color = LocalPaperColors.current.accent,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.SemiBold,
+        textAlign = TextAlign.Start,
+        style = TextStyle(textDirection = direction),
+        modifier = Modifier
+            .clip(RoundedCornerShape(6.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 4.dp),
+    )
+}
+
+/** Low-emphasis row for the guide / about entries at the end of Settings. */
+@Composable
+private fun CompactSettingsLink(label: String, onClick: () -> Unit) {
+    val paper = LocalPaperColors.current
+    val shape = GoldCornerFrameShape(10.dp)
+    Text(
+        text = label,
+        color = paper.textStrong,
+        fontSize = 13.sp,
+        fontWeight = FontWeight.SemiBold,
+        textAlign = TextAlign.Center,
+        maxLines = 1,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(paper.tone300)
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold.copy(alpha = 0.6f), shape)
+            .clickable(onClick = onClick)
+            .padding(vertical = 7.dp, horizontal = 12.dp),
+    )
 }
 
 @ArabicPreviews
@@ -845,7 +897,25 @@ private fun SettingsScreenPreview() {
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val preferences: UserPreferences,
+    private val engines: RecitationEngines,
 ) : ViewModel() {
+    val whisperState: StateFlow<ModelState> get() = engines.whisperModels.state
+    val zipformerAvailable: Boolean get() = engines.isAvailable(RecitationEngineId.ZIPFORMER)
+    val whisperAvailable: Boolean get() = engines.isAvailable(RecitationEngineId.WHISPER)
+    val androidSpeechAvailable: Boolean get() = engines.isAvailable(RecitationEngineId.ANDROID)
+
+    fun setRecitationEngine(engine: RecitationEngineId) {
+        viewModelScope.launch { preferences.setRecitationEngine(engine) }
+    }
+
+    fun downloadWhisper() {
+        viewModelScope.launch { engines.whisperModels.download() }
+    }
+
+    fun deleteWhisper() {
+        engines.whisperModels.delete()
+    }
+
     val settings: StateFlow<UserSettings> = preferences.settings.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),

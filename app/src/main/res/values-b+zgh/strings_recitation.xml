@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">ⴰⵎⵙⵙⵓⴷⵙ ⵏ ⵓⵙⵙⵉⴼⴹ ⵏ ⵜⵖⵓⵔⵉ</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (ⴳ ⵓⵙⴰⴳⴳⴰⵡ)</string>
+    <string name="recitation_engine_zipformer_desc">ⴰⵎⵔⵙⴰⵍ. ⴱⵍⴰ ⴰⵏⵜⵔⵏⵉⵜ, ⴳ ⵓⵙⵔⴰⴳ, ⵉⵙⵙⵉⴼⵉⴹ ⴰⵙⵙⵉⵡⵍ ⴰⵙⴽⴽⵉⵍ ⵙ ⵓⵙⴽⴽⵉⵍ.</string>
+    <string name="recitation_engine_whisper">Whisper Quran (ⴳ ⵓⵙⴰⴳⴳⴰⵡ)</string>
+    <string name="recitation_engine_whisper_desc">ⴱⵍⴰ ⴰⵏⵜⵔⵏⵉⵜ ⴷⴼⴼⵉⵔ ⵏ ⵢⴰⵏ ⵓⴳⵎⵎⵉ (~78 MB).</string>
+    <string name="recitation_engine_android">ⴰⵙⵙⵓⴷⵙ ⵏ ⵡⴰⵡⴰⵍ ⵏ Android</string>
+    <string name="recitation_engine_android_desc">ⴰⵎⵙⵙⵓⴷⵙ ⵏ ⵜⵉⵍⵉⴼⵓⵏ (ⵉⵣⵎⵔ ⴰⴷ ⵉⵔⵉ ⴰⵏⵜⵔⵏⵉⵜ).</string>
+    <string name="recitation_engine_unavailable">ⵓⵔ ⵉⵍⵍⵉ ⴳ ⵓⵙⴰⴳⴳⴰⵡ ⴰⴷ</string>
+    <string name="recitation_whisper_download">ⴰⴳⵎ ⴰⵎⴷⵢⴰ ⵏ Whisper</string>
+    <string name="recitation_whisper_downloading">ⴰⴳⵎⵎⵉ… %1$d%%</string>
+    <string name="recitation_whisper_ready">ⴰⵎⴷⵢⴰ ⵉⵡⵊⴷ</string>
+    <string name="recitation_whisper_delete">ⴽⴽⵙ ⴰⵎⴷⵢⴰ</string>
+    <string name="recitation_whisper_failed">ⵉⵅⵙⵔ ⵓⴳⵎⵎⵉ: %1$s</string>
+    <string name="recitation_license_model">ⵜⵓⵔⴰⴳⵜ ⵏ Zipformer Quran 3.1 (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">ⵜⵓⵔⴰⴳⵜ ⵏ sherpa-onnx (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">ⵜⴰⵙⵏⵙⵉⵡⵜ ⵜⵙⴼⵍⵍⵓⵙ ⵉ ⵜⵖⵓⵔⵉ ⵏⵏⴽ ⴳ ⵓⵙⴰⴳⴳⴰⵡ ⵏⵏⴽ ⴱⵍⴰ ⴰⵏⵜⵔⵏⵉⵜ ⵜⵙⵙⵉⵏⵖ ⴽⵓ ⴰⵡⴰⵍ ⵎⵏⵉⴷ ⵜⵏⵏⵉⵜ, ⵙ ⵓⵎⴷⵢⴰ Zipformer Quran 3.1 ⵏ Quran Lab.</string>
+    <string name="recitation_disclaimer">ⴰⵙⵙⵉⴼⴹ ⴰⵡⵓⵔⵎⴰⵏ ⵏ ⵜⵖⵓⵔⵉ ⴷ ⵜⵊⵡⵉⴷ ⵉⵣⵎⵔ ⴰⴷ ⵉⵣⴳⵍ. ⵓⵔ ⵉⵙⵏⴼⴰⵍ ⴰⵙⵍⵎⴰⴷ ⵉⵎⵓⴽⵏⵏ ⵓⵔ ⵉⴳⵉ ⴰⵙⵖⵜ ⴰⴷⵉⵏⴰⵏ ⵅⴼ ⵜⵖⵓⵔⵉ ⵏ ⵃⴷⴷ.</string>
+    <string name="recitation_understood">ⵙⵙⵏⵖ</string>
+    <string name="recitation_close">ⵇⵇⵏ</string>
+    <string name="training_show_ayah">ⵙⵎⵍ ⵜⴰⵢⵜ</string>
+    <string name="training_select">ⴼⵔⵏ</string>
+    <string name="training_select_surah">ⵔⴰⵔ ⵖⵔ ⵜⵙⵓⵕⴰⵜ</string>
+    <string name="training_select_page">ⵔⴰⵔ ⵖⵔ ⵓⵟⵟⵓⵏ ⵏ ⵜⴰⵙⵏⴰ</string>
+    <string name="training_go_to_page">ⴷⴷⵓ</string>
+    <string name="training_scope_open">ⵕⵥⵎ ⵜⴰⵖⵓⵔⵉ</string>
+    <string name="training_scope_page">ⵜⴰⵙⵏⴰ ⵜⴰⵎⵉⵔⴰⵏⵜ</string>
+    <string name="training_range_format_hint">ⵙⵙⴽⵛⵎ ⴽⵓ ⵜⴰⴳⵉⵔⴰ ⵙ ⵜⵙⵓⵕⴰⵜ:ⵜⴰⵢⵜ (ⵎⴷⵢⴰ 2:5).</string>
+    <string name="training_apply_range">ⵙⵙⵎⵔⵙ ⴰⵃⵔⵉⵛ</string>
+    <string name="training_previous">ⵓⵣⵡⵉⵔ</string>
+    <string name="training_next">ⴰⴹⴼⴼⵓⵕ</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s ⵉⵡⴰⵍⵏ</string>
+    <string name="training_legend_correct">ⵉⵚⵃⴰ</string>
+    <string name="training_legend_wrong">ⵉⵣⴳⵍ</string>
+    <string name="training_legend_missing">ⵉⵅⵚⵚⴰ</string>
+</resources>

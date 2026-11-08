@@ -230,15 +230,6 @@ class ListeningViewModel @Inject constructor(
         viewModelScope.launch { preferences.setLastRepeatMode(mode) }
     }
 
-    fun cycleRepeatMode() {
-        val next = when (repeatMode.value) {
-            SurahRepeatMode.REMAINING -> SurahRepeatMode.OFF
-            SurahRepeatMode.OFF -> SurahRepeatMode.ONE
-            SurahRepeatMode.ONE -> SurahRepeatMode.REMAINING
-        }
-        selectRepeatMode(next)
-    }
-
     fun playOrToggle(surah: Int = uiState.value.selectedSurah) {
         val reciter = uiState.value.selectedReciter ?: return
         val moshaf = reciter.preferredMoshaf() ?: return
@@ -283,17 +274,6 @@ class ListeningViewModel @Inject constructor(
     }
 
     fun setSleepTimer(mode: SleepTimerMode) = audioPlayer.setSleepTimer(mode)
-
-    fun togglePlayPause() {
-        val snapshot = playback.value
-        if (snapshot.isPlaying) {
-            audioPlayer.pause()
-        } else if (snapshot.playWhenReady || snapshot.surah != null) {
-            audioPlayer.resume()
-        } else {
-            playOrToggle()
-        }
-    }
 
     fun downloadRange() {
         val state = uiState.value
@@ -348,11 +328,6 @@ class ListeningViewModel @Inject constructor(
             }
             download.value = DownloadProgress(done = missing.size, total = missing.size, running = false)
         }
-    }
-
-    fun isSurahCached(surah: Int): Boolean {
-        val moshaf = uiState.value.selectedMoshaf ?: return false
-        return audioStore.has(moshaf.id, surah)
     }
 
     fun filteredSurahs(): List<SurahInfo> {

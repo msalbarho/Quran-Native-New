@@ -1,5 +1,7 @@
 package com.quransunah.app.ui.training
 
+import com.quransunah.app.ui.shell.GoldCornerFrame
+import com.quransunah.app.ui.shell.GoldCornerFrameShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,11 +35,12 @@ import com.quransunah.app.domain.model.TrainingAssessmentEvent
 import com.quransunah.app.domain.model.TrainingAssessmentResult
 import com.quransunah.app.domain.model.TrainingSession
 import com.quransunah.app.domain.model.TrainingSessionStatus
+import com.quransunah.app.ui.shell.ChromeTokens
 import com.quransunah.app.ui.theme.LocalPaperColors
 import java.text.DateFormat
 import java.util.Date
 
-private val CardShape = RoundedCornerShape(16.dp)
+private val CardShape = GoldCornerFrameShape(16.dp)
 
 @Composable
 fun TrainingHistoryScreen(
@@ -102,7 +105,7 @@ private fun TrainingHistoryList(
                     .padding(bottom = 8.dp)
                     .clip(CardShape)
                     .background(paper.chromeFill)
-                    .border(1.dp, paper.accent.copy(alpha = 0.22f), CardShape)
+                    .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, CardShape)
                     .clickable(role = Role.Button) { onOpen(session) }
                     .padding(horizontal = 12.dp, vertical = 10.dp),
             ) {
@@ -150,7 +153,7 @@ private fun TrainingHistoryDetail(
             fontWeight = FontWeight.SemiBold,
             fontSize = 14.sp,
             modifier = Modifier
-                .clip(RoundedCornerShape(10.dp))
+                .clip(GoldCornerFrameShape(10.dp))
                 .clickable(role = Role.Button, onClick = onBack)
                 .padding(vertical = 6.dp),
         )
@@ -199,7 +202,7 @@ private fun TrainingHistoryDetail(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp)
-                .clip(RoundedCornerShape(14.dp))
+                .clip(GoldCornerFrameShape(14.dp))
                 .background(paper.accent)
                 .clickable(role = Role.Button, onClick = onResume)
                 .padding(vertical = 12.dp),

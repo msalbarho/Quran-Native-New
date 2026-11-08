@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">د تلاوت د ارزونې انجن</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (په وسیله کې)</string>
+    <string name="recitation_engine_zipformer_desc">ډیفالټ. آفلاین، سمدستي، تلفظ توری په توری ارزوي.</string>
+    <string name="recitation_engine_whisper">Whisper Quran (په وسیله کې)</string>
+    <string name="recitation_engine_whisper_desc">د یو ځل ډاونلوډ وروسته آفلاین (~78 MB).</string>
+    <string name="recitation_engine_android">د اندروید د وینا پېژندنه</string>
+    <string name="recitation_engine_android_desc">د تلیفون دننني پېژندونکی (کېدای شي انټرنېټ ته اړتیا ولري).</string>
+    <string name="recitation_engine_unavailable">په دې وسیله کې شتون نه لري</string>
+    <string name="recitation_whisper_download">د Whisper ماډل ډاونلوډ کړئ</string>
+    <string name="recitation_whisper_downloading">ډاونلوډ کېږي… %1$d%%</string>
+    <string name="recitation_whisper_ready">ماډل چمتو دی</string>
+    <string name="recitation_whisper_delete">ماډل ړنګ کړئ</string>
+    <string name="recitation_whisper_failed">ډاونلوډ ناکام شو: %1$s</string>
+    <string name="recitation_license_model">د Zipformer Quran 3.1 جواز (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">د sherpa-onnx جواز (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">اپ ستاسو تلاوت ستاسو په وسیله کې پرته له انټرنېټه اوري او هره کلمه د ویلو پر مهال رنګوي، د Quran Lab د Zipformer Quran 3.1 ماډل په کارولو سره.</string>
+    <string name="recitation_disclaimer">د تلاوت او تجوید اتومات ارزونه ښايي تېروتنه وکړي. دا د وړ استاذ ځای نه نیسي او د هیچا د تلاوت په اړه شرعي حکم نه دی.</string>
+    <string name="recitation_understood">پوه شوم</string>
+    <string name="recitation_close">بندول</string>
+    <string name="training_show_ayah">آیت ښکاره کړئ</string>
+    <string name="training_select">غوره کړئ</string>
+    <string name="training_select_surah">سورت ته لاړ شئ</string>
+    <string name="training_select_page">د پاڼې شمېرې ته لاړ شئ</string>
+    <string name="training_go_to_page">لاړ شه</string>
+    <string name="training_scope_open">تلاوت پرانیزئ</string>
+    <string name="training_scope_page">اوسنۍ پاڼه</string>
+    <string name="training_range_format_hint">هره پوله د سورت:آیت په بڼه ولیکئ (د بېلګې په توګه 2:5).</string>
+    <string name="training_apply_range">برخه پلي کړئ</string>
+    <string name="training_previous">مخکنی</string>
+    <string name="training_next">بل</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s کلمې</string>
+    <string name="training_legend_correct">سم</string>
+    <string name="training_legend_wrong">غلط</string>
+    <string name="training_legend_missing">پاتې</string>
+</resources>

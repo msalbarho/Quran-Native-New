@@ -43,14 +43,6 @@ class TrainingHistoryViewModel @Inject constructor(
         }
     }
 
-    fun noteAssessment(surah: Int, ayah: Int, pageNumber: Int, mastered: Boolean) {
-        if (surah <= 0 || ayah <= 0 || pageNumber <= 0) return
-        val result = if (mastered) TrainingAssessmentResult.MASTERED else TrainingAssessmentResult.LEARNING
-        viewModelScope.launch {
-            history.recordAssessment(surah, ayah, pageNumber, result, System.currentTimeMillis())
-        }
-    }
-
     fun rememberPosition(surah: Int, ayah: Int, pageNumber: Int) {
         if (surah <= 0 || ayah <= 0 || pageNumber <= 0) return
         viewModelScope.launch {

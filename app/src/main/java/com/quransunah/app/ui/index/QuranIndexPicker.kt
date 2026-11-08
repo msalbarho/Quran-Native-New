@@ -1,5 +1,7 @@
 package com.quransunah.app.ui.index
 
+import com.quransunah.app.ui.shell.GoldCornerFrame
+import com.quransunah.app.ui.shell.GoldCornerFrameShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -76,8 +78,8 @@ import com.quransunah.app.ui.mushaf.QcfGlyphText
 import com.quransunah.app.ui.preview.ArabicPreviews
 import com.quransunah.app.ui.preview.PreviewFixtures
 import com.quransunah.app.ui.preview.PreviewTheme
-import com.quransunah.app.ui.shell.IslamicEdgePattern
-import com.quransunah.app.ui.shell.IslamicOrnamentFade
+import com.quransunah.app.ui.shell.ChromeTokens
+import com.quransunah.app.ui.shell.TiledOrnamentBackground
 import com.quransunah.app.ui.theme.LocalAppFontFamily
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
@@ -85,8 +87,8 @@ import com.quransunah.app.ui.theme.PaperColors
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.yield
 
-private val CardShape = RoundedCornerShape(14.dp)
-private val ChipShape = RoundedCornerShape(12.dp)
+private val CardShape = GoldCornerFrameShape(14.dp)
+private val ChipShape = GoldCornerFrameShape(12.dp)
 private val SurahListRtlTags = setOf("ar", "ur", "fa", "fa-af", "ps")
 
 @Composable
@@ -423,7 +425,7 @@ private fun IndexTabRow(
             .clip(RoundedCornerShape(16.dp))
             .background(track),
     ) {
-        IslamicEdgePattern(Modifier.matchParentSize())
+        TiledOrnamentBackground(Modifier.matchParentSize())
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -737,23 +739,26 @@ private fun JuzIndexList(
         IndexEmpty()
         return
     }
-    LazyColumn(
-        state = listState,
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(11.dp),
-    ) {
-        items(sections, key = { it.juz.id }, contentType = { "juz" }) { section ->
-            JuzSectionCard(
-                section = section,
-                active = section.juz.number == currentJuz,
-                currentHizb = currentHizb,
-                languageTag = languageTag,
-                surahName = surahName,
-                fontManager = fontManager,
-                juzNameTypeface = juzNameTypeface,
-                onSelect = onSelect,
-            )
+    val direction = if (languageTag in SurahListRtlTags) LayoutDirection.Rtl else LayoutDirection.Ltr
+    CompositionLocalProvider(LocalLayoutDirection provides direction) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(11.dp),
+        ) {
+            items(sections, key = { it.juz.id }, contentType = { "juz" }) { section ->
+                JuzSectionCard(
+                    section = section,
+                    active = section.juz.number == currentJuz,
+                    currentHizb = currentHizb,
+                    languageTag = languageTag,
+                    surahName = surahName,
+                    fontManager = fontManager,
+                    juzNameTypeface = juzNameTypeface,
+                    onSelect = onSelect,
+                )
+            }
         }
     }
 }
@@ -890,21 +895,24 @@ private fun HizbIndexList(
         IndexEmpty()
         return
     }
-    LazyColumn(
-        state = listState,
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        items(sections, key = { it.hizb.id }, contentType = { "hizb" }) { section ->
-            HizbSectionCard(
-                section = section,
-                activeHizb = section.hizb.number == currentHizb,
-                currentPage = currentPage,
-                languageTag = languageTag,
-                surahName = surahName,
-                onSelect = onSelect,
-            )
+    val direction = if (languageTag in SurahListRtlTags) LayoutDirection.Rtl else LayoutDirection.Ltr
+    CompositionLocalProvider(LocalLayoutDirection provides direction) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(sections, key = { it.hizb.id }, contentType = { "hizb" }) { section ->
+                HizbSectionCard(
+                    section = section,
+                    activeHizb = section.hizb.number == currentHizb,
+                    currentPage = currentPage,
+                    languageTag = languageTag,
+                    surahName = surahName,
+                    onSelect = onSelect,
+                )
+            }
         }
     }
 }
@@ -969,10 +977,7 @@ private fun SajdaIndexCard(
             .goldCard(paper, active)
             .clickable(onClick = onClick),
     ) {
-        IslamicEdgePattern(
-            Modifier.matchParentSize(),
-            fade = IslamicOrnamentFade.VerticalEdges,
-        )
+        TiledOrnamentBackground(Modifier.matchParentSize())
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1052,10 +1057,7 @@ private fun HizbSectionCard(
             .clip(CardShape)
             .goldCard(paper, activeHizb),
     ) {
-        IslamicEdgePattern(
-            Modifier.matchParentSize(),
-            fade = IslamicOrnamentFade.VerticalEdges,
-        )
+        TiledOrnamentBackground(Modifier.matchParentSize())
         Column(Modifier.fillMaxWidth()) {
         DivisionRow(
             number = section.hizb.number,
@@ -1170,9 +1172,9 @@ private fun NumberBadge(number: Int, active: Boolean, compact: Boolean = false) 
     Box(
         modifier = Modifier
             .size(size)
-            .clip(RoundedCornerShape(6.dp))
+            .clip(GoldCornerFrameShape(6.dp))
             .background(if (active) paper.darkAccent.copy(alpha = 0.22f) else paper.tone400.copy(alpha = 0.55f))
-            .border(1.dp, paper.darkAccent.copy(alpha = if (active) 0.78f else 0.42f), RoundedCornerShape(6.dp)),
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, GoldCornerFrameShape(6.dp)),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -1199,9 +1201,9 @@ private fun PageChip(pageNumber: Int, labeled: Boolean = false) {
         fontSize = 11.sp,
         textAlign = TextAlign.Center,
         modifier = Modifier
-            .clip(RoundedCornerShape(5.dp))
+            .clip(GoldCornerFrameShape(5.dp))
             .background(paper.tone400.copy(alpha = 0.5f))
-            .border(1.dp, paper.darkAccent.copy(alpha = 0.42f), RoundedCornerShape(5.dp))
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, GoldCornerFrameShape(5.dp))
             .padding(horizontal = 7.dp, vertical = 4.dp),
     )
 }
@@ -1219,10 +1221,9 @@ private fun IndexEmpty() {
 }
 
 private fun Modifier.goldCard(paper: PaperColors, active: Boolean): Modifier {
-    val stroke = paper.accent.copy(alpha = if (active) 0.62f else 0.2f)
     return this
-        .background(paper.pageBody.copy(alpha = if (active) 0.92f else 0.58f))
-        .border(if (active) 1.5.dp else 1.dp, stroke, CardShape)
+        .background(paper.pageBody.copy(alpha = if (active) 0.92f else 0.58f), CardShape)
+        .border(if (active) 1.1.dp else ChromeTokens.GoldStroke, ChromeTokens.Gold, CardShape)
 }
 
 @Composable

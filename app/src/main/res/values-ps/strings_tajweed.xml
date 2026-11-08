@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">د تجوید د رنګونو لارښود</string>
+    <string name="tajweed_colors">د تجوید رنګونه</string>
+    <string name="tajweed_rule_1">لازم مد: ۶ حرکتونه</string>
+    <string name="tajweed_rule_2">واجب متصل مد: ۴–۵ حرکتونه</string>
+    <string name="tajweed_rule_3">جائز منفصل مد: ۲، ۴ یا ۵ حرکتونه</string>
+    <string name="tajweed_rule_4">طبیعي مد / عوض: ۲ حرکتونه</string>
+    <string name="tajweed_rule_5">اخفاء، له غنې سره ادغام او د غنې ځایونه</string>
+    <string name="tajweed_rule_6">تفخیم: د استعلاء توري او راء</string>
+    <string name="tajweed_rule_7">قلقله</string>
+    <string name="tajweed_rule_8">نه لوستل کېدونکي توري: وصل همزه، شمسي لام او نور</string>
+    <string-array name="mushaf_header_numbers">
+        <item>یو</item>
+        <item>دوه</item>
+        <item>درې</item>
+        <item>څلور</item>
+        <item>پنځه</item>
+        <item>شپږ</item>
+        <item>اووه</item>
+        <item>اته</item>
+        <item>نهه</item>
+        <item>لس</item>
+        <item>یوولس</item>
+        <item>دولس</item>
+        <item>دیارلس</item>
+        <item>څوارلس</item>
+        <item>پنځلس</item>
+        <item>شپاړس</item>
+        <item>اوولس</item>
+        <item>اتلس</item>
+        <item>نولس</item>
+        <item>شل</item>
+        <item>یوویشت</item>
+        <item>دوه ویشت</item>
+        <item>درې ویشت</item>
+        <item>څلور ویشت</item>
+        <item>پنځه ویشت</item>
+        <item>شپږ ویشت</item>
+        <item>اووه ویشت</item>
+        <item>اته ویشت</item>
+        <item>نهه ویشت</item>
+        <item>دېرش</item>
+        <item>یو دېرش</item>
+        <item>دوه دېرش</item>
+        <item>درې دېرش</item>
+        <item>څلور دېرش</item>
+        <item>پنځه دېرش</item>
+        <item>شپږ دېرش</item>
+        <item>اووه دېرش</item>
+        <item>اته دېرش</item>
+        <item>نهه دېرش</item>
+        <item>څلوېښت</item>
+        <item>یوڅلوېښت</item>
+        <item>دوه څلوېښت</item>
+        <item>درې څلوېښت</item>
+        <item>څلور څلوېښت</item>
+        <item>پنځه څلوېښت</item>
+        <item>شپږ څلوېښت</item>
+        <item>اووه څلوېښت</item>
+        <item>اته څلوېښت</item>
+        <item>نهه څلوېښت</item>
+        <item>پنځوس</item>
+        <item>یوپنځوس</item>
+        <item>دوه پنځوس</item>
+        <item>درې پنځوس</item>
+        <item>څلور پنځوس</item>
+        <item>پنځه پنځوس</item>
+        <item>شپږ پنځوس</item>
+        <item>اووه پنځوس</item>
+        <item>اته پنځوس</item>
+        <item>نهه پنځوس</item>
+        <item>شپېته</item>
+    </string-array>
+</resources>

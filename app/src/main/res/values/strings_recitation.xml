@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="settings_recitation_engine">Recitation checking engine</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (on device)</string>
+    <string name="recitation_engine_zipformer_desc">Default. Offline, real-time, checks pronunciation letter by letter.</string>
+    <string name="recitation_engine_whisper">Whisper Quran (on device)</string>
+    <string name="recitation_engine_whisper_desc">Offline after a one-time download (~78 MB).</string>
+    <string name="recitation_engine_android">Android speech recognition</string>
+    <string name="recitation_engine_android_desc">The phone\'s built-in recognizer (may need internet).</string>
+    <string name="recitation_engine_unavailable">Not available on this device</string>
+    <string name="recitation_whisper_download">Download Whisper model</string>
+    <string name="recitation_whisper_downloading">Downloading… %1$d%%</string>
+    <string name="recitation_whisper_ready">Model ready</string>
+    <string name="recitation_whisper_delete">Delete model</string>
+    <string name="recitation_whisper_failed">Download failed: %1$s</string>
+    <string name="recitation_license_model">Zipformer Quran 3.1 licence (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">sherpa-onnx licence (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">The app listens to your recitation on your device without internet and colours each word as you say it, using the Zipformer Quran 3.1 model by Quran Lab.</string>
+    <string name="recitation_disclaimer">Automatic recitation and tajweed checking can be wrong. It does not replace a qualified teacher and is not a religious ruling on anyone\'s recitation.</string>
+    <string name="recitation_understood">Got it</string>
+    <string name="recitation_close">Close</string>
+    <string name="training_show_ayah">Show ayah</string>
+    <string name="training_select">Select</string>
+    <string name="training_select_surah">Go to surah</string>
+    <string name="training_select_page">Go to page number</string>
+    <string name="training_go_to_page">Go</string>
+    <string name="training_scope_open">Open recitation</string>
+    <string name="training_scope_page">Current page</string>
+    <string name="training_range_format_hint">Enter each endpoint as surah:ayah (for example 2:5).</string>
+    <string name="training_apply_range">Apply passage</string>
+    <string name="training_previous">Previous</string>
+    <string name="training_next">Next</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s words</string>
+    <string name="training_legend_correct">Correct</string>
+    <string name="training_legend_wrong">Wrong</string>
+    <string name="training_legend_missing">Missing</string>
+</resources>

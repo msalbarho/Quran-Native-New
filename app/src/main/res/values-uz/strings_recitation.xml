@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">Tilovatni tekshirish dvigateli</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (qurilmada)</string>
+    <string name="recitation_engine_zipformer_desc">Standart. Oflayn, real vaqtda, talaffuzni harfma-harf tekshiradi.</string>
+    <string name="recitation_engine_whisper">Whisper Quran (qurilmada)</string>
+    <string name="recitation_engine_whisper_desc">Bir martalik yuklab olishdan keyin oflayn (~78 MB).</string>
+    <string name="recitation_engine_android">Android nutqni aniqlash</string>
+    <string name="recitation_engine_android_desc">Telefonning ichki aniqlagichi (internet kerak boʻlishi mumkin).</string>
+    <string name="recitation_engine_unavailable">Bu qurilmada mavjud emas</string>
+    <string name="recitation_whisper_download">Whisper modelini yuklab olish</string>
+    <string name="recitation_whisper_downloading">Yuklab olinmoqda… %1$d%%</string>
+    <string name="recitation_whisper_ready">Model tayyor</string>
+    <string name="recitation_whisper_delete">Modelni oʻchirish</string>
+    <string name="recitation_whisper_failed">Yuklab olish muvaffaqiyatsiz: %1$s</string>
+    <string name="recitation_license_model">Zipformer Quran 3.1 litsenziyasi (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">sherpa-onnx litsenziyasi (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">Ilova Quran Lab tomonidan yaratilgan Zipformer Quran 3.1 modeli yordamida tilovatingizni qurilmangizda internetsiz tinglaydi va har bir soʻzni aytganingizda rangga boʻyaydi.</string>
+    <string name="recitation_disclaimer">Tilovat va tajvidni avtomatik tekshirish xato qilishi mumkin. U malakali ustoz oʻrnini bosmaydi va hech kimning tilovati haqida diniy hukm emas.</string>
+    <string name="recitation_understood">Tushunarli</string>
+    <string name="recitation_close">Yopish</string>
+    <string name="training_show_ayah">Oyatni koʻrsatish</string>
+    <string name="training_select">Tanlash</string>
+    <string name="training_select_surah">Suraga oʻtish</string>
+    <string name="training_select_page">Sahifa raqamiga oʻtish</string>
+    <string name="training_go_to_page">Oʻtish</string>
+    <string name="training_scope_open">Tilovatni ochish</string>
+    <string name="training_scope_page">Joriy sahifa</string>
+    <string name="training_range_format_hint">Har bir chegarani sura:oyat koʻrinishida kiriting (masalan, 2:5).</string>
+    <string name="training_apply_range">Parchani qoʻllash</string>
+    <string name="training_previous">Oldingi</string>
+    <string name="training_next">Keyingi</string>
+    <string name="training_ayah_word_progress">%1$s / %2$s soʻz</string>
+    <string name="training_legend_correct">Toʻgʻri</string>
+    <string name="training_legend_wrong">Xato</string>
+    <string name="training_legend_missing">Tushib qolgan</string>
+</resources>

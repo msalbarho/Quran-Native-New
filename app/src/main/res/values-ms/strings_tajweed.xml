@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">Panduan warna tajwid</string>
+    <string name="tajweed_colors">Warna tajwid</string>
+    <string name="tajweed_rule_1">Mad lazim: 6 harakat</string>
+    <string name="tajweed_rule_2">Mad wajib muttasil: 4–5 harakat</string>
+    <string name="tajweed_rule_3">Mad jaiz munfasil: 2, 4 atau 5 harakat</string>
+    <string name="tajweed_rule_4">Mad asli / iwadh: 2 harakat</string>
+    <string name="tajweed_rule_5">Ikhfa, idgham berdengung dan ghunnah</string>
+    <string name="tajweed_rule_6">Tafkhim: huruf isti‘la dan ra</string>
+    <string name="tajweed_rule_7">Qalqalah</string>
+    <string name="tajweed_rule_8">Huruf tidak dibaca: hamzah wasal, lam syamsiah dan lain-lain</string>
+    <string-array name="mushaf_header_numbers">
+        <item>satu</item>
+        <item>dua</item>
+        <item>tiga</item>
+        <item>empat</item>
+        <item>lima</item>
+        <item>enam</item>
+        <item>tujuh</item>
+        <item>lapan</item>
+        <item>sembilan</item>
+        <item>sepuluh</item>
+        <item>sebelas</item>
+        <item>dua belas</item>
+        <item>tiga belas</item>
+        <item>empat belas</item>
+        <item>lima belas</item>
+        <item>enam belas</item>
+        <item>tujuh belas</item>
+        <item>lapan belas</item>
+        <item>sembilan belas</item>
+        <item>dua puluh</item>
+        <item>dua puluh satu</item>
+        <item>dua puluh dua</item>
+        <item>dua puluh tiga</item>
+        <item>dua puluh empat</item>
+        <item>dua puluh lima</item>
+        <item>dua puluh enam</item>
+        <item>dua puluh tujuh</item>
+        <item>dua puluh lapan</item>
+        <item>dua puluh sembilan</item>
+        <item>tiga puluh</item>
+        <item>tiga puluh satu</item>
+        <item>tiga puluh dua</item>
+        <item>tiga puluh tiga</item>
+        <item>tiga puluh empat</item>
+        <item>tiga puluh lima</item>
+        <item>tiga puluh enam</item>
+        <item>tiga puluh tujuh</item>
+        <item>tiga puluh lapan</item>
+        <item>tiga puluh sembilan</item>
+        <item>empat puluh</item>
+        <item>empat puluh satu</item>
+        <item>empat puluh dua</item>
+        <item>empat puluh tiga</item>
+        <item>empat puluh empat</item>
+        <item>empat puluh lima</item>
+        <item>empat puluh enam</item>
+        <item>empat puluh tujuh</item>
+        <item>empat puluh lapan</item>
+        <item>empat puluh sembilan</item>
+        <item>lima puluh</item>
+        <item>lima puluh satu</item>
+        <item>lima puluh dua</item>
+        <item>lima puluh tiga</item>
+        <item>lima puluh empat</item>
+        <item>lima puluh lima</item>
+        <item>lima puluh enam</item>
+        <item>lima puluh tujuh</item>
+        <item>lima puluh lapan</item>
+        <item>lima puluh sembilan</item>
+        <item>enam puluh</item>
+    </string-array>
+</resources>

@@ -43,6 +43,122 @@ internal object ShareAudioClip {
         return ShareTimedClip(dest, framesToDurationUs(trimmed.frameCount, trimmed.sampleRate))
     }
 
+    /** Clean maker-only PCM: exact requested clock crop, 44.1 kHz stereo, neutral resampling.
+     * No echo, pitch, tempo, or copyright-evasion processing. Fades are on the export edges only.
+     */
+    fun prepareMaker(source: File, dest: File, fromMs: Long = 0, toMs: Long? = null,
+                     fadeIn: Boolean, fadeOut: Boolean): ShareTimedClip {
+        val pcm = decodePcm16(source)
+        val first = (fromMs * pcm.sampleRate / 1000).toInt().coerceIn(0, pcm.frameCount - 1)
+        val last = (toMs?.let { it * pcm.sampleRate / 1000 } ?: pcm.frameCount.toLong()).toInt()
+            .coerceIn(first + 1, pcm.frameCount)
+        val outputRate = 44100
+        val outputFrames = ((last - first).toLong() * outputRate / pcm.sampleRate).toInt().coerceAtLeast(1)
+        val samples = ShortArray(outputFrames * 2)
+        fun sourceSample(frame: Int, channel: Int): Float {
+            val i = frame.coerceIn(first, last - 1) * pcm.channelCount
+            return when (pcm.channelCount) {
+                1 -> pcm.samples[i].toFloat()
+                2 -> pcm.samples[i + channel].toFloat()
+                else -> (0 until pcm.channelCount).sumOf { pcm.samples[i + it].toInt() }.toFloat() / pcm.channelCount
+            }
+        }
+        for (frame in 0 until outputFrames) {
+            val sourcePosition = first + frame.toDouble() * pcm.sampleRate / outputRate
+            val index = sourcePosition.toInt()
+            val fraction = (sourcePosition - index).toFloat()
+            val fadeFrames = minOf(outputRate * 3 / 10, outputFrames / 2).coerceAtLeast(1)
+            var gain = 1f
+            if (fadeIn) gain = minOf(gain, frame.toFloat() / fadeFrames)
+            if (fadeOut) gain = minOf(gain, (outputFrames - 1 - frame).toFloat() / fadeFrames)
+            for (channel in 0..1) {
+                val a = sourceSample(index, channel)
+                val b = sourceSample(index + 1, channel)
+                samples[frame * 2 + channel] = ((a + (b - a) * fraction) * gain).toInt().coerceIn(-32768, 32767).toShort()
+            }
+        }
+        writeWav(dest, Pcm16(outputRate, 2, samples))
+        return ShareTimedClip(dest, framesToDurationUs(outputFrames, outputRate))
+    }
+    /** One continuous encoder input. Never trim a verse at a word-alignment anchor:
+     * QUL anchors may be inside a syllable, not at the safe boundary of the audio file.
+     * Original ayah files already include their own leading/trailing safety margins.
+     */
+    fun concatenateMaker(clips: List<ShareTimedClip>, dest: File): ShareTimedClip {
+        require(clips.isNotEmpty())
+        val dataBytes = clips.sumOf { it.file.length() - 44L }
+        require(dataBytes in 4..Int.MAX_VALUE.toLong())
+        val totalFrames = dataBytes / 4
+        val fadeFrames = minOf(13230L, totalFrames / 2).coerceAtLeast(1)
+        dest.outputStream().use { output ->
+            val header = ByteBuffer.allocate(44).order(ByteOrder.LITTLE_ENDIAN)
+            header.put("RIFF".toByteArray(Charsets.US_ASCII)); header.putInt(36 + dataBytes.toInt())
+            header.put("WAVEfmt ".toByteArray(Charsets.US_ASCII)); header.putInt(16)
+            header.putShort(1); header.putShort(2); header.putInt(44100); header.putInt(176400)
+            header.putShort(4); header.putShort(16); header.put("data".toByteArray(Charsets.US_ASCII)); header.putInt(dataBytes.toInt())
+            output.write(header.array())
+            var sampleIndex = 0L
+            val buffer = ByteArray(65536)
+            clips.forEach { clip ->
+                clip.file.inputStream().use { input ->
+                    check(input.skip(44) == 44L)
+                    while (true) {
+                        val count = input.read(buffer)
+                        if (count < 0) break
+                        check(count % 2 == 0)
+                        var i = 0
+                        while (i < count) {
+                            val frame = sampleIndex / 2
+                            val gain = makerEdgeFadeGain(frame, totalFrames)
+                            if (gain < 1f) {
+                                val original = ((buffer[i].toInt() and 255) or (buffer[i + 1].toInt() shl 8)).toShort().toInt()
+                                val faded = (original * gain).toInt()
+                                buffer[i] = faded.toByte(); buffer[i + 1] = (faded shr 8).toByte()
+                            }
+                            sampleIndex++; i += 2
+                        }
+                        output.write(buffer, 0, count)
+                    }
+                }
+            }
+        }
+        return ShareTimedClip(dest, totalFrames * 1_000_000L / 44100)
+    }
+    /** Measure AAC priming against the exact WAV given to the encoder, rather than
+     * assuming a device-specific constant or dropping potentially useful AAC packets.
+     */
+    fun makerEncoderDelayUs(encoded: File, referenceWav: File): Long {
+        val decoded = decodePcm16(encoded)
+        check(decoded.sampleRate == 44100)
+        val reference = referenceWav.inputStream().use { input ->
+            check(input.skip(44) == 44L)
+            val bytes = ByteArray(minOf(44100 * 3 * 4, (referenceWav.length() - 44).toInt()))
+            var count = 0
+            while (count < bytes.size) { val n = input.read(bytes, count, bytes.size - count); if (n < 0) break; count += n }
+            ShortArray(count / 2).also { ByteBuffer.wrap(bytes, 0, count).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(it) }
+        }
+        val start = minOf(13230, reference.size / 8)
+        val end = minOf(reference.size / 2, decoded.frameCount - 6616)
+        if (end - start < 2000) return 0L
+        fun score(lag: Int): Double {
+            var xy = 0.0; var xx = 0.0; var yy = 0.0
+            var frame = start
+            while (frame < end) {
+                val x = reference[frame * 2].toDouble()
+                val y = decoded.samples[(frame + lag) * decoded.channelCount].toDouble()
+                xy += x * y; xx += x * x; yy += y * y; frame += 16
+            }
+            return if (xx > 0 && yy > 0) xy / kotlin.math.sqrt(xx * yy) else 0.0
+        }
+        var bestLag = 0; var bestScore = -1.0
+        for (lag in 0..6615 step 8) { val s = score(lag); if (s > bestScore) { bestLag = lag; bestScore = s } }
+        val coarse = bestLag
+        for (lag in maxOf(0, coarse - 12)..minOf(6615, coarse + 12)) {
+            val s = score(lag); if (s > bestScore) { bestLag = lag; bestScore = s }
+        }
+        check(bestScore > .65) { "Cannot verify audio/video encoder sync ($bestScore)" }
+        return bestLag * 1_000_000L / 44100
+    }
     private fun wavPcmDurationUs(file: File): Long {
         return runCatching {
             file.inputStream().use { stream ->

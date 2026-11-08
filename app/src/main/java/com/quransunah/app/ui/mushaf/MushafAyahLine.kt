@@ -60,30 +60,30 @@ fun MushafAyahLine(
     val paper = LocalPaperColors.current
     val night = LocalNightMode.current
     val inspection = LocalInspectionMode.current
-    var pageFace by remember(pageNumber, fontManager) {
-        mutableStateOf(fontManager?.peekPageTypeface(pageNumber))
+    var pageFace by remember(pageNumber, fontManager, night) {
+        mutableStateOf(fontManager?.peekPageTypeface(pageNumber, night))
     }
     var uthmanicFace by remember(fontManager) {
         mutableStateOf(fontManager?.peekUthmanicTypeface())
     }
 
-    var fontsSettled by remember(pageNumber, fontManager) {
+    var fontsSettled by remember(pageNumber, fontManager, night) {
         mutableStateOf(
-            fontManager == null || inspection || fontManager.peekPageTypeface(pageNumber) != null,
+            fontManager == null || inspection || fontManager.peekPageTypeface(pageNumber, night) != null,
         )
     }
-    LaunchedEffect(pageNumber, fontManager) {
+    LaunchedEffect(pageNumber, fontManager, night) {
         if (fontManager != null && !inspection) {
-            pageFace = fontManager.loadPageTypeface(pageNumber)
+            pageFace = fontManager.loadPageTypeface(pageNumber, night)
             uthmanicFace = fontManager.loadUthmanicTypeface()
         }
         fontsSettled = true
     }
 
     val glyphSize = when {
-        words.size <= 10 -> 26.sp
-        words.size <= 24 -> 31.sp
-        else -> 30.sp
+        words.size <= 10 -> 28.6.sp // +10% (4.3.1)
+        words.size <= 24 -> 34.1.sp // +10% (4.3.1)
+        else -> 33.sp // +10% (4.3.1)
     }
     val glyphColor = if (night) Color.White else Color.Black
     val markerColor = ThemeTokens.AyahMarker

@@ -98,6 +98,13 @@ object HeaderGlyphFit {
         }
     }
 
+    /** First actual surah in reading order, including a continuation before a later banner. */
+    fun firstSurahOnPage(page: MushafPage?): Int? = page?.lines?.sortedBy { it.lineNumber }
+        ?.firstNotNullOfOrNull { line ->
+            line.words.firstOrNull()?.surah?.takeIf { it > 0 }
+                ?: line.surahNumber?.takeIf { line.lineType == LineType.SURAH_NAME && it > 0 }
+        }
+
     fun surahsOnPage(page: MushafPage?): List<Int> {
         if (page == null) return emptyList()
         val banners = page.lines.mapNotNull { line ->

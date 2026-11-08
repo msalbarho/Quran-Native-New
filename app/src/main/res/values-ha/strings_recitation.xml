@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_recitation_engine">Injin duba karatu</string>
+    <string name="recitation_engine_zipformer">Zipformer Quran (a kan na\'ura)</string>
+    <string name="recitation_engine_zipformer_desc">Tsoho. Ba tare da intanet ba, nan take, yana duba furuci harafi bayan harafi.</string>
+    <string name="recitation_engine_whisper">Whisper Quran (a kan na\'ura)</string>
+    <string name="recitation_engine_whisper_desc">Ba tare da intanet ba bayan saukewa sau ɗaya (~78 MB).</string>
+    <string name="recitation_engine_android">Gane magana na Android</string>
+    <string name="recitation_engine_android_desc">Mai gane magana na cikin wayar (yana iya buƙatar intanet).</string>
+    <string name="recitation_engine_unavailable">Babu shi a wannan na\'urar</string>
+    <string name="recitation_whisper_download">Sauke samfurin Whisper</string>
+    <string name="recitation_whisper_downloading">Ana saukewa… %1$d%%</string>
+    <string name="recitation_whisper_ready">Samfuri ya shirya</string>
+    <string name="recitation_whisper_delete">Share samfuri</string>
+    <string name="recitation_whisper_failed">Saukewa ya kasa: %1$s</string>
+    <string name="recitation_license_model">Lasisin Zipformer Quran 3.1 (NPL-1.2)</string>
+    <string name="recitation_license_sherpa">Lasisin sherpa-onnx (Apache-2.0)</string>
+    <string name="recitation_zipformer_notice">Manhajar tana sauraron karatunka a kan na\'urarka ba tare da intanet ba kuma tana canza launin kowace kalma yayin da kake faɗinta, ta amfani da samfurin Zipformer Quran 3.1 na Quran Lab.</string>
+    <string name="recitation_disclaimer">Duban karatu da tajwidi ta atomatik na iya kuskure. Ba ya maye gurbin ƙwararren malami kuma ba hukuncin addini ba ne kan karatun kowa.</string>
+    <string name="recitation_understood">Na gane</string>
+    <string name="recitation_close">Rufe</string>
+    <string name="training_show_ayah">Nuna aya</string>
+    <string name="training_select">Zaɓa</string>
+    <string name="training_select_surah">Je zuwa sura</string>
+    <string name="training_select_page">Je zuwa lambar shafi</string>
+    <string name="training_go_to_page">Je</string>
+    <string name="training_scope_open">Buɗe karatu</string>
+    <string name="training_scope_page">Shafi na yanzu</string>
+    <string name="training_range_format_hint">Shigar da kowane iyaka a matsayin sura:aya (misali 2:5).</string>
+    <string name="training_apply_range">Yi amfani da sashe</string>
+    <string name="training_previous">Na baya</string>
+    <string name="training_next">Na gaba</string>
+    <string name="training_ayah_word_progress">Kalmomi %1$s / %2$s</string>
+    <string name="training_legend_correct">Daidai</string>
+    <string name="training_legend_wrong">Kuskure</string>
+    <string name="training_legend_missing">Ya ɓace</string>
+</resources>

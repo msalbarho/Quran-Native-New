@@ -65,6 +65,45 @@ interface MushafDao {
         """
         SELECT word_id, surah_id, ayah_number, word_position, text_hafs, qpc_ligature, is_ayah_marker
         FROM words
+        WHERE COALESCE(is_ayah_marker, 0) = 0
+          AND word_id >= (
+              SELECT MIN(word_id) FROM words
+              WHERE surah_id = :surahId AND ayah_number = :ayahNumber
+                AND COALESCE(is_ayah_marker, 0) = 0
+          )
+        ORDER BY word_id
+        """,
+    )
+    suspend fun getTrainingWordsFromAyah(surahId: Int, ayahNumber: Int): List<WordEntity>
+
+    @Query(
+        """
+        SELECT word_id, surah_id, ayah_number, word_position, text_hafs, qpc_ligature, is_ayah_marker
+        FROM words
+        WHERE COALESCE(is_ayah_marker, 0) = 0
+          AND word_id BETWEEN (
+              SELECT MIN(word_id) FROM words
+              WHERE surah_id = :fromSurah AND ayah_number = :fromAyah
+                AND COALESCE(is_ayah_marker, 0) = 0
+          ) AND (
+              SELECT MAX(word_id) FROM words
+              WHERE surah_id = :toSurah AND ayah_number = :toAyah
+                AND COALESCE(is_ayah_marker, 0) = 0
+          )
+        ORDER BY word_id
+        """,
+    )
+    suspend fun getTrainingWordsBetweenAyahs(
+        fromSurah: Int,
+        fromAyah: Int,
+        toSurah: Int,
+        toAyah: Int,
+    ): List<WordEntity>
+
+    @Query(
+        """
+        SELECT word_id, surah_id, ayah_number, word_position, text_hafs, qpc_ligature, is_ayah_marker
+        FROM words
         WHERE surah_id = 1 AND ayah_number = 1 AND word_position < 5
         ORDER BY word_position
         """,

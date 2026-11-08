@@ -1,5 +1,7 @@
 package com.quransunah.app.ui.listening
 
+import com.quransunah.app.ui.shell.GoldCornerFrame
+import com.quransunah.app.ui.shell.GoldCornerFrameShape
 import android.graphics.Typeface
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -58,14 +60,15 @@ import com.quransunah.app.domain.model.SurahInfo
 import com.quransunah.app.fonts.QcfFontManager
 import com.quransunah.app.ui.index.RevelationPlaceArt
 import com.quransunah.app.ui.index.SurahNames
+import com.quransunah.app.ui.shell.ChromeTokens
 import com.quransunah.app.ui.index.matchesSurahQuery
 import com.quransunah.app.ui.index.revelationPlace
 import com.quransunah.app.ui.mushaf.QcfGlyphText
 import com.quransunah.app.ui.theme.LocalNightMode
 import com.quransunah.app.ui.theme.LocalPaperColors
 
-private val DialogShape = RoundedCornerShape(16.dp)
-private val CardShape = RoundedCornerShape(11.dp)
+private val DialogShape = GoldCornerFrameShape(16.dp)
+private val CardShape = GoldCornerFrameShape(11.dp)
 private val Backdrop = Color(0x6B0F172A)
 
 @Composable
@@ -125,6 +128,7 @@ fun AudioSurahPicker(
                 .shadow(18.dp, DialogShape)
                 .clip(DialogShape)
                 .background(paper.pageBody)
+                .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, DialogShape)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -229,7 +233,6 @@ private fun AudioSurahCard(
     val place = revelationPlace(surah.revelationType)
     val fallbackName = surah.nameArabic.removePrefix("سُورَةُ ").removePrefix("سورة ")
     val localizedName = SurahNames.localized(languageTag, surah.number)
-    val stroke = paper.darkAccent.copy(alpha = if (active) 0.78f else 0.42f)
     CompositionLocalProvider(LocalLayoutDirection provides uiLayoutDirection()) {
     Box(
         modifier = Modifier
@@ -237,7 +240,7 @@ private fun AudioSurahCard(
             .heightIn(min = 56.dp)
             .clip(CardShape)
             .background(paper.pageBody.copy(alpha = 0.72f))
-            .border(if (active) 1.5.dp else 1.dp, stroke, CardShape)
+            .border(if (active) 1.1.dp else ChromeTokens.GoldStroke, ChromeTokens.Gold, CardShape)
             .clickable(onClick = onClick),
     ) {
         if (place != null) {

@@ -54,7 +54,8 @@ fun WordEntity.toWordRecord(meaning: String? = null): WordRecord = WordRecord(
     ayah = ayahNumber,
     position = wordPosition,
     uthmanic = textHafs.orEmpty(),
-    qcfLigature = qpcLigature.orEmpty(),
+    // 604 coloured page fonts: v4 per-page codes (the DB column keeps the old 47-face codes).
+    qcfLigature = wordId?.let { com.quransunah.app.fonts.QpcV4Glyphs.instance?.forWord(it) } ?: qpcLigature.orEmpty(),
     isAyahMarker = isAyahMarker == 1,
     meaning = meaning,
 )

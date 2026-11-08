@@ -834,7 +834,7 @@ private fun PreviewOutlineButton(label: String, modifier: Modifier = Modifier) {
         modifier = modifier
             .heightIn(min = 36.dp)
             .clip(shape)
-            .border(1.dp, paper.tone500, shape)
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, shape)
             .background(paper.pageBody)
             .padding(horizontal = 8.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center,
@@ -861,7 +861,7 @@ private fun PreviewReciterField() {
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .border(1.dp, paper.tone500, shape)
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, shape)
             .padding(horizontal = 10.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.Start,
     ) {

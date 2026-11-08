@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">Jagorar launukan tajwidi</string>
+    <string name="tajweed_colors">Launukan tajwidi</string>
+    <string name="tajweed_rule_1">Maddi lazim: haraka 6</string>
+    <string name="tajweed_rule_2">Maddi wajib muttasil: haraka 4–5</string>
+    <string name="tajweed_rule_3">Maddi jaiz munfasil: haraka 2, 4 ko 5</string>
+    <string name="tajweed_rule_4">Maddi tabi‘i / iwadi: haraka 2</string>
+    <string name="tajweed_rule_5">Ikhfa, idgami mai gunna da wuraren gunna</string>
+    <string name="tajweed_rule_6">Tafkhim: haruffan isti‘ila da ra</string>
+    <string name="tajweed_rule_7">Kalkala</string>
+    <string name="tajweed_rule_8">Haruffan da ba a furtawa: hamzatul wasli, lam shamsiyya da sauransu</string>
+    <string-array name="mushaf_header_numbers">
+        <item>ɗaya</item>
+        <item>biyu</item>
+        <item>uku</item>
+        <item>huɗu</item>
+        <item>biyar</item>
+        <item>shida</item>
+        <item>bakwai</item>
+        <item>takwas</item>
+        <item>tara</item>
+        <item>goma</item>
+        <item>goma sha ɗaya</item>
+        <item>goma sha biyu</item>
+        <item>goma sha uku</item>
+        <item>goma sha huɗu</item>
+        <item>goma sha biyar</item>
+        <item>goma sha shida</item>
+        <item>goma sha bakwai</item>
+        <item>goma sha takwas</item>
+        <item>goma sha tara</item>
+        <item>ashirin</item>
+        <item>ashirin da ɗaya</item>
+        <item>ashirin da biyu</item>
+        <item>ashirin da uku</item>
+        <item>ashirin da huɗu</item>
+        <item>ashirin da biyar</item>
+        <item>ashirin da shida</item>
+        <item>ashirin da bakwai</item>
+        <item>ashirin da takwas</item>
+        <item>ashirin da tara</item>
+        <item>talatin</item>
+        <item>talatin da ɗaya</item>
+        <item>talatin da biyu</item>
+        <item>talatin da uku</item>
+        <item>talatin da huɗu</item>
+        <item>talatin da biyar</item>
+        <item>talatin da shida</item>
+        <item>talatin da bakwai</item>
+        <item>talatin da takwas</item>
+        <item>talatin da tara</item>
+        <item>arba’in</item>
+        <item>arba’in da ɗaya</item>
+        <item>arba’in da biyu</item>
+        <item>arba’in da uku</item>
+        <item>arba’in da huɗu</item>
+        <item>arba’in da biyar</item>
+        <item>arba’in da shida</item>
+        <item>arba’in da bakwai</item>
+        <item>arba’in da takwas</item>
+        <item>arba’in da tara</item>
+        <item>hamsin</item>
+        <item>hamsin da ɗaya</item>
+        <item>hamsin da biyu</item>
+        <item>hamsin da uku</item>
+        <item>hamsin da huɗu</item>
+        <item>hamsin da biyar</item>
+        <item>hamsin da shida</item>
+        <item>hamsin da bakwai</item>
+        <item>hamsin da takwas</item>
+        <item>hamsin da tara</item>
+        <item>sittin</item>
+    </string-array>
+</resources>

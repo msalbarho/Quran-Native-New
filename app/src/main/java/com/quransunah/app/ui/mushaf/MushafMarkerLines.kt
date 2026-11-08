@@ -32,8 +32,3 @@ fun findSajdaMarkerLineNumber(
     }?.lineNum
 }
 
-fun lineSlotIndex(lines: List<LineRecord>, lineNum: Int?): Int? {
-    if (lineNum == null) return null
-    val index = lines.indexOfFirst { it.lineNum == lineNum }
-    return index.takeIf { it >= 0 }
-}

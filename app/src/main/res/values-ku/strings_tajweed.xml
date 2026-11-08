@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tajweed_guide">Rêbera rengên tecwîdê</string>
+    <string name="tajweed_colors">Rengên tecwîdê</string>
+    <string name="tajweed_rule_1">Medda lazim: 6 hereket</string>
+    <string name="tajweed_rule_2">Medda wajib muttasil: 4–5 hereket</string>
+    <string name="tajweed_rule_3">Medda caiz munfasil: 2, 4 an 5 hereket</string>
+    <string name="tajweed_rule_4">Medda xwezayî / îwaz: 2 hereket</string>
+    <string name="tajweed_rule_5">Îxfa, îdgam bi xunne û cihên xunneyê</string>
+    <string name="tajweed_rule_6">Tefxîm: tîpên qalind û ra</string>
+    <string name="tajweed_rule_7">Qelqele</string>
+    <string name="tajweed_rule_8">Tîpên ku nayên xwendin: hemzeya weslê, lama şemsî û hwd.</string>
+    <string-array name="mushaf_header_numbers">
+        <item>yek</item>
+        <item>du</item>
+        <item>sê</item>
+        <item>çar</item>
+        <item>pênc</item>
+        <item>şeş</item>
+        <item>heft</item>
+        <item>heşt</item>
+        <item>neh</item>
+        <item>deh</item>
+        <item>yazdeh</item>
+        <item>diwazdeh</item>
+        <item>sêzdeh</item>
+        <item>çardeh</item>
+        <item>panzdeh</item>
+        <item>şanzdeh</item>
+        <item>hevdeh</item>
+        <item>hejdeh</item>
+        <item>nozdeh</item>
+        <item>bîst</item>
+        <item>bîst û yek</item>
+        <item>bîst û du</item>
+        <item>bîst û sê</item>
+        <item>bîst û çar</item>
+        <item>bîst û pênc</item>
+        <item>bîst û şeş</item>
+        <item>bîst û heft</item>
+        <item>bîst û heşt</item>
+        <item>bîst û neh</item>
+        <item>sî</item>
+        <item>sî û yek</item>
+        <item>sî û du</item>
+        <item>sî û sê</item>
+        <item>sî û çar</item>
+        <item>sî û pênc</item>
+        <item>sî û şeş</item>
+        <item>sî û heft</item>
+        <item>sî û heşt</item>
+        <item>sî û neh</item>
+        <item>çil</item>
+        <item>çil û yek</item>
+        <item>çil û du</item>
+        <item>çil û sê</item>
+        <item>çil û çar</item>
+        <item>çil û pênc</item>
+        <item>çil û şeş</item>
+        <item>çil û heft</item>
+        <item>çil û heşt</item>
+        <item>çil û neh</item>
+        <item>pêncî</item>
+        <item>pêncî û yek</item>
+        <item>pêncî û du</item>
+        <item>pêncî û sê</item>
+        <item>pêncî û çar</item>
+        <item>pêncî û pênc</item>
+        <item>pêncî û şeş</item>
+        <item>pêncî û heft</item>
+        <item>pêncî û heşt</item>
+        <item>pêncî û neh</item>
+        <item>şêst</item>
+    </string-array>
+</resources>
