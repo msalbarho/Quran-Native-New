@@ -4,6 +4,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.quransunah.app.domain.model.PlaybackDomain
 import com.quransunah.app.domain.model.PlaybackSnapshot
+import com.quransunah.app.share.QulRecitations
 import com.quransunah.app.share.QulWordTimings
 import com.quransunah.app.share.WordSegment
 import com.quransunah.app.share.wordAt
@@ -14,14 +15,16 @@ import kotlinx.coroutines.CancellationException
 @Composable
 fun rememberQulPlaybackWord(playback: PlaybackSnapshot, lines: List<LineRecord>): Int? {
     val context = LocalContext.current
-    val enabled = playback.domain == PlaybackDomain.AYAH && playback.reciterId in setOf("123", "92")
+    val reciterId = playback.reciterId
+    val recitationId = reciterId?.let { QulRecitations.recitationId(it) }
+    val enabled = playback.domain == PlaybackDomain.AYAH && recitationId != null
     var segments by remember { mutableStateOf(emptyList<WordSegment>()) }
     val surah = playback.surah
     val ayah = playback.ayah
-    LaunchedEffect(enabled, surah, ayah, playback.reciterId) {
+    LaunchedEffect(enabled, surah, ayah, reciterId) {
         segments = emptyList()
-        if (enabled && surah != null && ayah != null) {
-            try { segments = QulWordTimings(context).load(surah, ayah, if (playback.reciterId == "92") 26 else 18) }
+        if (enabled && surah != null && ayah != null && recitationId != null) {
+            try { segments = QulWordTimings(context).load(surah, ayah, recitationId) }
             catch (e: CancellationException) { throw e }
             catch (_: Exception) { /* Existing ayah highlight is the offline fallback. */ }
         }

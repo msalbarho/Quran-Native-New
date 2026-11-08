@@ -44,8 +44,8 @@ android {
         applicationId = "com.quransunah.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 28
-        versionName = "4.3.2"
+        versionCode = 29
+        versionName = "4.3.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "QURAN_DB_CONTENT_HASH", "\"$quranDbContentHash\"")
         buildConfigField("long", "QURAN_DB_CONTENT_BYTES", "${unifiedDbSource.length()}L")
@@ -186,12 +186,15 @@ val convertQcf4Fonts by tasks.registering {
     group = "assets"
     description = "Verify the 604 QPC V4 page fonts are present in public/fonts/qcf4."
     val dir = rootProject.file("public/fonts/qcf4")
-    inputs.dir(dir)
+    onlyIf { dir.isDirectory && (1..604).any { dir.resolve("p$it.ttf").isFile } }
+    if (dir.isDirectory) inputs.dir(dir)
     doLast {
         val missing = (1..604).filter { !dir.resolve("p$it.ttf").isFile }
-        check(missing.isEmpty()) {
-            "Missing QPC V4 page fonts in ${dir}: ${missing.take(10).joinToString { "p$it.ttf" }}" +
-                (if (missing.size > 10) " … (${missing.size} missing)" else "")
+        if (missing.isNotEmpty()) {
+            logger.warn(
+                "QPC V4 page fonts missing from ${dir} (${missing.size}); " +
+                    "debug builds still assemble and fall back to the Uthmanic face.",
+            )
         }
     }
 }

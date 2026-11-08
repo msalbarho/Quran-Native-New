@@ -123,6 +123,8 @@
     <string name="word_save_ayah">Save ayah</string>
     <string name="word_saved">Saved</string>
     <string name="word_share_image">Share as image</string>
+    <string name="word_share_ayah_range">From ayah to ayah</string>
+    <string name="word_share_range_image">Share range as one image</string>
     <string name="word_preparing">Preparing…</string>
     <string name="word_share_video">Share as video</string>
     <string name="word_video_reader">Video reciter</string>

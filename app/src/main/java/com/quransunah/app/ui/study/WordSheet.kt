@@ -238,7 +238,8 @@ fun WordSheet(
             onSelectReciter = viewModel::selectReciter,
             onOpenTafsir = viewModel::openTafsir,
             onToggleBookmark = viewModel::toggleBookmark,
-            onShareImage = viewModel::shareImage,
+            onShareImage = { viewModel.shareImage() },
+            onShareRangeImage = viewModel::shareImage,
             onShareText = { viewModel.shareText(translationTag) },
             onVideoFrom = viewModel::setVideoFrom,
             onVideoTo = viewModel::setVideoTo,
@@ -360,6 +361,7 @@ fun WordSheetContent(
     onOpenTafsir: () -> Unit,
     onToggleBookmark: () -> Unit,
     onShareImage: () -> Unit,
+    onShareRangeImage: (Int, Int) -> Unit,
     onShareText: () -> Unit,
     onVideoFrom: (Int) -> Unit,
     onVideoTo: (Int) -> Unit,
@@ -561,6 +563,47 @@ fun WordSheetContent(
                     onClick = onPlayAyah,
                     enabled = ui.surahReciters.isNotEmpty(),
                 )
+            }
+            SheetSection {
+                var rangeOpen by remember(word.ayah) { mutableStateOf(false) }
+                var rangeFrom by remember(word.ayah) { mutableIntStateOf(word.ayah) }
+                var rangeTo by remember(word.ayah) { mutableIntStateOf(word.ayah) }
+                AccentFillButton(
+                    label = stringResource(R.string.word_share_ayah_range),
+                    onClick = { rangeOpen = !rangeOpen },
+                    enabled = !ui.sharing,
+                )
+                if (rangeOpen) {
+                    val toMax = (rangeFrom + AppConstants.SHARE_AYAH_RANGE_MAX - 1).coerceAtMost(maxAyah)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        VideoFromAyahDropdown(
+                            fromAyah = rangeFrom,
+                            maxAyah = maxAyah,
+                            onSelect = { start ->
+                                rangeFrom = start
+                                rangeTo = rangeTo.coerceIn(start, (start + AppConstants.SHARE_AYAH_RANGE_MAX - 1).coerceAtMost(maxAyah))
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                        VideoToAyahDropdown(
+                            fromAyah = rangeFrom,
+                            toAyah = rangeTo.coerceIn(rangeFrom, toMax),
+                            maxAyah = maxAyah,
+                            onSelect = { rangeTo = it },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                    AccentFillButton(
+                        label = stringResource(
+                            if (ui.sharing) R.string.word_preparing else R.string.word_share_range_image,
+                        ),
+                        onClick = { onShareRangeImage(rangeFrom, rangeTo.coerceIn(rangeFrom, toMax)) },
+                        enabled = !ui.sharing,
+                    )
+                }
             }
             SheetSection {
                 AccentFillButton(
@@ -1104,6 +1147,7 @@ private fun WordSheetPreview() {
             onOpenTafsir = {},
             onToggleBookmark = {},
             onShareImage = {},
+            onShareRangeImage = { _, _ -> },
             onShareText = {},
             onVideoFrom = {},
             onVideoTo = {},

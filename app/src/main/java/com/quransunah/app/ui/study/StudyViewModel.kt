@@ -26,6 +26,10 @@ import com.quransunah.app.share.AyahPlainText
 import com.quransunah.app.share.AyahShareContent
 import com.quransunah.app.share.AyahShareExporter
 import com.quransunah.app.share.AyahShareVerse
+import com.quransunah.app.share.ShareMushafLayout
+import com.quransunah.app.share.ShareMushafWord
+import com.quransunah.app.share.SharePageLines
+import com.quransunah.app.share.ShareSourceLine
 import com.quransunah.app.ui.mushaf.SajdahAyah
 import com.quransunah.app.ui.mushaf.WordRecord
 import com.quransunah.app.ui.mushaf.toWordRecord
@@ -52,6 +56,7 @@ data class StudyUiState(
     val bookmarked: Boolean = false,
     val trackedForMemorization: Boolean = false,
     val reciters: List<AyahReciter> = emptyList(),
+    val videoReciters: List<AyahReciter> = emptyList(),
     val surahReciters: List<SurahReciter> = emptyList(),
     val selectedReciterId: String = AppConstants.DEFAULT_AYAH_RECITER_ID,
     val videoReciterId: String = AppConstants.DEFAULT_AYAH_RECITER_ID,
@@ -84,6 +89,8 @@ class StudyViewModel @Inject constructor(
     private fun wordSheetAyahReciters(): List<AyahReciter> =
         reciterCatalog.getAyahCapableReciters().filterNot { it.id == ALJUHANI_RECITER_ID }
 
+    private fun videoMakerReciters(): List<AyahReciter> = reciterCatalog.getAyahCapableReciters()
+
     val playback: StateFlow<PlaybackSnapshot> = audioPlayer.snapshot
 
     private var bindJob: Job? = null
@@ -93,6 +100,7 @@ class StudyViewModel @Inject constructor(
     private val _ui = MutableStateFlow(
         StudyUiState(
             reciters = wordSheetAyahReciters(),
+            videoReciters = videoMakerReciters(),
             surahReciters = reciterCatalog.surahReciters(),
         ),
     )
@@ -178,6 +186,7 @@ class StudyViewModel @Inject constructor(
                     bookmarked = bookmarked,
                     trackedForMemorization = trackedForMemorization,
                     reciters = reciters,
+                    videoReciters = videoMakerReciters(),
                     surahReciters = surahReciters,
                     selectedReciterId = ayahReciter,
                     videoReciterId = videoReciter,
@@ -407,9 +416,9 @@ class StudyViewModel @Inject constructor(
         }
     }
 
-    fun shareImage() {
+    fun shareImage(fromAyah: Int? = null, toAyah: Int? = null) {
         viewModelScope.launch {
-            val content = shareContent() ?: return@launch
+            val content = shareContent(fromAyah, toAyah) ?: return@launch
             _ui.update { it.copy(sharing = true, shareError = null) }
             runCatching { shareExporter.shareImage(content) }
                 .onFailure { error -> _ui.update { it.copy(shareError = error.message) } }
@@ -489,12 +498,38 @@ class StudyViewModel @Inject constructor(
                 englishTranslation = translationRepository.getAyahTranslation("en", word.surah, ayah),
             )
         }
+        val pages = verses.map { it.pageNumber }.distinct().sorted()
+        val mushafLines = ShareMushafLayout.cutLines(
+            pages = pages.map { pageNumber ->
+                val page = mushafRepository.getPage(pageNumber)
+                SharePageLines(
+                    pageNumber = pageNumber,
+                    lines = page.lines.map { line ->
+                        ShareSourceLine(
+                            lineNumber = line.lineNumber,
+                            words = line.words.map { token ->
+                                ShareMushafWord(
+                                    ayah = token.ayah,
+                                    position = token.wordIndex,
+                                    qcf = token.textLigature.ifBlank { token.textHafs },
+                                    uthmanic = token.textHafs,
+                                    isMarker = token.isAyahMarker,
+                                )
+                            },
+                        )
+                    },
+                )
+            },
+            fromAyah = fromAyah,
+            toAyah = toAyah,
+        )
         return AyahShareContent(
             surah = word.surah,
             surahName = ui.surahName,
             fromAyah = fromAyah,
             toAyah = verses.lastOrNull()?.ayah ?: fromAyah,
             verses = verses,
+            mushafLines = mushafLines,
         )
     }
 

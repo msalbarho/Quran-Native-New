@@ -5,6 +5,7 @@ import java.nio.ByteBuffer
 import java.sql.DriverManager
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 
 /**
@@ -18,6 +19,7 @@ class QpcV4FontCoverageTest {
 
     @Test
     fun everyWordOnEveryPageHasGlyphsInItsPageFont() {
+        assumeTrue("QCF4 page fonts are gitignored in this checkout", File("../public/fonts/qcf4/p1.ttf").isFile)
         Class.forName("org.sqlite.JDBC")
         val pageOf = HashMap<Int, Int>(90_000)
         var wordCount = 0
@@ -49,6 +51,7 @@ class QpcV4FontCoverageTest {
 
     @Test
     fun nightPaletteBecomesPaletteZero() {
+        assumeTrue("QCF4 page fonts are gitignored in this checkout", File("../public/fonts/qcf4/p50.ttf").isFile)
         val font = File("../public/fonts/qcf4/p50.ttf").readBytes()
         assertTrue(ColrPalette.selectPalette(font, ColrPalette.DARK))
         val bb = ByteBuffer.wrap(font)

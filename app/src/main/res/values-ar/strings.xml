@@ -123,6 +123,8 @@
     <string name="word_save_ayah">حفظ الآية</string>
     <string name="word_saved">تم الحفظ</string>
     <string name="word_share_image">مشاركة كصورة</string>
+    <string name="word_share_ayah_range">من آية إلى آية</string>
+    <string name="word_share_range_image">مشاركة المقطع كصورة واحدة</string>
     <string name="word_preparing">جاري الإعداد…</string>
     <string name="word_share_video">مشاركة كفيديو</string>
     <string name="word_video_reader">قارئ الفيديو</string>

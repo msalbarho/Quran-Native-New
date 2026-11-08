@@ -80,14 +80,28 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
         saved = false
     }
     LaunchedEffect(options) { saved = false }
+    var focusedBackground by remember { mutableStateOf(options.background) }
+    var previewAyahSpans by remember { mutableStateOf(emptyList<Pair<LongRange, Int>>()) }
     LaunchedEffect(content,ui.videoReciterId) {
-        previewTimings=emptyList();previewClockMs=0L
-        val verse=content?.verses?.firstOrNull()
-        val id=when(ui.videoReciterId){"123"->18;"92"->26;else->null}
-        if(verse!=null && id!=null) try {
-            val words=QulWordTimings(context).load(content!!.surah,verse.ayah,id)
-            val durationUs=((words.maxOfOrNull { it.endMs } ?: 1L)+200)*1000
-            previewTimings=words.cursorSegments(durationUs)
+        previewTimings=emptyList();previewClockMs=0L;previewAyahSpans=emptyList()
+        val data=content ?: return@LaunchedEffect
+        if(!QulRecitations.hasWordTimingCatalog(ui.videoReciterId)) return@LaunchedEffect
+        try {
+            val store=QulWordTimings(context)
+            val combined=ArrayList<WordSegment>()
+            val spans=ArrayList<Pair<LongRange, Int>>()
+            var offset=0L
+            data.verses.forEach { verse ->
+                val timing=store.loadForReciter(ui.videoReciterId,data.surah,verse.ayah)
+                val duration=((timing.segments.maxOfOrNull { it.endMs } ?: 1L)+200)
+                combined += timing.segments.cursorSegments(duration*1000).map {
+                    it.copy(startMs=it.startMs+offset,endMs=it.endMs+offset)
+                }
+                spans += (offset until offset+duration) to verse.ayah
+                offset += duration
+            }
+            previewTimings=combined
+            previewAyahSpans=spans
         } catch(e:CancellationException){throw e} catch(_:Exception){ /* Offline still preview remains usable. */ }
     }
     LaunchedEffect(step,busy,previewTimings) {
@@ -98,13 +112,17 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
     }
     LaunchedEffect(content) {
         val data = content ?: return@LaunchedEffect
-        snapshotFlow { Triple(options,previewClockMs,previewTimings) }.conflate().collect { (settings,clock,timings) ->
+        snapshotFlow { Triple(options,previewClockMs,previewTimings) to (focusedBackground to step) }.conflate().collect { (triple, focusStep) ->
+            val (settings,clock,timings)=triple
+            val (focused, currentStep)=focusStep
             val segment=timings.firstOrNull { clock in it.startMs until it.endMs }
             val fraction=segment?.let { ((clock-it.startMs).toFloat()/(it.endMs-it.startMs).coerceAtLeast(1)).coerceIn(0f,1f) } ?: 0f
+            val ayah=previewAyahSpans.firstOrNull { clock in it.first }?.second ?: data.verses.first().ayah
             try {
                 var nextGeometry=geometry
                 val image=exporter.makerPreview(data,settings,segment?.position,fraction,clock*1000,
-                    (timings.lastOrNull()?.endMs ?: 1L)*1000,onGeometry={nextGeometry=it})
+                    (timings.lastOrNull()?.endMs ?: 1L)*1000,onGeometry={nextGeometry=it},
+                    previewBackground=if(currentStep==1) focused else null, activeAyah=ayah)
                 geometry=nextGeometry;preview=image
             }
             catch (e: CancellationException) { throw e }
@@ -136,21 +154,21 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
             BackHandler { if (!busy) { if (step > 0) step-- else onClose() } }
             Box(Modifier.fillMaxSize().background(MakerPaper).statusBarsPadding().navigationBarsPadding()) {
                 TiledOrnamentBackground(Modifier.matchParentSize().alpha(.12f))
-                Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text("فيديو جديد", fontWeight = FontWeight.Bold, color = MakerGold)
-                        TextButton(onClick = { if (!busy) onClose() }, enabled = !busy) { Text("إلغاء", color = MakerGold) }
+                        TextButton(onClick = { if (!busy) onClose() }, enabled = !busy, contentPadding = PaddingValues(0.dp)) { Text("إلغاء", color = MakerGold) }
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                         listOf("آيات", "خلفية", "تنسيق", "مشاركة").forEachIndexed { index, name ->
-                            TextButton(onClick = { step = index }, enabled = !busy) {
+                            TextButton(onClick = { step = index }, enabled = !busy, contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)) {
                                 Text("${if (step == index) "●" else if (step > index) "✓" else "○"} $name", color = MakerGold,
-                                    fontWeight = if (step == index) FontWeight.Bold else FontWeight.Normal)
+                                    fontWeight = if (step == index) FontWeight.Bold else FontWeight.Normal, fontSize = 13.sp)
                             }
                         }
                     }
-                    Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        if (step == 0) {
+                    when (step) {
+                        0 -> Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             MakerPanel {
                                 Text(ui.surahName, color = MakerGold, fontWeight = FontWeight.Bold)
                                 Text("اختر بداية المقطع ونهايته • حتى ١٠ آيات")
@@ -162,98 +180,160 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
                             MakerPanel {
                                 Text("القارئ", color = MakerGold)
                                 OutlinedButton(onClick = { reciters = true }, modifier = Modifier.fillMaxWidth(), shape = GoldCornerFrameShape(10.dp)) {
-                                    Text(ui.reciters.firstOrNull { it.id == ui.videoReciterId }?.let { ReciterNames.display("ar", it.id, it.name) } ?: "اختر القارئ", color = MakerGold)
+                                    Text((ui.videoReciters.ifEmpty { ui.reciters }).firstOrNull { it.id == ui.videoReciterId }?.let { ReciterNames.display("ar", it.id, it.name) } ?: "اختر القارئ", color = MakerGold)
                                 }
-                                Text("تتبّع الكلمات متاح للعفاسي وياسر الدوسري. بقية القراء: تمييز الآية فقط.", style = MaterialTheme.typography.bodySmall)
                             }
                             content?.verses?.forEach { verse ->
                                 MakerPanel { Text(verse.uthmanicText); Text("الآية ${verse.ayah}", color = MakerGold) }
                             }
-                        } else {
-                            preview?.let { bmp ->
-                                MakerDragPreview(bmp,options,geometry,step,busy){options=it}
-                            } ?: Box(Modifier.fillMaxWidth().height(330.dp),contentAlignment=Alignment.Center){CircularProgressIndicator(color=MakerGold)}
-                            when (step) {
-                                1 -> {
-                                    Text("الخلفيات المحدّدة: ${options.backgrounds.size} • بالترتيب", color = MakerGold, fontWeight = FontWeight.Bold)
-                                    Text("تتوزّع مدة الفيديو بالتساوي مع انتقال ناعم")
-                                    ShareBackgrounds.FILES.take(20).chunked(3).forEach { row ->
-                                        Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                                            row.forEach { name ->
-                                                val image=remember(name) { context.assets.open(ShareBackgrounds.assetPath(name)).use { BitmapFactory.decodeStream(it,null,BitmapFactory.Options().apply { inSampleSize=8 }) } }
-                                                Box(Modifier.weight(1f).height(105.dp).border(if(name in options.backgrounds)3.dp else 1.dp,MakerGold,GoldCornerFrameShape(8.dp)).clickable {
-                                                    val chosen=options.backgrounds.toMutableList()
-                                                    if(name in chosen){if(chosen.size>1)chosen.remove(name)}else chosen.add(name)
-                                                    options=options.copy(background=chosen.first(),backgrounds=chosen)
-                                                }) {
-                                                    image?.let { Image(it.asImageBitmap(),"خلفية $name",contentScale=ContentScale.Crop,modifier=Modifier.fillMaxSize()) }
-                                                    if(name in options.backgrounds) Text("${options.backgrounds.indexOf(name)+1}",color=Color.White,modifier=Modifier.align(Alignment.TopEnd).background(MakerGold).padding(6.dp))
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                2 -> {
-                                    Text("اسحب الإطار الذهبي لتحريك الآية أو اسم السورة", color=MakerGold)
-                                    Text("معاينة حركة الكلمات • الصوت عند تشغيل الفيديو",style=MaterialTheme.typography.bodySmall)
-                                    Row(Modifier.horizontalScroll(rememberScrollState())) {
-                                        listOf("الخط", "الألوان", "المؤثرات", "العنوان", "النص", "رقم الآية", "الحركة", "تتبّع الكلمات").forEachIndexed { index, label ->
-                                            FilterChip(selected = styleTab == index, onClick = { styleTab = index }, label = { Text(label) })
-                                        }
-                                    }
-                                    MakerPanel {
-                                        when(styleTab) {
-                                            0 -> listOf("مصحف المدينة V4", "عثماني", "نسخ النظام").forEachIndexed { i, label ->
-                                                Row(Modifier.fillMaxWidth().clickable { options = options.copy(font = i) }, verticalAlignment = Alignment.CenterVertically) {
-                                                    RadioButton(selected = options.font == i, onClick = { options = options.copy(font = i) }); Text(label)
-                                                }
-                                            }
-                                            1 -> {
-                                                Text("لون الكلمة المتلوّة • النص أبيض دائماً")
-                                                val colours=listOf("ذهبي" to 0xFFD4B06A.toInt(),"نعناعي" to 0xFF66D9B8.toInt(),"سماوي" to 0xFF91CAFF.toInt(),
-                                                    "أصفر" to 0xFFF2CD62.toInt(),"برتقالي" to 0xFFF49C65.toInt(),"وردي" to 0xFFF090B8.toInt(),
-                                                    "بنفسجي" to 0xFFC6A5ED.toInt(),"أخضر" to 0xFF8CCB7A.toInt(),"أحمر" to 0xFFE17872.toInt())
-                                                colours.chunked(3).forEach { row ->
-                                                    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(9.dp)) {
-                                                        row.forEach { (name,value) ->
-                                                            PaletteOption(label=name,start=Color(value),end=Color(value),active=options.highlightColor==value,
-                                                                onClick={options=options.copy(highlightColor=value)},modifier=Modifier.weight(1f))
+                        }
+                        1 -> Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            MakerPreviewOrLoading(preview, options, geometry, step, busy) { options = it }
+                            Text("الخلفيات المحدّدة: ${options.backgrounds.size} • بالترتيب", color = MakerGold, fontWeight = FontWeight.Bold)
+                            Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                ShareBackgrounds.FILES.take(20).chunked(3).forEach { row ->
+                                    Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                                        row.forEach { name ->
+                                            val image=remember(name) { context.assets.open(ShareBackgrounds.assetPath(name)).use { BitmapFactory.decodeStream(it,null,BitmapFactory.Options().apply { inSampleSize=8 }) } }
+                                            Box(Modifier.weight(1f).height(105.dp).border(if(name==focusedBackground)3.dp else if(name in options.backgrounds)2.dp else 1.dp,MakerGold,GoldCornerFrameShape(8.dp)).clickable {
+                                                focusedBackground = name
+                                                val chosen=options.backgrounds.toMutableList()
+                                                if(name !in chosen) chosen.add(name)
+                                                options=options.copy(background=chosen.first(),backgrounds=chosen)
+                                            }) {
+                                                image?.let { Image(it.asImageBitmap(),"خلفية $name",contentScale=ContentScale.Crop,modifier=Modifier.fillMaxSize()) }
+                                                if(name in options.backgrounds) Text(
+                                                    "${options.backgrounds.indexOf(name)+1}",
+                                                    color=Color.White,
+                                                    modifier=Modifier.align(Alignment.TopEnd).background(MakerGold).padding(6.dp).clickable {
+                                                        if (options.backgrounds.size > 1) {
+                                                            val chosen = options.backgrounds.filter { it != name }
+                                                            options = options.copy(background = chosen.first(), backgrounds = chosen)
+                                                            if (focusedBackground == name) focusedBackground = chosen.first()
                                                         }
-                                                    }
-                                                }
+                                                    },
+                                                )
                                             }
-                                            2 -> MakerToggle("توهّج هادئ", options.glow) { options = options.copy(glow = it) }
-                                            3 -> MakerToggle("اسم السورة", options.showTitle) { options = options.copy(showTitle = it) }
-                                            4 -> { Text("حجم النص"); Slider(value = options.textScale, onValueChange = { options = options.copy(textScale = it) }, valueRange = .7f..1.4f); MakerToggle("لوحة داكنة خلف النص", options.textBackdrop) { options = options.copy(textBackdrop = it) } }
-                                            5 -> {
-                                                MakerToggle("زخرفة عثمانية أصلية • رقم مدمج",options.marker){options=options.copy(marker=it)}
-                                                val colours=listOf("ذهبي" to 0xFFD4B06A.toInt(),"أبيض" to 0xFFFFFFFF.toInt(),"أسود" to 0xFF000000.toInt(),"أحمر" to 0xFFE53935.toInt(),"أصفر" to 0xFFFFEB3B.toInt(),"أخضر" to 0xFF4CAF50.toInt())
-                                                colours.chunked(3).forEach { row -> Row { row.forEach { (name,value) ->
-                                                    FilterChip(selected=options.markerColor==value,onClick={options=options.copy(markerColor=value)},label={Text(name)})
-                                                } } }
-                                            }
-                                            7 -> listOf("شريط تقدم ذهبي متّصل","لون تراكمي","خط أسفل الكلمة","الكلمة الحالية فقط","توهّج هادئ للكلمة").forEachIndexed { mode,label ->
-                                                Row(Modifier.fillMaxWidth().clickable{options=options.copy(trackingMode=mode)},verticalAlignment=Alignment.CenterVertically){
-                                                    RadioButton(selected=options.trackingMode==mode,onClick={options=options.copy(trackingMode=mode)});Text(label)
-                                                }
-                                            }
-                                            6 -> { MakerToggle("تقريب هادئ", options.motion) { options = options.copy(motion = it) }; Text("تظهر الحركة في الفيديو بعد إنشائه") }
                                         }
                                     }
-                                    MakerPanel { MakerToggle("English", options.translation) { options = options.copy(translation = it) } }
-                                }
-                                3 -> {
-                                    Text("اسحب الإطار الذهبي لتحريك الآية أو اسم السورة",color=MakerGold,style=MaterialTheme.typography.bodySmall)
-
-                                    MakerButton(if(busy && !sharing)"جارٍ تجهيز الفيديو…" else "حفظ على الجهاز",!busy && content!=null){export()}
-                                    MakerButton(if(busy && sharing)"جارٍ تجهيز المشاركة…" else "مشاركة",!busy && content!=null){export(share=true)}
-                                    if(saved)Text("✓ تم الحفظ في الاستوديو",color=MakerGold,style=MaterialTheme.typography.bodySmall)
                                 }
                             }
                         }
-                        if (busy) { LinearProgressIndicator(Modifier.fillMaxWidth(), color = MakerGold); Text("جارٍ تجهيز الفيديو… يرجى الانتظار", color = MakerGold) }
-                        error?.let { Text(it, color = Color(0xFFB3261E)) }
+                        2 -> Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            MakerPreviewOrLoading(preview, options, geometry, step, busy) { options = it }
+                            Text("اسحب الإطار الذهبي لتحريك الآية أو اسم السورة", color=MakerGold, fontSize = 12.sp)
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                listOf("الخط", "الألوان", "المؤثرات", "العنوان", "النص", "ترجمة", "تتبّع الكلمات").forEachIndexed { index, label ->
+                                    FilterChip(selected = styleTab == index, onClick = { styleTab = index }, label = { Text(label, fontSize = 12.sp) })
+                                }
+                            }
+                            Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            MakerPanel {
+                                when(styleTab) {
+                                    0 -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        listOf("مصحف المدينة V4", "عثماني", "نسخ النظام").forEachIndexed { i, label ->
+                                            FilterChip(selected = options.font == i, onClick = { options = options.copy(font = i) },
+                                                label = { Text(label, fontSize = 11.sp, maxLines = 1) }, modifier = Modifier.weight(1f))
+                                        }
+                                    }
+                                    1 -> {
+                                        Text("لون الكلمة المتلوّة", fontSize = 13.sp)
+                                        ShareMushafLayout.HIGHLIGHT_COLOURS.take(4).let { row ->
+                                            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+                                                row.forEach { (name,value) ->
+                                                    PaletteOption(label=name,start=Color(value),end=Color(value),active=options.highlightColor==value,
+                                                        onClick={options=options.copy(highlightColor=value)},modifier=Modifier.weight(1f))
+                                                }
+                                            }
+                                        }
+                                        ShareMushafLayout.HIGHLIGHT_COLOURS.drop(4).let { row ->
+                                            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+                                                row.forEach { (name,value) ->
+                                                    PaletteOption(label=name,start=Color(value),end=Color(value),active=options.highlightColor==value,
+                                                        onClick={options=options.copy(highlightColor=value)},modifier=Modifier.weight(1f))
+                                                }
+                                                repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
+                                            }
+                                        }
+                                    }
+                                    2 -> {
+                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            FilterChip(selected = options.glow, onClick = { options = options.copy(glow = !options.glow) },
+                                                label = { Text("توهّج هادئ", fontSize = 12.sp) }, modifier = Modifier.weight(1f))
+                                            FilterChip(selected = options.shadow, onClick = { options = options.copy(shadow = !options.shadow) },
+                                                label = { Text("ظل النص", fontSize = 12.sp) }, modifier = Modifier.weight(1f))
+                                        }
+                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            FilterChip(selected = options.vignette, onClick = { options = options.copy(vignette = !options.vignette) },
+                                                label = { Text("تظليل الحواف", fontSize = 12.sp) }, modifier = Modifier.weight(1f))
+                                            FilterChip(selected = options.motion, onClick = { options = options.copy(motion = !options.motion) },
+                                                label = { Text("تقريب الخلفية", fontSize = 12.sp) }, modifier = Modifier.weight(1f))
+                                        }
+                                    }
+                                    3 -> {
+                                        MakerToggle("اسم السورة", options.showTitle) { options = options.copy(showTitle = it) }
+                                        if (options.showTitle) {
+                                            Text("إطار الاسم", fontSize = 13.sp)
+                                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                listOf("إطار المصحف", "مستطيل مزخرف", "ميدالية").forEachIndexed { i, label ->
+                                                    FilterChip(selected = options.titleFrame == i, onClick = { options = options.copy(titleFrame = i) },
+                                                        label = { Text(label, fontSize = 11.sp, maxLines = 1) }, modifier = Modifier.weight(1f))
+                                                }
+                                            }
+                                        }
+                                    }
+                                    4 -> {
+                                        Text("حجم النص  ${ShareMushafLayout.scaleToFontSize(options.textScale).toInt()}")
+                                        Slider(
+                                            value = ShareMushafLayout.scaleToFontSize(options.textScale),
+                                            onValueChange = { options = options.copy(textScale = ShareMushafLayout.fontSizeToScale(it)) },
+                                            valueRange = ShareMushafLayout.FONT_SIZE_MIN..ShareMushafLayout.FONT_SIZE_MAX,
+                                        )
+                                        MakerToggle("لوحة داكنة خلف النص", options.textBackdrop) { options = options.copy(textBackdrop = it) }
+                                        Text("لون النص", fontSize = 13.sp)
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            FilterChip(selected = !options.tajweedText, onClick = { options = options.copy(tajweedText = false) }, label = { Text("أبيض") })
+                                            FilterChip(selected = options.tajweedText, onClick = { options = options.copy(tajweedText = true) }, label = { Text("تجويد") })
+                                        }
+                                        MakerToggle("رقم الآية", options.marker) { options = options.copy(marker = it) }
+                                        if (options.marker) {
+                                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                ShareMushafLayout.MARKER_COLOURS.forEach { (name, value) ->
+                                                    FilterChip(selected = options.markerColor == value, onClick = { options = options.copy(markerColor = value) },
+                                                        label = { Text(name) }, modifier = Modifier.weight(1f))
+                                                }
+                                            }
+                                        }
+                                    }
+                                    5 -> MakerToggle("الترجمة الإنجليزية", options.translation) { options = options.copy(translation = it) }
+                                    6 -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        listOf("شريط ذهبي", "تلوين تراكمي", "خط ممتد").forEachIndexed { mode, label ->
+                                            FilterChip(selected = options.trackingMode == mode, onClick = { options = options.copy(trackingMode = mode) },
+                                                label = { Text(label, fontSize = 11.sp, maxLines = 1) }, modifier = Modifier.weight(1f))
+                                        }
+                                    }
+                                }
+                            }
+                            }
+                        }
+                        else -> Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            MakerPreviewOrLoading(preview, options, geometry, step, busy) { options = it }
+                            if(saved)Text("✓ تم الحفظ في الاستوديو",color=MakerGold,style=MaterialTheme.typography.bodySmall)
+                            Spacer(Modifier.weight(1f))
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button(onClick = { export() }, enabled = !busy && content!=null, modifier = Modifier.weight(1f).heightIn(min = 50.dp),
+                                    shape = GoldCornerFrameShape(10.dp), colors = ButtonDefaults.buttonColors(containerColor = MakerGold)) {
+                                    Text(if(busy && !sharing)"جارٍ التجهيز…" else "حفظ على الجهاز", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                }
+                                Button(onClick = { export(share=true) }, enabled = !busy && content!=null, modifier = Modifier.weight(1f).heightIn(min = 50.dp),
+                                    shape = GoldCornerFrameShape(10.dp), colors = ButtonDefaults.buttonColors(containerColor = MakerGold)) {
+                                    Text(if(busy && sharing)"جارٍ التجهيز…" else "مشاركة", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                }
+                            }
+                        }
                     }
+                    if (busy) { LinearProgressIndicator(Modifier.fillMaxWidth(), color = MakerGold); Text("جارٍ تجهيز الفيديو… يرجى الانتظار", color = MakerGold) }
+                    error?.let { Text(it, color = Color(0xFFB3261E)) }
                     if (step < 3) MakerButton(listOf("التالي: الخلفية", "التالي: التنسيق", "التالي: المشاركة")[step], !busy) { step++ }
                     else TextButton(onClick = { step-- }, enabled = !busy) { Text("رجوع إلى التنسيق", color = MakerGold) }
                 }
@@ -261,7 +341,7 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
             if (reciters) ModalBottomSheet(onDismissRequest = { reciters = false }, containerColor = MakerPaper) {
                 Text("اختر القارئ", modifier = Modifier.padding(20.dp), color = MakerGold, fontWeight = FontWeight.Bold)
                 LazyColumn(Modifier.fillMaxWidth().heightIn(max = 520.dp)) {
-                    items(ui.reciters, key = { it.id }) { reciter ->
+                    items(ui.videoReciters.ifEmpty { ui.reciters }, key = { it.id }) { reciter ->
                         ListItem(headlineContent = { Text(ReciterNames.display("ar", reciter.id, reciter.name)) },
                             trailingContent = { if (reciter.id == ui.videoReciterId) Text("✓", color = MakerGold) },
                             colors = ListItemDefaults.colors(containerColor = MakerPaper),
@@ -274,9 +354,23 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
     }
 }
 
+@Composable private fun MakerPreviewOrLoading(
+    preview: Bitmap?,
+    options: VideoMakerOptions,
+    geometry: MakerPreviewGeometry,
+    step: Int,
+    busy: Boolean,
+    onChange: (VideoMakerOptions) -> Unit,
+) {
+    preview?.let { bmp -> MakerDragPreview(bmp, options, geometry, step, busy, onChange) }
+        ?: Box(Modifier.fillMaxWidth().height(if (step == 3) 380.dp else 340.dp), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = MakerGold)
+        }
+}
+
 /** Dedicated immediate vertical drag targets win over the surrounding scroll container. */
 @Composable private fun MakerDragPreview(bitmap:Bitmap,options:VideoMakerOptions,geometry:MakerPreviewGeometry,step:Int,busy:Boolean,onChange:(VideoMakerOptions)->Unit) {
-    val previewHeight=if(step==2)290.dp else 330.dp
+    val previewHeight=when(step){2->340.dp;3->380.dp;else->300.dp}
     val heightPx=with(LocalDensity.current){previewHeight.toPx()}
     Box(Modifier.fillMaxWidth(),contentAlignment=Alignment.Center) {
         Box(Modifier.height(previewHeight).width(previewHeight*9f/16f)) {

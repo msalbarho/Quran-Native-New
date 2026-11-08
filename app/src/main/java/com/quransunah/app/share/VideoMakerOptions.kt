@@ -4,17 +4,21 @@ package com.quransunah.app.share
 data class VideoMakerOptions(
     val background: String = ShareBackgrounds.FILES.first(),
     val backgrounds: List<String> = listOf(background),
-    val trackingMode: Int = 0, // 0 progress band, 1 cumulative, 2 underline, 3 current, 4 glow
+    val trackingMode: Int = 0, // 0 gold progress band, 1 cumulative colour, 2 cumulative underline
     val markerColor: Int = 0xFFD4B06A.toInt(),
     val font: Int = 0,
     val highlightColor: Int = 0xFFD4B06A.toInt(),
     val glow: Boolean = false,
-    val motion: Boolean = false,
+    val shadow: Boolean = false,
+    val vignette: Boolean = false,
+    val motion: Boolean = false, // Ken Burns on the background
     val textBackdrop: Boolean = false,
     val showTitle: Boolean = true,
+    val titleFrame: Int = 0, // 0 Madinah header, 1 ornamented rect, 2 medallion
     val translation: Boolean = false,
     val marker: Boolean = true,
-    val textScale: Float = 1f,
+    val tajweedText: Boolean = false,
+    val textScale: Float = 1f, // 1 = 22, slider 22–29
     val ayahX: Float = .5f,
     val ayahY: Float = .48f,
     val titleX: Float = .5f,
@@ -73,6 +77,12 @@ fun makerBackgroundMix(positionUs: Long, durationUs: Long, count: Int): MakerBac
     return MakerBackgroundMix(index, index, 0f)
 }
 
+fun makerNeedsSmoothFrames(options: VideoMakerOptions): Boolean =
+    options.trackingMode == ShareMushafLayout.TRACKING_BAND ||
+        options.trackingMode == ShareMushafLayout.TRACKING_UNDERLINE ||
+        options.motion ||
+        options.backgrounds.size > 1
+
 fun makerRenderFrames(segments: List<WordSegment>, durationUs: Long, smooth: Boolean): List<WordVideoFrame> {
     require(durationUs > 0)
     val cursor = segments.cursorSegments(durationUs)
@@ -91,7 +101,7 @@ fun makerRenderFrames(segments: List<WordSegment>, durationUs: Long, smooth: Boo
 data class MakerPreviewGeometry(val ayahCenterY:Float=.48f,val titleCenterY:Float=.16f,
     val ayahHeight:Float=.10f,val titleHeight:Float=.06f)
 fun makerBlockSeparation(ayahHeight:Float,titleHeight:Float):Float =
-    (maxOf(ayahHeight,.18f)+maxOf(titleHeight,.165f))/2f+.028f
+    ayahHeight / 2f + titleHeight / 2f + 0.016f
 fun makerVerticalPlacement(ayahY:Float,titleY:Float,ayahHeight:Float,titleHeight:Float,
                            showTitle:Boolean,translation:Boolean):MakerPreviewGeometry {
     val minAyah=.08f+ayahHeight/2f

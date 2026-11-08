@@ -12,6 +12,7 @@ import java.sql.DriverManager
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 
 class MeaningReadingOrderTest {
@@ -29,8 +30,11 @@ class MeaningReadingOrderTest {
         val marker604 = glyphs[markerWordId(114, 6)]!!
         assertEquals(1, marker604.length)
         assertTrue(marker604[0].code in 0xFC41..0xFFFF)
-        assertTrue(fontHasColorTables(File("../public/fonts/qcf4/p71.ttf")))
-        assertTrue(fontHasColorTables(File("../public/fonts/qcf4/p604.ttf")))
+        val font71 = File("../public/fonts/qcf4/p71.ttf")
+        val font604 = File("../public/fonts/qcf4/p604.ttf")
+        assumeTrue("QCF4 page fonts are gitignored in this checkout", font71.isFile && font604.isFile)
+        assertTrue(fontHasColorTables(font71))
+        assertTrue(fontHasColorTables(font604))
     }
 
     private fun markerWordId(surah: Int, ayah: Int): Int {

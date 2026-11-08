@@ -16,6 +16,8 @@ data class AyahShareContent(
     val fromAyah: Int,
     val toAyah: Int,
     val verses: List<AyahShareVerse>,
+    /** Selected ayat cut from Madinah page lines (original breaks, markers inline). */
+    val mushafLines: List<ShareMushafLine> = emptyList(),
 ) {
     fun shouldShowBasmalah(): Boolean = surah !in SURAHS_WITHOUT_BASMALAH
 

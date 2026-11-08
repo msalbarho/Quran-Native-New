@@ -62,8 +62,17 @@ class VideoMakerTimingTest {
         assertTrue(options.marker)
         assertTrue(options.showTitle)
         assertFalse(options.translation)
+        assertEquals(0, options.trackingMode)
+        assertEquals(0xFFD4B06A.toInt(), options.markerColor)
         assertTrue(options.ayahY in .2f.. .65f)
         assertTrue(ShareBackgrounds.FILES.contains(options.background))
+        assertEquals(7, ShareMushafLayout.HIGHLIGHT_COLOURS.size)
+        assertEquals(3, ShareMushafLayout.MARKER_COLOURS.size)
+        assertEquals(22f, ShareMushafLayout.scaleToFontSize(options.textScale), 0.01f)
+        assertEquals(1f, ShareMushafLayout.fontSizeToScale(22f), 0.01f)
+        assertTrue(ShareMushafLayout.fontSizeToScale(29f) <= 29f / 22f + 0.001f)
+        assertFalse(makerNeedsSmoothFrames(options.copy(trackingMode = 1, backgrounds = listOf(options.background))))
+        assertTrue(makerNeedsSmoothFrames(options.copy(trackingMode = 2)))
     }
     @org.junit.Test fun smoothRenderIntervalsAreContinuousAndNeverSubFrame() {
         val frames=makerRenderFrames(listOf(WordSegment(1,0,200),WordSegment(2,200,600)),600000L,true)

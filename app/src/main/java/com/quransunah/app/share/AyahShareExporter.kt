@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.LinearGradient
 import android.graphics.Paint
+import android.graphics.RadialGradient
 import android.graphics.Rect
 import android.graphics.Shader
 import android.graphics.Typeface
@@ -102,7 +103,16 @@ class AyahShareExporter @Inject constructor(
     suspend fun shareImage(content: AyahShareContent) = withContext(Dispatchers.IO) {
         fontManager.ensureMaps()
         val verse = content.verses.firstOrNull() ?: return@withContext
-        val bitmap = renderMaker(content,verse,VideoMakerOptions(),null,1080,1920,displayVerses=content.verses)
+        val scale = ShareMushafLayout.fitScale(content.verses.size, content.mushafLines.size.coerceAtLeast(1))
+        val bitmap = renderMaker(
+            content,
+            verse,
+            VideoMakerOptions(textScale = scale),
+            null,
+            1080,
+            1920,
+            displayVerses = content.verses,
+        )
         val file = writeJpeg(bitmap, "ayah-${content.surah}-${verse.ayah}.jpg")
         bitmap.recycle()
         saveToGalleryThenShare(
@@ -184,11 +194,34 @@ class AyahShareExporter @Inject constructor(
     }
 
     /** Offline-safe editor preview uses the very same renderer as the MP4. */
-    suspend fun makerPreview(content: AyahShareContent, options: VideoMakerOptions, word: Int? = 1, progress: Float = .5f, elapsedUs: Long = 0L, totalUs: Long = 1L, onGeometry: ((MakerPreviewGeometry)->Unit)? = null): Bitmap =
-        withContext(Dispatchers.IO) {
-            fontManager.ensureMaps()
-            renderMaker(content, content.verses.first(), options, word, 540, 960, progress, elapsedUs, totalUs, onGeometry=onGeometry)
-        }
+    suspend fun makerPreview(
+        content: AyahShareContent,
+        options: VideoMakerOptions,
+        word: Int? = 1,
+        progress: Float = .5f,
+        elapsedUs: Long = 0L,
+        totalUs: Long = 1L,
+        onGeometry: ((MakerPreviewGeometry) -> Unit)? = null,
+        previewBackground: String? = null,
+        activeAyah: Int? = content.verses.firstOrNull()?.ayah,
+    ): Bitmap = withContext(Dispatchers.IO) {
+        fontManager.ensureMaps()
+        renderMaker(
+            content,
+            content.verses.first(),
+            options,
+            word,
+            540,
+            960,
+            progress,
+            elapsedUs,
+            totalUs,
+            displayVerses = content.verses,
+            onGeometry = onGeometry,
+            previewBackground = previewBackground,
+            activeAyah = activeAyah,
+        )
+    }
 
     suspend fun makeVideo(content: AyahShareContent, reciterId: String, options: VideoMakerOptions): File = withContext(Dispatchers.IO) {
         fontManager.ensureMaps()
@@ -202,14 +235,20 @@ class AyahShareExporter @Inject constructor(
         val prepared = ArrayList<PreparedVerse>()
         val timingStore = QulWordTimings(context)
         content.verses.forEachIndexed { verseIndex, verse ->
-            val source = downloadAyahAudio(reciter, content.surah, verse.ayah).first()
-            val qulId = when (reciter.id) { "123" -> 18; "92" -> 26; else -> null }
-            val originalSegments = qulId?.let { timingStore.load(content.surah, verse.ayah, it) }.orEmpty()
-            if (qulId != null) check(originalSegments.isNotEmpty()) { "Word timings unavailable. Please retry with internet access." }
+            val timing = runCatching { timingStore.loadForReciter(reciter.id, content.surah, verse.ayah) }
+                .getOrDefault(QulAyahTiming())
+            val source = resolveAyahAudio(reciter, content.surah, verse.ayah, timing)
+            val originalSegments = timing.segments
             // Word timestamps are highlight anchors, NOT safe audio crop boundaries.
             // Preserve the complete source ayah, including its real consonant attack and margins.
-            val clip = ShareAudioClip.prepareMaker(source, File(shareDir(), "maker-${verse.ayah}.wav"),
-                fromMs = 0L, toMs = null, fadeIn = false, fadeOut = false)
+            val clip = ShareAudioClip.prepareMaker(
+                source,
+                File(shareDir(), "maker-${verse.ayah}.wav"),
+                fromMs = timing.cropStartMs ?: 0L,
+                toMs = timing.cropEndMs,
+                fadeIn = false,
+                fadeOut = false,
+            )
             clips += clip
             val segments = originalSegments.cursorSegments(clip.durationUs)
             timeline.put(org.json.JSONObject().put("ayah", verse.ayah).put("startUs", timelineStartUs)
@@ -223,13 +262,12 @@ class AyahShareExporter @Inject constructor(
         val totalUs = clips.sumOf { it.durationUs }
         var verseStartUs = 0L
         prepared.forEach { item ->
-            makerRenderFrames(item.segments, item.clip.durationUs,
-                options.trackingMode in listOf(0,2,4) || options.backgrounds.size > 1).forEach { interval ->
+            makerRenderFrames(item.segments, item.clip.durationUs, makerNeedsSmoothFrames(options)).forEach { interval ->
                 val localUs = interval.startUs + interval.durationUs / 2
                 val word = item.segments.firstOrNull { it.position == interval.word && localUs / 1000 in it.startMs until it.endMs }
                 val progress = word?.let { ((localUs / 1000f - it.startMs) / (it.endMs - it.startMs).coerceAtLeast(1)).coerceIn(0f,1f) } ?: 0f
                 val bitmap = renderMaker(content, item.verse, options, interval.word, 1080, 1920,
-                    progress, verseStartUs + localUs, totalUs)
+                    progress, verseStartUs + localUs, totalUs, displayVerses = content.verses, activeAyah = item.verse.ayah)
                 frames += writeJpeg(bitmap, "maker-frame-${frames.size}.jpg")
                 bitmap.recycle(); durations += interval.durationUs
             }
@@ -240,7 +278,7 @@ class AyahShareExporter @Inject constructor(
         File(shareDir(), "last-maker-timeline.json").writeText(timeline.toString(2))
         val encoded = File(shareDir(), "maker-encoded.mp4")
         if (encoded.exists()) encoded.delete()
-        exportVideo(frames, listOf(combined), encoded, durations, options.motion, cleanAudio = true)
+        exportVideo(frames, listOf(combined), encoded, durations, motion = false, cleanAudio = true)
         val encoderDelayUs = ShareAudioClip.makerEncoderDelayUs(encoded, combined.file)
         File(shareDir(), "last-maker-sync.txt").writeText("measuredVideoDelayUs=$encoderDelayUs\n")
         MakerAvSync.align(encoded, output, encoderDelayUs)
@@ -290,110 +328,490 @@ class AyahShareExporter @Inject constructor(
         ShareGallerySaver.saveImage(context,file,file.name) ?: error("Could not save image")
     }
 
-    private suspend fun renderMaker(content: AyahShareContent, verse: AyahShareVerse, options: VideoMakerOptions,
-                                    activeWord: Int?, width: Int, height: Int, activeProgress: Float = 0f,
-                                    elapsedUs: Long = 0L, totalUs: Long = 1L, displayVerses: List<AyahShareVerse> = listOf(verse), onGeometry: ((MakerPreviewGeometry)->Unit)? = null): Bitmap {
+    private suspend fun renderMaker(
+        content: AyahShareContent,
+        verse: AyahShareVerse,
+        options: VideoMakerOptions,
+        activeWord: Int?,
+        width: Int,
+        height: Int,
+        activeProgress: Float = 0f,
+        elapsedUs: Long = 0L,
+        totalUs: Long = 1L,
+        displayVerses: List<AyahShareVerse> = listOf(verse),
+        onGeometry: ((MakerPreviewGeometry) -> Unit)? = null,
+        previewBackground: String? = null,
+        activeAyah: Int? = verse.ayah,
+    ): Bitmap {
         val bitmap = createBitmap(width, height)
         val canvas = Canvas(bitmap)
         val backgrounds = options.backgrounds.ifEmpty { listOf(options.background) }
-        val mix = makerBackgroundMix(elapsedUs,totalUs,backgrounds.size)
-        drawCoverBackground(canvas, backgrounds[mix.from])
-        if (mix.from != mix.to) drawCoverBackground(canvas, backgrounds[mix.to], (mix.blend*255).toInt())
+        val zoom = if (options.motion) ShareMushafLayout.kenBurnsScale(elapsedUs, totalUs) else 1f
+        val focused = previewBackground?.takeIf { it in backgrounds }
+        if (focused != null) {
+            drawCoverBackground(canvas, focused, scale = zoom)
+        } else {
+            val mix = makerBackgroundMix(elapsedUs, totalUs, backgrounds.size)
+            drawCoverBackground(canvas, backgrounds[mix.from], scale = zoom)
+            if (mix.from != mix.to) drawCoverBackground(canvas, backgrounds[mix.to], (mix.blend * 255).toInt(), zoom)
+        }
         drawDarkOverlay(canvas)
+        if (options.vignette) drawVignette(canvas)
         val hafs = fontManager.loadUthmanicTypeface() ?: Typeface.DEFAULT
-        val pageFace = if (options.font == 0) fontManager.loadPageTypeface(verse.pageNumber, night = true) else null
-        val qcf = options.font == 0 && verse.qcfText.any { it.code in 0xFB50..0xFEFF || it.code in 0xE000..0xF8FF } && pageFace != Typeface.DEFAULT
-        val face = if (qcf) pageFace!! else if (options.font == 2) Typeface.create("serif",Typeface.NORMAL) else hafs
-        val words = (if (qcf) verse.qcfText else verse.uthmanicText).trim().split(Regex("\\s+"))
-        val starts = words.indices.map { index -> words.take(index).sumOf { it.length+1 } }
-        val text = android.text.SpannableStringBuilder()
-        displayVerses.forEachIndexed { index,item ->
-            val itemPage=if(options.font==0)fontManager.loadPageTypeface(item.pageNumber,night=true)else null
-            val itemQcf=options.font==0 && item.qcfText.any { it.code in 0xFB50..0xFEFF || it.code in 0xE000..0xF8FF } && itemPage!=Typeface.DEFAULT
-            val itemFace=if(itemQcf)itemPage!! else if(options.font==2)Typeface.create("serif",Typeface.NORMAL)else hafs
-            val itemWords=(if(itemQcf)item.qcfText else item.uthmanicText).trim().split(Regex("\\s+"))
-            val begin=text.length
-            text.append(itemWords.joinToString(" "))
-            text.setSpan(object:android.text.style.MetricAffectingSpan() {
-                override fun updateDrawState(tp:TextPaint){tp.typeface=itemFace;tp.color=TEXT_WHITE;tp.colorFilter=PorterDuffColorFilter(TEXT_WHITE,PorterDuff.Mode.SRC_IN)}
-                override fun updateMeasureState(tp:TextPaint){tp.typeface=itemFace}
-            },begin,text.length,android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-            if(options.marker)HafsAyahMarker.appendInline(text,hafs,item.ayah,options.markerColor,itemWords.last(),itemFace)
-            if(index<displayVerses.lastIndex)text.append(" ")
-        }
-        if (activeWord != null) words.indices.forEach { index ->
-            val recited = if (options.trackingMode == 1) index < activeWord else index == activeWord-1
-            if (recited && options.trackingMode in listOf(1,3,4)) {
-                text.setSpan(object : android.text.style.CharacterStyle() {
+        val tracking = options.trackingMode.coerceIn(0, 2)
+        val maxWidth = (width * .82f).toInt()
+        val titleFace = if (options.showTitle) fontManager.loadSurahTitleTypeface() else null
+        val title = if (options.showTitle) visualPua(fontManager.surahNameLigature(content.surah).orEmpty()) else ""
+        val titlePaint = ligaturePaint(titleFace ?: hafs, width * .10f * ShareMushafLayout.TITLE_SIZE_FACTOR, AYAH_MARKER_ACCENT)
+        fitWidth(titlePaint, title, width * .62f, 16f)
+        applyTextEffects(titlePaint, options, width)
+        val titleBounds = Rect()
+        if (title.isNotEmpty()) titlePaint.getTextBounds(title, 0, title.length, titleBounds)
+        val titleFrameH = if (options.showTitle) maxOf(titleBounds.height().toFloat(), width * .072f) else 0f
+        val mushaf = content.mushafLines.takeIf { it.isNotEmpty() }
+        val bodyHeight: Float
+        val bodyTop: Float
+        if (mushaf != null) {
+            val measured = measureMushafBlock(mushaf, options, hafs, width, height)
+            val geometry = makerVerticalPlacement(
+                options.ayahY,
+                options.titleY,
+                measured.height / height,
+                titleFrameH / height,
+                options.showTitle,
+                options.translation,
+            )
+            onGeometry?.invoke(geometry)
+            bodyTop = geometry.ayahCenterY * height - measured.height / 2f
+            bodyHeight = measured.height
+            if (options.textBackdrop) drawTextBackdrop(canvas, bodyTop, bodyTop + bodyHeight)
+            drawMushafBlock(canvas, mushaf, options, hafs, width, bodyTop, measured.textSize, tracking, activeWord, activeAyah, activeProgress)
+        } else {
+            val pageFace = if (options.font == 0) fontManager.loadPageTypeface(verse.pageNumber, night = true) else null
+            val qcf = options.font == 0 && verse.qcfText.any { it.code in 0xFB50..0xFEFF || it.code in 0xE000..0xF8FF } && pageFace != Typeface.DEFAULT
+            val face = if (qcf) pageFace!! else if (options.font == 2) Typeface.create("serif", Typeface.NORMAL) else hafs
+            val words = (if (qcf) verse.qcfText else verse.uthmanicText).trim().split(Regex("\\s+"))
+            val starts = words.indices.map { index -> words.take(index).sumOf { it.length + 1 } }
+            val text = android.text.SpannableStringBuilder()
+            displayVerses.forEachIndexed { index, item ->
+                val itemPage = if (options.font == 0) fontManager.loadPageTypeface(item.pageNumber, night = true) else null
+                val itemQcf = options.font == 0 && item.qcfText.any { it.code in 0xFB50..0xFEFF || it.code in 0xE000..0xF8FF } && itemPage != Typeface.DEFAULT
+                val itemFace = if (itemQcf) itemPage!! else if (options.font == 2) Typeface.create("serif", Typeface.NORMAL) else hafs
+                val itemWords = (if (itemQcf) item.qcfText else item.uthmanicText).trim().split(Regex("\\s+"))
+                val begin = text.length
+                text.append(itemWords.joinToString(" "))
+                text.setSpan(object : android.text.style.MetricAffectingSpan() {
                     override fun updateDrawState(tp: TextPaint) {
-                        tp.colorFilter = PorterDuffColorFilter(options.highlightColor,PorterDuff.Mode.SRC_IN)
-                        if (options.trackingMode == 4) tp.setShadowLayer(width*.012f,0f,0f,options.highlightColor)
+                        tp.typeface = itemFace
+                        applyAyahPaint(tp, options)
                     }
-                },starts[index],starts[index]+words[index].length,android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    override fun updateMeasureState(tp: TextPaint) { tp.typeface = itemFace }
+                }, begin, text.length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                if (options.marker) HafsAyahMarker.appendInline(text, hafs, item.ayah, options.markerColor, itemWords.last(), itemFace)
+                if (index < displayVerses.lastIndex) text.append(" ")
             }
-        }
-        val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-            typeface=face; textSize=width*.080f*options.textScale; color=TEXT_WHITE
-            colorFilter=PorterDuffColorFilter(TEXT_WHITE,PorterDuff.Mode.SRC_IN)
-            if(options.glow) setShadowLayer(width*.014f,0f,0f,options.highlightColor)
-        }
-        val maxWidth=(width*.82f).toInt()
-        fun layout()=android.text.StaticLayout.Builder.obtain(text,0,text.length,paint,maxWidth)
-            .setAlignment(android.text.Layout.Alignment.ALIGN_CENTER).setTextDirection(android.text.TextDirectionHeuristics.RTL)
-            .setLineSpacing(0f,1.45f).setHyphenationFrequency(android.text.Layout.HYPHENATION_FREQUENCY_NONE).build()
-        var body=layout()
-        while(body.height>height*.48f && paint.textSize>width*.025f){paint.textSize*=.9f;body=layout()}
-        val visibleWidth=(0 until body.lineCount).maxOf { body.getLineRight(it)-body.getLineLeft(it) }
-        val bodyX=(width*options.ayahX).coerceIn(visibleWidth/2f,width-visibleWidth/2f)-maxWidth/2f
-        val titleFace=if(options.showTitle)fontManager.loadSurahTitleTypeface() else null
-        val title=if(options.showTitle)visualPua(fontManager.surahNameLigature(content.surah).orEmpty()) else ""
-        val titlePaint=ligaturePaint(titleFace ?: hafs,width*.10f,AYAH_MARKER_ACCENT)
-        fitWidth(titlePaint,title,width*.70f,20f)
-        val titleBounds=Rect();if(title.isNotEmpty())titlePaint.getTextBounds(title,0,title.length,titleBounds)
-        val geometry=makerVerticalPlacement(options.ayahY,options.titleY,body.height.toFloat()/height,
-            titleBounds.height().toFloat()/height,options.showTitle,options.translation)
-        onGeometry?.invoke(geometry)
-        val bodyY=geometry.ayahCenterY*height-body.height/2f
-        if(options.textBackdrop) drawTextBackdrop(canvas,bodyY,bodyY+body.height)
-        canvas.save();canvas.translate(bodyX,bodyY)
-        if(activeWord!=null && options.trackingMode in listOf(0,2)) {
-            val trackingPaint=Paint(Paint.ANTI_ALIAS_FLAG).apply { color=options.highlightColor; strokeWidth=width*.006f;strokeCap=Paint.Cap.ROUND }
-            val filledLines=linkedMapOf<Int,android.graphics.RectF>()
-            words.indices.forEach { index ->
-                val complete=index<activeWord-1
-                if(complete || index==activeWord-1) {
-                    val path=android.graphics.Path();val bounds=android.graphics.RectF()
-                    val line=body.getLineForOffset(starts[index])
-                    val next=starts.getOrNull(index+1)
-                    val end=starts[index]+words[index].length+if(options.trackingMode==0 && next!=null && body.getLineForOffset(next)==line)1 else 0
-                    body.getSelectionPath(starts[index],end,path);path.computeBounds(bounds,true)
-                    val fraction=if(complete) 1f else activeProgress.coerceIn(0f,1f)
-                    if(options.trackingMode==0) {
-                        val filled=android.graphics.RectF(bounds.right-bounds.width()*fraction,bounds.top,bounds.right,bounds.bottom)
-                        filledLines[line]?.union(filled) ?: run { filledLines[line]=filled }
-                    } else if(!complete) {
-                        val y=body.getLineBaseline(line)+paint.fontMetrics.descent+width*.008f
-                        canvas.drawLine(bounds.right,y,bounds.right-bounds.width()*fraction,y,trackingPaint)
+            if (activeWord != null && tracking == ShareMushafLayout.TRACKING_CUMULATIVE) {
+                val currentAyah = activeAyah ?: verse.ayah
+                var cursor = 0
+                displayVerses.forEach { item ->
+                    val itemWords = item.uthmanicText.trim().split(Regex("\\s+")).filter { it.isNotBlank() }
+                    itemWords.indices.forEach { index ->
+                        val recited = item.ayah < currentAyah || (item.ayah == currentAyah && index < activeWord)
+                        if (recited) {
+                            val start = cursor
+                            val end = cursor + itemWords[index].length
+                            if (end <= text.length) {
+                                text.setSpan(object : android.text.style.CharacterStyle() {
+                                    override fun updateDrawState(tp: TextPaint) {
+                                        tp.colorFilter = PorterDuffColorFilter(options.highlightColor, PorterDuff.Mode.SRC_IN)
+                                    }
+                                }, start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                            }
+                        }
+                        cursor += itemWords[index].length + 1
                     }
                 }
             }
-            if(options.trackingMode==0) {
-                trackingPaint.alpha=90
-                filledLines.values.forEach { canvas.drawRoundRect(it,paint.textSize*.10f,paint.textSize*.10f,trackingPaint) }
+            val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+                typeface = face
+                textSize = width * .080f * options.textScale
+                applyAyahPaint(this, options)
+                applyTextEffects(this, options, width)
             }
+            fun layout() = android.text.StaticLayout.Builder.obtain(text, 0, text.length, paint, maxWidth)
+                .setAlignment(android.text.Layout.Alignment.ALIGN_CENTER)
+                .setTextDirection(android.text.TextDirectionHeuristics.RTL)
+                .setLineSpacing(0f, ShareMushafLayout.ARABIC_LINE_MULTIPLIER)
+                .setIncludePad(false)
+                .setHyphenationFrequency(android.text.Layout.HYPHENATION_FREQUENCY_NONE)
+                .build()
+            var body = layout()
+            while (body.height > height * .48f && paint.textSize > width * .025f) {
+                paint.textSize *= .9f
+                body = layout()
+            }
+            val visibleWidth = (0 until body.lineCount).maxOf { body.getLineRight(it) - body.getLineLeft(it) }
+            val bodyX = (width * options.ayahX).coerceIn(visibleWidth / 2f, width - visibleWidth / 2f) - maxWidth / 2f
+            val geometry = makerVerticalPlacement(
+                options.ayahY, options.titleY, body.height.toFloat() / height,
+                titleFrameH / height, options.showTitle, options.translation,
+            )
+            onGeometry?.invoke(geometry)
+            bodyTop = geometry.ayahCenterY * height - body.height / 2f
+            bodyHeight = body.height.toFloat()
+            if (options.textBackdrop) drawTextBackdrop(canvas, bodyTop, bodyTop + bodyHeight)
+            canvas.save()
+            canvas.translate(bodyX, bodyTop)
+            if (activeWord != null && tracking in listOf(ShareMushafLayout.TRACKING_BAND, ShareMushafLayout.TRACKING_UNDERLINE)) {
+                drawWrappedTracking(canvas, body, words, starts, activeWord, activeProgress, tracking, options, width, paint)
+            }
+            body.draw(canvas)
+            canvas.restore()
         }
-        body.draw(canvas);canvas.restore()
-        if(options.showTitle)canvas.drawText(title,width*options.titleX,
-            height*geometry.titleCenterY-(titleBounds.top+titleBounds.bottom)/2f,titlePaint)
-        val english=displayVerses.mapNotNull { it.englishTranslation }.joinToString("\n")
-        if(options.translation && english.isNotBlank()) {
-            val en=TextPaint(Paint.ANTI_ALIAS_FLAG).apply { color=TEXT_WHITE;textSize=width*.026f }
-            val translation=android.text.StaticLayout.Builder.obtain(english,0,english.length,en,maxWidth)
+        if (options.showTitle) {
+            drawSurahTitle(
+                canvas, title, titlePaint, titleBounds,
+                width * options.titleX,
+                height * makerVerticalPlacement(
+                    options.ayahY, options.titleY, bodyHeight / height, titleFrameH / height,
+                    options.showTitle, options.translation,
+                ).titleCenterY,
+                options.titleFrame, width,
+            )
+        }
+        val english = displayVerses.mapNotNull { it.englishTranslation }.joinToString("\n")
+        if (options.translation && english.isNotBlank()) {
+            val en = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { color = TEXT_WHITE; textSize = width * .026f }
+            val translation = android.text.StaticLayout.Builder.obtain(english, 0, english.length, en, maxWidth)
                 .setAlignment(android.text.Layout.Alignment.ALIGN_CENTER).build()
-            canvas.save();canvas.translate((width*options.ayahX-maxWidth/2f).coerceIn(0f,(width-maxWidth).toFloat()),bodyY+body.height+width*.075f);translation.draw(canvas);canvas.restore()
+            canvas.save()
+            canvas.translate(
+                (width * options.ayahX - maxWidth / 2f).coerceIn(0f, (width - maxWidth).toFloat()),
+                bodyTop + bodyHeight + width * ShareMushafLayout.TRANSLATION_GAP_WIDTH,
+            )
+            translation.draw(canvas)
+            canvas.restore()
         }
         drawBranding(canvas)
         return bitmap
+    }
+
+    private fun applyAyahPaint(paint: TextPaint, options: VideoMakerOptions) {
+        if (options.tajweedText && options.font == 0) {
+            paint.colorFilter = null
+            paint.color = TEXT_WHITE
+        } else {
+            paint.color = TEXT_WHITE
+            paint.colorFilter = PorterDuffColorFilter(TEXT_WHITE, PorterDuff.Mode.SRC_IN)
+        }
+    }
+
+    private fun applyTextEffects(paint: TextPaint, options: VideoMakerOptions, width: Int) {
+        when {
+            options.glow -> paint.setShadowLayer(width * .014f, 0f, 0f, options.highlightColor)
+            options.shadow -> paint.setShadowLayer(width * .012f, 0f, width * .006f, 0xCC000000.toInt())
+        }
+    }
+
+    private data class MushafMeasure(val height: Float, val textSize: Float)
+
+    private suspend fun measureMushafBlock(
+        lines: List<ShareMushafLine>,
+        options: VideoMakerOptions,
+        @Suppress("UNUSED_PARAMETER") hafs: Typeface,
+        width: Int,
+        height: Int,
+    ): MushafMeasure {
+        val base = width * .080f * options.textScale *
+            ShareMushafLayout.fitScale(lines.map { it.words.firstOrNull()?.ayah }.distinct().size, lines.size)
+        val paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
+        var size = base
+        val available = height * .48f
+        while (size > width * .025f) {
+            val lineH = ShareMushafLayout.arabicLineHeight(size)
+            val needed = lines.size * lineH
+            if (needed <= available) break
+            size *= .92f
+        }
+        return MushafMeasure(lines.size * ShareMushafLayout.arabicLineHeight(size), size)
+    }
+
+    private suspend fun drawMushafBlock(
+        canvas: Canvas,
+        lines: List<ShareMushafLine>,
+        options: VideoMakerOptions,
+        hafs: Typeface,
+        width: Int,
+        top: Float,
+        textSize: Float,
+        tracking: Int,
+        activeWord: Int?,
+        activeAyah: Int?,
+        activeProgress: Float,
+    ) {
+        val maxWidth = width * .82f
+        val lineH = ShareMushafLayout.arabicLineHeight(textSize)
+        val left = (width - maxWidth) / 2f
+        val right = left + maxWidth
+        val paint = TextPaint(Paint.ANTI_ALIAS_FLAG or Paint.SUBPIXEL_TEXT_FLAG).apply {
+            this.textSize = textSize
+            textAlign = Paint.Align.LEFT
+            applyAyahPaint(this, options)
+            applyTextEffects(this, options, width)
+        }
+        data class PlannedGlyph(
+            val word: ShareMushafWord,
+            val shown: String,
+            val face: Typeface,
+            val x: Float,
+            val width: Float,
+            val isMarker: Boolean,
+            val bodyIndex: Int,
+            val line: Int,
+            val baseline: Float,
+        )
+        val planned = ArrayList<PlannedGlyph>()
+        val boxes = ArrayList<ShareWordBox>()
+        var bodyIndex = 0
+        lines.forEachIndexed { lineIndex, line ->
+            val pageFace = if (options.font == 0) fontManager.loadPageTypeface(line.pageNumber, night = true) else null
+            val fallback = if (options.font == 2) Typeface.create("serif", Typeface.NORMAL) else hafs
+            val face = if (options.font == 0 && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
+            val baseline = top + lineIndex * lineH + textSize
+            var cursor = right
+            val gap = textSize * .18f
+            val visible = line.words.filter { options.marker || !it.isMarker }
+            visible.forEach { word ->
+                paint.typeface = face
+                if (word.isMarker) {
+                    val markerW = textSize * .90f * 1.05f
+                    cursor -= markerW
+                    planned += PlannedGlyph(word, "", hafs, cursor, markerW, true, -1, lineIndex, baseline)
+                    cursor -= gap
+                } else {
+                    val glyph = if (options.font == 0) word.qcf.ifBlank { word.uthmanic } else word.uthmanic
+                    val shown = if (options.font == 0) visualPua(glyph) else glyph
+                    val w = paint.measureText(shown)
+                    cursor -= w
+                    planned += PlannedGlyph(word, shown, face, cursor, w, false, bodyIndex, lineIndex, baseline)
+                    boxes += ShareWordBox(
+                        index = bodyIndex,
+                        ayah = word.ayah,
+                        position = word.position,
+                        line = lineIndex,
+                        left = cursor,
+                        right = cursor + w,
+                        top = baseline - textSize,
+                        bottom = baseline + textSize * .25f,
+                        baseline = baseline,
+                        descent = paint.fontMetrics.descent,
+                    )
+                    bodyIndex += 1
+                    cursor -= gap
+                }
+            }
+        }
+        val currentIndex = when {
+            activeWord == null || activeAyah == null -> -1
+            else -> ShareMushafLayout.globalWordIndex(lines, activeAyah, activeWord)
+        }
+        if (currentIndex >= 0 && tracking == ShareMushafLayout.TRACKING_BAND) {
+            val band = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = options.highlightColor; alpha = 90 }
+            boxes.forEach { box ->
+                val fraction = wordReciteFraction(box.ayah, box.position, activeAyah, activeWord, activeProgress)
+                if (fraction > 0f) {
+                    val filled = android.graphics.RectF(box.right - box.width * fraction, box.top, box.right, box.bottom)
+                    canvas.drawRoundRect(filled, textSize * .10f, textSize * .10f, band)
+                }
+            }
+        }
+        if (currentIndex >= 0 && tracking == ShareMushafLayout.TRACKING_UNDERLINE) {
+            val underline = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = options.highlightColor
+                strokeWidth = width * .006f
+                strokeCap = Paint.Cap.ROUND
+            }
+            ShareMushafLayout.cumulativeUnderlines(boxes, currentIndex, activeProgress).forEach { span ->
+                canvas.drawLine(span.right, span.y, span.left, span.y, underline)
+            }
+        }
+        planned.forEach { item ->
+            if (item.isMarker) {
+                HafsAyahMarker.draw(
+                    canvas, item.face, item.word.ayah,
+                    item.x + item.width / 2f, item.baseline - textSize * .25f, textSize * .90f, options.markerColor,
+                )
+            } else {
+                paint.typeface = item.face
+                val recited = isWordRecited(item.word.ayah, item.word.position, activeAyah, activeWord)
+                if (tracking == ShareMushafLayout.TRACKING_CUMULATIVE && recited) {
+                    val coloured = TextPaint(paint).apply {
+                        colorFilter = PorterDuffColorFilter(options.highlightColor, PorterDuff.Mode.SRC_IN)
+                    }
+                    canvas.drawText(item.shown, item.x, item.baseline, coloured)
+                } else {
+                    canvas.drawText(item.shown, item.x, item.baseline, paint)
+                }
+            }
+        }
+    }
+
+    private fun isWordRecited(ayah: Int, position: Int, activeAyah: Int?, activeWord: Int?): Boolean {
+        if (activeAyah == null || activeWord == null) return false
+        return ayah < activeAyah || (ayah == activeAyah && position < activeWord)
+    }
+
+    private fun wordReciteFraction(ayah: Int, position: Int, activeAyah: Int?, activeWord: Int?, progress: Float): Float {
+        if (activeAyah == null || activeWord == null) return 0f
+        return when {
+            ayah < activeAyah || (ayah == activeAyah && position < activeWord) -> 1f
+            ayah == activeAyah && position == activeWord -> progress.coerceIn(0f, 1f)
+            else -> 0f
+        }
+    }
+
+    private fun drawWrappedTracking(
+        canvas: Canvas,
+        body: android.text.Layout,
+        words: List<String>,
+        starts: List<Int>,
+        activeWord: Int,
+        activeProgress: Float,
+        tracking: Int,
+        options: VideoMakerOptions,
+        width: Int,
+        paint: TextPaint,
+    ) {
+        val trackingPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = options.highlightColor
+            strokeWidth = width * .006f
+            strokeCap = Paint.Cap.ROUND
+        }
+        val filledLines = linkedMapOf<Int, android.graphics.RectF>()
+        val underlineBoxes = ArrayList<ShareWordBox>()
+        words.indices.forEach { index ->
+            val complete = index < activeWord - 1
+            val current = index == activeWord - 1
+            if (!complete && !current) return@forEach
+            val path = android.graphics.Path()
+            val bounds = android.graphics.RectF()
+            val line = body.getLineForOffset(starts[index])
+            val next = starts.getOrNull(index + 1)
+            val end = starts[index] + words[index].length +
+                if (tracking == ShareMushafLayout.TRACKING_BAND && next != null && body.getLineForOffset(next) == line) 1 else 0
+            body.getSelectionPath(starts[index], end, path)
+            path.computeBounds(bounds, true)
+            val fraction = if (complete) 1f else activeProgress.coerceIn(0f, 1f)
+            if (tracking == ShareMushafLayout.TRACKING_BAND) {
+                val filled = android.graphics.RectF(bounds.right - bounds.width() * fraction, bounds.top, bounds.right, bounds.bottom)
+                filledLines[line]?.union(filled) ?: run { filledLines[line] = filled }
+            } else {
+                underlineBoxes += ShareWordBox(
+                    index = index,
+                    ayah = 0,
+                    position = index + 1,
+                    line = line,
+                    left = bounds.left,
+                    right = bounds.right,
+                    top = bounds.top,
+                    bottom = bounds.bottom,
+                    baseline = body.getLineBaseline(line).toFloat(),
+                    descent = paint.fontMetrics.descent + width * .008f,
+                )
+            }
+        }
+        if (tracking == ShareMushafLayout.TRACKING_BAND) {
+            trackingPaint.alpha = 90
+            filledLines.values.forEach { canvas.drawRoundRect(it, paint.textSize * .10f, paint.textSize * .10f, trackingPaint) }
+        } else {
+            val current = (activeWord - 1).coerceAtLeast(0)
+            ShareMushafLayout.cumulativeUnderlines(underlineBoxes, current, activeProgress).forEach { span ->
+                canvas.drawLine(span.right, span.y, span.left, span.y, trackingPaint)
+            }
+        }
+    }
+
+    private fun drawSurahTitle(
+        canvas: Canvas,
+        title: String,
+        paint: TextPaint,
+        bounds: Rect,
+        centerX: Float,
+        centerY: Float,
+        frame: Int,
+        width: Int,
+    ) {
+        if (title.isEmpty()) return
+        val textW = paint.measureText(title)
+        val textH = maxOf(bounds.height().toFloat(), paint.textSize)
+        val padX = width * .04f
+        val padY = textH * .55f
+        val left = centerX - textW / 2f - padX
+        val right = centerX + textW / 2f + padX
+        val top = centerY - textH / 2f - padY
+        val bottom = centerY + textH / 2f + padY
+        val gold = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = AYAH_MARKER_ACCENT
+            style = Paint.Style.STROKE
+            strokeWidth = width * .0045f
+        }
+        val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x66000000.toInt() }
+        when (frame) {
+            1 -> {
+                val rect = android.graphics.RectF(left, top, right, bottom)
+                canvas.drawRoundRect(rect, width * .012f, width * .012f, fill)
+                canvas.drawRoundRect(rect, width * .012f, width * .012f, gold)
+                val inset = android.graphics.RectF(left + width * .008f, top + width * .008f, right - width * .008f, bottom - width * .008f)
+                gold.strokeWidth = width * .0022f
+                canvas.drawRoundRect(inset, width * .008f, width * .008f, gold)
+            }
+            2 -> {
+                val oval = android.graphics.RectF(left, top, right, bottom)
+                canvas.drawOval(oval, fill)
+                canvas.drawOval(oval, gold)
+                gold.strokeWidth = width * .0022f
+                canvas.drawOval(android.graphics.RectF(left + width * .01f, top + width * .01f, right - width * .01f, bottom - width * .01f), gold)
+            }
+            else -> {
+                val path = plaquePath(left, top, right, bottom)
+                canvas.drawPath(path, fill)
+                canvas.drawPath(path, gold)
+                gold.strokeWidth = width * .0022f
+                canvas.drawPath(plaquePath(left + width * .01f, top + width * .01f, right - width * .01f, bottom - width * .01f), gold)
+            }
+        }
+        canvas.drawText(title, centerX, centerY - (bounds.top + bounds.bottom) / 2f, paint)
+    }
+
+    private fun plaquePath(left: Float, top: Float, right: Float, bottom: Float): android.graphics.Path {
+        val h = (bottom - top).coerceAtLeast(1f)
+        val tip = h * 0.42f
+        val mid = (top + bottom) / 2f
+        return android.graphics.Path().apply {
+            moveTo(left, mid)
+            quadTo(left + tip * 0.35f, top, left + tip, top)
+            lineTo(right - tip, top)
+            quadTo(right - tip * 0.35f, top, right, mid)
+            quadTo(right - tip * 0.35f, bottom, right - tip, bottom)
+            lineTo(left + tip, bottom)
+            quadTo(left + tip * 0.35f, bottom, left, mid)
+            close()
+        }
+    }
+
+    private fun drawVignette(canvas: Canvas) {
+        val width = canvas.width.toFloat()
+        val height = canvas.height.toFloat()
+        val paint = Paint()
+        paint.shader = RadialGradient(
+            width / 2f,
+            height / 2f,
+            maxOf(width, height) * 0.72f,
+            intArrayOf(0x00000000, 0x99000000.toInt()),
+            floatArrayOf(0.48f, 1f),
+            Shader.TileMode.CLAMP,
+        )
+        canvas.drawRect(0f, 0f, width, height, paint)
     }
 
     private fun drawBranding(canvas: Canvas) {
@@ -497,7 +915,7 @@ class AyahShareExporter @Inject constructor(
         return bitmap
     }
 
-    private fun drawCoverBackground(canvas: Canvas, fileName: String, alpha: Int = 255) {
+    private fun drawCoverBackground(canvas: Canvas, fileName: String, alpha: Int = 255, scale: Float = 1f) {
         val width = canvas.width
         val height = canvas.height
         val cacheKey = "$fileName-$width-$height"
@@ -511,7 +929,7 @@ class AyahShareExporter @Inject constructor(
             return
         }
         backgroundCache.put(cacheKey,source)
-        val src = coverSrcRect(source.width, source.height, width, height)
+        val src = zoomedCoverSrc(source.width, source.height, width, height, scale)
         val filter = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply { this.alpha = alpha }
         canvas.drawBitmap(source, src, Rect(0, 0, width, height), filter)
 
@@ -820,6 +1238,17 @@ class AyahShareExporter @Inject constructor(
     private fun visualPua(text: String): String =
         if (text.any { it.code in 0xE000..0xF8FF }) text.reversed() else text
 
+    private fun zoomedCoverSrc(srcW: Int, srcH: Int, dstW: Int, dstH: Int, scale: Float): Rect {
+        val base = coverSrcRect(srcW, srcH, dstW, dstH)
+        val zoom = scale.coerceAtLeast(1f)
+        if (zoom <= 1.001f) return base
+        val w = (base.width() / zoom).toInt().coerceAtLeast(1)
+        val h = (base.height() / zoom).toInt().coerceAtLeast(1)
+        val left = (base.centerX() - w / 2).coerceIn(base.left, base.right - w)
+        val top = (base.centerY() - h / 2).coerceIn(base.top, base.bottom - h)
+        return Rect(left, top, left + w, top + h)
+    }
+
     private fun coverSrcRect(srcW: Int, srcH: Int, dstW: Int, dstH: Int): Rect {
         val srcAspect = srcW.toFloat() / srcH
         val dstAspect = dstW.toFloat() / dstH
@@ -846,6 +1275,24 @@ class AyahShareExporter @Inject constructor(
         val dir = File(context.cacheDir, "share")
         if (!dir.exists()) dir.mkdirs()
         return dir
+    }
+
+    private fun resolveAyahAudio(
+        reciter: AyahReciter,
+        surah: Int,
+        ayah: Int,
+        timing: QulAyahTiming,
+    ): File {
+        val dir = File(shareDir(), "audio").apply { mkdirs() }
+        val url = timing.audioUrl
+            ?: timing.surahAudioUrl
+            ?: QulRecitations.ayahAudioUrl(reciter.id, surah, ayah)
+            ?: runCatching { AudioUrls.ayahStreamUri(reciter, surah, ayah).toString() }.getOrNull()
+            ?: error("No ayah audio for this reciter")
+        val name = if (timing.surahAudioUrl != null) "${reciter.id}-$surah.mp3" else "${reciter.id}-$surah-$ayah.mp3"
+        val file = File(dir, name)
+        if (!file.exists() || file.length() < 1024) downloadTo(url, file)
+        return file
     }
 
     private fun downloadAyahAudio(

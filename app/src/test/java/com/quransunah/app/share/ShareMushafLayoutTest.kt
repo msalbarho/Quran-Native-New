@@ -1,0 +1,108 @@
+package com.quransunah.app.share
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+
+class ShareMushafLayoutTest {
+    private fun word(ayah: Int, position: Int, marker: Boolean = false) = ShareMushafWord(
+        ayah = ayah,
+        position = position,
+        qcf = "g$ayah$position",
+        uthmanic = "w$ayah$position",
+        isMarker = marker,
+    )
+
+    @Test
+    fun cutKeepsOriginalLineBreaksAndDropsOtherAyat() {
+        val pages = listOf(
+            SharePageLines(
+                pageNumber = 1,
+                lines = listOf(
+                    ShareSourceLine(1, listOf(word(4, 1), word(4, 2), word(5, 1))),
+                    ShareSourceLine(2, listOf(word(5, 2), word(5, 3, marker = true), word(6, 1))),
+                    ShareSourceLine(3, listOf(word(6, 2), word(7, 1))),
+                ),
+            ),
+        )
+        val cut = ShareMushafLayout.cutLines(pages, fromAyah = 5, toAyah = 6)
+        assertEquals(3, cut.size)
+        assertEquals(listOf(5), cut[0].words.map { it.ayah }.distinct())
+        assertEquals(listOf(5, 6), cut[1].words.map { it.ayah }.distinct())
+        assertEquals(listOf(6), cut[2].words.map { it.ayah })
+        assertEquals(1, cut[0].words.size)
+        assertTrue(cut[1].words.any { it.isMarker })
+        assertTrue(cut.none { line -> line.words.any { it.ayah == 4 || it.ayah == 7 } })
+    }
+
+    @Test
+    fun wrappedArabicLinesUseTightMushafSpacing() {
+        assertTrue(ShareMushafLayout.ARABIC_LINE_MULTIPLIER <= 1.12f)
+        assertTrue(ShareMushafLayout.ARABIC_LINE_MULTIPLIER >= 1f)
+        val threeLines = 3 * ShareMushafLayout.arabicLineHeight(24f)
+        val oldGappy = 3 * 24f * 1.45f
+        assertTrue(threeLines < oldGappy)
+        assertEquals(24f * ShareMushafLayout.ARABIC_LINE_MULTIPLIER, ShareMushafLayout.arabicLineHeight(24f), 0.001f)
+    }
+
+    @Test
+    fun stackedCopyIsTitleThenAyatThenTranslationRoom() {
+        val geometry = makerVerticalPlacement(.48f, .16f, .22f, .05f, true, true)
+        assertTrue(geometry.titleCenterY < geometry.ayahCenterY)
+        val titleBottom = geometry.titleCenterY + geometry.titleHeight / 2f
+        val ayahTop = geometry.ayahCenterY - geometry.ayahHeight / 2f
+        assertTrue(titleBottom <= ayahTop + 0.0001f)
+        assertTrue(geometry.ayahCenterY + geometry.ayahHeight / 2f <= 0.8001f)
+        assertTrue(ShareMushafLayout.TRANSLATION_GAP_WIDTH < 0.05f)
+        assertTrue(ShareMushafLayout.TITLE_SIZE_FACTOR <= 0.61f)
+    }
+
+    @Test
+    fun oneAyahNeverEnlargesAndMoreAyatShrink() {
+        assertEquals(1f, ShareMushafLayout.fitScale(1, 1), 0f)
+        assertTrue(ShareMushafLayout.fitScale(5, 8) < 1f)
+        assertTrue(ShareMushafLayout.heightFitScale(1, 40f, 200f) == 1f)
+        assertTrue(ShareMushafLayout.heightFitScale(10, 40f, 200f) < 1f)
+    }
+
+    @Test
+    fun underlineGrowsRtlThroughEveryRecitedWord() {
+        val boxes = listOf(
+            ShareWordBox(0, 1, 1, 0, 80f, 120f, 0f, 20f, 16f, 4f),
+            ShareWordBox(1, 1, 2, 0, 40f, 75f, 0f, 20f, 16f, 4f),
+            ShareWordBox(2, 1, 3, 0, 0f, 35f, 0f, 20f, 16f, 4f),
+        )
+        val first = ShareMushafLayout.cumulativeUnderlines(boxes, 0, 0.5f).single()
+        assertEquals(120f, first.right, 0.01f)
+        assertEquals(100f, first.left, 0.01f)
+        val throughSecond = ShareMushafLayout.cumulativeUnderlines(boxes, 1, 1f).single()
+        assertEquals(120f, throughSecond.right, 0.01f)
+        assertEquals(40f, throughSecond.left, 0.01f)
+        val all = ShareMushafLayout.cumulativeUnderlines(boxes, 2, 1f).single()
+        assertEquals(120f, all.right, 0.01f)
+        assertEquals(0f, all.left, 0.01f)
+    }
+
+    @Test
+    fun qulCatalogCoversVerifiedAyahRecitersAndJuhani() {
+        assertEquals(18, QulRecitations.recitationId("123"))
+        assertEquals(26, QulRecitations.recitationId("92"))
+        assertEquals(22, QulRecitations.recitationId("husary"))
+        assertEquals(13, QulRecitations.recitationId("102"))
+        assertEquals(15, QulRecitations.recitationId("51"))
+        assertEquals(16, QulRecitations.recitationId("54"))
+        assertEquals(25, QulRecitations.recitationId("31"))
+        assertEquals(162, QulRecitations.recitationId("62"))
+        assertTrue(QulRecitations.spec("62")!!.isSurahLevel)
+        assertTrue(QulRecitations.ayahAudioUrl("123", 1, 1)!!.contains("alafasy/001001.mp3"))
+        assertEquals(null, QulRecitations.ayahAudioUrl("5", 1, 1))
+        assertEquals(null, QulRecitations.recitationId("5"))
+    }
+
+    @Test
+    fun kenBurnsOnlyZoomsIn() {
+        assertEquals(1f, ShareMushafLayout.kenBurnsScale(0, 1_000_000), 0.001f)
+        assertTrue(ShareMushafLayout.kenBurnsScale(1_000_000, 1_000_000) > 1f)
+    }
+}
