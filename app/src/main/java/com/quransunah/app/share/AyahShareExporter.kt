@@ -56,7 +56,7 @@ import kotlinx.coroutines.withContext
 
 private const val SHARE_WIDTH = 1080
 private const val SHARE_HEIGHT = 1920
-/** Higher canvas for share-video export (React uses 1080×1920 @ 8 Mbps). */
+/** Higher canvas for share-video export (React uses 1080├ù1920 @ 8 Mbps). */
 private const val SHARE_VIDEO_WIDTH = 1440
 private const val SHARE_VIDEO_HEIGHT = 2560
 private const val SHARE_VIDEO_BITRATE = 8_000_000
@@ -122,12 +122,7 @@ class AyahShareExporter @Inject constructor(
         return context.createConfigurationContext(configuration).getString(R.string.app_name)
     }
 
-    /** Always Arabic branding, independent of the UI language. */
-    internal fun promotionalWatermarkLabel(): String {
-        val configuration = android.content.res.Configuration(context.resources.configuration)
-        configuration.setLocale(java.util.Locale.forLanguageTag("ar"))
-        return context.createConfigurationContext(configuration).getString(R.string.video_watermark)
-    }
+    internal fun promotionalWatermarkLabel(): String = "القرآن الكريم - تلاوة واستماع"
 
     suspend fun shareImage(content: AyahShareContent) = withContext(Dispatchers.IO) {
         fontManager.ensureMaps()
@@ -145,7 +140,7 @@ class AyahShareExporter @Inject constructor(
             1920,
             displayVerses = content.verses,
             lineSpacing = ShareMushafLayout.IMAGE_LINE_MULTIPLIER,
-            fitWidthFraction = 0.78f,
+            fitWidthFraction = 0.72f,
         )
         val file = writeJpeg(bitmap, "ayah-${content.surah}-${verse.ayah}.jpg")
         bitmap.recycle()
@@ -288,31 +283,100 @@ class AyahShareExporter @Inject constructor(
     }
 
 
-    /** Verses that fit on one frame with the selected ayat; paginate by ayah groups when needed. */
+    /**
+     * Pages of Mushaf lines (~4–5). Whole ayat stay together when they fit;
+     * an ayah longer than 5 lines is split across consecutive pages at line
+     * boundaries. Font size is never reduced to fit.
+     */
+    private fun paginateMushafLines(lines: List<ShareMushafLine>, minLines: Int = 4, maxLines: Int = 5): List<List<ShareMushafLine>> {
+        if (lines.isEmpty()) return emptyList()
+        fun ayahOf(line: ShareMushafLine): Int =
+            line.words.firstOrNull { !it.isMarker }?.ayah
+                ?: line.words.firstOrNull()?.ayah
+                ?: -1
+        val pages = ArrayList<List<ShareMushafLine>>()
+        var i = 0
+        while (i < lines.size) {
+            var end = i
+            while (end < lines.size) {
+                val ayah = ayahOf(lines[end])
+                var ayahEnd = end
+                while (ayahEnd + 1 < lines.size && ayahOf(lines[ayahEnd + 1]) == ayah) {
+                    ayahEnd++
+                }
+                val ayahLen = ayahEnd - end + 1
+                val taken = end - i
+                if (taken == 0) {
+                    if (ayahLen <= maxLines) {
+                        end = ayahEnd + 1
+                        if (end - i >= minLines && end < lines.size) {
+                            val nextAyah = ayahOf(lines[end])
+                            var nextEnd = end
+                            while (nextEnd + 1 < lines.size && ayahOf(lines[nextEnd + 1]) == nextAyah) {
+                                nextEnd++
+                            }
+                            if ((nextEnd - i + 1) > maxLines) break
+                        }
+                        continue
+                    } else {
+                        end = i + maxLines
+                        break
+                    }
+                } else if (taken + ayahLen <= maxLines) {
+                    end = ayahEnd + 1
+                    if (end - i >= minLines && end < lines.size) {
+                        val nextAyah = ayahOf(lines[end])
+                        var nextEnd = end
+                        while (nextEnd + 1 < lines.size && ayahOf(lines[nextEnd + 1]) == nextAyah) {
+                            nextEnd++
+                        }
+                        if ((nextEnd - i + 1) > maxLines) break
+                    }
+                    continue
+                } else {
+                    break
+                }
+            }
+            if (end <= i) end = (i + maxLines).coerceAtMost(lines.size)
+            pages += lines.subList(i, end)
+            i = end
+        }
+        return pages
+    }
+
+    private fun displayPageLines(
+        content: AyahShareContent,
+        activeAyah: Int?,
+        activeWord: Int? = null,
+    ): List<ShareMushafLine> {
+        val lines = content.mushafLines
+        if (lines.isEmpty()) return lines
+        val pages = paginateMushafLines(lines)
+        if (pages.isEmpty()) return lines
+        val ayah = activeAyah ?: content.verses.firstOrNull()?.ayah
+        if (ayah == null) return pages.first()
+        if (activeWord != null) {
+            for (page in pages) {
+                val hit = page.any { line ->
+                    line.words.any { w -> !w.isMarker && w.ayah == ayah && w.position == activeWord }
+                }
+                if (hit) return page
+            }
+        }
+        return pages.firstOrNull { page ->
+            page.any { line -> line.words.any { it.ayah == ayah } }
+        } ?: pages.first()
+    }
+
     private fun displayPageForAyah(content: AyahShareContent, activeAyah: Int?): List<AyahShareVerse> {
         val verses = content.verses
         if (verses.isEmpty()) return verses
-        val lines = content.mushafLines
-        if (lines.isEmpty() || verses.size <= 4) return verses
-        val maxLines = 6
-        val pages = ArrayList<List<AyahShareVerse>>()
-        var start = 0
-        while (start < verses.size) {
-            var end = start
-            while (end < verses.size) {
-                val from = verses[start].ayah
-                val to = verses[end].ayah
-                val count = lines.count { line -> line.words.any { it.ayah in from..to } }
-                if (end > start && count > maxLines) break
-                end++
-            }
-            if (end == start) end++
-            pages += verses.subList(start, end)
-            start = end
-        }
-        val ayah = activeAyah ?: verses.first().ayah
-        return pages.firstOrNull { page -> page.any { it.ayah == ayah } } ?: verses
+        val pageLines = displayPageLines(content, activeAyah)
+        val ayahs = pageLines.flatMap { line -> line.words.map { it.ayah } }.toSet()
+        val pageVerses = verses.filter { it.ayah in ayahs }
+        return pageVerses.ifEmpty { verses }
     }
+
 
     suspend fun makeVideo(content: AyahShareContent, reciterId: String, options: VideoMakerOptions): File = withContext(Dispatchers.IO) {
         fontManager.ensureMaps()
@@ -375,14 +439,34 @@ class AyahShareExporter @Inject constructor(
                     lineSpacing = ShareMushafLayout.ARABIC_LINE_MULTIPLIER, plate = MakerPlate.GLYPHS,
                     wordBoxes = boxes)
             } else null
+            var platePageKey: List<ShareMushafLine>? = null
+            var plateBackdrop = backdrop
+            var plateGlyphs = glyphs
+            var plateBoxes = boxes
             makerRenderFrames(item.segments, item.clip.durationUs, smooth, frameUs).forEach { interval ->
                 val localUs = interval.startUs + interval.durationUs / 2
                 val word = item.segments.firstOrNull { it.position == interval.word && localUs / 1000 in it.startMs until it.endMs }
                 val progress = word?.let { ((localUs / 1000f - it.startMs) / (it.endMs - it.startMs).coerceAtLeast(1)).coerceIn(0f,1f) } ?: 0f
-                val bitmap = if (backdrop != null && glyphs != null && frameBitmap != null && frameCanvas != null) {
-                    frameCanvas.drawBitmap(backdrop, 0f, 0f, null)
-                    drawExportTracking(frameCanvas, boxes, options, interval.word, item.verse.ayah, progress, 1080)
-                    frameCanvas.drawBitmap(glyphs, 0f, 0f, null)
+                val pageLines = displayPageLines(content, item.verse.ayah, interval.word)
+                if (plateOk && (platePageKey == null || platePageKey != pageLines)) {
+                    plateBackdrop?.takeIf { it !== backdrop }?.recycle()
+                    plateGlyphs?.takeIf { it !== glyphs }?.recycle()
+                    plateBoxes = ArrayList()
+                    plateBackdrop = renderMaker(content, item.verse, options, interval.word, 1080, 1920,
+                        0f, verseStartUs, totalUs, displayVerses = displayPageForAyah(content, item.verse.ayah),
+                        activeAyah = item.verse.ayah, oneAyahAtATime = false, lockedTextSize = textSize,
+                        lineSpacing = ShareMushafLayout.ARABIC_LINE_MULTIPLIER, plate = MakerPlate.BACKDROP)
+                    plateGlyphs = renderMaker(content, item.verse, options, interval.word, 1080, 1920,
+                        0f, verseStartUs, totalUs, displayVerses = displayPageForAyah(content, item.verse.ayah),
+                        activeAyah = item.verse.ayah, oneAyahAtATime = false, lockedTextSize = textSize,
+                        lineSpacing = ShareMushafLayout.ARABIC_LINE_MULTIPLIER, plate = MakerPlate.GLYPHS,
+                        wordBoxes = plateBoxes)
+                    platePageKey = pageLines
+                }
+                val bitmap = if (plateBackdrop != null && plateGlyphs != null && frameBitmap != null && frameCanvas != null) {
+                    frameCanvas.drawBitmap(plateBackdrop, 0f, 0f, null)
+                    drawExportTracking(frameCanvas, plateBoxes, options, interval.word, item.verse.ayah, progress, 1080)
+                    frameCanvas.drawBitmap(plateGlyphs, 0f, 0f, null)
                     frameBitmap
                 } else {
                     renderMaker(content, item.verse, options, interval.word, 1080, 1920,
@@ -395,6 +479,8 @@ class AyahShareExporter @Inject constructor(
                 durations += interval.durationUs
                 if (frames.size % 12 == 0) kotlinx.coroutines.yield()
             }
+            if (plateBackdrop !== backdrop) plateBackdrop?.recycle()
+            if (plateGlyphs !== glyphs) plateGlyphs?.recycle()
             backdrop?.recycle()
             glyphs?.recycle()
             verseStartUs += item.clip.durationUs
@@ -522,13 +608,15 @@ class AyahShareExporter @Inject constructor(
         if (title.isNotEmpty()) titlePaint.getTextBounds(title, 0, title.length, titleBounds)
         val titleInk = if (options.showTitle) maxOf(titleBounds.height().toFloat(), width * .062f) else 0f
         val titleFrameH = titleInk * (1f + 2f * ShareMushafLayout.TITLE_PAD_Y_FACTOR)
-        val scopedLines = if (oneAyahAtATime && activeAyah != null) {
-            content.mushafLines.mapNotNull { line ->
-                val kept = line.words.filter { it.ayah == activeAyah }
-                if (kept.isEmpty()) null else line.copy(words = kept)
+        val scopedLines = when {
+            oneAyahAtATime && activeAyah != null -> {
+                content.mushafLines.mapNotNull { line ->
+                    val kept = line.words.filter { it.ayah == activeAyah }
+                    if (kept.isEmpty()) null else line.copy(words = kept)
+                }
             }
-        } else {
-            content.mushafLines
+            content.mushafLines.isNotEmpty() -> displayPageLines(content, activeAyah, activeWord)
+            else -> content.mushafLines
         }
         val mushaf = scopedLines.takeIf { it.isNotEmpty() }?.let { source ->
             if (oneAyahAtATime && lockedTextSize != null) {
@@ -1089,7 +1177,7 @@ class AyahShareExporter @Inject constructor(
         canvas.drawRect(0f,height-stripHeight,width,height,Paint().apply { color=0xAA111923.toInt() })
         val iconSize=stripHeight*.68f
         val label=promotionalWatermarkLabel()
-        val paint=TextPaint(Paint.ANTI_ALIAS_FLAG).apply { typeface=Typeface.DEFAULT_BOLD;textSize=width*.028f;color=0xFFE3C98C.toInt() }
+        val paint=TextPaint(Paint.ANTI_ALIAS_FLAG).apply { typeface=Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD); textSize=width*.028f; color=0xFFE3C98C.toInt(); textLocale=java.util.Locale.forLanguageTag("ar") }
         val textWidth=kotlin.math.ceil(paint.measureText(label).toDouble()).toInt()+2
         val text=android.text.StaticLayout.Builder.obtain(label,0,label.length,paint,textWidth)
             .setTextDirection(android.text.TextDirectionHeuristics.RTL).setIncludePad(false).build()
@@ -1450,24 +1538,17 @@ class AyahShareExporter @Inject constructor(
 
     /** Matches React `formatShareAyahNumberLabel`: Arabic label + Eastern digits. */
     private fun formatShareAyahNumberLabel(ayah: Int): String =
-        "آية ${EasternArabic.format(ayah)}"
-
+        "╪ó┘è╪⌐ ${EasternArabic.format(ayah)}"
     private fun wrapFitted(
         paint: TextPaint,
         text: String,
         maxWidth: Float,
-        maxHeight: Float,
+        @Suppress("UNUSED_PARAMETER") maxHeight: Float,
     ): List<String> {
         if (text.isBlank()) return listOf(text)
-        var size = paint.textSize
-        var lines = wrapLines(paint, text, maxWidth)
-        while (lines.size * lineHeight(paint) > maxHeight && size > 28f) {
-            size *= 0.92f
-            paint.textSize = size
-            lines = wrapLines(paint, text, maxWidth)
-        }
-        return lines
+        return wrapLines(paint, text, maxWidth)
     }
+
 
     private fun wrapLines(paint: TextPaint, text: String, maxWidth: Float): List<String> {
         val words = text.split(Regex("\\s+")).filter { it.isNotBlank() }
@@ -1494,46 +1575,17 @@ class AyahShareExporter @Inject constructor(
     }
 
     private fun lineHeight(paint: TextPaint): Float = paint.textSize * ShareMushafLayout.IMAGE_LINE_MULTIPLIER
-
     private suspend fun sharedAyahTextSize(
         lines: List<ShareMushafLine>,
         options: VideoMakerOptions,
         width: Int,
     ): Float {
+        // Uniform size from the user’s text scale — never shrink/grow per ayah length.
+        // Pagination (4–5 lines; long ayat split across pages) handles overflow.
         val base = width * .080f * options.textScale
-        if (lines.isEmpty()) return base * ShareMushafLayout.VIDEO_ARABIC_SIZE_FACTOR
-        val paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
-        val ayahs = lines.flatMap { line -> line.words.map { it.ayah } }.distinct()
-        var widest = 0f
-        for (ayah in ayahs) {
-            for (line in lines) {
-                val kept = line.words.filter { it.ayah == ayah }
-                if (kept.isEmpty()) continue
-                widest = maxOf(widest, lineInkWidth(line.copy(words = kept), options, base, paint))
-            }
-        }
-        val limit = width * ShareMushafLayout.VIDEO_WRAP_WIDTH
-        val fitted = if (widest <= limit || widest <= 1f) base else (base * limit / widest).coerceAtLeast(width * .025f)
-        var size = fitted * ShareMushafLayout.VIDEO_ARABIC_SIZE_FACTOR
-        val floor = width * .025f
-        val maxBlock = width * 16f / 9f * 0.50f
-        while (size > floor) {
-            var tallest = 0f
-            for (ayah in ayahs) {
-                val ayahLines = lines.mapNotNull { line ->
-                    val kept = line.words.filter { it.ayah == ayah }
-                    if (kept.isEmpty()) null else line.copy(words = kept)
-                }
-                val rows = reflowMushafLines(ayahLines, options, size, limit)
-                val pad = size * 0.46f
-                val block = rows.size * size * ShareMushafLayout.VIDEO_LINE_MULTIPLIER + pad * 2f
-                if (block > tallest) tallest = block
-            }
-            if (tallest <= maxBlock) break
-            size *= 0.92f
-        }
-        return size.coerceAtLeast(floor)
+        return base * ShareMushafLayout.VIDEO_ARABIC_SIZE_FACTOR
     }
+
 
     /**
      * Joins the selected words into one paragraph. Mushaf line breaks are not
@@ -1610,13 +1662,9 @@ class AyahShareExporter @Inject constructor(
         }
         return ink
     }
+    private fun ayahFontSize(@Suppress("UNUSED_PARAMETER") wordCount: Int, canvasWidth: Int): Float =
+        canvasWidth * 0.058f
 
-    private fun ayahFontSize(wordCount: Int, canvasWidth: Int): Float = when {
-        wordCount <= 8 -> canvasWidth * 0.072f
-        wordCount <= 16 -> canvasWidth * 0.058f
-        wordCount <= 28 -> canvasWidth * 0.048f
-        else -> canvasWidth * 0.040f
-    }
 
     // Legacy QCF PUA glyphs are bidi-neutral and must be pre-reversed; QPC V4 glyphs (U+FB50..U+FEFF)
     // are strong RTL, so the text stack already orders them right to left.
@@ -1661,7 +1709,6 @@ class AyahShareExporter @Inject constructor(
         if (!dir.exists()) dir.mkdirs()
         return dir
     }
-
     private fun resolveAyahAudio(
         reciter: AyahReciter,
         surah: Int,
@@ -1669,16 +1716,20 @@ class AyahShareExporter @Inject constructor(
         timing: QulAyahTiming,
     ): File {
         val dir = File(shareDir(), "audio").apply { mkdirs() }
-        val url = timing.audioUrl
-            ?: timing.surahAudioUrl
-            ?: QulRecitations.ayahAudioUrl(reciter.id, surah, ayah)
-            ?: runCatching { AudioUrls.ayahStreamUri(reciter, surah, ayah).toString() }.getOrNull()
-            ?: error("No ayah audio for this reciter")
+        val qulUrl = QulRecitations.ayahAudioUrl(reciter.id, surah, ayah)
+        val url = when {
+            QulRecitations.hasWordTimingCatalog(reciter.id) ->
+                qulUrl ?: timing.audioUrl ?: timing.surahAudioUrl
+            else ->
+                timing.audioUrl ?: timing.surahAudioUrl ?: qulUrl
+                    ?: runCatching { AudioUrls.ayahStreamUri(reciter, surah, ayah).toString() }.getOrNull()
+        } ?: error("No ayah audio for this reciter")
         val name = if (timing.surahAudioUrl != null) "${reciter.id}-$surah.mp3" else "${reciter.id}-$surah-$ayah.mp3"
         val file = File(dir, name)
         if (!file.exists() || file.length() < 1024) downloadTo(url, file)
         return file
     }
+
 
     private fun downloadAyahAudio(
         reciter: AyahReciter,

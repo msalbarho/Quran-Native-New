@@ -38,9 +38,11 @@ class ShareMushafLayoutTest {
 
     @Test
     fun wrappedArabicLinesUseTightMushafSpacing() {
-        assertTrue(ShareMushafLayout.ARABIC_LINE_MULTIPLIER <= 1f)
-        assertTrue(ShareMushafLayout.ARABIC_LINE_MULTIPLIER >= 0.90f)
-        assertTrue(ShareMushafLayout.IMAGE_LINE_MULTIPLIER < 1.40f)
+        // v7: slightly roomier Arabic lines for 4–5-line whole-ayah pages; image share also roomier.
+        assertTrue(ShareMushafLayout.ARABIC_LINE_MULTIPLIER <= 1.20f)
+        assertTrue(ShareMushafLayout.ARABIC_LINE_MULTIPLIER >= 1.05f)
+        assertTrue(ShareMushafLayout.IMAGE_LINE_MULTIPLIER <= 1.50f)
+        assertTrue(ShareMushafLayout.IMAGE_LINE_MULTIPLIER >= 1.30f)
         assertTrue(ShareMushafLayout.PAGE_WORD_GAP < ShareMushafLayout.TEXT_WORD_GAP)
         assertTrue(ShareMushafLayout.TITLE_PAD_Y_FACTOR < 0.30f)
         val threeLines = 3 * ShareMushafLayout.arabicLineHeight(24f)

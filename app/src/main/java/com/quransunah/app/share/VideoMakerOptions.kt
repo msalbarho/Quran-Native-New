@@ -14,7 +14,7 @@ data class VideoMakerOptions(
     val motion: Boolean = false, // Ken Burns on the background
     val textBackdrop: Boolean = false,
     val showTitle: Boolean = true,
-    val titleFrame: Int = 0, // 0 Madinah header, 1 ornamented rect, 2 medallion
+    val titleFrame: Int = 0, // 0 Madinah header, 1 slim ornate frame
     val translation: Boolean = false,
     val marker: Boolean = true,
     val tajweedText: Boolean = false,

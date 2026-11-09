@@ -22,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -161,7 +162,7 @@ fun SettingsScreenContent(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 24.dp),
+            .padding(start = 14.dp, end = 14.dp, top = 10.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         SettingsSection(title = stringResource(R.string.settings_appearance), showDivider = false) {
@@ -230,7 +231,7 @@ fun SettingsScreenContent(
             modifier = Modifier.padding(top = 18.dp, bottom = 12.dp),
             color = paper.tone500.copy(alpha = 0.72f),
         )
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             CompactSettingsLink(stringResource(R.string.settings_user_guide_button), onOpenUserGuide)
             CompactSettingsLink(stringResource(R.string.settings_about_button)) { aboutOpen = true }
         }
@@ -261,8 +262,9 @@ private fun LanguageSettingRow(selected: String?, onSelect: (String?) -> Unit) {
             .clip(rowShape)
             .background(rowFill)
             .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, rowShape)
+            .minimumInteractiveComponentSize()
             .clickable(role = Role.Button) { dialogOpen = true }
-            .padding(horizontal = 14.dp, vertical = 12.dp),
+            .padding(horizontal = 10.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -330,7 +332,7 @@ private fun LanguagePickerDialog(
                         .clip(fieldShape)
                         .background(fieldFill)
                         .border(1.dp, paper.accent.copy(alpha = if (night) 0.34f else 0.18f), fieldShape)
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                        .padding(horizontal = 10.dp, vertical = 8.dp),
                 )
             },
         ) {
@@ -339,7 +341,7 @@ private fun LanguagePickerDialog(
                     text = stringResource(R.string.settings_no_languages),
                     color = paper.textMuted,
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(vertical = 12.dp),
+                    modifier = Modifier.padding(vertical = 7.dp),
                 )
             }
             if (showDevice) {
@@ -386,11 +388,11 @@ private fun PaletteChoiceGrid(
 ) {
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         val columns = if (maxWidth >= 270.dp) 3 else 2
-        Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             PaperPaletteId.entries.chunked(columns).forEach { row ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(9.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     row.forEach { id ->
                         val (start, end) = PaperPalettes.swatchGradient(id)
@@ -482,12 +484,12 @@ private fun SettingsSection(
     val paper = LocalPaperColors.current
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(11.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.Start,
     ) {
         if (showDivider) {
             HorizontalDivider(
-                modifier = Modifier.padding(top = 18.dp, bottom = 6.dp),
+                modifier = Modifier.padding(top = 10.dp, bottom = 4.dp),
                 color = paper.tone500.copy(alpha = 0.72f),
             )
         }
@@ -585,8 +587,9 @@ private fun SegmentedOption(
         modifier = modifier
             .clip(shape)
             .background(if (selected) paper.accent else Color.Transparent)
+            .minimumInteractiveComponentSize()
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 10.dp),
+            .padding(horizontal = 10.dp, vertical = 6.dp),
     )
 }
 
@@ -604,7 +607,7 @@ private fun FontSizeSlider(
 ) {
     val paper = LocalPaperColors.current
     var local by remember { mutableFloatStateOf(size.coerceIn(min, max)) }
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.settings_font_px, EasternArabic.formatDecimal(local)),
             color = paper.textStrong,
@@ -879,8 +882,9 @@ private fun CompactSettingsLink(label: String, onClick: () -> Unit) {
             .clip(shape)
             .background(paper.tone300)
             .border(ChromeTokens.GoldStroke, ChromeTokens.Gold.copy(alpha = 0.6f), shape)
+            .minimumInteractiveComponentSize()
             .clickable(onClick = onClick)
-            .padding(vertical = 7.dp, horizontal = 12.dp),
+            .padding(vertical = 6.dp, horizontal = 12.dp),
     )
 }
 

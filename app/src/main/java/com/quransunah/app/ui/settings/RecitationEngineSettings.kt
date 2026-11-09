@@ -46,7 +46,7 @@ internal fun RecitationEngineSettings(
     onWhisperDelete: () -> Unit,
 ) {
     val paper = LocalPaperColors.current
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
         EngineRow(
             title = stringResource(R.string.recitation_engine_zipformer),
             desc = stringResource(R.string.recitation_engine_zipformer_desc),
@@ -91,7 +91,7 @@ private fun EngineRow(title: String, desc: String, selected: Boolean, available:
             .background(if (selected) paper.accent else paper.tone300)
             .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, shape)
             .clickable(role = Role.RadioButton, onClick = onClick)
-            .padding(vertical = 10.dp, horizontal = 14.dp),
+            .padding(vertical = 7.dp, horizontal = 12.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         val fg = if (selected) paper.pageBackground else paper.textStrong
@@ -115,7 +115,7 @@ private fun WhisperModelRow(state: ModelState, onDownload: () -> Unit, onDelete:
         }
         ModelState.Ready -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.recitation_whisper_ready), color = paper.textStrong, fontSize = 13.sp, fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f).padding(vertical = 8.dp))
+                modifier = Modifier.weight(1f).padding(vertical = 5.dp))
             SmallPill(stringResource(R.string.recitation_whisper_delete), Modifier.weight(1f), onDelete)
         }
         is ModelState.Failed -> Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -142,7 +142,7 @@ private fun SmallPill(label: String, modifier: Modifier = Modifier, onClick: () 
             .background(paper.tone300)
             .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, shape)
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(vertical = 8.dp, horizontal = 10.dp),
+            .padding(vertical = 6.dp, horizontal = 10.dp),
     )
 }
 

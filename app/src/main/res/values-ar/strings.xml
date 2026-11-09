@@ -124,6 +124,7 @@
     <string name="word_saved">تم الحفظ</string>
     <string name="word_share_from_ayah">من آية</string>
     <string name="word_share_to_ayah">إلى الآية</string>
+    <string name="word_share_image_max">حتى ٣ آيات للصورة</string>
     <string name="word_share_image">مشاركة كصورة</string>
     <string name="word_share_ayah_range">من آية إلى آية</string>
     <string name="word_share_range_image">مشاركة المقطع كصورة واحدة</string>
@@ -360,6 +361,6 @@
     <string name="video_swatch_violet">بنفسجي</string>
     <string name="video_swatch_green">أخضر</string>
     <string name="video_swatch_red">أحمر</string>
-    <string name="video_watermark">Ø§Ù„Ù‚Ø±Ø¢Ù† Ø§Ù„ÙƒØ±ÙŠÙ… - ØªÙ„Ø§ÙˆØ© ÙˆØ§Ø³ØªÙ…Ø§Ø¹</string>
+    <string name="video_watermark">القرآن الكريم - تلاوة واستماع</string>
     <string name="video_preview_restart">إعادة المعاينة</string>
 </resources>

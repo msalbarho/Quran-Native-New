@@ -124,6 +124,7 @@
     <string name="word_saved">Saved</string>
     <string name="word_share_from_ayah">From ayah</string>
     <string name="word_share_to_ayah">To ayah</string>
+    <string name="word_share_image_max">Up to 3 ayat for an image</string>
     <string name="word_share_image">Share as image</string>
     <string name="word_share_ayah_range">From ayah to ayah</string>
     <string name="word_share_range_image">Share range as one image</string>
@@ -362,6 +363,6 @@
     <string name="video_swatch_violet">Violet</string>
     <string name="video_swatch_green">Green</string>
     <string name="video_swatch_red">Red</string>
-    <string name="video_watermark">Holy Quran — recitation and listening</string>
+    <string name="video_watermark">Holy Quran - recitation and listening</string>
     <string name="video_preview_restart">Replay preview</string>
 </resources>

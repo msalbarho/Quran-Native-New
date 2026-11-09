@@ -6,6 +6,7 @@ package com.quransunah.app.share
  * stay as they were on the page (RTL: remaining glyphs sit on the right).
  */
 object ShareMushafLayout {
+    const val IMAGE_SHARE_MAX_AYAT = 3
     const val FONT_SIZE_MIN = 22f
     const val FONT_SIZE_MAX = 29f
     const val TITLE_SIZE_FACTOR = 0.60f
@@ -13,7 +14,7 @@ object ShareMushafLayout {
      * Baseline distance as a fraction of Arabic text size. QPC page glyphs
      * already carry vertical bearings, so a full em of leading opens a gutter.
      */
-    const val ARABIC_LINE_MULTIPLIER = 0.96f
+    const val ARABIC_LINE_MULTIPLIER = 1.12f
     /** One-ayah video frames. Page glyphs need more than one em or harakat collide. */
     const val VIDEO_LINE_MULTIPLIER = 1.65f
     /** Arabic verse size in the video frame, relative to the fitted size. Translation is unchanged. */
@@ -21,7 +22,7 @@ object ShareMushafLayout {
     /** Inset used when wrapping a video line so glyphs stay inside the frame. */
     const val VIDEO_WRAP_WIDTH = 0.90f
     /** Wrapped share slides (not page-slot glyphs) still need room for harakat. */
-    const val IMAGE_LINE_MULTIPLIER = 1.28f
+    const val IMAGE_LINE_MULTIPLIER = 1.42f
     const val PAGE_WORD_GAP = 0.04f
     const val TEXT_WORD_GAP = 0.10f
     const val TITLE_PAD_Y_FACTOR = 0.18f
@@ -41,9 +42,9 @@ object ShareMushafLayout {
     )
 
     val MARKER_COLOURS = listOf(
-        "ذهب" to 0xFFD4B06A.toInt(),
+        "ذهبي" to 0xFFD4B06A.toInt(),
         "أبيض" to 0xFFFFFFFF.toInt(),
-        "أخضر" to 0xFF4CAF50.toInt(),
+        "سماوي" to 0xFF91CAFF.toInt(),
     )
 
     fun wordGap(textSize: Float, pageFont: Boolean): Float =

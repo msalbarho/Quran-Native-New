@@ -21,6 +21,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.defaultMinSize
 import com.quransunah.app.ui.theme.LocalPaperColors
 import com.quransunah.app.ui.shell.ChromeTokens
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -31,6 +32,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.Alignment
@@ -133,11 +135,18 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
                 data.verses.mapNotNull { verse ->
                     val timing = runCatching { store.loadForReciter(ui.videoReciterId, data.surah, verse.ayah) }
                         .getOrDefault(QulAyahTiming())
-                    val url = timing.audioUrl
-                        ?: timing.surahAudioUrl
-                        ?: QulRecitations.ayahAudioUrl(ui.videoReciterId, data.surah, verse.ayah)
-                        ?: reciter?.let { runCatching { AudioUrls.ayahStreamUri(it, data.surah, verse.ayah).toString() }.getOrNull() }
-                        ?: return@mapNotNull null
+                    val qulUrl = QulRecitations.ayahAudioUrl(ui.videoReciterId, data.surah, verse.ayah)
+                    val url = when {
+                        QulRecitations.hasWordTimingCatalog(ui.videoReciterId) ->
+                            qulUrl
+                                ?: timing.audioUrl
+                                ?: timing.surahAudioUrl
+                        else ->
+                            timing.audioUrl
+                                ?: timing.surahAudioUrl
+                                ?: qulUrl
+                                ?: reciter?.let { runCatching { AudioUrls.ayahStreamUri(it, data.surah, verse.ayah).toString() }.getOrNull() }
+                    } ?: return@mapNotNull null
                     PreviewClip(
                         ayah = verse.ayah,
                         url = url,
@@ -347,23 +356,46 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
                         }
                     }
                     when (step) {
-                        0 -> Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        0 -> Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             MakerPanel {
-                                Text(
-                                    SurahNames.displayName(uiLanguage, ui.word?.surah ?: content?.surah ?: 1, ui.surahName),
-                                    color = MakerGold,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                                Text(stringResource(R.string.video_range_hint))
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Text(
+                                        SurahNames.displayName(uiLanguage, ui.word?.surah ?: content?.surah ?: 1, ui.surahName),
+                                        color = MakerGold,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp,
+                                        maxLines = 1,
+                                        modifier = Modifier.weight(1.1f),
+                                    )
                                     MakerNumber(stringResource(R.string.video_from_ayah), ui.videoFromAyah, 1..SurahAyahCounts.ayahCount(ui.word?.surah ?: 1), Modifier.weight(1f), viewModel::setVideoFrom)
                                     MakerNumber(stringResource(R.string.video_to_ayah), ui.videoToAyah, ui.videoFromAyah..minOf(SurahAyahCounts.ayahCount(ui.word?.surah ?: 1), ui.videoFromAyah + 9), Modifier.weight(1f), viewModel::setVideoTo)
                                 }
                             }
                             MakerPanel {
-                                Text(stringResource(R.string.video_reciter), color = MakerGold)
-                                OutlinedButton(onClick = { reciters = true }, modifier = Modifier.fillMaxWidth(), shape = GoldCornerFrameShape(10.dp)) {
-                                    Text((ui.videoReciters.ifEmpty { ui.reciters }).firstOrNull { it.id == ui.videoReciterId }?.let { ReciterNames.display(uiLanguage, it.id, it.name) } ?: stringResource(R.string.video_choose_reciter), color = MakerGold)
+                                Row(
+                                    Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Text(stringResource(R.string.video_reciter), color = MakerGold, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(0.35f))
+                                    OutlinedButton(
+                                        onClick = { reciters = true },
+                                        modifier = Modifier.weight(1f).heightIn(min = 40.dp),
+                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                                        shape = GoldCornerFrameShape(10.dp),
+                                    ) {
+                                        Text(
+                                            (ui.videoReciters.ifEmpty { ui.reciters }).firstOrNull { it.id == ui.videoReciterId }?.let { ReciterNames.display(uiLanguage, it.id, it.name) }
+                                                ?: stringResource(R.string.video_choose_reciter),
+                                            color = MakerGold,
+                                            fontSize = 13.sp,
+                                            maxLines = 1,
+                                        )
+                                    }
                                 }
                             }
                             content?.mushafLines?.takeIf { it.isNotEmpty() }?.let { lines ->
@@ -410,11 +442,10 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 listOf(
                                     R.string.video_tab_font,
-                                    R.string.video_tab_colors,
-                                    R.string.video_tab_title,
-                                    R.string.video_tab_text,
                                     R.string.video_translation,
                                     R.string.video_tab_tracking,
+                                    R.string.video_tab_title,
+                                    R.string.video_tab_text,
                                 ).forEachIndexed { index, label ->
                                     MakerChoice(stringResource(label), styleTab == index, Modifier.weight(1f)) { styleTab = index }
                                 }
@@ -427,34 +458,47 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
                                             MakerChoice(stringResource(label), options.font == i, Modifier.weight(1f)) { options = options.copy(font = i) }
                                         }
                                     }
-                                    4 -> MakerToggle(translationLabel, options.translation) { options = options.copy(translation = it) }
-                                    1 -> {
-                                        Text(stringResource(R.string.video_highlight_color), fontSize = 13.sp)
+                                    1 -> MakerToggle(translationLabel, options.translation) { options = options.copy(translation = it) }
+                                    2 -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            listOf(
+                                                ShareMushafLayout.TRACKING_BAND to R.string.video_track_band,
+                                                ShareMushafLayout.TRACKING_CUMULATIVE to R.string.video_track_color,
+                                                ShareMushafLayout.TRACKING_UNDERLINE to R.string.video_track_line,
+                                            ).forEach { (mode, label) ->
+                                                MakerChoice(stringResource(label), options.trackingMode == mode, Modifier.weight(1f)) {
+                                                    options = options.copy(trackingMode = mode)
+                                                }
+                                            }
+                                        }
+                                        Text(stringResource(R.string.video_highlight_color), fontSize = 12.sp, color = MakerGold)
                                         val swatches = videoSwatches()
                                         swatches.take(4).let { row ->
-                                            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(6.dp)) {
-                                                row.forEach { (name,value) ->
-                                                    PaletteOption(label=name,start=Color(value),end=Color(value),active=options.highlightColor==value,
-                                                        onClick={options=options.copy(highlightColor=value)},modifier=Modifier.weight(1f))
+                                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                row.forEach { (name, value) ->
+                                                    PaletteOption(label=name, start=Color(value), end=Color(value), active=options.highlightColor==value,
+                                                        onClick={ options=options.copy(highlightColor=value) }, modifier=Modifier.weight(1f))
                                                 }
                                             }
                                         }
                                         swatches.drop(4).let { row ->
-                                            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(6.dp)) {
-                                                row.forEach { (name,value) ->
-                                                    PaletteOption(label=name,start=Color(value),end=Color(value),active=options.highlightColor==value,
-                                                        onClick={options=options.copy(highlightColor=value)},modifier=Modifier.weight(1f))
+                                            if (row.isNotEmpty()) {
+                                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                    row.forEach { (name, value) ->
+                                                        PaletteOption(label=name, start=Color(value), end=Color(value), active=options.highlightColor==value,
+                                                            onClick={ options=options.copy(highlightColor=value) }, modifier=Modifier.weight(1f))
+                                                    }
+                                                    repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
                                                 }
-                                                repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
                                             }
                                         }
                                     }
-                                    2 -> {
+                                    3 -> Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                         MakerToggle(stringResource(R.string.video_surah_name), options.showTitle) { options = options.copy(showTitle = it) }
                                         if (options.showTitle) {
-                                            Text(stringResource(R.string.video_name_frame), fontSize = 13.sp)
+                                            Text(stringResource(R.string.video_name_frame), fontSize = 12.sp, color = MakerGold)
                                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                                listOf(R.string.video_frame_mushaf, R.string.video_frame_ornate, R.string.video_frame_medal).forEachIndexed { i, label ->
+                                                listOf(R.string.video_frame_mushaf, R.string.video_frame_ornate).forEachIndexed { i, label ->
                                                     MakerChoice(stringResource(label), options.titleFrame == i, Modifier.weight(1f)) {
                                                         options = options.copy(titleFrame = i)
                                                     }
@@ -462,32 +506,30 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
                                             }
                                         }
                                     }
-                                    3 -> {
+                                    4 -> Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        Text(stringResource(R.string.video_text_size, ShareMushafLayout.scaleToFontSize(options.textScale).toInt()), fontSize = 12.sp)
+                                        Slider(
+                                            value = ShareMushafLayout.scaleToFontSize(options.textScale),
+                                            onValueChange = { options = options.copy(textScale = ShareMushafLayout.fontSizeToScale(it)) },
+                                            valueRange = ShareMushafLayout.FONT_SIZE_MIN..ShareMushafLayout.FONT_SIZE_MAX,
+                                            steps = (ShareMushafLayout.FONT_SIZE_MAX - ShareMushafLayout.FONT_SIZE_MIN).toInt() - 1,
+                                        )
                                         MakerToggle(stringResource(R.string.video_backdrop), options.textBackdrop) { options = options.copy(textBackdrop = it) }
-                                        Text(stringResource(R.string.video_text_color), fontSize = 13.sp)
                                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                             MakerChoice(stringResource(R.string.video_color_white), !options.tajweedText, Modifier.weight(1f)) { options = options.copy(tajweedText = false) }
                                             MakerChoice(stringResource(R.string.video_color_tajweed), options.tajweedText, Modifier.weight(1f)) { options = options.copy(tajweedText = true) }
                                         }
-                                        MakerToggle(translationLabel, options.translation) { options = options.copy(translation = it) }
                                         MakerToggle(stringResource(R.string.video_verse_number), options.marker) { options = options.copy(marker = it) }
                                         if (options.marker) {
                                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                                listOf(R.string.video_swatch_gold, R.string.video_color_white, R.string.video_swatch_green).zip(ShareMushafLayout.MARKER_COLOURS).forEach { (label, colour) ->
-                                                    val value = colour.second
-                                                    MakerChoice(stringResource(label), options.markerColor == value, Modifier.weight(1f)) {
-                                                        options = options.copy(markerColor = value)
+                                                listOf(R.string.video_swatch_gold, R.string.video_color_white, R.string.video_swatch_sky)
+                                                    .zip(ShareMushafLayout.MARKER_COLOURS)
+                                                    .forEach { (label, colour) ->
+                                                        val value = colour.second
+                                                        MakerChoice(stringResource(label), options.markerColor == value, Modifier.weight(1f)) {
+                                                            options = options.copy(markerColor = value)
+                                                        }
                                                     }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    4 -> {
-                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                            listOf(R.string.video_track_band, R.string.video_track_color, R.string.video_track_line).forEachIndexed { mode, label ->
-                                                MakerChoice(stringResource(label), options.trackingMode == mode, Modifier.weight(1f)) {
-                                                    options = options.copy(trackingMode = mode)
-                                                }
                                             }
                                         }
                                     }
@@ -501,12 +543,14 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
                             if(saved)Text(stringResource(R.string.video_saved_mark),color=MakerGold,style=MaterialTheme.typography.bodySmall)
                             Spacer(Modifier.weight(1f))
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(onClick = { export() }, enabled = !busy && content!=null, modifier = Modifier.weight(1f).heightIn(min = 50.dp),
-                                    shape = GoldCornerFrameShape(10.dp), colors = ButtonDefaults.buttonColors(containerColor = MakerGold)) {
+                                Button(onClick = { export() }, enabled = !busy && content!=null, modifier = Modifier.weight(1f).minimumInteractiveComponentSize().heightIn(min = 42.dp).defaultMinSize(minHeight = 40.dp),
+                                    shape = GoldCornerFrameShape(10.dp), colors = ButtonDefaults.buttonColors(containerColor = MakerGold),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)) {
                                     Text(if(busy && !sharing) stringResource(R.string.video_preparing) else stringResource(R.string.video_save), fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                 }
-                                Button(onClick = { export(share=true) }, enabled = !busy && content!=null, modifier = Modifier.weight(1f).heightIn(min = 50.dp),
-                                    shape = GoldCornerFrameShape(10.dp), colors = ButtonDefaults.buttonColors(containerColor = MakerGold)) {
+                                Button(onClick = { export(share=true) }, enabled = !busy && content!=null, modifier = Modifier.weight(1f).minimumInteractiveComponentSize().heightIn(min = 42.dp).defaultMinSize(minHeight = 40.dp),
+                                    shape = GoldCornerFrameShape(10.dp), colors = ButtonDefaults.buttonColors(containerColor = MakerGold),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)) {
                                     Text(if(busy && sharing) stringResource(R.string.video_preparing) else stringResource(R.string.video_share), fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                 }
                             }
@@ -721,9 +765,10 @@ private data class PreviewClip(
     Button(
         onClick = click,
         enabled = enabled,
-        modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp),
+        modifier = Modifier.fillMaxWidth().minimumInteractiveComponentSize().heightIn(min = 40.dp).defaultMinSize(minHeight = 40.dp),
         shape = GoldCornerFrameShape(10.dp),
         colors = ButtonDefaults.buttonColors(containerColor = paper.accent, contentColor = paper.pageBackground),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
     ) { Text(label, fontWeight = FontWeight.Bold) }
 }
 @Composable private fun MakerChoice(label: String, selected: Boolean, modifier: Modifier, click: () -> Unit) {
@@ -731,11 +776,12 @@ private data class PreviewClip(
     val shape = GoldCornerFrameShape(8.dp)
     Box(
         modifier
-            .heightIn(min = 40.dp)
+            .heightIn(min = 36.dp)
+            .defaultMinSize(minHeight = 40.dp)
             .background(if (selected) paper.accent else paper.pageBody, shape)
             .border(ChromeTokens.GoldStroke, ChromeTokens.Gold.copy(alpha = if (selected) 1f else 0.55f), shape)
             .clickable(onClick = click)
-            .padding(horizontal = 4.dp, vertical = 8.dp),
+            .padding(horizontal = 4.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
