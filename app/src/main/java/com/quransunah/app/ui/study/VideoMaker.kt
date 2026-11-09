@@ -41,6 +41,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -126,6 +129,22 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
     var previewPlaying by remember { mutableStateOf(true) }
     var previewRestart by remember { mutableIntStateOf(0) }
     val onPreview = step in 1..3 && !busy
+    // ONLY the share-video preview MediaPlayer: pause when the maker leaves the
+    // foreground. Do not auto-resume — user taps play. Does not touch the main
+    // recitation AudioPlayer service / notification / Android Auto.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_PAUSE || event == Lifecycle.Event.ON_STOP) {
+                previewPlaying = false
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            previewPlaying = false
+        }
+    }
     LaunchedEffect(content, ui.videoReciterId) {
         previewTimings = emptyList()
         previewClockMs = 0L

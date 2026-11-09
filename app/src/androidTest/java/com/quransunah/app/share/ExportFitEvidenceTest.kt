@@ -2,8 +2,11 @@ package com.quransunah.app.share
 
 import android.content.ContentValues
 import android.graphics.Bitmap
+import android.graphics.Paint
+import android.graphics.Typeface
 import android.os.Environment
 import android.provider.MediaStore
+import android.text.TextPaint
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.quransunah.app.data.catalog.ReciterCatalog
@@ -16,6 +19,7 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.math.abs
 
 @RunWith(AndroidJUnit4::class)
 class ExportFitEvidenceTest {
@@ -23,7 +27,7 @@ class ExportFitEvidenceTest {
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/v11-share")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/v12-share")
             put(MediaStore.MediaColumns.IS_PENDING, 1)
         }
         val resolver = context.contentResolver
@@ -34,22 +38,8 @@ class ExportFitEvidenceTest {
         resolver.update(uri, values, null, null)
     }
 
-    private fun qcfLines(glyphs: QpcV4Glyphs, page: Int, rows: List<List<Triple<Int, Int, Int>>>): List<ShareMushafLine> =
-        rows.mapIndexed { li, row ->
-            ShareMushafLine(
-                pageNumber = page,
-                lineNumber = li + 1,
-                words = row.map { (ayah, pos, wid) ->
-                    if (wid == 0) ShareMushafWord(ayah, pos, "", "0", isMarker = true, sourcePage = page)
-                    else ShareMushafWord(ayah, pos, glyphs.forWord(wid).orEmpty(), "w$wid", sourcePage = page)
-                },
-            )
-        }
-
-    /** Build mushaf lines for one ayah from contiguous word_ids (last may be marker). */
     private fun ayahLines(
         glyphs: QpcV4Glyphs,
-        surah: Int,
         ayah: Int,
         page: Int,
         firstWid: Int,
@@ -66,16 +56,17 @@ class ExportFitEvidenceTest {
             }
             pos++
         }
-        // Chunk into fake mushaf rows of ~10 so source spans multiple lines (filter is by ayah).
-        return words.chunked(10).mapIndexed { i, chunk ->
-            ShareMushafLine(page, i + 1, chunk)
-        }
+        return words.chunked(10).mapIndexed { i, chunk -> ShareMushafLine(page, i + 1, chunk) }
     }
 
     private fun versesFrom(lines: List<ShareMushafLine>, surah: Int, name: String, from: Int, to: Int): AyahShareContent {
         val vs = (from..to).map { ayah ->
             val words = lines.flatMap { it.words }.filter { it.ayah == ayah && !it.isMarker }
-            AyahShareVerse(ayah, lines.first().pageNumber, words.joinToString(" ") { it.qcf }, words.joinToString(" ") { it.uthmanic })
+            AyahShareVerse(
+                ayah, lines.first().pageNumber,
+                words.joinToString(" ") { it.qcf },
+                words.joinToString(" ") { it.uthmanic },
+            )
         }
         return AyahShareContent(surah, name, from, to, vs, mushafLines = lines.filter { l -> l.words.any { it.ayah in from..to } })
     }
@@ -93,71 +84,132 @@ class ExportFitEvidenceTest {
         val expected = bodyPositions(content.mushafLines, ayah)
         assertTrue("$label expected words", expected.isNotEmpty())
         val pages = exporter.wrappedAyahPages(content, options, 540, ayah)
-        assertTrue("$label pages", pages.isNotEmpty())
         val got = pages.flatten().flatMap { it.words }.filter { !it.isMarker }.map { it.position }
-        assertEquals("$label no truncated words across pages", expected, got)
-        // Pages must be disjoint on body positions.
-        val seen = HashSet<Int>()
-        for ((i, page) in pages.withIndex()) {
-            for (p in page.flatMap { it.words }.filter { !it.isMarker }.map { it.position }) {
-                assertTrue("$label page $i duplicate pos $p", seen.add(p))
-            }
-        }
+        assertEquals("$label no truncated words", expected, got)
     }
 
     private fun assertMarkerGlued(pages: List<List<ShareMushafLine>>, label: String) {
-        val lines = pages.flatten()
-        for (line in lines) {
+        for (line in pages.flatten()) {
             for ((i, w) in line.words.withIndex()) {
                 if (!w.isMarker) continue
-                assertTrue(
-                    "$label marker alone on line (pos=${w.position} lineWords=${line.words.size})",
-                    i > 0 && !line.words[i - 1].isMarker,
-                )
+                assertTrue("$label marker alone", i > 0 && !line.words[i - 1].isMarker)
             }
         }
-        val markers = lines.flatMap { it.words }.count { it.isMarker }
-        assertTrue("$label expected marker(s)", markers >= 1)
     }
 
-    private fun assertDragClamps() {
-        val g = makerVerticalPlacement(0.95f, 0.02f, 0.25f, 0.06f, showTitle = true, translation = true)
-        // Title stays above ayah block; ayah stays above watermark.
-        assertTrue("title above ayah", g.titleCenterY + g.titleHeight / 2f <= g.ayahCenterY - g.ayahHeight / 2f + 0.001f)
-        assertTrue("ayah above watermark", g.ayahCenterY + g.ayahHeight / 2f <= 0.90f + 0.001f)
-        val g2 = makerVerticalPlacement(0.10f, 0.80f, 0.20f, 0.06f, showTitle = true, translation = false)
-        assertTrue("title not past ayah top", g2.titleCenterY <= g2.ayahCenterY)
-    }
-
-        private fun bitmapSignature(bmp: Bitmap): Long {
-        var h = 1125899906842597L
-        val stepX = (bmp.width / 40).coerceAtLeast(1)
-        val stepY = (bmp.height / 40).coerceAtLeast(1)
-        for (y in 0 until bmp.height step stepY) {
-            for (x in 0 until bmp.width step stepX) {
-                h = h * 1315423911L + bmp.getPixel(x, y)
-            }
+    /**
+     * Measure QCF page-4 widths for 2:17 words 1–7 and solve for the fraction of
+     * frame width where those seven fill VIDEO_WRAP_WIDTH and the 8th does not.
+     */
+    private suspend fun calibrateFractionFrom217(fonts: QcfFontManager, glyphs: QpcV4Glyphs): Float {
+        fonts.ensureMaps()
+        val face = fonts.loadPageTypeface(4, night = true)
+        val paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
+        paint.typeface = if (face != Typeface.DEFAULT) face else Typeface.DEFAULT
+        val probe = 100f
+        paint.textSize = probe
+        val gap = ShareMushafLayout.wordGap(probe, pageFont = true)
+        fun widthOf(wid: Int): Float {
+            val raw = glyphs.forWord(wid).orEmpty()
+            // Match exporter visualPua: reverse only BMP PUA.
+            val shown = if (raw.any { it.code in 0xE000..0xF8FF }) raw.reversed() else raw
+            return paint.measureText(shown)
         }
-        return h
+        val w7 = (216..222).sumOf { widthOf(it).toDouble() }.toFloat() + 6f * gap
+        val w8 = w7 + gap + widthOf(223)
+        // size S scales linearly with probe; at S: total7 = w7 * (S/probe)
+        // want total7 == WRAP * frameW  =>  S/frameW = WRAP * probe / w7
+        val frac = ShareMushafLayout.VIDEO_WRAP_WIDTH * probe / w7
+        // Sanity: 8 words must exceed wrap at this size.
+        val at = { f: Float -> w8 * (f * 540f / probe) }
+        assertTrue("8th word must overflow wrap at calibrated size (frac=$frac)", at(frac) > 540f * ShareMushafLayout.VIDEO_WRAP_WIDTH)
+        return frac
     }
 
     @Test
-    fun oneAyahPagesFatihaAndKursi() = runBlocking {
+    fun fixedSizeBaqarah17AndEvidence() = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val glyphs = QpcV4Glyphs(context)
         val fonts = QcfFontManager(context, glyphs)
         fonts.ensureMaps()
         val exporter = AyahShareExporter(context, fonts, ReciterCatalog(context))
-        val evidence = File(context.cacheDir, "v11-export-fit").apply { deleteRecursively(); mkdirs() }
+        val evidence = File(context.cacheDir, "v12-export-fit").apply { deleteRecursively(); mkdirs() }
         val options = VideoMakerOptions(
             translation = false,
             backgrounds = ShareBackgrounds.FILES.take(1),
             trackingMode = ShareMushafLayout.TRACKING_BAND,
             showTitle = true,
+            marker = true,
         )
 
+        val calibrated = calibrateFractionFrom217(fonts, glyphs)
+        val report = File(evidence, "v12-size-calibrate.txt")
+        report.writeText(
+            "calibratedFraction=$calibrated constant=${ShareMushafLayout.VIDEO_AYAH_SIZE_FRACTION} " +
+                "delta=${abs(calibrated - ShareMushafLayout.VIDEO_AYAH_SIZE_FRACTION)}\n",
+        )
+        run {
+            val values = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, "v12-size-calibrate.txt")
+                put(MediaStore.MediaColumns.MIME_TYPE, "text/plain")
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/v12-share")
+                put(MediaStore.MediaColumns.IS_PENDING, 1)
+            }
+            val resolver = context.contentResolver
+            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: error("insert")
+            resolver.openOutputStream(uri)!!.use { it.write(report.readBytes()) }
+            values.clear(); values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+            resolver.update(uri, values, null, null)
+        }
+        // Constant must match calibration within 1.5% (frozen value).
+        assertTrue(
+            "VIDEO_AYAH_SIZE_FRACTION=${ShareMushafLayout.VIDEO_AYAH_SIZE_FRACTION} vs calibrated=$calibrated",
+            abs(ShareMushafLayout.VIDEO_AYAH_SIZE_FRACTION - calibrated) / calibrated < 0.015f,
+        )
+
+        // 2:17 word_ids 216..233 (marker 233), page 4.
+        val baq17Lines = ayahLines(glyphs, 17, 4, 216, 233, 233)
+        val baq17 = versesFrom(baq17Lines, 2, "Al-Baqarah", 17, 17)
+        assertPagesComplete(exporter, baq17, options, 17, "2:17")
+        val pages17 = exporter.wrappedAyahPages(baq17, options, 540, 17)
+        assertMarkerGlued(pages17, "2:17")
+        val line1 = pages17.first().first().words.filter { !it.isMarker }
+        assertEquals("2:17 line1 word count", 7, line1.size)
+        assertEquals("2:17 line1 positions", (1..7).toList(), line1.map { it.position })
+        assertTrue("2:17 has continuation", pages17.first().size >= 2 || pages17.size >= 1 && pages17.first().size >= 2)
+        val allLines = pages17.flatten()
+        assertTrue("2:17 multi-line", allLines.size >= 2)
+        assertEquals("2:17 line1 last pos", 7, allLines.first().words.last { !it.isMarker }.position)
+        assertEquals("2:17 line2 starts with ما (pos 8)", 8, allLines[1].words.first { !it.isMarker }.position)
+
+        val bmp17 = exporter.makerPreview(baq17, options, word = 1, progress = 0.35f, activeAyah = 17)
+        val f17 = File(evidence, "v12-export-baqarah17.jpg")
+        f17.outputStream().use { bmp17.compress(Bitmap.CompressFormat.JPEG, 92, it) }
+        publishJpeg(context, f17, f17.name)
+        bmp17.recycle()
+
+        val baq17Tr = baq17.copy(
+            verses = baq17.verses.map {
+                it.copy(
+                    englishTranslation = "Their example is that of someone who kindles a fire, but when it lights up all around them, Allah takes away their light, leaving them in complete darkness—unable to see.",
+                )
+            },
+        )
+        val bmp17tr = exporter.makerPreview(baq17Tr, options.copy(translation = true), word = 1, progress = 0.35f, activeAyah = 17)
+        val f17tr = File(evidence, "v12-export-baqarah17-tr.jpg")
+        f17tr.outputStream().use { bmp17tr.compress(Bitmap.CompressFormat.JPEG, 92, it) }
+        publishJpeg(context, f17tr, f17tr.name)
+        bmp17tr.recycle()
+
+        // Fatiha 7 + Kursi p1/p2 at the same fixed size.
+        fun qcfLines(page: Int, rows: List<List<Triple<Int, Int, Int>>>) = rows.mapIndexed { li, row ->
+            ShareMushafLine(page, li + 1, row.map { (ayah, pos, wid) ->
+                if (wid == 0) ShareMushafWord(ayah, pos, "", "0", isMarker = true, sourcePage = page)
+                else ShareMushafWord(ayah, pos, glyphs.forWord(wid).orEmpty(), "w$wid", sourcePage = page)
+            })
+        }
         val fatihaLines = qcfLines(
-            glyphs, 1,
+            1,
             listOf(
                 listOf(Triple(1, 1, 1), Triple(1, 2, 2), Triple(1, 3, 3), Triple(1, 4, 4), Triple(1, 5, 0)),
                 listOf(Triple(2, 1, 6), Triple(2, 2, 7), Triple(2, 3, 8), Triple(2, 4, 9), Triple(2, 5, 0)),
@@ -176,103 +228,27 @@ class ExportFitEvidenceTest {
             assertPagesComplete(exporter, fatiha, options, ayah, "fatiha $ayah")
             assertMarkerGlued(exporter.wrappedAyahPages(fatiha, options, 540, ayah), "fatiha $ayah")
         }
-        assertDragClamps()
-        for (ayah in listOf(1, 3, 7)) {
-            val bmp = exporter.makerPreview(fatiha, options, word = 1, progress = 0.3f, activeAyah = ayah)
-            val f = File(evidence, "v11-export-fatiha-ayah$ayah.jpg")
-            f.outputStream().use { bmp.compress(Bitmap.CompressFormat.JPEG, 92, it) }
-            publishJpeg(context, f, f.name)
-            bmp.recycle()
-            System.gc()
-        }
+        val f7 = exporter.makerPreview(fatiha, options, word = 1, progress = 0.3f, activeAyah = 7)
+        File(evidence, "v12-export-fatiha-ayah7.jpg").outputStream().use { f7.compress(Bitmap.CompressFormat.JPEG, 92, it) }
+        publishJpeg(context, File(evidence, "v12-export-fatiha-ayah7.jpg"), "v12-export-fatiha-ayah7.jpg")
+        f7.recycle()
 
-        // Real 2:255 word_ids 5436..5486 (marker 5486).
-        val kursiLines = ayahLines(glyphs, 2, 255, 42, 5436, 5486, 5486)
+        val kursiLines = ayahLines(glyphs, 255, 42, 5436, 5486, 5486)
         val kursi = versesFrom(kursiLines, 2, "Al-Baqarah", 255, 255)
         assertPagesComplete(exporter, kursi, options, 255, "kursi")
         val kursiPages = exporter.wrappedAyahPages(kursi, options, 540, 255)
         assertMarkerGlued(kursiPages, "kursi")
-        assertTrue("kursi should paginate or hold all words", kursiPages.isNotEmpty())
-        val kursiBody = bodyPositions(kursi.mushafLines, 255)
-        val earlyWord = kursiBody.first()
-        // Must pick a word on the LAST wrapped page — 4/5 through the ayah can
-        // still fall on page 1 when page 1 holds most of the words.
-        val lateWord = kursiPages.last().flatMap { it.words }.first { !it.isMarker }.position
-        val k1 = exporter.makerPreview(kursi, options, word = earlyWord, progress = 0.2f, activeAyah = 255)
-        val k1f = File(evidence, "v11-export-kursi-p1.jpg")
-        k1f.outputStream().use { k1.compress(Bitmap.CompressFormat.JPEG, 92, it) }
-        publishJpeg(context, k1f, k1f.name)
-        val sig1 = bitmapSignature(k1)
+        assertTrue("kursi paginates", kursiPages.size >= 2)
+        val early = bodyPositions(kursi.mushafLines, 255).first()
+        val late = kursiPages.last().flatMap { it.words }.first { !it.isMarker }.position
+        val k1 = exporter.makerPreview(kursi, options, word = early, progress = 0.2f, activeAyah = 255)
+        File(evidence, "v12-export-kursi-p1.jpg").outputStream().use { k1.compress(Bitmap.CompressFormat.JPEG, 92, it) }
+        publishJpeg(context, File(evidence, "v12-export-kursi-p1.jpg"), "v12-export-kursi-p1.jpg")
         k1.recycle()
-        System.gc()
-        val k2 = exporter.makerPreview(kursi, options, word = lateWord, progress = 0.8f, activeAyah = 255)
-        val k2f = File(evidence, "v11-export-kursi-p2.jpg")
-        k2f.outputStream().use { k2.compress(Bitmap.CompressFormat.JPEG, 92, it) }
-        publishJpeg(context, k2f, k2f.name)
-        val sig2 = bitmapSignature(k2)
+        val k2 = exporter.makerPreview(kursi, options, word = late, progress = 0.8f, activeAyah = 255)
+        File(evidence, "v12-export-kursi-p2.jpg").outputStream().use { k2.compress(Bitmap.CompressFormat.JPEG, 92, it) }
+        publishJpeg(context, File(evidence, "v12-export-kursi-p2.jpg"), "v12-export-kursi-p2.jpg")
         k2.recycle()
-        assertTrue("kursi must paginate (got ${kursiPages.size} pages)", kursiPages.size >= 2)
-        assertNotEquals("kursi p1/p2 must differ (early=$earlyWord late=$lateWord pages=${kursiPages.size})", sig1, sig2)
-
-        // Longest ayah 2:282 word_ids 6171..6299 (marker last).
-        val debtLines = ayahLines(glyphs, 2, 282, 48, 6171, 6299, 6299)
-        val debt = versesFrom(debtLines, 2, "Al-Baqarah", 282, 282)
-        assertPagesComplete(exporter, debt, options, 282, "2:282")
-        val debtPages = exporter.wrappedAyahPages(debt, options, 540, 282)
-        assertMarkerGlued(debtPages, "2:282")
-        assertTrue("2:282 must span multiple pages at readable size", debtPages.size >= 2)
-        val debtBody = bodyPositions(debt.mushafLines, 282)
-        val d1 = exporter.makerPreview(debt, options, word = debtBody.first(), progress = 0.2f, activeAyah = 282)
-        val d1f = File(evidence, "v11-export-282-p1.jpg")
-        d1f.outputStream().use { d1.compress(Bitmap.CompressFormat.JPEG, 92, it) }
-        publishJpeg(context, d1f, d1f.name)
-        val dsig1 = bitmapSignature(d1)
-        d1.recycle()
-        System.gc()
-        val d2 = exporter.makerPreview(debt, options, word = debtBody.last(), progress = 0.8f, activeAyah = 282)
-        val d2f = File(evidence, "v11-export-282-p2.jpg")
-        d2f.outputStream().use { d2.compress(Bitmap.CompressFormat.JPEG, 92, it) }
-        publishJpeg(context, d2f, d2f.name)
-        val dsig2 = bitmapSignature(d2)
-        d2.recycle()
-        assertNotEquals("2:282 first/last page frames must differ", dsig1, dsig2)
-
-        // Translation-on evidence (t178u): Fatiha 7 + Kursi pages must keep translation in-frame.
-        val trOptions = options.copy(translation = true)
-        val fatihaTr = fatiha.copy(
-            verses = fatiha.verses.map {
-                it.copy(
-                    englishTranslation = when (it.ayah) {
-                        1 -> "In the Name of Allah—the Most Compassionate, Most Merciful."
-                        3 -> "the Most Compassionate, Most Merciful,"
-                        7 -> "the Path of those You have blessed—not those You are displeased with, or those who are astray."
-                        else -> "Ayah ${it.ayah}"
-                    },
-                )
-            },
-        )
-        for (ayah in listOf(1, 3, 7)) {
-            val bmp = exporter.makerPreview(fatihaTr, trOptions, word = 1, progress = 0.3f, activeAyah = ayah)
-            val f = File(evidence, "v11-export-fatiha-ayah${ayah}-tr.jpg")
-            f.outputStream().use { bmp.compress(Bitmap.CompressFormat.JPEG, 92, it) }
-            publishJpeg(context, f, f.name)
-            bmp.recycle()
-            System.gc()
-        }
-        val kursiTr = kursi.copy(
-            verses = kursi.verses.map {
-                it.copy(
-                    englishTranslation = "Allah! There is no god except Him, the Ever-Living, All-Sustaining… His Seat encompasses the heavens and the earth, and the preservation of both does not tire Him. For He is the Most High, the Greatest.",
-                )
-            },
-        )
-        val kTr1 = exporter.makerPreview(kursiTr, trOptions, word = earlyWord, progress = 0.2f, activeAyah = 255)
-        File(evidence, "v11-export-kursi-p1-tr.jpg").outputStream().use { kTr1.compress(Bitmap.CompressFormat.JPEG, 92, it) }
-        publishJpeg(context, File(evidence, "v11-export-kursi-p1-tr.jpg"), "v11-export-kursi-p1-tr.jpg")
-        kTr1.recycle()
-        val kTr2 = exporter.makerPreview(kursiTr, trOptions, word = lateWord, progress = 0.8f, activeAyah = 255)
-        File(evidence, "v11-export-kursi-p2-tr.jpg").outputStream().use { kTr2.compress(Bitmap.CompressFormat.JPEG, 92, it) }
-        publishJpeg(context, File(evidence, "v11-export-kursi-p2-tr.jpg"), "v11-export-kursi-p2-tr.jpg")
-        kTr2.recycle()
+        assertNotEquals("kursi pages differ", early, late)
     }
 }

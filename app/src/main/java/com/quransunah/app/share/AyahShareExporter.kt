@@ -1732,62 +1732,16 @@ class AyahShareExporter @Inject constructor(
 
     private fun lineHeight(paint: TextPaint): Float = paint.textSize * ShareMushafLayout.IMAGE_LINE_MULTIPLIER
     private suspend fun sharedAyahTextSize(
-        lines: List<ShareMushafLine>,
-        options: VideoMakerOptions,
+        @Suppress("UNUSED_PARAMETER") lines: List<ShareMushafLine>,
+        @Suppress("UNUSED_PARAMETER") options: VideoMakerOptions,
         width: Int,
     ): Float {
-        // One uniform size for the whole selection: the LARGEST size such that
-        // every selected ayah reflows into ≤ VIDEO_AYAH_PAGE_MAX_LINES inside
-        // VIDEO_WRAP_WIDTH. Short ayat wrap as a paragraph (mushaf breaks ignored).
-        val maxWidth = width * ShareMushafLayout.VIDEO_WRAP_WIDTH
-        val minSize = width * ShareMushafLayout.VIDEO_MIN_WIDTH_FRACTION
-        val maxSize = width * ShareMushafLayout.VIDEO_FIXED_WIDTH_FRACTION *
+        // One fixed size for every selection (preview + export). Calibrated so
+        // 2:17 wraps with line 1 = words through أضاءت (7 words); see VIDEO_AYAH_SIZE_FRACTION.
+        return width * ShareMushafLayout.VIDEO_AYAH_SIZE_FRACTION *
             ShareMushafLayout.VIDEO_ARABIC_SIZE_FACTOR
-        if (lines.isEmpty() || maxWidth <= 1f) return minSize
-        val ayahs = ayahsInOrder(lines)
-        val maxLines = ShareMushafLayout.VIDEO_AYAH_PAGE_MAX_LINES
-        val height = (width * 16f / 9f).toInt().coerceAtLeast(width)
-        val availableH = height * (if (options.translation) 0.40f else 0.50f)
-        val paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
-        suspend fun allFit(size: Float): Boolean {
-            // Size is limited by whether ONE page (≤ maxLines) clears the text band.
-            // Ayat that still need more lines at this size continue on the next page —
-            // never shrink just to cram words, and never drop overflow.
-            for (ayah in ayahs) {
-                val source = ayahSourceLines(lines, ayah)
-                if (source.isEmpty()) continue
-                val wrapped = reflowMushafLines(source, options, size, maxWidth)
-                if (wrapped.isEmpty()) continue
-                val pageLines = minOf(maxLines, wrapped.size)
-                val lineH = metricsLineHeight(
-                    wrapped.take(pageLines),
-                    options,
-                    size,
-                    paint,
-                    ShareMushafLayout.VIDEO_LINE_MULTIPLIER,
-                )
-                val pad = size * 0.28f
-                if (pageLines * lineH + pad * 2f > availableH) return false
-            }
-            return true
-        }
-        // If even maxSize fits every ayah in ≤5 lines, use it (large glyphs).
-        if (allFit(maxSize)) return maxSize
-        // Binary search largest size that still fits.
-        var lo = minSize
-        var hi = maxSize
-        var best = minSize
-        repeat(18) {
-            val mid = (lo + hi) * 0.5f
-            if (allFit(mid)) {
-                best = mid
-                lo = mid
-            } else {
-                hi = mid
-            }
-        }
-        return best.coerceIn(minSize, maxSize)
     }
+
 
 
 
