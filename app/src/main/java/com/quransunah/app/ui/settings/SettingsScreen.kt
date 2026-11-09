@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,6 +49,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
@@ -579,20 +581,17 @@ private fun SegmentedOption(
         maxLines = if (fitSingleLine) 1 else Int.MAX_VALUE,
         softWrap = !fitSingleLine,
         overflow = TextOverflow.Clip,
-        style = if (fitSingleLine) {
-            TextStyle(
-                fontSize = fontSize,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                lineHeight = MushafOptionLine,
-                lineHeightStyle = LineHeightStyle(
-                    alignment = LineHeightStyle.Alignment.Center,
-                    trim = LineHeightStyle.Trim.None,
-                ),
-            )
-        } else {
-            TextStyle.Default
-        },
+        style = TextStyle(
+            fontSize = if (fitSingleLine) fontSize else MushafOptionFont,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            lineHeight = MushafOptionLine,
+            lineHeightStyle = LineHeightStyle(
+                alignment = LineHeightStyle.Alignment.Center,
+                trim = LineHeightStyle.Trim.Both,
+            ),
+            platformStyle = PlatformTextStyle(includeFontPadding = false),
+        ),
         onTextLayout = if (fitSingleLine) {
             { result ->
                 if (result.didOverflowWidth && fontSize > MushafOptionMinFont) {
@@ -605,9 +604,10 @@ private fun SegmentedOption(
         modifier = modifier
             .clip(shape)
             .background(if (selected) paper.accent else Color.Transparent)
-            .then(if (compact) Modifier.heightIn(min = 32.dp) else Modifier.minimumInteractiveComponentSize())
+            .then(if (compact) Modifier.heightIn(min = 36.dp) else Modifier.minimumInteractiveComponentSize())
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = if (compact) 8.dp else 10.dp, vertical = if (compact) 3.dp else 6.dp),
+            .padding(horizontal = if (compact) 8.dp else 10.dp, vertical = if (compact) 6.dp else 8.dp)
+            .wrapContentHeight(align = Alignment.CenterVertically),
     )
 }
 
@@ -901,6 +901,14 @@ private fun CompactSettingsLink(
         textAlign = TextAlign.Center,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
+        style = TextStyle(
+            textAlign = TextAlign.Center,
+            lineHeightStyle = LineHeightStyle(
+                alignment = LineHeightStyle.Alignment.Center,
+                trim = LineHeightStyle.Trim.Both,
+            ),
+            platformStyle = PlatformTextStyle(includeFontPadding = false),
+        ),
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 40.dp)
@@ -908,7 +916,8 @@ private fun CompactSettingsLink(
             .background(paper.tone300)
             .border(ChromeTokens.GoldStroke, ChromeTokens.Gold.copy(alpha = 0.6f), shape)
             .clickable(onClick = onClick)
-            .padding(vertical = 8.dp, horizontal = 10.dp),
+            .padding(vertical = 8.dp, horizontal = 10.dp)
+            .wrapContentHeight(align = Alignment.CenterVertically),
     )
 }
 

@@ -283,11 +283,15 @@ class AyahShareExporter @Inject constructor(
 
 
     /**
-     * Pages of Mushaf lines (~4–5). Whole ayat stay together when they fit;
-     * an ayah longer than 5 lines is split across consecutive pages at line
-     * boundaries. Font size is never reduced to fit.
+     * One ayah per video page. Lines belonging to other ayat are dropped.
+     * An ayah longer than [maxLines] mushaf lines is split across consecutive
+     * pages at line boundaries (word timings drive which slice is shown).
      */
-    private fun paginateMushafLines(lines: List<ShareMushafLine>, minLines: Int = 4, maxLines: Int = 5): List<List<ShareMushafLine>> {
+    private fun paginateMushafLines(
+        lines: List<ShareMushafLine>,
+        minLines: Int = 1,
+        maxLines: Int = ShareMushafLayout.VIDEO_AYAH_PAGE_MAX_LINES,
+    ): List<List<ShareMushafLine>> {
         if (lines.isEmpty()) return emptyList()
         fun ayahOf(line: ShareMushafLine): Int =
             line.words.firstOrNull { !it.isMarker }?.ayah
@@ -296,49 +300,19 @@ class AyahShareExporter @Inject constructor(
         val pages = ArrayList<List<ShareMushafLine>>()
         var i = 0
         while (i < lines.size) {
-            var end = i
-            while (end < lines.size) {
-                val ayah = ayahOf(lines[end])
-                var ayahEnd = end
-                while (ayahEnd + 1 < lines.size && ayahOf(lines[ayahEnd + 1]) == ayah) {
-                    ayahEnd++
-                }
-                val ayahLen = ayahEnd - end + 1
-                val taken = end - i
-                if (taken == 0) {
-                    if (ayahLen <= maxLines) {
-                        end = ayahEnd + 1
-                        if (end - i >= minLines && end < lines.size) {
-                            val nextAyah = ayahOf(lines[end])
-                            var nextEnd = end
-                            while (nextEnd + 1 < lines.size && ayahOf(lines[nextEnd + 1]) == nextAyah) {
-                                nextEnd++
-                            }
-                            if ((nextEnd - i + 1) > maxLines) break
-                        }
-                        continue
-                    } else {
-                        end = i + maxLines
-                        break
-                    }
-                } else if (taken + ayahLen <= maxLines) {
-                    end = ayahEnd + 1
-                    if (end - i >= minLines && end < lines.size) {
-                        val nextAyah = ayahOf(lines[end])
-                        var nextEnd = end
-                        while (nextEnd + 1 < lines.size && ayahOf(lines[nextEnd + 1]) == nextAyah) {
-                            nextEnd++
-                        }
-                        if ((nextEnd - i + 1) > maxLines) break
-                    }
-                    continue
-                } else {
-                    break
-                }
+            val ayah = ayahOf(lines[i])
+            var ayahEnd = i
+            while (ayahEnd + 1 < lines.size && ayahOf(lines[ayahEnd + 1]) == ayah) {
+                ayahEnd++
             }
-            if (end <= i) end = (i + maxLines).coerceAtMost(lines.size)
-            pages += lines.subList(i, end)
-            i = end
+            // Emit this ayah in chunks of at most maxLines.
+            var start = i
+            while (start <= ayahEnd) {
+                val end = minOf(start + maxLines, ayahEnd + 1)
+                pages += lines.subList(start, end)
+                start = end
+            }
+            i = ayahEnd + 1
         }
         return pages
     }
@@ -373,7 +347,7 @@ class AyahShareExporter @Inject constructor(
         activeWord: Int? = null,
     ): List<ShareMushafLine> {
         if (lines.isEmpty()) return lines
-        val pages = paginateMushafLines(lines, minLines = 4, maxLines = 5)
+        val pages = paginateMushafLines(lines, minLines = 1, maxLines = ShareMushafLayout.VIDEO_AYAH_PAGE_MAX_LINES)
         if (pages.isEmpty()) return lines
         val ayah = activeAyah
         if (ayah == null) return pages.first()
@@ -393,10 +367,9 @@ class AyahShareExporter @Inject constructor(
     private fun displayPageForAyah(content: AyahShareContent, activeAyah: Int?): List<AyahShareVerse> {
         val verses = content.verses
         if (verses.isEmpty()) return verses
-        val pageLines = displayPageLines(content, activeAyah)
-        val ayahs = pageLines.flatMap { line -> line.words.map { it.ayah } }.toSet()
-        val pageVerses = verses.filter { it.ayah in ayahs }
-        return pageVerses.ifEmpty { verses }
+        val ayah = activeAyah ?: verses.first().ayah
+        val one = verses.filter { it.ayah == ayah }
+        return one.ifEmpty { verses.take(1) }
     }
 
 
@@ -630,8 +603,9 @@ class AyahShareExporter @Inject constructor(
         if (title.isNotEmpty()) titlePaint.getTextBounds(title, 0, title.length, titleBounds)
         val titleInk = if (options.showTitle) maxOf(titleBounds.height().toFloat(), width * .062f) else 0f
         val titleFrameH = titleInk * (1f + 2f * ShareMushafLayout.TITLE_PAD_Y_FACTOR)
+        // Always one ayah per page (preview + export). Long ayat split at line bounds.
         val sourceLines: List<ShareMushafLine> = when {
-            oneAyahAtATime && activeAyah != null -> {
+            activeAyah != null && content.mushafLines.isNotEmpty() -> {
                 content.mushafLines.mapNotNull { line ->
                     val kept = line.words.filter { it.ayah == activeAyah }
                     if (kept.isEmpty()) null else line.copy(words = kept)
@@ -641,8 +615,6 @@ class AyahShareExporter @Inject constructor(
             else -> emptyList()
         }
         val mushaf = sourceLines.takeIf { it.isNotEmpty() }?.let { source ->
-            // Keep Madinah QCF page line breaks. Uniform size already fits the
-            // widest line across the whole selection; paginate to 4-5 lines.
             selectReflowedPage(source, activeAyah, activeWord)
         }
         val bodyHeight: Float
@@ -650,11 +622,17 @@ class AyahShareExporter @Inject constructor(
         val ayahTextSize: Float
         if (mushaf != null) {
             val measured = measureMushafBlock(mushaf, options, hafs, width, height, lockedTextSize, lineSpacing, fitWidthFraction)
+            val titleHFrac = titleFrameH / height
+            val ayahHFrac = measured.height / height
+            // Center the single-ayah block in the text band (below title, above branding).
+            val bandTop = if (options.showTitle) (options.titleY + titleHFrac / 2f + 0.02f) else 0.10f
+            val bandBottom = if (options.translation) 0.78f else 0.86f
+            val idealCenter = (bandTop + bandBottom) / 2f
             val geometry = makerVerticalPlacement(
-                options.ayahY,
+                idealCenter.coerceIn(bandTop + ayahHFrac / 2f, bandBottom - ayahHFrac / 2f),
                 options.titleY,
-                measured.height / height,
-                titleFrameH / height,
+                ayahHFrac,
+                titleHFrac,
                 options.showTitle,
                 options.translation,
             )
@@ -1685,8 +1663,8 @@ class AyahShareExporter @Inject constructor(
         if (widest > maxWidth && widest > 0f) {
             size *= (maxWidth / widest)
         }
-        // Height fit for a full 4–5 line page at QCF metrics.
-        val pageLines = minOf(5, maxOf(1, lines.size))
+        // Height fit for one ayah page (up to VIDEO_AYAH_PAGE_MAX_LINES) at QCF metrics.
+        val pageLines = minOf(ShareMushafLayout.VIDEO_AYAH_PAGE_MAX_LINES, maxOf(1, lines.size))
         var guard = 0
         while (guard++ < 24 && size > width * 0.018f) {
             val lineH = metricsLineHeight(lines, options, size, paint, ShareMushafLayout.VIDEO_LINE_MULTIPLIER)

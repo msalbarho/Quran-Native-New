@@ -18,11 +18,13 @@ object ShareMushafLayout {
     /** Arabic verse size in the video frame, relative to the fitted size. Translation is unchanged. */
     const val VIDEO_ARABIC_SIZE_FACTOR = 1.0f
     /** Usable text width as a fraction of frame width (side margins). */
-    const val VIDEO_WRAP_WIDTH = 0.82f
+    const val VIDEO_WRAP_WIDTH = 0.84f
     /** Starting video body size as fraction of frame width; may shrink to fit widest line. */
-    const val VIDEO_FIXED_WIDTH_FRACTION = 0.038f
+    const val VIDEO_FIXED_WIDTH_FRACTION = 0.052f
     /** Extra leading on top of measured QCF ascent+descent (tashkeel clearance). */
     const val VIDEO_METRICS_LEADING = 0.35f
+    /** Max mushaf lines on one video page for a single (possibly long) ayah. */
+    const val VIDEO_AYAH_PAGE_MAX_LINES = 7
     /** Wrapped share slides (not page-slot glyphs) still need room for harakat. */
     const val IMAGE_LINE_MULTIPLIER = 1.42f
     const val PAGE_WORD_GAP = 0.04f

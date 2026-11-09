@@ -122,11 +122,11 @@
     <string name="word_tafsir">تفسير الآية</string>
     <string name="word_save_ayah">حفظ الآية</string>
     <string name="word_saved">تم الحفظ</string>
-    <string name="word_share_from_ayah">من آية</string>
+    <string name="word_share_from_ayah">من الآية</string>
     <string name="word_share_to_ayah">إلى الآية</string>
     <string name="word_share_image_max">حتى ٣ آيات للصورة</string>
     <string name="word_share_image">مشاركة كصورة</string>
-    <string name="word_share_ayah_range">من آية إلى آية</string>
+    <string name="word_share_ayah_range">من الآية إلى الآية</string>
     <string name="word_share_range_image">مشاركة المقطع كصورة واحدة</string>
     <string name="word_preparing">جاري الإعداد…</string>
     <string name="word_share_video">مشاركة كفيديو</string>
@@ -144,7 +144,7 @@
     <string name="training_close">إغلاق</string>
     <string name="training_next_word">الكلمة التالية</string>
     <string name="training_recording">تسجيل</string>
-    <string name="training_scope_range">تحديد مقطع من آية إلى آية</string>
+    <string name="training_scope_range">تحديد مقطع من الآية إلى الآية</string>
     <string name="training_continue">متابعة</string>
     <string name="training_mark_memorized">حفظتها</string>
     <string name="training_log">سجل التدريب</string>

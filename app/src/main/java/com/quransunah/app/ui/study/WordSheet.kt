@@ -85,6 +85,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
@@ -587,7 +589,7 @@ fun WordSheetContent(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(stringResource(R.string.word_share_from_ayah), color = paper.textMuted, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.word_share_from_ayah), color = paper.textMuted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                         VideoFromAyahDropdown(
                             fromAyah = rangeFrom,
                             maxAyah = maxAyah,
@@ -599,7 +601,7 @@ fun WordSheetContent(
                         )
                     }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(stringResource(R.string.word_share_to_ayah), color = paper.textMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.word_share_to_ayah), color = paper.textMuted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                         VideoToAyahDropdown(
                             fromAyah = rangeFrom,
                             toAyah = rangeTo.coerceIn(rangeFrom, toMax),
@@ -841,7 +843,7 @@ private fun SheetChipButton(
             .border(1.dp, border, shape)
             .background(fill)
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 6.dp),
+            .padding(horizontal = 8.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -852,6 +854,14 @@ private fun SheetChipButton(
             textAlign = TextAlign.Center,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
+            style = TextStyle(
+                textAlign = TextAlign.Center,
+                lineHeightStyle = LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.Both,
+                ),
+                platformStyle = PlatformTextStyle(includeFontPadding = false),
+            ),
         )
     }
 }
@@ -936,7 +946,7 @@ private fun AccentFillButton(
             .background(if (enabled) paper.accent else paper.accent.copy(alpha = 0.45f))
             .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, shape)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -945,6 +955,14 @@ private fun AccentFillButton(
             fontWeight = FontWeight.Bold,
             fontSize = 15.sp,
             textAlign = TextAlign.Center,
+            style = TextStyle(
+                textAlign = TextAlign.Center,
+                lineHeightStyle = LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.Both,
+                ),
+                platformStyle = PlatformTextStyle(includeFontPadding = false),
+            ),
         )
     }
 }

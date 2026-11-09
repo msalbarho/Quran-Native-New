@@ -48,6 +48,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextDirection
@@ -764,8 +766,21 @@ private data class PreviewClip(
         modifier = Modifier.fillMaxWidth().minimumInteractiveComponentSize().heightIn(min = 40.dp).defaultMinSize(minHeight = 40.dp),
         shape = GoldCornerFrameShape(10.dp),
         colors = ButtonDefaults.buttonColors(containerColor = paper.accent, contentColor = paper.pageBackground),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-    ) { Text(label, fontWeight = FontWeight.Bold) }
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+    ) {
+        Text(
+            label,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            style = TextStyle(
+                lineHeightStyle = LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.Both,
+                ),
+                platformStyle = PlatformTextStyle(includeFontPadding = false),
+            ),
+        )
+    }
 }
 @Composable private fun MakerChoice(label: String, selected: Boolean, modifier: Modifier, click: () -> Unit) {
     val paper = LocalPaperColors.current
@@ -777,7 +792,7 @@ private data class PreviewClip(
             .background(if (selected) paper.accent else paper.pageBody, shape)
             .border(ChromeTokens.GoldStroke, ChromeTokens.Gold.copy(alpha = if (selected) 1f else 0.55f), shape)
             .clickable(onClick = click)
-            .padding(horizontal = 4.dp, vertical = 6.dp),
+            .padding(horizontal = 6.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -787,6 +802,14 @@ private data class PreviewClip(
             fontSize = 12.sp,
             textAlign = TextAlign.Center,
             maxLines = 1,
+            style = TextStyle(
+                textAlign = TextAlign.Center,
+                lineHeightStyle = LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.Both,
+                ),
+                platformStyle = PlatformTextStyle(includeFontPadding = false),
+            ),
         )
     }
 }
@@ -796,54 +819,66 @@ private data class PreviewClip(
 @Composable private fun MakerNumber(label: String, value: Int, range: IntRange, modifier: Modifier, change: (Int) -> Unit) {
     val MakerGold = LocalPaperColors.current.accent
     var open by remember { mutableStateOf(false) }
-    Box(modifier) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .border(1.dp, MakerGold.copy(alpha = 0.85f), GoldCornerFrameShape(10.dp))
-                .clickable { open = true }
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Text(
-                label,
-                color = MakerGold.copy(alpha = 0.78f),
-                fontSize = 10.sp,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-            )
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+    val labelStyle = TextStyle(
+        lineHeightStyle = LineHeightStyle(
+            alignment = LineHeightStyle.Alignment.Center,
+            trim = LineHeightStyle.Trim.Both,
+        ),
+        platformStyle = PlatformTextStyle(includeFontPadding = false),
+    )
+    Column(modifier = modifier) {
+        Text(
+            text = label,
+            color = MakerGold.copy(alpha = 0.78f),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(bottom = 4.dp),
+            style = labelStyle,
+        )
+        Box {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 40.dp)
+                    .border(1.dp, MakerGold.copy(alpha = 0.85f), GoldCornerFrameShape(10.dp))
+                    .clickable { open = true }
+                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
                 Text(
-                    EasternArabic.format(value),
+                    text = EasternArabic.format(value),
                     color = MakerGold,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    fontSize = 18.sp,
                     maxLines = 1,
+                    textAlign = TextAlign.Center,
+                    style = labelStyle,
                 )
                 Text(
-                    if (open) "▴" else "▾",
+                    text = " ▾",
                     color = MakerGold.copy(alpha = 0.9f),
-                    fontSize = 11.sp,
-                    modifier = Modifier.padding(start = 2.dp),
+                    fontSize = 12.sp,
+                    maxLines = 1,
+                    style = labelStyle,
                 )
             }
-        }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }, modifier = Modifier.heightIn(max = 300.dp)) {
-            range.forEach { n ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            EasternArabic.format(n),
-                            fontWeight = if (n == value) FontWeight.Bold else FontWeight.Normal,
-                        )
-                    },
-                    onClick = { change(n); open = false },
-                )
+            DropdownMenu(expanded = open, onDismissRequest = { open = false }, modifier = Modifier.heightIn(max = 300.dp)) {
+                range.forEach { n ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                EasternArabic.format(n),
+                                fontWeight = if (n == value) FontWeight.Bold else FontWeight.Normal,
+                            )
+                        },
+                        onClick = { change(n); open = false },
+                    )
+                }
             }
         }
     }
 }
+
