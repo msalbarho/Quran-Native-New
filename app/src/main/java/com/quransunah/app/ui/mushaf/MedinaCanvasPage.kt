@@ -392,6 +392,7 @@ private fun MedinaCanvasPageBody(
     val revealedWordIds = LocalTrainingRevealedWordIds.current
     val wordMarks = LocalTrainingWordMarks.current
     val focusWordId = LocalTrainingFocusWordId.current
+    val playbackCursor = LocalQulPlaybackCursor.current
 
     Box(modifier = modifier) {
         Canvas(
@@ -450,6 +451,34 @@ private fun MedinaCanvasPageBody(
                     pagePaint.textSize = pagePlan.pageTextSize
                     pagePaint.color = glyph
                     pagePaint.colorFilter = null
+                    if (playbackCursor != null) {
+                        var bandLeft = Float.POSITIVE_INFINITY
+                        var bandRight = Float.NEGATIVE_INFINITY
+                        var bandTop = Float.POSITIVE_INFINITY
+                        var bandBottom = Float.NEGATIVE_INFINITY
+                        for (word in slot.words) {
+                            val fraction = playbackCursor.fractionFor(
+                                word.word.surah,
+                                word.word.ayah,
+                                word.word.position,
+                                word.word.isAyahMarker,
+                            )
+                            if (fraction <= 0f) continue
+                            val wordRight = word.x + word.width
+                            val wordLeft = wordRight - word.width * fraction
+                            if (wordRight > bandRight) bandRight = wordRight
+                            if (wordLeft < bandLeft) bandLeft = wordLeft
+                            if (word.boxTop < bandTop) bandTop = word.boxTop
+                            if (word.boxBottom > bandBottom) bandBottom = word.boxBottom
+                        }
+                        if (bandLeft < bandRight) {
+                            pagePaint.style = Paint.Style.FILL
+                            pagePaint.color = highlightColor.copy(alpha = 0.32f).toArgb()
+                            pagePaint.colorFilter = null
+                            val radius = (bandBottom - bandTop) * 0.16f
+                            nativeCanvas.drawRoundRect(bandLeft, bandTop, bandRight, bandBottom, radius, radius, pagePaint)
+                        }
+                    }
                     for (word in slot.words) {
                         val ayahMatch = highlightAyah != null &&
                             word.word.surah == highlightAyah.first &&

@@ -38,12 +38,18 @@ class ShareMushafLayoutTest {
 
     @Test
     fun wrappedArabicLinesUseTightMushafSpacing() {
-        assertTrue(ShareMushafLayout.ARABIC_LINE_MULTIPLIER <= 1.12f)
-        assertTrue(ShareMushafLayout.ARABIC_LINE_MULTIPLIER >= 1f)
+        assertTrue(ShareMushafLayout.ARABIC_LINE_MULTIPLIER <= 1f)
+        assertTrue(ShareMushafLayout.ARABIC_LINE_MULTIPLIER >= 0.90f)
+        assertTrue(ShareMushafLayout.IMAGE_LINE_MULTIPLIER < 1.40f)
+        assertTrue(ShareMushafLayout.PAGE_WORD_GAP < ShareMushafLayout.TEXT_WORD_GAP)
+        assertTrue(ShareMushafLayout.TITLE_PAD_Y_FACTOR < 0.30f)
         val threeLines = 3 * ShareMushafLayout.arabicLineHeight(24f)
         val oldGappy = 3 * 24f * 1.45f
         assertTrue(threeLines < oldGappy)
         assertEquals(24f * ShareMushafLayout.ARABIC_LINE_MULTIPLIER, ShareMushafLayout.arabicLineHeight(24f), 0.001f)
+        assertEquals(1.65f, ShareMushafLayout.VIDEO_LINE_MULTIPLIER, 0.001f)
+        assertEquals(1.2f, ShareMushafLayout.VIDEO_ARABIC_SIZE_FACTOR, 0.001f)
+        assertTrue(ShareMushafLayout.VIDEO_WRAP_WIDTH < 1f)
     }
 
     @Test
@@ -98,6 +104,11 @@ class ShareMushafLayoutTest {
         assertTrue(QulRecitations.ayahAudioUrl("123", 1, 1)!!.contains("alafasy/001001.mp3"))
         assertEquals(null, QulRecitations.ayahAudioUrl("5", 1, 1))
         assertEquals(null, QulRecitations.recitationId("5"))
+        listOf("123", "92", "husary", "102", "51", "54", "31").forEach {
+            assertTrue(QulRecitations.hasWordTimingCatalog(it))
+        }
+        assertTrue(!QulRecitations.hasWordTimingCatalog("5"))
+        assertTrue(!QulRecitations.hasWordTimingCatalog("62"))
     }
 
     @Test

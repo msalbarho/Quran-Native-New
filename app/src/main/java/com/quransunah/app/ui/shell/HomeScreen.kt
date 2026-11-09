@@ -23,6 +23,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,9 +40,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -249,13 +254,12 @@ private fun HomeRouteCard(
     } else {
         paper.accent
     }
-    val minHeight = if (compact) 104.dp else if (featured) 156.dp else 148.dp
+    val minHeight = if (compact) 104.dp else if (featured) 156.dp else 132.dp
     val cardDescription = "$title، $description"
-    val stackText = !featured && !compact
     val contentFraction = when {
-        featured -> 0.58f
-        compact -> 0.60f
-        else -> 0.68f
+        featured -> 1f
+        compact -> 0.84f
+        else -> 1f
     }
     val borderColor = ChromeTokens.Gold
     val shadowElevation = when {
@@ -300,15 +304,17 @@ private fun HomeRouteCard(
                             colorStops = if (textAtStart) {
                                 arrayOf(
                                     0.00f to clear,
-                                    0.34f to clear,
-                                    0.62f to soft,
+                                    0.14f to clear,
+                                    0.36f to soft,
+                                    0.58f to lift,
                                     1.00f to lift,
                                 )
                             } else {
                                 arrayOf(
                                     0.00f to lift,
-                                    0.38f to soft,
-                                    0.66f to clear,
+                                    0.42f to lift,
+                                    0.64f to soft,
+                                    0.86f to clear,
                                     1.00f to clear,
                                 )
                             },
@@ -323,19 +329,18 @@ private fun HomeRouteCard(
             iconRes = iconRes,
             featured = featured,
             compact = compact,
-            stackText = stackText,
             titleColor = titleColor,
             descriptionColor = descriptionColor,
             iconSurface = iconSurface,
             iconTint = iconTint,
             modifier = Modifier
-                .align(if (stackText) Alignment.TopStart else Alignment.CenterStart)
+                .align(Alignment.CenterStart)
                 .fillMaxWidth(contentFraction)
                 .padding(
-                    start = if (compact) 14.dp else 16.dp,
-                    end = 8.dp,
-                    top = if (featured) 16.dp else 12.dp,
-                    bottom = if (featured) 14.dp else 10.dp,
+                    start = if (featured || compact) 14.dp else 8.dp,
+                    end = if (featured) 12.dp else 8.dp,
+                    top = 10.dp,
+                    bottom = 10.dp,
                 ),
         )
     }
@@ -349,16 +354,37 @@ private fun HomeCardCopy(
     iconRes: Int,
     featured: Boolean,
     compact: Boolean,
-    stackText: Boolean,
     titleColor: Color,
     descriptionColor: Color,
     iconSurface: Color,
     iconTint: Color,
     modifier: Modifier = Modifier,
 ) {
-    val iconSize = if (featured) 56.dp else 40.dp
-    val glyphSize = if (featured) 30.dp else 22.dp
-    val icon: @Composable () -> Unit = {
+    val iconSize = when {
+        featured -> 46.dp
+        compact -> 40.dp
+        else -> 30.dp
+    }
+    val glyphSize = when {
+        featured -> 24.dp
+        compact -> 22.dp
+        else -> 16.dp
+    }
+    val titleSize = when {
+        featured -> 20.sp
+        compact -> 17.sp
+        else -> 14.sp
+    }
+    val titleFloor = when {
+        featured -> 16.sp
+        compact -> 15.sp
+        else -> 11.sp
+    }
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(if (featured || compact) 10.dp else 6.dp),
+    ) {
         Box(
             modifier = Modifier
                 .size(iconSize)
@@ -373,64 +399,71 @@ private fun HomeCardCopy(
                 modifier = Modifier.size(glyphSize),
             )
         }
-    }
-    val copy: @Composable () -> Unit = {
-        Text(
-            text = title,
-            color = titleColor,
-            fontFamily = LocalDisplayFontFamily.current,
-            fontWeight = FontWeight.Bold,
-            fontSize = if (featured) 21.sp else if (compact) 17.sp else 16.sp,
-            lineHeight = if (featured) 28.sp else if (compact) 22.sp else 21.sp,
-            textAlign = TextAlign.Start,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-            text = description,
-            color = descriptionColor,
-            fontFamily = LocalAppFontFamily.current,
-            fontWeight = FontWeight.Medium,
-            fontSize = if (featured) 15.sp else 13.sp,
-            lineHeight = if (featured) 22.sp else 18.sp,
-            textAlign = TextAlign.Start,
-            maxLines = if (compact) 1 else 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 4.dp),
-        )
-        detail?.let {
-            Text(
-                text = it,
-                color = titleColor.copy(alpha = 0.86f),
-                fontFamily = LocalAppFontFamily.current,
-                fontSize = 12.sp,
-                lineHeight = 17.sp,
-                textAlign = TextAlign.Start,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 8.dp),
+        Column(modifier = Modifier.weight(1f)) {
+            SingleLineCardTitle(
+                text = title,
+                color = titleColor,
+                maxSize = titleSize,
+                minSize = titleFloor,
             )
+            Text(
+                text = description,
+                color = descriptionColor,
+                fontFamily = LocalAppFontFamily.current,
+                fontWeight = FontWeight.Medium,
+                fontSize = if (featured) 15.sp else 12.sp,
+                lineHeight = if (featured) 20.sp else 16.sp,
+                textAlign = TextAlign.Start,
+                maxLines = if (featured || compact) 1 else 2,
+                overflow = TextOverflow.Ellipsis,
+                style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
+                modifier = Modifier.padding(top = 2.dp),
+            )
+            detail?.let {
+                Text(
+                    text = it,
+                    color = titleColor.copy(alpha = 0.86f),
+                    fontFamily = LocalAppFontFamily.current,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    textAlign = TextAlign.Start,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 6.dp),
+                )
+            }
         }
     }
-    if (stackText) {
-        Column(
-            modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-            horizontalAlignment = Alignment.Start,
-        ) {
-            icon()
-            Column { copy() }
-        }
-    } else {
-        Row(
-            modifier = modifier,
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            icon()
-            Column(modifier = Modifier.weight(1f)) { copy() }
-        }
-    }
+}
+
+/** Amiri, packaged from public/fonts. Shrinks just enough to stay on one line. */
+@Composable
+private fun SingleLineCardTitle(
+    text: String,
+    color: Color,
+    maxSize: TextUnit,
+    minSize: TextUnit,
+) {
+    var size by remember(text, maxSize) { mutableStateOf(maxSize) }
+    Text(
+        text = text,
+        color = color,
+        fontFamily = LocalDisplayFontFamily.current,
+        fontWeight = FontWeight.Bold,
+        fontSize = size,
+        lineHeight = size * 1.15f,
+        textAlign = TextAlign.Start,
+        maxLines = 1,
+        softWrap = false,
+        overflow = TextOverflow.Clip,
+        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
+        onTextLayout = { layout ->
+            if (layout.hasVisualOverflow && size > minSize) {
+                size = (size.value - 0.5f).coerceAtLeast(minSize.value).sp
+            }
+        },
+    )
 }
 
 @Composable

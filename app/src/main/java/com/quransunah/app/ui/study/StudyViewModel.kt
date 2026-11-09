@@ -6,6 +6,7 @@ import com.quransunah.app.core.AppConstants
 import com.quransunah.app.core.SurahAyahCounts
 import com.quransunah.app.data.catalog.AyahReciter
 import com.quransunah.app.data.catalog.ReciterCatalog
+import com.quransunah.app.data.catalog.TranslationRegistry
 import com.quransunah.app.data.catalog.SurahReciter
 import com.quransunah.app.data.prefs.UserPreferences
 import com.quransunah.app.domain.model.MemorizationItem
@@ -29,6 +30,7 @@ import com.quransunah.app.share.AyahShareVerse
 import com.quransunah.app.share.ShareMushafLayout
 import com.quransunah.app.share.ShareMushafWord
 import com.quransunah.app.share.SharePageLines
+import com.quransunah.app.share.QulRecitations
 import com.quransunah.app.share.ShareSourceLine
 import com.quransunah.app.ui.mushaf.SajdahAyah
 import com.quransunah.app.ui.mushaf.WordRecord
@@ -89,7 +91,11 @@ class StudyViewModel @Inject constructor(
     private fun wordSheetAyahReciters(): List<AyahReciter> =
         reciterCatalog.getAyahCapableReciters().filterNot { it.id == ALJUHANI_RECITER_ID }
 
-    private fun videoMakerReciters(): List<AyahReciter> = reciterCatalog.getAyahCapableReciters()
+    private fun videoMakerReciters(): List<AyahReciter> {
+        val all = reciterCatalog.getAyahCapableReciters()
+        return all.filter { QulRecitations.hasWordTimingCatalog(it.id) } +
+            all.filterNot { QulRecitations.hasWordTimingCatalog(it.id) }
+    }
 
     val playback: StateFlow<PlaybackSnapshot> = audioPlayer.snapshot
 
@@ -481,6 +487,11 @@ class StudyViewModel @Inject constructor(
     private suspend fun shareContent(from: Int? = null, to: Int? = null): AyahShareContent? {
         val ui = _ui.value
         val word = ui.word ?: return null
+        val settings = preferences.settings.first()
+        val translationTag = settings.translationLanguage
+            ?.takeIf { TranslationRegistry.forLanguage(it) != null }
+            ?: TranslationRegistry.forLanguage(settings.appLanguage)?.languageTag
+            ?: "en"
         val fromAyah = from ?: word.ayah
         val rawTo = to ?: word.ayah
         val toAyah = rawTo.coerceAtMost(fromAyah + AppConstants.SHARE_AYAH_RANGE_MAX - 1)
@@ -495,7 +506,7 @@ class StudyViewModel @Inject constructor(
                 qcfText = body.joinToString(" ") { it.textLigature.ifBlank { it.textHafs } }.trim(),
                 uthmanicText = body.joinToString(" ") { it.textHafs }.trim(),
                 markerLigature = shareMarkerLigature(words),
-                englishTranslation = translationRepository.getAyahTranslation("en", word.surah, ayah),
+                englishTranslation = translationRepository.getAyahTranslation(translationTag, word.surah, ayah),
             )
         }
         val pages = verses.map { it.pageNumber }.distinct().sorted()
@@ -530,6 +541,7 @@ class StudyViewModel @Inject constructor(
             toAyah = verses.lastOrNull()?.ayah ?: fromAyah,
             verses = verses,
             mushafLines = mushafLines,
+            translationTag = translationTag,
         )
     }
 

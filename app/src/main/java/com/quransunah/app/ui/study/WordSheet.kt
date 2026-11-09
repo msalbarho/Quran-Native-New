@@ -331,7 +331,11 @@ fun WordSheet(
 
     if (ui.tafsirOpen && !inspection) {
         TafsirSheet(
-            surahName = ui.surahName.ifBlank {
+            surahName = com.quransunah.app.ui.index.SurahNames.displayName(
+                ArabicRtl.currentTag(LocalContext.current),
+                selected.surah,
+                ui.surahName,
+            ).ifBlank {
                 stringResource(R.string.surah_fallback, EasternArabic.format(selected.surah))
             },
             ayah = selected.ayah,
@@ -565,20 +569,22 @@ fun WordSheetContent(
                 )
             }
             SheetSection {
-                var rangeOpen by remember(word.ayah) { mutableStateOf(false) }
-                var rangeFrom by remember(word.ayah) { mutableIntStateOf(word.ayah) }
-                var rangeTo by remember(word.ayah) { mutableIntStateOf(word.ayah) }
                 AccentFillButton(
-                    label = stringResource(R.string.word_share_ayah_range),
-                    onClick = { rangeOpen = !rangeOpen },
+                    label = stringResource(R.string.video_new),
+                    onClick = onShareVideo,
                     enabled = !ui.sharing,
                 )
-                if (rangeOpen) {
-                    val toMax = (rangeFrom + AppConstants.SHARE_AYAH_RANGE_MAX - 1).coerceAtMost(maxAyah)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
+            }
+            SheetSection {
+                var rangeFrom by remember(word.ayah) { mutableIntStateOf(word.ayah) }
+                var rangeTo by remember(word.ayah) { mutableIntStateOf(word.ayah) }
+                val toMax = (rangeFrom + AppConstants.SHARE_AYAH_RANGE_MAX - 1).coerceAtMost(maxAyah)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(stringResource(R.string.word_share_from_ayah), color = paper.textMuted, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                         VideoFromAyahDropdown(
                             fromAyah = rangeFrom,
                             maxAyah = maxAyah,
@@ -586,31 +592,25 @@ fun WordSheetContent(
                                 rangeFrom = start
                                 rangeTo = rangeTo.coerceIn(start, (start + AppConstants.SHARE_AYAH_RANGE_MAX - 1).coerceAtMost(maxAyah))
                             },
-                            modifier = Modifier.weight(1f),
+                            label = "",
                         )
+                    }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(stringResource(R.string.word_share_to_ayah), color = paper.textMuted, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                         VideoToAyahDropdown(
                             fromAyah = rangeFrom,
                             toAyah = rangeTo.coerceIn(rangeFrom, toMax),
                             maxAyah = maxAyah,
                             onSelect = { rangeTo = it },
-                            modifier = Modifier.weight(1f),
+                            label = "",
                         )
                     }
-                    AccentFillButton(
-                        label = stringResource(
-                            if (ui.sharing) R.string.word_preparing else R.string.word_share_range_image,
-                        ),
-                        onClick = { onShareRangeImage(rangeFrom, rangeTo.coerceIn(rangeFrom, toMax)) },
-                        enabled = !ui.sharing,
-                    )
                 }
-            }
-            SheetSection {
                 AccentFillButton(
                     label = stringResource(
                         if (ui.sharing) R.string.word_preparing else R.string.word_share_image,
                     ),
-                    onClick = onShareImage,
+                    onClick = { onShareRangeImage(rangeFrom, rangeTo.coerceIn(rangeFrom, toMax)) },
                     enabled = !ui.sharing,
                 )
                 AccentFillButton(
@@ -619,9 +619,7 @@ fun WordSheetContent(
                     enabled = !ui.sharing,
                 )
             }
-            SheetSection {
-                AccentFillButton(label = "فيديو جديد • آيات، خلفية، تنسيق، مشاركة", onClick = onShareVideo, enabled = !ui.sharing)
-            }
+            
             if (ui.sharing) {
                 LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth(),
@@ -913,6 +911,7 @@ private fun AccentFillButton(
             .heightIn(min = 44.dp)
             .clip(shape)
             .background(if (enabled) paper.accent else paper.accent.copy(alpha = 0.45f))
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, shape)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center,
@@ -996,6 +995,7 @@ private fun VideoFromAyahDropdown(
     maxAyah: Int,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    label: String = stringResource(R.string.audio_range_from),
 ) {
     // Start may go back up to (range max - 1) ayahs before the long-pressed ayah, so the
     // selected range can still contain it; the "to" list then follows the chosen start.
@@ -1008,7 +1008,7 @@ private fun VideoFromAyahDropdown(
     }
     AyahNumberDropdown(
         value = fromAyah,
-        label = stringResource(R.string.audio_range_from),
+        label = label,
         options = options,
         onSelect = onSelect,
         modifier = modifier,
@@ -1084,6 +1084,7 @@ private fun VideoToAyahDropdown(
     maxAyah: Int,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    label: String = stringResource(R.string.audio_range_to),
 ) {
     val options = remember(fromAyah, maxAyah) {
         val start = fromAyah.coerceIn(1, maxAyah.coerceAtLeast(1))
@@ -1104,7 +1105,7 @@ private fun VideoToAyahDropdown(
     ) {
         CompactSelectorField(
             value = EasternArabic.format(toAyah),
-            label = stringResource(R.string.audio_range_to),
+            label = label,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .menuAnchor(MenuAnchorType.PrimaryNotEditable)

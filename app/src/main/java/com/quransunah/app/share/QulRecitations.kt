@@ -35,7 +35,8 @@ object QulRecitations {
 
     fun recitationId(reciterId: String): Int? = spec(reciterId)?.recitationId
 
-    fun hasWordTimingCatalog(reciterId: String): Boolean = spec(reciterId) != null
+    /** Ayah-level QUL catalogs only. Surah files can list a verse window with no words. */
+    fun hasWordTimingCatalog(reciterId: String): Boolean = spec(reciterId)?.ayahFolder != null
 
     fun ayahAudioUrl(reciterId: String, surah: Int, ayah: Int): String? {
         val folder = spec(reciterId)?.ayahFolder ?: return null

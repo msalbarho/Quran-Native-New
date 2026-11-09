@@ -10,30 +10,44 @@ object ShareMushafLayout {
     const val FONT_SIZE_MAX = 29f
     const val TITLE_SIZE_FACTOR = 0.60f
     /**
-     * Baseline distance as a fraction of Arabic text size. Mushaf page slots
-     * sit tight; extra leading (1.4+) opens a visible gutter between wrapped lines.
+     * Baseline distance as a fraction of Arabic text size. QPC page glyphs
+     * already carry vertical bearings, so a full em of leading opens a gutter.
      */
-    const val ARABIC_LINE_MULTIPLIER = 1.08f
-    const val TRANSLATION_GAP_WIDTH = 0.028f
+    const val ARABIC_LINE_MULTIPLIER = 0.96f
+    /** One-ayah video frames. Page glyphs need more than one em or harakat collide. */
+    const val VIDEO_LINE_MULTIPLIER = 1.65f
+    /** Arabic verse size in the video frame, relative to the fitted size. Translation is unchanged. */
+    const val VIDEO_ARABIC_SIZE_FACTOR = 1.2f
+    /** Inset used when wrapping a video line so glyphs stay inside the frame. */
+    const val VIDEO_WRAP_WIDTH = 0.90f
+    /** Wrapped share slides (not page-slot glyphs) still need room for harakat. */
+    const val IMAGE_LINE_MULTIPLIER = 1.28f
+    const val PAGE_WORD_GAP = 0.04f
+    const val TEXT_WORD_GAP = 0.10f
+    const val TITLE_PAD_Y_FACTOR = 0.18f
+    const val TRANSLATION_GAP_WIDTH = 0.018f
     const val TRACKING_BAND = 0
     const val TRACKING_CUMULATIVE = 1
     const val TRACKING_UNDERLINE = 2
 
     val HIGHLIGHT_COLOURS = listOf(
-        "ذهبي" to 0xFFD4B06A.toInt(),
-        "نعناعي" to 0xFF66D9B8.toInt(),
-        "سماوي" to 0xFF91CAFF.toInt(),
-        "برتقالي" to 0xFFF49C65.toInt(),
-        "بنفسجي" to 0xFFC6A5ED.toInt(),
+        "ذهب" to 0xFFD4B06A.toInt(),
+        "نعناع" to 0xFF66D9B8.toInt(),
+        "سماء" to 0xFF91CAFF.toInt(),
+        "برتق" to 0xFFF49C65.toInt(),
+        "بنفسج" to 0xFFC6A5ED.toInt(),
         "أخضر" to 0xFF8CCB7A.toInt(),
         "أحمر" to 0xFFE17872.toInt(),
     )
 
     val MARKER_COLOURS = listOf(
-        "ذهبي" to 0xFFD4B06A.toInt(),
+        "ذهب" to 0xFFD4B06A.toInt(),
         "أبيض" to 0xFFFFFFFF.toInt(),
         "أخضر" to 0xFF4CAF50.toInt(),
     )
+
+    fun wordGap(textSize: Float, pageFont: Boolean): Float =
+        textSize * if (pageFont) PAGE_WORD_GAP else TEXT_WORD_GAP
 
     fun fontSizeToScale(size: Float): Float =
         (size / FONT_SIZE_MIN).coerceIn(1f, FONT_SIZE_MAX / FONT_SIZE_MIN)
@@ -147,6 +161,8 @@ data class ShareMushafWord(
     val qcf: String,
     val uthmanic: String,
     val isMarker: Boolean = false,
+    /** Madinah page this glyph belongs to. 0 keeps the line's page. */
+    val sourcePage: Int = 0,
 )
 
 data class ShareWordBox(

@@ -8,6 +8,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.LayoutDirection
 import java.util.Locale
 
+fun localeIsRtl(tag: String?): Boolean {
+    if (tag.isNullOrBlank()) return false
+    return TextUtils.getLayoutDirectionFromLocale(Locale.forLanguageTag(tag)) == View.LAYOUT_DIRECTION_RTL
+}
+
 /**
  * Layout direction of the selected app UI language.
  * The rest of the app stays on the global direction set in [ArabicRtl.applyLocale].

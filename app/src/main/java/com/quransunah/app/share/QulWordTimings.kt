@@ -56,7 +56,7 @@ class QulWordTimings(private val context: Context) {
         val audioUrl = row.optString("audio_url").takeIf { it.isNotBlank() }
             ?: QulRecitations.ayahAudioUrl(QulRecitations.reciterId(recitationId).orEmpty(), surah, ayah)
         QulAyahTiming(
-            segments = parseSegments(row.optJSONArray("segments")),
+            segments = parseQulWordSegments(row.optJSONArray("segments")),
             audioUrl = audioUrl,
         )
     }
@@ -88,7 +88,7 @@ class QulWordTimings(private val context: Context) {
             ?: return QulAyahTiming(surahAudioUrl = surahUrl)
         val from = verse.optLong("timestamp_from")
         val to = verse.optLong("timestamp_to")
-        val raw = parseSegments(verse.optJSONArray("segments"))
+        val raw = parseQulWordSegments(verse.optJSONArray("segments"))
         val shifted = raw.mapNotNull { word ->
             val start = (word.startMs - from).coerceAtLeast(0L)
             val end = (word.endMs - from).coerceAtLeast(start + 1)
@@ -102,16 +102,22 @@ class QulWordTimings(private val context: Context) {
         )
     }
 
-    private fun parseSegments(rows: JSONArray?): List<WordSegment> {
-        if (rows == null) return emptyList()
-        return (0 until rows.length()).mapNotNull { i ->
-            val row = rows.optJSONArray(i) ?: return@mapNotNull null
-            if (row.length() < 3) return@mapNotNull null
-            val offset = if (row.length() == 4) 1 else 0
-            val position = row.optInt(offset)
-            val start = row.optLong(offset + 1)
-            val end = row.optLong(offset + 2)
-            WordSegment(position, start, end).takeIf { it.position > 0 && it.endMs > it.startMs && it.startMs >= 0 }
-        }.sortedBy { it.startMs }
-    }
+}
+
+/** QUL rows are `[word, startMs, endMs]` or `[index, word, startMs, endMs]`. The leading index is not a word. */
+internal fun parseQulWordSegments(rows: JSONArray?): List<WordSegment> {
+    if (rows == null) return emptyList()
+    return (0 until rows.length()).mapNotNull { i ->
+        val row = rows.optJSONArray(i) ?: return@mapNotNull null
+        wordSegmentFromQulRow((0 until row.length()).map { row.optLong(it) })
+    }.sortedBy { it.startMs }
+}
+
+internal fun wordSegmentFromQulRow(values: List<Long>): WordSegment? {
+    if (values.size < 3) return null
+    val offset = if (values.size == 4) 1 else 0
+    val position = values[offset].toInt()
+    val start = values[offset + 1]
+    val end = values[offset + 2]
+    return WordSegment(position, start, end).takeIf { it.position > 0 && it.endMs > it.startMs && it.startMs >= 0 }
 }

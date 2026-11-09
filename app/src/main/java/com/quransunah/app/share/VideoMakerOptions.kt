@@ -20,9 +20,9 @@ data class VideoMakerOptions(
     val tajweedText: Boolean = false,
     val textScale: Float = 1f, // 1 = 22, slider 22–29
     val ayahX: Float = .5f,
-    val ayahY: Float = .48f,
+    val ayahY: Float = .28f,
     val titleX: Float = .5f,
-    val titleY: Float = .16f,
+    val titleY: Float = .11f,
 )
 
 data class WordSegment(val position: Int, val startMs: Long, val endMs: Long)
@@ -83,17 +83,34 @@ fun makerNeedsSmoothFrames(options: VideoMakerOptions): Boolean =
         options.motion ||
         options.backgrounds.size > 1
 
-fun makerRenderFrames(segments: List<WordSegment>, durationUs: Long, smooth: Boolean): List<WordVideoFrame> {
+/**
+ * Smooth highlight sampling. Short videos stay near 10 fps. Longer ones widen the
+ * step so the whole export stays within [maxFrames] unique pictures.
+ */
+fun makerExportFrameUs(totalDurationUs: Long, smooth: Boolean, maxFrames: Int = 480): Long {
+    val minFrame = 33_334L
+    if (!smooth || totalDurationUs <= 0L) return minFrame
+    val preferred = 100_000L
+    val capped = totalDurationUs / maxFrames.coerceAtLeast(1)
+    return maxOf(preferred, capped, minFrame)
+}
+
+fun makerRenderFrames(
+    segments: List<WordSegment>,
+    durationUs: Long,
+    smooth: Boolean,
+    frameUs: Long = 33_334L,
+): List<WordVideoFrame> {
     require(durationUs > 0)
     val cursor = segments.cursorSegments(durationUs)
     // Media3's image TimestampIterator floors duration*fps. A shorter item can have
     // zero timestamps, so never enqueue a sub-frame image. Preserve total audio time.
-    val frameUs = 33334L
-    val desired = if (smooth) generateSequence(0L) { it + frameUs }.takeWhile { it < durationUs }.toList() + durationUs
+    val step = frameUs.coerceAtLeast(33_334L)
+    val desired = if (smooth) generateSequence(0L) { it + step }.takeWhile { it < durationUs }.toList() + durationUs
         else (listOf(0L,durationUs) + cursor.flatMap { listOf(it.startMs*1000,it.endMs*1000) }.filter { it in 0..durationUs }).distinct().sorted()
     val points = mutableListOf(0L)
-    desired.drop(1).forEach { point -> if(point-points.last()>=frameUs || point==durationUs) points += point }
-    if(points.size>2 && points.last()-points[points.lastIndex-1]<frameUs)points.removeAt(points.lastIndex-1)
+    desired.drop(1).forEach { point -> if(point-points.last()>=step || point==durationUs) points += point }
+    if(points.size>2 && points.last()-points[points.lastIndex-1]<step)points.removeAt(points.lastIndex-1)
     return points.zipWithNext().map { (a,b) -> WordVideoFrame(a,b-a,cursor.wordAt((a+(b-a)/2)/1000)) }
 }
 
