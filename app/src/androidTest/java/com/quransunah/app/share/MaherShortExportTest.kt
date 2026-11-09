@@ -25,7 +25,7 @@ class MaherShortExportTest {
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, mime)
-            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/v8-maher")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/v10-maher")
             put(MediaStore.MediaColumns.IS_PENDING, 1)
         }
         val resolver = context.contentResolver
@@ -48,6 +48,14 @@ class MaherShortExportTest {
         fonts.ensureMaps()
         val exporter = AyahShareExporter(context, fonts, ReciterCatalog(context))
         fun qcf(ids: IntRange) = ids.mapNotNull { glyphs.forWord(it) }.joinToString(" ")
+        fun word(ayah: Int, pos: Int, wid: Int) =
+            if (wid == 0) ShareMushafWord(ayah, pos, "", "0", isMarker = true, sourcePage = 1)
+            else ShareMushafWord(ayah, pos, glyphs.forWord(wid).orEmpty(), "w$wid", sourcePage = 1)
+        val mushafLines = listOf(
+            ShareMushafLine(1, 1, listOf(word(1, 1, 1), word(1, 2, 2), word(1, 3, 3), word(1, 4, 4), word(1, 5, 0))),
+            ShareMushafLine(1, 2, listOf(word(2, 1, 6), word(2, 2, 7), word(2, 3, 8), word(2, 4, 9), word(2, 5, 0))),
+            ShareMushafLine(1, 3, listOf(word(3, 1, 11), word(3, 2, 12), word(3, 3, 0))),
+        )
         val content = AyahShareContent(
             surah = 1,
             surahName = "Al-Fatihah",
@@ -58,13 +66,14 @@ class MaherShortExportTest {
                 AyahShareVerse(2, 1, qcf(6..9), "ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ"),
                 AyahShareVerse(3, 1, qcf(11..12), "ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"),
             ),
+            mushafLines = mushafLines,
         )
         val options = VideoMakerOptions(
             translation = false,
             backgrounds = ShareBackgrounds.FILES.take(1),
             trackingMode = ShareMushafLayout.TRACKING_BAND,
         )
-        val evidence = File(context.cacheDir, "v8-maher").apply {
+        val evidence = File(context.cacheDir, "v10-maher").apply {
             deleteRecursively()
             mkdirs()
         }
@@ -77,13 +86,13 @@ class MaherShortExportTest {
         assertTrue(QulRecitations.ayahAudioUrl("102", 1, 1) == null)
 
         val preview = exporter.makerPreview(content, options, 1, 0.3f)
-        val previewFile = File(evidence, "v8-maher-preview.png")
+        val previewFile = File(evidence, "v10-maher-preview.png")
         previewFile.outputStream().use { preview.compress(Bitmap.CompressFormat.PNG, 100, it) }
         preview.recycle()
 
         val video = exporter.makeVideo(content, "102", options)
         assertTrue(video.exists() && video.length() > 10_000L)
-        val videoCopy = File(evidence, "v8-maher-fatiha-1-3.mp4")
+        val videoCopy = File(evidence, "v10-maher-fatiha-1-3.mp4")
         video.copyTo(videoCopy, overwrite = true)
         val extractor = MediaExtractor()
         try {
@@ -95,7 +104,7 @@ class MaherShortExportTest {
             extractor.release()
         }
         val branded = exporter.makeMakerImage(content, options)
-        val brandedFile = File(evidence, "v8-maher-branded.jpg")
+        val brandedFile = File(evidence, "v10-maher-branded.jpg")
         branded.copyTo(brandedFile, overwrite = true)
         val report = File(evidence, "report.txt")
         report.writeText(
@@ -104,9 +113,9 @@ class MaherShortExportTest {
                 "attr=${QulRecitations.KFGQPC_MAHER_ATTRIBUTION}\n" +
                 runCatching { File(context.cacheDir, "share/last-maker-sync.txt").readText() }.getOrDefault("")
         )
-        publish(context, previewFile, "image/png", "v8-maher-preview.png")
-        publish(context, brandedFile, "image/jpeg", "v8-maher-branded.jpg")
-        publish(context, videoCopy, "video/mp4", "v8-maher-fatiha-1-3.mp4")
+        publish(context, previewFile, "image/png", "v10-maher-preview.png")
+        publish(context, brandedFile, "image/jpeg", "v10-maher-branded.jpg")
+        publish(context, videoCopy, "video/mp4", "v10-maher-fatiha-1-3.mp4")
         publish(context, report, "text/plain", "report.txt")
     }
 

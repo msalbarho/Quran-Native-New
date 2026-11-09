@@ -21,7 +21,7 @@ class ExportFitEvidenceTest {
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/v9-share")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/v10-share")
             put(MediaStore.MediaColumns.IS_PENDING, 1)
         }
         val resolver = context.contentResolver
@@ -38,8 +38,8 @@ class ExportFitEvidenceTest {
                 pageNumber = page,
                 lineNumber = li + 1,
                 words = row.map { (ayah, pos, wid) ->
-                    if (wid == 0) ShareMushafWord(ayah, pos, "", "0", isMarker = true)
-                    else ShareMushafWord(ayah, pos, glyphs.forWord(wid).orEmpty(), "w$wid")
+                    if (wid == 0) ShareMushafWord(ayah, pos, "", "0", isMarker = true, sourcePage = page)
+                    else ShareMushafWord(ayah, pos, glyphs.forWord(wid).orEmpty(), "w$wid", sourcePage = page)
                 },
             )
         }
@@ -64,6 +64,27 @@ class ExportFitEvidenceTest {
         return if (total == 0) 0.0 else ink.toDouble() / total
     }
 
+    /** Fraction of frame width spanned by bright ink in the text band. */
+    private fun textWidthRatio(bmp: Bitmap): Double {
+        val w = bmp.width
+        val h = bmp.height
+        var minX = w
+        var maxX = 0
+        for (y in (h * 0.18).toInt() until (h * 0.62).toInt() step 2) {
+            for (x in 0 until w step 2) {
+                val c = bmp.getPixel(x, y)
+                val r = (c shr 16) and 0xff
+                val g = (c shr 8) and 0xff
+                val b = c and 0xff
+                if ((r + g + b) / 3 > 190) {
+                    if (x < minX) minX = x
+                    if (x > maxX) maxX = x
+                }
+            }
+        }
+        return if (maxX <= minX) 0.0 else (maxX - minX).toDouble() / w
+    }
+
     private fun versesFrom(lines: List<ShareMushafLine>, surah: Int, name: String, from: Int, to: Int): AyahShareContent {
         val vs = (from..to).map { ayah ->
             val words = lines.flatMap { it.words }.filter { it.ayah == ayah && !it.isMarker }
@@ -79,7 +100,7 @@ class ExportFitEvidenceTest {
         val fonts = QcfFontManager(context, glyphs)
         fonts.ensureMaps()
         val exporter = AyahShareExporter(context, fonts, ReciterCatalog(context))
-        val evidence = File(context.cacheDir, "v9-export-fit").apply { deleteRecursively(); mkdirs() }
+        val evidence = File(context.cacheDir, "v10-export-fit").apply { deleteRecursively(); mkdirs() }
         val options = VideoMakerOptions(
             translation = false,
             backgrounds = ShareBackgrounds.FILES.take(1),
@@ -87,6 +108,7 @@ class ExportFitEvidenceTest {
             showTitle = true,
         )
 
+        // Real Fatiha word_ids 1..36 (markers included as wid=0 via is_ayah_marker rows).
         val fatihaLines = qcfLines(
             glyphs, 1,
             listOf(
@@ -105,32 +127,46 @@ class ExportFitEvidenceTest {
         val fatiha = versesFrom(fatihaLines, 1, "Al-Fatihah", 1, 7)
         for (ayah in listOf(1, 3, 7)) {
             val bmp = exporter.makerPreview(fatiha, options, word = 1, progress = 0.3f, activeAyah = ayah)
-            val f = File(evidence, "v9-export-fatiha-ayah$ayah.jpg")
+            val f = File(evidence, "v10-export-fatiha-ayah$ayah.jpg")
             f.outputStream().use { bmp.compress(Bitmap.CompressFormat.JPEG, 92, it) }
+            val widthRatio = textWidthRatio(bmp)
             assertTrue("fatiha $ayah edge", edgeInkRatio(bmp) < 0.10)
+            // Short ayat and long ayah share one large size; ink should not be a tiny island.
+            assertTrue("fatiha $ayah widthRatio=$widthRatio", widthRatio > 0.35)
             publishJpeg(context, f, f.name)
             bmp.recycle()
             System.gc()
         }
 
-        val kursiRows = (1..12).map { li ->
-            val base = 200 + li * 8
-            (0..7).map { wi ->
-                val pos = li * 8 + wi + 1
-                if (wi == 7 && li == 12) Triple(255, pos, 0) else Triple(255, pos, base + wi)
-            }
-        }
-        val kursiLines = qcfLines(glyphs, 3, kursiRows)
+        // Real Ayat al-Kursi 2:255 word_ids 5436..5486 on Madinah page 42 (lines 8-13).
+        val kursiRows = listOf(
+            // line 8 partial: 5436-5440 (pos 1-5)
+            (5436..5440).mapIndexed { i, wid -> Triple(255, i + 1, wid) },
+            // line 9: 5441-5451 (pos 6-16)
+            (5441..5451).mapIndexed { i, wid -> Triple(255, i + 6, wid) },
+            // line 10: 5452-5462 (pos 17-27)
+            (5452..5462).mapIndexed { i, wid -> Triple(255, i + 17, wid) },
+            // line 11: 5463-5473 (pos 28-38)
+            (5463..5473).mapIndexed { i, wid -> Triple(255, i + 28, wid) },
+            // line 12: 5474-5482 (pos 39-47)
+            (5474..5482).mapIndexed { i, wid -> Triple(255, i + 39, wid) },
+            // line 13 partial: 5483-5486 (pos 48-50 + marker 51)
+            listOf(
+                Triple(255, 48, 5483), Triple(255, 49, 5484), Triple(255, 50, 5485), Triple(255, 51, 0),
+            ),
+        )
+        val kursiLines = qcfLines(glyphs, 42, kursiRows)
         val kursi = versesFrom(kursiLines, 2, "Al-Baqarah", 255, 255)
+        // page1: early word; page2: late word (pos ~40) forces second wrapped page if needed
         val k1 = exporter.makerPreview(kursi, options, word = 2, progress = 0.4f, activeAyah = 255)
-        val k1f = File(evidence, "v9-export-kursi-p1.jpg")
+        val k1f = File(evidence, "v10-export-kursi-p1.jpg")
         k1f.outputStream().use { k1.compress(Bitmap.CompressFormat.JPEG, 92, it) }
         assertTrue("kursi p1 edge", edgeInkRatio(k1) < 0.10)
         publishJpeg(context, k1f, k1f.name)
         k1.recycle()
         System.gc()
-        val k2 = exporter.makerPreview(kursi, options, word = 70, progress = 0.5f, activeAyah = 255)
-        val k2f = File(evidence, "v9-export-kursi-p2.jpg")
+        val k2 = exporter.makerPreview(kursi, options, word = 45, progress = 0.5f, activeAyah = 255)
+        val k2f = File(evidence, "v10-export-kursi-p2.jpg")
         k2f.outputStream().use { k2.compress(Bitmap.CompressFormat.JPEG, 92, it) }
         assertTrue("kursi p2 edge", edgeInkRatio(k2) < 0.10)
         publishJpeg(context, k2f, k2f.name)

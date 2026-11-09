@@ -341,28 +341,45 @@ class AyahShareExporter @Inject constructor(
         } ?: pages.first()
     }
 
-    private fun selectReflowedPage(
-        lines: List<ShareMushafLine>,
-        activeAyah: Int?,
+    private fun ayahSourceLines(lines: List<ShareMushafLine>, ayah: Int): List<ShareMushafLine> =
+        lines.mapNotNull { line ->
+            val kept = line.words.filter { it.ayah == ayah }
+            if (kept.isEmpty()) null else line.copy(words = kept)
+        }
+
+    private fun ayahsInOrder(lines: List<ShareMushafLine>): List<Int> {
+        val seen = LinkedHashSet<Int>()
+        for (line in lines) {
+            for (word in line.words) seen += word.ayah
+        }
+        return seen.toList()
+    }
+
+    /** Chunk already-reflowed lines into pages of ≤ MAX lines; pick page by active word. */
+    private fun selectWrappedAyahPage(
+        wrapped: List<ShareMushafLine>,
         activeWord: Int? = null,
     ): List<ShareMushafLine> {
-        if (lines.isEmpty()) return lines
-        val pages = paginateMushafLines(lines, minLines = 1, maxLines = ShareMushafLayout.VIDEO_AYAH_PAGE_MAX_LINES)
-        if (pages.isEmpty()) return lines
-        val ayah = activeAyah
-        if (ayah == null) return pages.first()
+        if (wrapped.isEmpty()) return wrapped
+        val maxLines = ShareMushafLayout.VIDEO_AYAH_PAGE_MAX_LINES
+        if (wrapped.size <= maxLines) return wrapped
+        val pages = ArrayList<List<ShareMushafLine>>()
+        var i = 0
+        while (i < wrapped.size) {
+            val end = minOf(i + maxLines, wrapped.size)
+            pages += wrapped.subList(i, end)
+            i = end
+        }
         if (activeWord != null) {
             for (page in pages) {
-                val hit = page.any { line ->
-                    line.words.any { w -> !w.isMarker && w.ayah == ayah && w.position == activeWord }
+                if (page.any { line -> line.words.any { w -> !w.isMarker && w.position == activeWord } }) {
+                    return page
                 }
-                if (hit) return page
             }
         }
-        return pages.firstOrNull { page ->
-            page.any { line -> line.words.any { it.ayah == ayah } }
-        } ?: pages.first()
+        return pages.first()
     }
+
 
     private fun displayPageForAyah(content: AyahShareContent, activeAyah: Int?): List<AyahShareVerse> {
         val verses = content.verses
@@ -603,19 +620,30 @@ class AyahShareExporter @Inject constructor(
         if (title.isNotEmpty()) titlePaint.getTextBounds(title, 0, title.length, titleBounds)
         val titleInk = if (options.showTitle) maxOf(titleBounds.height().toFloat(), width * .062f) else 0f
         val titleFrameH = titleInk * (1f + 2f * ShareMushafLayout.TITLE_PAD_Y_FACTOR)
-        // Always one ayah per page (preview + export). Long ayat split at line bounds.
-        val sourceLines: List<ShareMushafLine> = when {
-            activeAyah != null && content.mushafLines.isNotEmpty() -> {
-                content.mushafLines.mapNotNull { line ->
-                    val kept = line.words.filter { it.ayah == activeAyah }
-                    if (kept.isEmpty()) null else line.copy(words = kept)
+        // One ayah per page: keep only that ayah's words (by ayah number), reflow
+        // to wrap width at the uniform size, paginate only if > MAX wrapped lines.
+        val mushaf = if (content.mushafLines.isNotEmpty()) {
+            val ayah = activeAyah ?: content.verses.firstOrNull()?.ayah
+            if (ayah == null) {
+                null
+            } else {
+                val source = ayahSourceLines(content.mushafLines, ayah)
+                if (source.isEmpty()) {
+                    null
+                } else {
+                    val size = lockedTextSize
+                        ?: sharedAyahTextSize(content.mushafLines, options, width)
+                    val wrapped = reflowMushafLines(
+                        source,
+                        options,
+                        size,
+                        width * ShareMushafLayout.VIDEO_WRAP_WIDTH,
+                    )
+                    selectWrappedAyahPage(wrapped, activeWord)
                 }
             }
-            content.mushafLines.isNotEmpty() -> content.mushafLines
-            else -> emptyList()
-        }
-        val mushaf = sourceLines.takeIf { it.isNotEmpty() }?.let { source ->
-            selectReflowedPage(source, activeAyah, activeWord)
+        } else {
+            null
         }
         val bodyHeight: Float
         val bodyTop: Float
@@ -1647,34 +1675,61 @@ class AyahShareExporter @Inject constructor(
         options: VideoMakerOptions,
         width: Int,
     ): Float {
-        // Uniform size for preview+export: fit the widest QCF page line, then
-        // shrink further so 5 lines of real QCF metrics clear the frame height.
+        // One uniform size for the whole selection: the LARGEST size such that
+        // every selected ayah reflows into ≤ VIDEO_AYAH_PAGE_MAX_LINES inside
+        // VIDEO_WRAP_WIDTH. Short ayat wrap as a paragraph (mushaf breaks ignored).
         val maxWidth = width * ShareMushafLayout.VIDEO_WRAP_WIDTH
-        val height = (width * 16f / 9f).toInt().coerceAtLeast(width) // 9:16 portrait
-        val availableH = height * 0.48f
-        var size = width * ShareMushafLayout.VIDEO_FIXED_WIDTH_FRACTION *
+        val minSize = width * ShareMushafLayout.VIDEO_MIN_WIDTH_FRACTION
+        val maxSize = width * ShareMushafLayout.VIDEO_FIXED_WIDTH_FRACTION *
             ShareMushafLayout.VIDEO_ARABIC_SIZE_FACTOR
-        if (lines.isEmpty() || maxWidth <= 1f) return size
+        if (lines.isEmpty() || maxWidth <= 1f) return minSize
+        val ayahs = ayahsInOrder(lines)
+        val maxLines = ShareMushafLayout.VIDEO_AYAH_PAGE_MAX_LINES
+        val height = (width * 16f / 9f).toInt().coerceAtLeast(width)
+        val availableH = height * 0.50f
         val paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
-        var widest = 0f
-        for (line in lines) {
-            widest = maxOf(widest, lineInkWidth(line, options, size, paint))
+        suspend fun allFit(size: Float): Boolean {
+            for (ayah in ayahs) {
+                val source = ayahSourceLines(lines, ayah)
+                if (source.isEmpty()) continue
+                val wrapped = reflowMushafLines(source, options, size, maxWidth)
+                // Above min size every ayah must fit on one page (<= maxLines).
+                // At min size, longer ayat may paginate.
+                if (size > minSize * 1.01f && wrapped.size > maxLines) return false
+                val pageLines = minOf(maxLines, maxOf(1, wrapped.size))
+                val sample = if (wrapped.isEmpty()) source else wrapped.take(pageLines)
+                val lineH = metricsLineHeight(
+                    sample,
+                    options,
+                    size,
+                    paint,
+                    ShareMushafLayout.VIDEO_LINE_MULTIPLIER,
+                )
+                val pad = size * 0.28f
+                if (pageLines * lineH + pad * 2f > availableH && size > minSize * 1.01f) {
+                    return false
+                }
+            }
+            return true
         }
-        if (widest > maxWidth && widest > 0f) {
-            size *= (maxWidth / widest)
+        // If even maxSize fits every ayah in ≤5 lines, use it (large glyphs).
+        if (allFit(maxSize)) return maxSize
+        // Binary search largest size that still fits.
+        var lo = minSize
+        var hi = maxSize
+        var best = minSize
+        repeat(18) {
+            val mid = (lo + hi) * 0.5f
+            if (allFit(mid)) {
+                best = mid
+                lo = mid
+            } else {
+                hi = mid
+            }
         }
-        // Height fit for one ayah page (up to VIDEO_AYAH_PAGE_MAX_LINES) at QCF metrics.
-        val pageLines = minOf(ShareMushafLayout.VIDEO_AYAH_PAGE_MAX_LINES, maxOf(1, lines.size))
-        var guard = 0
-        while (guard++ < 24 && size > width * 0.018f) {
-            val lineH = metricsLineHeight(lines, options, size, paint, ShareMushafLayout.VIDEO_LINE_MULTIPLIER)
-            val pad = size * 0.28f
-            if (pageLines * lineH + pad * 2f <= availableH) break
-            size *= 0.92f
-        }
-        size *= 0.96f
-        return size.coerceAtLeast(width * 0.018f)
+        return best.coerceIn(minSize, maxSize)
     }
+
 
 
     /**
