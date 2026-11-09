@@ -7,20 +7,22 @@ package com.quransunah.app.share
  */
 object ShareMushafLayout {
     const val IMAGE_SHARE_MAX_AYAT = 3
-    const val FONT_SIZE_MIN = 22f
-    const val FONT_SIZE_MAX = 29f
     const val TITLE_SIZE_FACTOR = 0.60f
     /**
      * Baseline distance as a fraction of Arabic text size. QPC page glyphs
      * already carry vertical bearings, so a full em of leading opens a gutter.
      */
     const val ARABIC_LINE_MULTIPLIER = 1.12f
-    /** One-ayah video frames. Page glyphs need more than one em or harakat collide. */
-    const val VIDEO_LINE_MULTIPLIER = 1.65f
+    /** Fallback when font metrics are unavailable; prefer measured QCF ascent+descent. */
+    const val VIDEO_LINE_MULTIPLIER = 2.35f
     /** Arabic verse size in the video frame, relative to the fitted size. Translation is unchanged. */
-    const val VIDEO_ARABIC_SIZE_FACTOR = 1.2f
-    /** Inset used when wrapping a video line so glyphs stay inside the frame. */
-    const val VIDEO_WRAP_WIDTH = 0.90f
+    const val VIDEO_ARABIC_SIZE_FACTOR = 1.0f
+    /** Usable text width as a fraction of frame width (side margins). */
+    const val VIDEO_WRAP_WIDTH = 0.82f
+    /** Starting video body size as fraction of frame width; may shrink to fit widest line. */
+    const val VIDEO_FIXED_WIDTH_FRACTION = 0.038f
+    /** Extra leading on top of measured QCF ascent+descent (tashkeel clearance). */
+    const val VIDEO_METRICS_LEADING = 0.35f
     /** Wrapped share slides (not page-slot glyphs) still need room for harakat. */
     const val IMAGE_LINE_MULTIPLIER = 1.42f
     const val PAGE_WORD_GAP = 0.04f
@@ -49,12 +51,6 @@ object ShareMushafLayout {
 
     fun wordGap(textSize: Float, pageFont: Boolean): Float =
         textSize * if (pageFont) PAGE_WORD_GAP else TEXT_WORD_GAP
-
-    fun fontSizeToScale(size: Float): Float =
-        (size / FONT_SIZE_MIN).coerceIn(1f, FONT_SIZE_MAX / FONT_SIZE_MIN)
-
-    fun scaleToFontSize(scale: Float): Float =
-        (scale * FONT_SIZE_MIN).coerceIn(FONT_SIZE_MIN, FONT_SIZE_MAX)
 
     /** One ayah keeps the current size; more ayat only shrink, never enlarge. */
     fun fitScale(ayahCount: Int, lineCount: Int = ayahCount): Float {

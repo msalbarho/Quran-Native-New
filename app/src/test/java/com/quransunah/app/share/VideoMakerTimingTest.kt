@@ -82,9 +82,8 @@ class VideoMakerTimingTest {
         assertTrue(ShareBackgrounds.FILES.contains(options.background))
         assertEquals(7, ShareMushafLayout.HIGHLIGHT_COLOURS.size)
         assertEquals(3, ShareMushafLayout.MARKER_COLOURS.size)
-        assertEquals(22f, ShareMushafLayout.scaleToFontSize(options.textScale), 0.01f)
-        assertEquals(1f, ShareMushafLayout.fontSizeToScale(22f), 0.01f)
-        assertTrue(ShareMushafLayout.fontSizeToScale(29f) <= 29f / 22f + 0.001f)
+        assertTrue(ShareMushafLayout.VIDEO_FIXED_WIDTH_FRACTION > 0f)
+        assertTrue(ShareMushafLayout.VIDEO_ARABIC_SIZE_FACTOR > 0f)
         assertFalse(makerNeedsSmoothFrames(options.copy(trackingMode = 1, backgrounds = listOf(options.background))))
         assertTrue(makerNeedsSmoothFrames(options.copy(trackingMode = 2)))
     }

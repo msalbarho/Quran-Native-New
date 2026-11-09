@@ -402,8 +402,8 @@ fun WordSheetContent(
         modifier = modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-            .padding(bottom = 28.dp),
+            .padding(horizontal = 16.dp)
+            .padding(top = 2.dp, bottom = 28.dp),
     ) {
         SheetSection {
         CompositionLocalProvider(LocalLayoutDirection provides uiLayoutDirection()) {
@@ -441,7 +441,7 @@ fun WordSheetContent(
                 pageNumber = ui.pageNumber,
                 fontManager = fontManager,
                 onSelectWord = onSelectWord,
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier.padding(top = 2.dp),
             )
         } else {
             UthmanicText(
@@ -453,7 +453,7 @@ fun WordSheetContent(
                 maxLines = 6,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 12.dp),
+                    .padding(top = 2.dp, bottom = 6.dp),
             )
         }
         }
@@ -462,8 +462,8 @@ fun WordSheetContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+                .padding(top = 3.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp),
         ) {
             SheetSection {
             Row(
@@ -529,7 +529,7 @@ fun WordSheetContent(
             }
             }
 
-            SheetSection {
+            SheetSection(compact = true) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -614,19 +614,25 @@ fun WordSheetContent(
                     color = paper.textMuted,
                     fontSize = 11.sp,
                 )
-                AccentFillButton(
-                    label = stringResource(
-                        if (ui.sharing) R.string.word_preparing else R.string.word_share_image,
-                    ),
-                    /* image capped at 3 ayat */
-                    onClick = { onShareRangeImage(rangeFrom, rangeTo.coerceIn(rangeFrom, toMax)) },
-                    enabled = !ui.sharing,
-                )
-                AccentFillButton(
-                    label = stringResource(R.string.word_share_text),
-                    onClick = onShareText,
-                    enabled = !ui.sharing,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    AccentFillButton(
+                        label = stringResource(
+                            if (ui.sharing) R.string.word_preparing else R.string.word_share_image,
+                        ),
+                        onClick = { onShareRangeImage(rangeFrom, rangeTo.coerceIn(rangeFrom, toMax)) },
+                        enabled = !ui.sharing,
+                        modifier = Modifier.weight(1f),
+                    )
+                    AccentFillButton(
+                        label = stringResource(R.string.word_share_text),
+                        onClick = onShareText,
+                        enabled = !ui.sharing,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
             
             if (ui.sharing) {
@@ -666,7 +672,7 @@ private fun WordSheetHeader(onClose: () -> Unit) {
         ) {
             Box(
                 modifier = Modifier
-                    .padding(top = 10.dp)
+                    .padding(top = 6.dp)
                     .size(width = 36.dp, height = 4.dp)
                     .clip(RoundedCornerShape(999.dp))
                     .background(paper.textMuted.copy(alpha = 0.45f))
@@ -685,7 +691,7 @@ private fun WordSheetHeader(onClose: () -> Unit) {
                         .defaultMinSize(minWidth = 40.dp, minHeight = 40.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .clickable(role = Role.Button, onClick = onClose)
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                        .padding(horizontal = 10.dp, vertical = 4.dp),
                 )
             }
         }
@@ -694,11 +700,13 @@ private fun WordSheetHeader(onClose: () -> Unit) {
 
 @Composable
 private fun SheetSection(
+    compact: Boolean = false,
     content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit,
 ) {
     val paper = LocalPaperColors.current
     val night = LocalNightMode.current
     val shape = GoldCornerFrameShape(12.dp)
+    val pad = if (compact) 8.dp else 12.dp
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -711,8 +719,8 @@ private fun SheetSection(
                 },
             )
             .border(1.dp, paper.accent.copy(alpha = if (night) 0.34f else 0.18f), shape)
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(5.dp),
+            .padding(pad),
+        verticalArrangement = Arrangement.spacedBy(if (compact) 3.dp else 5.dp),
         content = content,
     )
 }
@@ -914,11 +922,12 @@ private fun AccentFillButton(
     label: String,
     onClick: () -> Unit,
     enabled: Boolean = true,
+    modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
     val shape = GoldCornerFrameShape(12.dp)
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .minimumInteractiveComponentSize()
             .heightIn(min = 40.dp)

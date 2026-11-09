@@ -220,6 +220,7 @@
     <string name="settings_about_p1">هذا التطبيق عمل خالص لوجه الله تعالى، هديّة لكل مسلم ومسلمة، مبتغياً الأجر والثواب لي ولوالديّ ولعائلتي وللمسلمين أجمعين.</string>
     <string name="settings_about_p2">تم تطويره وبنائه بحب وشغف ليخدم كتاب الله. هذا المشروع مفتوح المصدر بالكامل، ومتاح لأي مطور أو مهتم تفكيكه، تعديله، أو إعادة استخدامه ونشره لتطوير تطبيقات تخدم الإسلام والمسلمين، فالدال على الخير كفاعله.</string>
     <string name="settings_about_p3">نسألكم الدعاء بظهر الغيب.</string>
+    <string name="settings_about_audio_kfgqpc">تسجيل ماهر المعيقلي المستخدم في هذا التطبيق هو تسجيل مجمع الملك فهد لطباعة المصحف الشريف برواية حفص.</string>
     <string name="settings_about_open_source_title">المشروع مفتوح المصدر</string>
     <string name="settings_about_open_source_text">هذا المشروع مفتوح المصدر ومتاح للجميع للاستفادة منه وتطويره والمساهمة فيه بما يخدم كتاب الله تعالى، ابتغاءً للأجر والثواب.</string>
     <string name="settings_about_github">عرض المشروع على GitHub</string>
@@ -300,7 +301,7 @@
     <string name="wird_cancel">رجوع</string>
 
     <!-- Video maker -->
-    <string name="video_new">فيديو جديد</string>
+    <string name="video_new">مشاركة كفيديو</string>
     <string name="video_cancel">إلغاء</string>
     <string name="video_step_verses">آيات</string>
     <string name="video_step_background">خلفية</string>
@@ -330,7 +331,6 @@
     <string name="video_frame_mushaf">مصحف</string>
     <string name="video_frame_ornate">مزخرف</string>
     <string name="video_frame_medal">ميدالية</string>
-    <string name="video_text_size">حجم النص %1$d</string>
     <string name="video_backdrop">لوحة داكنة خلف النص</string>
     <string name="video_text_color">لون النص</string>
     <string name="video_color_white">أبيض</string>

@@ -220,6 +220,7 @@
     <string name="settings_about_p1">This app is a sincere work offered purely for the sake of Allah, a gift for every Muslim man and woman, seeking reward for me, for my parents, for my family, and for all Muslims.</string>
     <string name="settings_about_p2">It was developed and built with love and passion to serve the Book of Allah. This project is fully open source, and any developer or interested person may study it, modify it, reuse it, and share it in order to build applications that serve Islam and Muslims. Whoever guides others to what is good is rewarded like the one who does that good.</string>
     <string name="settings_about_p3">We ask you to remember us in your prayers in our absence.</string>
+    <string name="settings_about_audio_kfgqpc">Maher Al-Muaiqly audio used in this app is the King Fahd Complex for the Printing of the Holy Qur’an (KFGQPC) Hafs recording.</string>
     <string name="settings_about_open_source_title">Open-source project</string>
     <string name="settings_about_open_source_text">This project is open source and available for everyone to benefit from, develop, and contribute to, in service of the Book of Allah, seeking reward from Allah.</string>
     <string name="settings_about_github">View the project on GitHub</string>
@@ -302,15 +303,15 @@
     <string name="wird_cancel">Back</string>
 
     <!-- Video maker -->
-    <string name="video_new">New video</string>
+    <string name="video_new">Share as video</string>
     <string name="video_cancel">Cancel</string>
     <string name="video_step_verses">Verses</string>
     <string name="video_step_background">Background</string>
     <string name="video_step_style">Style</string>
     <string name="video_step_share">Share</string>
     <string name="video_range_hint">Choose the start and the end • up to 10 verses</string>
-    <string name="video_from_ayah">From verse</string>
-    <string name="video_to_ayah">To verse</string>
+    <string name="video_from_ayah">From ayah</string>
+    <string name="video_to_ayah">To ayah</string>
     <string name="video_reciter">Reciter</string>
     <string name="video_choose_reciter">Choose a reciter</string>
     <string name="video_backgrounds_count">Selected backgrounds: %1$d • in order</string>
@@ -332,7 +333,6 @@
     <string name="video_frame_mushaf">Mushaf</string>
     <string name="video_frame_ornate">Ornate</string>
     <string name="video_frame_medal">Medallion</string>
-    <string name="video_text_size">Text size %1$d</string>
     <string name="video_backdrop">Dark panel behind the text</string>
     <string name="video_text_color">Text color</string>
     <string name="video_color_white">White</string>

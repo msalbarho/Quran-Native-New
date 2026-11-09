@@ -44,8 +44,8 @@ android {
         applicationId = "com.quransunah.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 31
-        versionName = "4.3.5"
+        versionCode = 32
+        versionName = "4.3.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "QURAN_DB_CONTENT_HASH", "\"$quranDbContentHash\"")
         buildConfigField("long", "QURAN_DB_CONTENT_BYTES", "${unifiedDbSource.length()}L")

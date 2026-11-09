@@ -18,7 +18,6 @@ data class VideoMakerOptions(
     val translation: Boolean = false,
     val marker: Boolean = true,
     val tajweedText: Boolean = false,
-    val textScale: Float = 1f, // 1 = 22, slider 22–29
     val ayahX: Float = .5f,
     val ayahY: Float = .28f,
     val titleX: Float = .5f,

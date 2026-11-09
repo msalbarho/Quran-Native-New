@@ -111,7 +111,10 @@
       "ayahAudio": {
         "type": "islamic-network",
         "baseUrl": "https://cdn.islamic.network/quran/audio/128/ar.mahermuaiqly"
-      }
+      },
+      "supportsAyahTiming": true,
+      "timingReciterId": 102,
+      "timingMoshafId": 133
     },
     {
       "id": "husary",
@@ -178,8 +181,7 @@
       "supportsAyahTiming": true,
       "timingReciterId": 54,
       "timingMoshafId": 54
-    }
-,
+    },
     {
       "id": "31",
       "name": "سعود الشريم",

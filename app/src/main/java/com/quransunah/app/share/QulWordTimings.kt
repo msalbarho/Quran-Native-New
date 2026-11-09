@@ -1,6 +1,7 @@
 package com.quransunah.app.share
 
 import android.content.Context
+import com.quransunah.app.core.SurahAyahCounts
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -9,7 +10,7 @@ import java.net.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** QUL / Quran.com word clocks. Separate cache; never writes playback/session state. */
+/** QUL / Quran.com / KFGQPC word clocks. Separate cache; never writes playback/session state. */
 class QulWordTimings(private val context: Context) {
     suspend fun load(surah: Int, ayah: Int, recitationId: Int = 18): List<WordSegment> =
         loadAyah(surah, ayah, recitationId).segments
@@ -29,6 +30,9 @@ class QulWordTimings(private val context: Context) {
         ),
     ): QulAyahTiming = withContext(Dispatchers.IO) {
         val resolved = spec ?: QulRecitations.spec(QulRecitations.reciterId(recitationId).orEmpty())
+        if (resolved?.isKfc == true) {
+            return@withContext loadKfc(surah, ayah, resolved)
+        }
         if (resolved?.isSurahLevel == true) {
             return@withContext loadSurahLevel(surah, ayah, resolved)
         }
@@ -58,6 +62,40 @@ class QulWordTimings(private val context: Context) {
         QulAyahTiming(
             segments = parseQulWordSegments(row.optJSONArray("segments")),
             audioUrl = audioUrl,
+        )
+    }
+
+    private fun loadKfc(surah: Int, ayah: Int, spec: QulRecitations.Spec): QulAyahTiming {
+        val assetDir = spec.kfcTimingAssetDir ?: return QulAyahTiming()
+        val name = "${SurahAyahCounts.pad3(surah)}.json"
+        val cacheDir = File(context.cacheDir, "kfc-word-timings").apply { mkdirs() }
+        val cache = File(cacheDir, name)
+        val text = when {
+            cache.exists() && cache.length() > 64 -> cache.readText()
+            else -> {
+                val fallbackUrl = spec.kfcSurahServer?.let {
+                    "${it.trimEnd('/')}/${SurahAyahCounts.pad3(surah)}.mp3"
+                }
+                val body = runCatching {
+                    context.assets.open("$assetDir/$name").bufferedReader().use { it.readText() }
+                }.getOrNull() ?: return QulAyahTiming(surahAudioUrl = fallbackUrl)
+                cache.writeText(body)
+                body
+            }
+        }
+        val root = JSONObject(text)
+        val surahUrl = root.optString("audio_url").takeIf { it.isNotBlank() }
+            ?: spec.kfcSurahServer?.let { "${it.trimEnd('/')}/${SurahAyahCounts.pad3(surah)}.mp3" }
+        val ayahs = root.optJSONObject("ayahs") ?: return QulAyahTiming(surahAudioUrl = surahUrl)
+        val row = ayahs.optJSONObject("$ayah") ?: return QulAyahTiming(surahAudioUrl = surahUrl)
+        val from = row.optLong("crop_start_ms")
+        val to = row.optLong("crop_end_ms")
+        val segments = parseQulWordSegments(row.optJSONArray("segments"))
+        return QulAyahTiming(
+            segments = segments,
+            surahAudioUrl = surahUrl,
+            cropStartMs = from.takeIf { it >= 0L },
+            cropEndMs = to.takeIf { it > from },
         )
     }
 

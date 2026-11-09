@@ -49,6 +49,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextDirection
 import com.quransunah.app.fonts.QcfFontManager
 import androidx.compose.ui.unit.LayoutDirection
@@ -59,6 +60,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.quransunah.app.R
 import com.quransunah.app.core.ArabicRtl
 import com.quransunah.app.core.LanguageRegistry
+import com.quransunah.app.core.EasternArabic
 import com.quransunah.app.core.SurahAyahCounts
 import com.quransunah.app.core.uiLayoutDirection
 import com.quransunah.app.data.audio.AudioUrls
@@ -369,7 +371,8 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp,
                                         maxLines = 1,
-                                        modifier = Modifier.weight(1.1f),
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f),
                                     )
                                     MakerNumber(stringResource(R.string.video_from_ayah), ui.videoFromAyah, 1..SurahAyahCounts.ayahCount(ui.word?.surah ?: 1), Modifier.weight(1f), viewModel::setVideoFrom)
                                     MakerNumber(stringResource(R.string.video_to_ayah), ui.videoToAyah, ui.videoFromAyah..minOf(SurahAyahCounts.ayahCount(ui.word?.surah ?: 1), ui.videoFromAyah + 9), Modifier.weight(1f), viewModel::setVideoTo)
@@ -507,13 +510,6 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
                                         }
                                     }
                                     4 -> Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                        Text(stringResource(R.string.video_text_size, ShareMushafLayout.scaleToFontSize(options.textScale).toInt()), fontSize = 12.sp)
-                                        Slider(
-                                            value = ShareMushafLayout.scaleToFontSize(options.textScale),
-                                            onValueChange = { options = options.copy(textScale = ShareMushafLayout.fontSizeToScale(it)) },
-                                            valueRange = ShareMushafLayout.FONT_SIZE_MIN..ShareMushafLayout.FONT_SIZE_MAX,
-                                            steps = (ShareMushafLayout.FONT_SIZE_MAX - ShareMushafLayout.FONT_SIZE_MIN).toInt() - 1,
-                                        )
                                         MakerToggle(stringResource(R.string.video_backdrop), options.textBackdrop) { options = options.copy(textBackdrop = it) }
                                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                             MakerChoice(stringResource(R.string.video_color_white), !options.tajweedText, Modifier.weight(1f)) { options = options.copy(tajweedText = false) }
@@ -801,9 +797,53 @@ private data class PreviewClip(
     val MakerGold = LocalPaperColors.current.accent
     var open by remember { mutableStateOf(false) }
     Box(modifier) {
-        OutlinedButton(onClick = { open = true }, modifier = Modifier.fillMaxWidth(), shape = GoldCornerFrameShape(8.dp)) { Text("$label: $value", color = MakerGold) }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .border(1.dp, MakerGold.copy(alpha = 0.85f), GoldCornerFrameShape(10.dp))
+                .clickable { open = true }
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                label,
+                color = MakerGold.copy(alpha = 0.78f),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                Text(
+                    EasternArabic.format(value),
+                    color = MakerGold,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    maxLines = 1,
+                )
+                Text(
+                    if (open) "▴" else "▾",
+                    color = MakerGold.copy(alpha = 0.9f),
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(start = 2.dp),
+                )
+            }
+        }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }, modifier = Modifier.heightIn(max = 300.dp)) {
-            range.forEach { n -> DropdownMenuItem(text = { Text(n.toString()) }, onClick = { change(n); open = false }) }
+            range.forEach { n ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            EasternArabic.format(n),
+                            fontWeight = if (n == value) FontWeight.Bold else FontWeight.Normal,
+                        )
+                    },
+                    onClick = { change(n); open = false },
+                )
+            }
         }
     }
 }

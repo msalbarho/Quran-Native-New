@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -162,7 +163,7 @@ fun SettingsScreenContent(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(start = 14.dp, end = 14.dp, top = 10.dp, bottom = 16.dp),
+            .padding(start = 14.dp, end = 14.dp, top = 4.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         SettingsSection(title = stringResource(R.string.settings_appearance), showDivider = false) {
@@ -172,6 +173,7 @@ fun SettingsScreenContent(
                 firstSelected = !settings.nightMode,
                 onFirst = { onNightMode(false) },
                 onSecond = { onNightMode(true) },
+                compact = true,
             )
         }
         SettingsSection(title = stringResource(R.string.settings_language)) {
@@ -197,6 +199,7 @@ fun SettingsScreenContent(
                 onFirst = { onMedinaMode(true) },
                 onSecond = { onMedinaMode(false) },
                 fitSingleLine = true,
+                compact = true,
             )
         }
         SettingsSection(title = stringResource(R.string.settings_font_size)) {
@@ -228,12 +231,23 @@ fun SettingsScreenContent(
             )
         }
         HorizontalDivider(
-            modifier = Modifier.padding(top = 18.dp, bottom = 12.dp),
+            modifier = Modifier.padding(top = 12.dp, bottom = 8.dp),
             color = paper.tone500.copy(alpha = 0.72f),
         )
-        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            CompactSettingsLink(stringResource(R.string.settings_user_guide_button), onOpenUserGuide)
-            CompactSettingsLink(stringResource(R.string.settings_about_button)) { aboutOpen = true }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            CompactSettingsLink(
+                stringResource(R.string.settings_user_guide_button),
+                onOpenUserGuide,
+                modifier = Modifier.weight(1f),
+            )
+            CompactSettingsLink(
+                stringResource(R.string.settings_about_button),
+                { aboutOpen = true },
+                modifier = Modifier.weight(1f),
+            )
         }
     }
     }
@@ -262,9 +276,9 @@ private fun LanguageSettingRow(selected: String?, onSelect: (String?) -> Unit) {
             .clip(rowShape)
             .background(rowFill)
             .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, rowShape)
-            .minimumInteractiveComponentSize()
+            .heightIn(min = 36.dp)
             .clickable(role = Role.Button) { dialogOpen = true }
-            .padding(horizontal = 10.dp, vertical = 7.dp),
+            .padding(horizontal = 10.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -484,12 +498,12 @@ private fun SettingsSection(
     val paper = LocalPaperColors.current
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.Start,
     ) {
         if (showDivider) {
             HorizontalDivider(
-                modifier = Modifier.padding(top = 10.dp, bottom = 4.dp),
+                modifier = Modifier.padding(top = 6.dp, bottom = 2.dp),
                 color = paper.tone500.copy(alpha = 0.72f),
             )
         }
@@ -511,6 +525,7 @@ private fun SegmentedTwoOptions(
     onFirst: () -> Unit,
     onSecond: () -> Unit,
     fitSingleLine: Boolean = false,
+    compact: Boolean = false,
 ) {
     val paper = LocalPaperColors.current
     val night = LocalNightMode.current
@@ -521,7 +536,7 @@ private fun SegmentedTwoOptions(
             .clip(shape)
             .background(if (night) paper.tone400 else lerp(paper.surface, paper.chromeFill, 0.35f))
             .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, shape)
-            .padding(4.dp),
+            .padding(if (compact) 2.dp else 4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         SegmentedOption(
@@ -529,6 +544,7 @@ private fun SegmentedTwoOptions(
             selected = firstSelected,
             onClick = onFirst,
             fitSingleLine = fitSingleLine,
+            compact = compact,
             modifier = Modifier.weight(1f),
         )
         SegmentedOption(
@@ -536,6 +552,7 @@ private fun SegmentedTwoOptions(
             selected = !firstSelected,
             onClick = onSecond,
             fitSingleLine = fitSingleLine,
+            compact = compact,
             modifier = Modifier.weight(1f),
         )
     }
@@ -548,6 +565,7 @@ private fun SegmentedOption(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     fitSingleLine: Boolean = false,
+    compact: Boolean = false,
 ) {
     val paper = LocalPaperColors.current
     var fontSize by remember(label) { mutableStateOf(MushafOptionFont) }
@@ -587,9 +605,9 @@ private fun SegmentedOption(
         modifier = modifier
             .clip(shape)
             .background(if (selected) paper.accent else Color.Transparent)
-            .minimumInteractiveComponentSize()
+            .then(if (compact) Modifier.heightIn(min = 32.dp) else Modifier.minimumInteractiveComponentSize())
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            .padding(horizontal = if (compact) 8.dp else 10.dp, vertical = if (compact) 3.dp else 6.dp),
     )
 }
 
@@ -741,6 +759,7 @@ private fun AboutAppDialog(onClose: () -> Unit) {
                 Text(stringResource(R.string.settings_about_p1), color = paper.textPrimary, fontSize = 15.sp, lineHeight = 24.sp, textAlign = TextAlign.Start, style = TextStyle(textDirection = bodyScript))
                 Text(stringResource(R.string.settings_about_p2), color = paper.textPrimary, fontSize = 15.sp, lineHeight = 24.sp, textAlign = TextAlign.Start, style = TextStyle(textDirection = bodyScript))
                 Text(stringResource(R.string.settings_about_p3), color = paper.textStrong, fontSize = 15.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Start, style = TextStyle(textDirection = bodyScript))
+                Text(stringResource(R.string.settings_about_audio_kfgqpc), color = paper.textPrimary, fontSize = 14.sp, lineHeight = 22.sp, textAlign = TextAlign.Start, style = TextStyle(textDirection = bodyScript))
                 HorizontalDivider(color = paper.tone500.copy(alpha = 0.45f))
                 Text(
                     text = stringResource(R.string.settings_about_open_source_title),
@@ -867,7 +886,11 @@ private fun AboutTextLink(label: String, direction: TextDirection, onClick: () -
 
 /** Low-emphasis row for the guide / about entries at the end of Settings. */
 @Composable
-private fun CompactSettingsLink(label: String, onClick: () -> Unit) {
+private fun CompactSettingsLink(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val paper = LocalPaperColors.current
     val shape = GoldCornerFrameShape(10.dp)
     Text(
@@ -877,14 +900,15 @@ private fun CompactSettingsLink(label: String, onClick: () -> Unit) {
         fontWeight = FontWeight.SemiBold,
         textAlign = TextAlign.Center,
         maxLines = 1,
-        modifier = Modifier
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier
             .fillMaxWidth()
+            .heightIn(min = 40.dp)
             .clip(shape)
             .background(paper.tone300)
             .border(ChromeTokens.GoldStroke, ChromeTokens.Gold.copy(alpha = 0.6f), shape)
-            .minimumInteractiveComponentSize()
             .clickable(onClick = onClick)
-            .padding(vertical = 6.dp, horizontal = 12.dp),
+            .padding(vertical = 8.dp, horizontal = 10.dp),
     )
 }
 

@@ -131,7 +131,6 @@ class AyahShareExporter @Inject constructor(
             content,
             verse,
             VideoMakerOptions(
-                textScale = ShareMushafLayout.fitScale(content.verses.size, content.mushafLines.size.coerceAtLeast(1)),
                 ayahY = 0.50f,
                 titleY = 0.13f,
             ),
@@ -244,7 +243,7 @@ class AyahShareExporter @Inject constructor(
                 content, current, options, word, 540, 960, progress, elapsedUs, totalUs,
                 displayVerses = displayPageForAyah(content, current.ayah), onGeometry = onGeometry, previewBackground = previewBackground,
                 activeAyah = current.ayah, oneAyahAtATime = false, lockedTextSize = textSize,
-                lineSpacing = ShareMushafLayout.ARABIC_LINE_MULTIPLIER,
+                lineSpacing = ShareMushafLayout.VIDEO_LINE_MULTIPLIER,
             )
         }
         val key = java.util.Objects.hash(
@@ -261,13 +260,13 @@ class AyahShareExporter @Inject constructor(
                 content, current, options, null, 540, 960, 0f, elapsedUs, totalUs,
                 displayVerses = displayPageForAyah(content, current.ayah), onGeometry = { geometry = it }, previewBackground = previewBackground,
                 activeAyah = current.ayah, oneAyahAtATime = false, lockedTextSize = textSize,
-                lineSpacing = ShareMushafLayout.ARABIC_LINE_MULTIPLIER, plate = MakerPlate.BACKDROP,
+                lineSpacing = ShareMushafLayout.VIDEO_LINE_MULTIPLIER, plate = MakerPlate.BACKDROP,
             )
             val glyphs = renderMaker(
                 content, current, options, null, 540, 960, 0f, elapsedUs, totalUs,
                 displayVerses = displayPageForAyah(content, current.ayah), previewBackground = previewBackground,
                 activeAyah = current.ayah, oneAyahAtATime = false, lockedTextSize = textSize,
-                lineSpacing = ShareMushafLayout.ARABIC_LINE_MULTIPLIER, plate = MakerPlate.GLYPHS, wordBoxes = boxes,
+                lineSpacing = ShareMushafLayout.VIDEO_LINE_MULTIPLIER, plate = MakerPlate.GLYPHS, wordBoxes = boxes,
             )
             plate = PreviewPlate(key, backdrop, glyphs, boxes, geometry)
             previewPlate = plate
@@ -368,6 +367,29 @@ class AyahShareExporter @Inject constructor(
         } ?: pages.first()
     }
 
+    private fun selectReflowedPage(
+        lines: List<ShareMushafLine>,
+        activeAyah: Int?,
+        activeWord: Int? = null,
+    ): List<ShareMushafLine> {
+        if (lines.isEmpty()) return lines
+        val pages = paginateMushafLines(lines, minLines = 4, maxLines = 5)
+        if (pages.isEmpty()) return lines
+        val ayah = activeAyah
+        if (ayah == null) return pages.first()
+        if (activeWord != null) {
+            for (page in pages) {
+                val hit = page.any { line ->
+                    line.words.any { w -> !w.isMarker && w.ayah == ayah && w.position == activeWord }
+                }
+                if (hit) return page
+            }
+        }
+        return pages.firstOrNull { page ->
+            page.any { line -> line.words.any { it.ayah == ayah } }
+        } ?: pages.first()
+    }
+
     private fun displayPageForAyah(content: AyahShareContent, activeAyah: Int?): List<AyahShareVerse> {
         val verses = content.verses
         if (verses.isEmpty()) return verses
@@ -430,13 +452,13 @@ class AyahShareExporter @Inject constructor(
                 renderMaker(content, item.verse, options, null, 1080, 1920,
                     0f, verseStartUs, totalUs, displayVerses = displayPageForAyah(content, item.verse.ayah),
                     activeAyah = item.verse.ayah, oneAyahAtATime = false, lockedTextSize = textSize,
-                    lineSpacing = ShareMushafLayout.ARABIC_LINE_MULTIPLIER, plate = MakerPlate.BACKDROP)
+                    lineSpacing = ShareMushafLayout.VIDEO_LINE_MULTIPLIER, plate = MakerPlate.BACKDROP)
             } else null
             val glyphs = if (plateOk) {
                 renderMaker(content, item.verse, options, null, 1080, 1920,
                     0f, verseStartUs, totalUs, displayVerses = displayPageForAyah(content, item.verse.ayah),
                     activeAyah = item.verse.ayah, oneAyahAtATime = false, lockedTextSize = textSize,
-                    lineSpacing = ShareMushafLayout.ARABIC_LINE_MULTIPLIER, plate = MakerPlate.GLYPHS,
+                    lineSpacing = ShareMushafLayout.VIDEO_LINE_MULTIPLIER, plate = MakerPlate.GLYPHS,
                     wordBoxes = boxes)
             } else null
             var platePageKey: List<ShareMushafLine>? = null
@@ -455,11 +477,11 @@ class AyahShareExporter @Inject constructor(
                     plateBackdrop = renderMaker(content, item.verse, options, interval.word, 1080, 1920,
                         0f, verseStartUs, totalUs, displayVerses = displayPageForAyah(content, item.verse.ayah),
                         activeAyah = item.verse.ayah, oneAyahAtATime = false, lockedTextSize = textSize,
-                        lineSpacing = ShareMushafLayout.ARABIC_LINE_MULTIPLIER, plate = MakerPlate.BACKDROP)
+                        lineSpacing = ShareMushafLayout.VIDEO_LINE_MULTIPLIER, plate = MakerPlate.BACKDROP)
                     plateGlyphs = renderMaker(content, item.verse, options, interval.word, 1080, 1920,
                         0f, verseStartUs, totalUs, displayVerses = displayPageForAyah(content, item.verse.ayah),
                         activeAyah = item.verse.ayah, oneAyahAtATime = false, lockedTextSize = textSize,
-                        lineSpacing = ShareMushafLayout.ARABIC_LINE_MULTIPLIER, plate = MakerPlate.GLYPHS,
+                        lineSpacing = ShareMushafLayout.VIDEO_LINE_MULTIPLIER, plate = MakerPlate.GLYPHS,
                         wordBoxes = plateBoxes)
                     platePageKey = pageLines
                 }
@@ -472,7 +494,7 @@ class AyahShareExporter @Inject constructor(
                     renderMaker(content, item.verse, options, interval.word, 1080, 1920,
                         progress, verseStartUs + localUs, totalUs, displayVerses = displayPageForAyah(content, item.verse.ayah),
                         activeAyah = item.verse.ayah, oneAyahAtATime = false, lockedTextSize = textSize,
-                        lineSpacing = ShareMushafLayout.ARABIC_LINE_MULTIPLIER)
+                        lineSpacing = ShareMushafLayout.VIDEO_LINE_MULTIPLIER)
                 }
                 frames += writeJpeg(bitmap, "maker-frame-${frames.size}.jpg", quality = 80)
                 if (bitmap !== frameBitmap) bitmap.recycle()
@@ -559,7 +581,7 @@ class AyahShareExporter @Inject constructor(
         activeAyah: Int? = verse.ayah,
         oneAyahAtATime: Boolean = false,
         lockedTextSize: Float? = null,
-        lineSpacing: Float = ShareMushafLayout.ARABIC_LINE_MULTIPLIER,
+        lineSpacing: Float = ShareMushafLayout.VIDEO_LINE_MULTIPLIER,
         fitWidthFraction: Float = 0.82f,
         plate: MakerPlate = MakerPlate.FULL,
         wordBoxes: MutableList<ShareWordBox>? = null,
@@ -608,22 +630,20 @@ class AyahShareExporter @Inject constructor(
         if (title.isNotEmpty()) titlePaint.getTextBounds(title, 0, title.length, titleBounds)
         val titleInk = if (options.showTitle) maxOf(titleBounds.height().toFloat(), width * .062f) else 0f
         val titleFrameH = titleInk * (1f + 2f * ShareMushafLayout.TITLE_PAD_Y_FACTOR)
-        val scopedLines = when {
+        val sourceLines: List<ShareMushafLine> = when {
             oneAyahAtATime && activeAyah != null -> {
                 content.mushafLines.mapNotNull { line ->
                     val kept = line.words.filter { it.ayah == activeAyah }
                     if (kept.isEmpty()) null else line.copy(words = kept)
                 }
             }
-            content.mushafLines.isNotEmpty() -> displayPageLines(content, activeAyah, activeWord)
-            else -> content.mushafLines
+            content.mushafLines.isNotEmpty() -> content.mushafLines
+            else -> emptyList()
         }
-        val mushaf = scopedLines.takeIf { it.isNotEmpty() }?.let { source ->
-            if (oneAyahAtATime && lockedTextSize != null) {
-                reflowMushafLines(source, options, lockedTextSize, width * ShareMushafLayout.VIDEO_WRAP_WIDTH)
-            } else {
-                source
-            }
+        val mushaf = sourceLines.takeIf { it.isNotEmpty() }?.let { source ->
+            // Keep Madinah QCF page line breaks. Uniform size already fits the
+            // widest line across the whole selection; paginate to 4-5 lines.
+            selectReflowedPage(source, activeAyah, activeWord)
         }
         val bodyHeight: Float
         val bodyTop: Float
@@ -699,7 +719,7 @@ class AyahShareExporter @Inject constructor(
             }
             val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
                 typeface = face
-                textSize = width * .080f * options.textScale *
+                textSize = width * ShareMushafLayout.VIDEO_FIXED_WIDTH_FRACTION *
                     if (oneAyahAtATime) ShareMushafLayout.VIDEO_ARABIC_SIZE_FACTOR else 1f
                 applyAyahPaint(this, options)
                 applyTextEffects(this, options, width)
@@ -800,28 +820,96 @@ class AyahShareExporter @Inject constructor(
         width: Int,
         height: Int,
         lockedTextSize: Float? = null,
-        lineSpacing: Float = ShareMushafLayout.ARABIC_LINE_MULTIPLIER,
+        lineSpacing: Float = ShareMushafLayout.VIDEO_LINE_MULTIPLIER,
         fitWidthFraction: Float = 0.82f,
     ): MushafMeasure {
-        fun block(size: Float): MushafMeasure {
-            val lineH = size * lineSpacing
-            val pad = if (lineSpacing > 1.2f) size * 0.46f else 0f
+        val paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
+        suspend fun block(size: Float): MushafMeasure {
+            val lineH = metricsLineHeight(lines, options, size, paint, lineSpacing)
+            val pad = size * 0.28f
             return MushafMeasure(lines.size * lineH + pad * 2f, size, pad)
         }
-        if (lockedTextSize != null) return block(lockedTextSize)
-        val base = width * .080f * options.textScale
-        val paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
-        var size = base
-        val available = height * .62f
-        val maxWidth = width * fitWidthFraction
-        while (size > width * .025f) {
-            val measured = block(size)
-            var widest = 0f
-            for (line in lines) widest = maxOf(widest, lineInkWidth(line, options, size, paint))
-            if (measured.height <= available && widest <= maxWidth) break
-            size *= .92f
-        }
+        // Uniform size for the whole selection (widest-line fit). Do not resize per page.
+        val size = lockedTextSize ?: sharedAyahTextSize(lines, options, width)
         return block(size)
+    }
+
+    private suspend fun metricsAscent(
+        lines: List<ShareMushafLine>,
+        options: VideoMakerOptions,
+        textSize: Float,
+        paint: TextPaint,
+    ): Float {
+        val hafs = fontManager.loadUthmanicTypeface() ?: Typeface.DEFAULT
+        val fallback = if (options.font == 2) Typeface.create("serif", Typeface.NORMAL) else hafs
+        var maxAscent = 0f
+        val faces = linkedSetOf<Typeface>()
+        for (line in lines) {
+            for (word in line.words) {
+                if (word.isMarker) continue
+                val page = word.sourcePage.takeIf { it > 0 } ?: line.pageNumber
+                val pageFace = if (options.font == 0) fontManager.loadPageTypeface(page, night = true) else null
+                val face = if (options.font == 0 && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
+                faces += face
+            }
+        }
+        if (faces.isEmpty()) faces += fallback
+        for (face in faces) {
+            paint.typeface = face
+            paint.textSize = textSize
+            maxAscent = maxOf(maxAscent, -paint.fontMetrics.ascent)
+        }
+        return maxOf(maxAscent, textSize)
+    }
+
+    /** Line pitch from real QCF page-face metrics (ascent+descent, tashkeel). */
+
+    private suspend fun metricsLineHeight(
+        lines: List<ShareMushafLine>,
+        options: VideoMakerOptions,
+        textSize: Float,
+        paint: TextPaint,
+        fallbackMultiplier: Float,
+    ): Float {
+        val hafs = fontManager.loadUthmanicTypeface() ?: Typeface.DEFAULT
+        val fallback = if (options.font == 2) Typeface.create("serif", Typeface.NORMAL) else hafs
+        var maxSpan = 0f
+        val faces = linkedSetOf<Typeface>()
+        for (line in lines) {
+            for (word in line.words) {
+                if (word.isMarker) continue
+                val page = word.sourcePage.takeIf { it > 0 } ?: line.pageNumber
+                val pageFace = if (options.font == 0) fontManager.loadPageTypeface(page, night = true) else null
+                val face = if (options.font == 0 && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
+                faces += face
+            }
+        }
+        if (faces.isEmpty()) faces += fallback
+        for (face in faces) {
+            paint.typeface = face
+            paint.textSize = textSize
+            val fm = paint.fontMetrics
+            maxSpan = maxOf(maxSpan, fm.descent - fm.ascent)
+        }
+        // Also probe real glyph bounds — QCF tashkeel often exceeds fontMetrics.
+        val bounds = android.graphics.Rect()
+        for (line in lines) {
+            for (word in line.words) {
+                if (word.isMarker || word.qcf.isBlank()) continue
+                val page = word.sourcePage.takeIf { it > 0 } ?: line.pageNumber
+                val pageFace = if (options.font == 0) fontManager.loadPageTypeface(page, night = true) else null
+                val face = if (options.font == 0 && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
+                paint.typeface = face
+                paint.textSize = textSize
+                val shown = if (options.font == 0) visualPua(word.qcf) else word.uthmanic
+                if (shown.isEmpty()) continue
+                paint.getTextBounds(shown, 0, shown.length, bounds)
+                maxSpan = maxOf(maxSpan, bounds.height().toFloat())
+            }
+        }
+        val floor = textSize * fallbackMultiplier
+        val leading = textSize * ShareMushafLayout.VIDEO_METRICS_LEADING
+        return maxOf(maxSpan + leading, floor)
     }
 
     private suspend fun drawMushafBlock(
@@ -836,18 +924,18 @@ class AyahShareExporter @Inject constructor(
         activeWord: Int?,
         activeAyah: Int?,
         activeProgress: Float,
-        lineSpacing: Float = ShareMushafLayout.ARABIC_LINE_MULTIPLIER,
+        lineSpacing: Float = ShareMushafLayout.VIDEO_LINE_MULTIPLIER,
         blockPad: Float = 0f,
         drawHighlight: Boolean = true,
         wordBoxes: MutableList<ShareWordBox>? = null,
     ) {
-        val lineH = textSize * lineSpacing
         val paint = TextPaint(Paint.ANTI_ALIAS_FLAG or Paint.SUBPIXEL_TEXT_FLAG).apply {
             this.textSize = textSize
             textAlign = Paint.Align.LEFT
             applyAyahPaint(this, options)
             applyTextEffects(this, options, width)
         }
+        val lineH = metricsLineHeight(lines, options, textSize, paint, lineSpacing)
         data class PlannedGlyph(
             val word: ShareMushafWord,
             val shown: String,
@@ -865,7 +953,8 @@ class AyahShareExporter @Inject constructor(
         var bodyIndex = 0
         lines.forEachIndexed { lineIndex, line ->
             val fallback = if (options.font == 2) Typeface.create("serif", Typeface.NORMAL) else hafs
-            val baseline = top + blockPad + lineIndex * lineH + textSize
+            // Place baseline so the tallest QCF ascent on this block sits inside the line box.
+            val baseline = top + blockPad + lineIndex * lineH + metricsAscent(lines, options, textSize, paint)
             val gap = ShareMushafLayout.wordGap(textSize, options.font == 0)
             val visible = line.words.filter { options.marker || !it.isMarker }
             val pieces = visible.map { word ->
@@ -1580,10 +1669,33 @@ class AyahShareExporter @Inject constructor(
         options: VideoMakerOptions,
         width: Int,
     ): Float {
-        // Uniform size from the user’s text scale — never shrink/grow per ayah length.
-        // Pagination (4–5 lines; long ayat split across pages) handles overflow.
-        val base = width * .080f * options.textScale
-        return base * ShareMushafLayout.VIDEO_ARABIC_SIZE_FACTOR
+        // Uniform size for preview+export: fit the widest QCF page line, then
+        // shrink further so 5 lines of real QCF metrics clear the frame height.
+        val maxWidth = width * ShareMushafLayout.VIDEO_WRAP_WIDTH
+        val height = (width * 16f / 9f).toInt().coerceAtLeast(width) // 9:16 portrait
+        val availableH = height * 0.48f
+        var size = width * ShareMushafLayout.VIDEO_FIXED_WIDTH_FRACTION *
+            ShareMushafLayout.VIDEO_ARABIC_SIZE_FACTOR
+        if (lines.isEmpty() || maxWidth <= 1f) return size
+        val paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
+        var widest = 0f
+        for (line in lines) {
+            widest = maxOf(widest, lineInkWidth(line, options, size, paint))
+        }
+        if (widest > maxWidth && widest > 0f) {
+            size *= (maxWidth / widest)
+        }
+        // Height fit for a full 4–5 line page at QCF metrics.
+        val pageLines = minOf(5, maxOf(1, lines.size))
+        var guard = 0
+        while (guard++ < 24 && size > width * 0.018f) {
+            val lineH = metricsLineHeight(lines, options, size, paint, ShareMushafLayout.VIDEO_LINE_MULTIPLIER)
+            val pad = size * 0.28f
+            if (pageLines * lineH + pad * 2f <= availableH) break
+            size *= 0.92f
+        }
+        size *= 0.96f
+        return size.coerceAtLeast(width * 0.018f)
     }
 
 
