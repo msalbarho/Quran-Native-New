@@ -304,7 +304,6 @@
     <string name="video_frame_mushaf">Mushaf</string>
     <string name="video_frame_ornate">Orné</string>
     <string name="video_frame_medal">Médaillon</string>
-    <string name="video_text_size">Taille du texte %1$d</string>
     <string name="video_backdrop">Panneau sombre derrière le texte</string>
     <string name="video_text_color">Couleur du texte</string>
     <string name="video_color_white">Blanc</string>

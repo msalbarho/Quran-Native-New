@@ -49,8 +49,11 @@ class ShareMushafLayoutTest {
         val oldGappy = 3 * 24f * 1.45f
         assertTrue(threeLines < oldGappy)
         assertEquals(24f * ShareMushafLayout.ARABIC_LINE_MULTIPLIER, ShareMushafLayout.arabicLineHeight(24f), 0.001f)
-        assertEquals(1.65f, ShareMushafLayout.VIDEO_LINE_MULTIPLIER, 0.001f)
-        assertEquals(1.2f, ShareMushafLayout.VIDEO_ARABIC_SIZE_FACTOR, 0.001f)
+        // v11/v12: tight glyph-bounds pitch (same as ARABIC_LINE_MULTIPLIER); fixed ayah size replaces 1.2x boost.
+        assertEquals(1.12f, ShareMushafLayout.VIDEO_LINE_MULTIPLIER, 0.001f)
+        assertEquals(1.0f, ShareMushafLayout.VIDEO_ARABIC_SIZE_FACTOR, 0.001f)
+        assertEquals(0.06214f, ShareMushafLayout.VIDEO_AYAH_SIZE_FRACTION, 0.00001f)
+        assertEquals(0.06f, ShareMushafLayout.VIDEO_METRICS_LEADING, 0.001f)
         assertTrue(ShareMushafLayout.VIDEO_WRAP_WIDTH < 1f)
     }
 

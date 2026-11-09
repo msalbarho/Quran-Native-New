@@ -304,7 +304,6 @@
     <string name="video_frame_mushaf">মুসহাফ</string>
     <string name="video_frame_ornate">অলংকৃত</string>
     <string name="video_frame_medal">পদক</string>
-    <string name="video_text_size">পাঠের আকার %1$d</string>
     <string name="video_backdrop">পাঠের পেছনে গাঢ় পট</string>
     <string name="video_text_color">পাঠের রঙ</string>
     <string name="video_color_white">সাদা</string>

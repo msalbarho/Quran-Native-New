@@ -304,7 +304,6 @@
     <string name="video_frame_mushaf">مصحف</string>
     <string name="video_frame_ornate">مزین</string>
     <string name="video_frame_medal">مدال</string>
-    <string name="video_text_size">اندازه متن %1$d</string>
     <string name="video_backdrop">زمینه تیره پشت متن</string>
     <string name="video_text_color">رنگ متن</string>
     <string name="video_color_white">سفید</string>

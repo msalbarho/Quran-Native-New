@@ -304,7 +304,6 @@
     <string name="video_frame_mushaf">Mushaf</string>
     <string name="video_frame_ornate">Ornament</string>
     <string name="video_frame_medal">Medaljong</string>
-    <string name="video_text_size">Tekststørrelse %1$d</string>
     <string name="video_backdrop">Mørkt felt bak teksten</string>
     <string name="video_text_color">Tekstfarge</string>
     <string name="video_color_white">Hvit</string>

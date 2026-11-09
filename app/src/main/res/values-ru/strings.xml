@@ -304,7 +304,6 @@
     <string name="video_frame_mushaf">Мусхаф</string>
     <string name="video_frame_ornate">Узор</string>
     <string name="video_frame_medal">Медальон</string>
-    <string name="video_text_size">Размер текста %1$d</string>
     <string name="video_backdrop">Тёмная подложка за текстом</string>
     <string name="video_text_color">Цвет текста</string>
     <string name="video_color_white">Белый</string>

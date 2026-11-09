@@ -304,7 +304,6 @@
     <string name="video_frame_mushaf">ⵎⵓⵚⵃⴰⴼ</string>
     <string name="video_frame_ornate">ⵉⵜⵜⵓⵥⵥⴰⵏ</string>
     <string name="video_frame_medal">ⵜⴰⵎⴷⴰⵍⵜ</string>
-    <string name="video_text_size">ⵜⵉⴷⴷⵉ ⵏ ⵓⴹⵕⵉⵚ %1$d</string>
     <string name="video_backdrop">ⴰⴳⵯⵏⵙ ⴰⴱⵔⴽⴰⵏ ⴷⴼⴼⵉⵔ ⵓⴹⵕⵉⵚ</string>
     <string name="video_text_color">ⴰⴽⵍⵓ ⵏ ⵓⴹⵕⵉⵚ</string>
     <string name="video_color_white">ⴰⵎⵍⵍⴰⵍ</string>

@@ -106,8 +106,8 @@ class VideoMakerTimingTest {
         for(height in listOf(.08f,.25f,.48f))for(a in listOf(-1f,.3f,.5f,2f))for(t in listOf(-1f,.5f,2f)) {
             val p=makerVerticalPlacement(a,t,height,.06f,true,true)
             org.junit.Assert.assertTrue(p.ayahCenterY-p.titleCenterY>=makerBlockSeparation(height,.06f)-.0001f)
-            org.junit.Assert.assertTrue(p.ayahCenterY+height/2f<=.8001f)
-            org.junit.Assert.assertTrue(p.titleCenterY-.03f>=.0499f)
+            org.junit.Assert.assertTrue(p.ayahCenterY+height/2f<=.8801f) // translation path max ~0.88 above watermark ~0.90
+            org.junit.Assert.assertTrue(p.titleCenterY-p.titleHeight/2f>=.0399f) // minTitle top is 0.04
         }
     }
 }
