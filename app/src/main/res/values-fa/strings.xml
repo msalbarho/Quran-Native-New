@@ -272,8 +272,68 @@
     <string name="training_range_from">از</string>
     <string name="training_range_to">تا</string>
     <string name="word_share_video_failed">اشتراک‌گذاری ویدیو ممکن نشد.</string>
+
+    <!-- Video maker -->
+    <string name="video_new">ویدیوی تازه</string>
+    <string name="video_cancel">لغو</string>
+    <string name="video_step_verses">آیه‌ها</string>
+    <string name="video_step_background">پس‌زمینه</string>
+    <string name="video_step_style">قالب</string>
+    <string name="video_step_share">اشتراک</string>
+    <string name="video_range_hint">آغاز و پایان را برگزینید • تا ۱۰ آیه</string>
+    <string name="video_from_ayah">از آیه</string>
+    <string name="video_to_ayah">تا آیه</string>
+    <string name="video_reciter">قاری</string>
+    <string name="video_choose_reciter">قاری را برگزینید</string>
+    <string name="video_backgrounds_count">پس‌زمینه‌های برگزیده: %1$d • به ترتیب</string>
+    <string name="video_background_item">پس‌زمینه %1$s</string>
+    <string name="video_drag_hint">قاب طلایی را بکشید تا آیه یا نام سوره جابه‌جا شود</string>
+    <string name="video_tab_font">قلم</string>
+    <string name="video_tab_colors">رنگ‌ها</string>
+    <string name="video_tab_title">عنوان</string>
+    <string name="video_tab_text">متن</string>
+    <string name="video_tab_tracking">پیگیری</string>
+    <string name="video_font_madinah">مدینه</string>
+    <string name="video_font_uthmani">عثمانی</string>
+    <string name="video_font_naskh">نسخ</string>
+    <string name="video_show_translation">ترجمه: %1$s</string>
+    <string name="video_translation">ترجمه</string>
+    <string name="video_highlight_color">رنگ واژهٔ خوانده‌شده</string>
+    <string name="video_surah_name">نام سوره</string>
+    <string name="video_name_frame">قاب نام</string>
+    <string name="video_frame_mushaf">مصحف</string>
+    <string name="video_frame_ornate">مزین</string>
+    <string name="video_frame_medal">مدال</string>
+    <string name="video_backdrop">زمینه تیره پشت متن</string>
+    <string name="video_text_color">رنگ متن</string>
+    <string name="video_color_white">سفید</string>
+    <string name="video_color_tajweed">تجوید</string>
+    <string name="video_verse_number">شماره آیه</string>
+    <string name="video_track_band">نوار</string>
+    <string name="video_track_color">رنگ</string>
+    <string name="video_track_line">خط</string>
+    <string name="video_save">ذخیره در دستگاه</string>
+    <string name="video_share">اشتراک</string>
+    <string name="video_preparing">در حال آماده‌سازی…</string>
+    <string name="video_please_wait">ویدیو آماده می‌شود… لطفاً صبر کنید</string>
+    <string name="video_next_background">بعدی: پس‌زمینه</string>
+    <string name="video_next_style">بعدی: قالب</string>
+    <string name="video_next_share">بعدی: اشتراک</string>
+    <string name="video_back_style">بازگشت به قالب</string>
+    <string name="video_word_by_word">کلمه به کلمه</string>
+    <string name="video_saved_gallery">ویدیو در گالری ذخیره شد</string>
+    <string name="video_prepare_failed">آماده‌سازی ویدیو ممکن نشد</string>
+    <string name="video_saved_mark">✓ در گالری ذخیره شد</string>
+    <string name="video_preview">پیش‌نمایش ویدیو</string>
+    <string name="video_drag_verse">کشیدن آیه</string>
+    <string name="video_drag_surah">کشیدن نام سوره</string>
+    <string name="video_swatch_gold">طلایی</string>
+    <string name="video_swatch_mint">نعنایی</string>
+    <string name="video_swatch_sky">آسمانی</string>
+    <string name="video_swatch_orange">نارنجی</string>
+    <string name="video_swatch_violet">بنفش</string>
+    <string name="video_swatch_green">سبز</string>
+    <string name="video_swatch_red">قرمز</string>
+    <string name="video_watermark">قرآن کریم — تلاوت و شنیدن</string>
+    <string name="video_preview_restart">پخش دوباره</string>
 </resources>
-
-
-
-

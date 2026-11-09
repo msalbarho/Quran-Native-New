@@ -17,6 +17,7 @@ import com.quransunah.app.core.AppConstants
 import com.quransunah.app.core.EasternArabic
 import com.quransunah.app.core.SurahAyahCounts
 import com.quransunah.app.data.audio.AudioUrls
+import com.quransunah.app.share.QulRecitations
 import com.quransunah.app.data.audio.AyatTimingStore
 import com.quransunah.app.data.audio.PlaybackNetwork
 import com.quransunah.app.data.audio.SurahAudioStore
@@ -659,7 +660,8 @@ class AudioController @Inject constructor(
         )
         return PlaybackMediaIds.mediaItem(
             mediaId = PlaybackMediaIds.ayah(reciter.id, surah, ayah),
-            uri = AudioUrls.ayahStreamUri(reciter, surah, ayah, audioQuality),
+            uri = QulRecitations.ayahAudioUrl(reciter.id, surah, ayah)?.let { Uri.parse(it) }
+                ?: AudioUrls.ayahStreamUri(reciter, surah, ayah, audioQuality),
             title = title,
             artist = reciter.name,
             subtitle = name,

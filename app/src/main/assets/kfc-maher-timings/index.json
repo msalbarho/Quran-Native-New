@@ -1,0 +1,691 @@
+{
+  "reciter": "102",
+  "server": "https://server12.mp3quran.net/maher/Almusshaf-Al-Mojawwad",
+  "timing_read_id": 133,
+  "surahs": {
+    "1": {
+      "file": "001.json",
+      "ayahs": 7,
+      "with_words": 7,
+      "missing_qul": 0
+    },
+    "2": {
+      "file": "002.json",
+      "ayahs": 286,
+      "with_words": 286,
+      "missing_qul": 0
+    },
+    "3": {
+      "file": "003.json",
+      "ayahs": 200,
+      "with_words": 200,
+      "missing_qul": 0
+    },
+    "4": {
+      "file": "004.json",
+      "ayahs": 176,
+      "with_words": 176,
+      "missing_qul": 0
+    },
+    "5": {
+      "file": "005.json",
+      "ayahs": 120,
+      "with_words": 120,
+      "missing_qul": 0
+    },
+    "6": {
+      "file": "006.json",
+      "ayahs": 165,
+      "with_words": 165,
+      "missing_qul": 0
+    },
+    "7": {
+      "file": "007.json",
+      "ayahs": 206,
+      "with_words": 206,
+      "missing_qul": 0
+    },
+    "8": {
+      "file": "008.json",
+      "ayahs": 75,
+      "with_words": 75,
+      "missing_qul": 0
+    },
+    "9": {
+      "file": "009.json",
+      "ayahs": 129,
+      "with_words": 129,
+      "missing_qul": 0
+    },
+    "10": {
+      "file": "010.json",
+      "ayahs": 109,
+      "with_words": 109,
+      "missing_qul": 0
+    },
+    "11": {
+      "file": "011.json",
+      "ayahs": 123,
+      "with_words": 123,
+      "missing_qul": 0
+    },
+    "12": {
+      "file": "012.json",
+      "ayahs": 111,
+      "with_words": 111,
+      "missing_qul": 0
+    },
+    "13": {
+      "file": "013.json",
+      "ayahs": 43,
+      "with_words": 43,
+      "missing_qul": 0
+    },
+    "14": {
+      "file": "014.json",
+      "ayahs": 52,
+      "with_words": 52,
+      "missing_qul": 0
+    },
+    "15": {
+      "file": "015.json",
+      "ayahs": 99,
+      "with_words": 99,
+      "missing_qul": 0
+    },
+    "16": {
+      "file": "016.json",
+      "ayahs": 128,
+      "with_words": 128,
+      "missing_qul": 0
+    },
+    "17": {
+      "file": "017.json",
+      "ayahs": 111,
+      "with_words": 111,
+      "missing_qul": 0
+    },
+    "18": {
+      "file": "018.json",
+      "ayahs": 110,
+      "with_words": 110,
+      "missing_qul": 0
+    },
+    "19": {
+      "file": "019.json",
+      "ayahs": 98,
+      "with_words": 98,
+      "missing_qul": 0
+    },
+    "20": {
+      "file": "020.json",
+      "ayahs": 135,
+      "with_words": 135,
+      "missing_qul": 0
+    },
+    "21": {
+      "file": "021.json",
+      "ayahs": 112,
+      "with_words": 112,
+      "missing_qul": 0
+    },
+    "22": {
+      "file": "022.json",
+      "ayahs": 78,
+      "with_words": 78,
+      "missing_qul": 0
+    },
+    "23": {
+      "file": "023.json",
+      "ayahs": 118,
+      "with_words": 118,
+      "missing_qul": 0
+    },
+    "24": {
+      "file": "024.json",
+      "ayahs": 64,
+      "with_words": 64,
+      "missing_qul": 0
+    },
+    "25": {
+      "file": "025.json",
+      "ayahs": 77,
+      "with_words": 77,
+      "missing_qul": 0
+    },
+    "26": {
+      "file": "026.json",
+      "ayahs": 227,
+      "with_words": 227,
+      "missing_qul": 0
+    },
+    "27": {
+      "file": "027.json",
+      "ayahs": 93,
+      "with_words": 93,
+      "missing_qul": 0
+    },
+    "28": {
+      "file": "028.json",
+      "ayahs": 88,
+      "with_words": 88,
+      "missing_qul": 0
+    },
+    "29": {
+      "file": "029.json",
+      "ayahs": 69,
+      "with_words": 69,
+      "missing_qul": 0
+    },
+    "30": {
+      "file": "030.json",
+      "ayahs": 60,
+      "with_words": 60,
+      "missing_qul": 0
+    },
+    "31": {
+      "file": "031.json",
+      "ayahs": 34,
+      "with_words": 34,
+      "missing_qul": 0
+    },
+    "32": {
+      "file": "032.json",
+      "ayahs": 30,
+      "with_words": 30,
+      "missing_qul": 0
+    },
+    "33": {
+      "file": "033.json",
+      "ayahs": 73,
+      "with_words": 73,
+      "missing_qul": 0
+    },
+    "34": {
+      "file": "034.json",
+      "ayahs": 54,
+      "with_words": 54,
+      "missing_qul": 0
+    },
+    "35": {
+      "file": "035.json",
+      "ayahs": 45,
+      "with_words": 45,
+      "missing_qul": 0
+    },
+    "36": {
+      "file": "036.json",
+      "ayahs": 83,
+      "with_words": 83,
+      "missing_qul": 0
+    },
+    "37": {
+      "file": "037.json",
+      "ayahs": 182,
+      "with_words": 182,
+      "missing_qul": 0
+    },
+    "38": {
+      "file": "038.json",
+      "ayahs": 88,
+      "with_words": 88,
+      "missing_qul": 0
+    },
+    "39": {
+      "file": "039.json",
+      "ayahs": 75,
+      "with_words": 75,
+      "missing_qul": 0
+    },
+    "40": {
+      "file": "040.json",
+      "ayahs": 85,
+      "with_words": 85,
+      "missing_qul": 0
+    },
+    "41": {
+      "file": "041.json",
+      "ayahs": 54,
+      "with_words": 54,
+      "missing_qul": 0
+    },
+    "42": {
+      "file": "042.json",
+      "ayahs": 53,
+      "with_words": 53,
+      "missing_qul": 0
+    },
+    "43": {
+      "file": "043.json",
+      "ayahs": 89,
+      "with_words": 89,
+      "missing_qul": 0
+    },
+    "44": {
+      "file": "044.json",
+      "ayahs": 59,
+      "with_words": 59,
+      "missing_qul": 0
+    },
+    "45": {
+      "file": "045.json",
+      "ayahs": 37,
+      "with_words": 37,
+      "missing_qul": 0
+    },
+    "46": {
+      "file": "046.json",
+      "ayahs": 35,
+      "with_words": 35,
+      "missing_qul": 0
+    },
+    "47": {
+      "file": "047.json",
+      "ayahs": 38,
+      "with_words": 38,
+      "missing_qul": 0
+    },
+    "48": {
+      "file": "048.json",
+      "ayahs": 29,
+      "with_words": 29,
+      "missing_qul": 0
+    },
+    "49": {
+      "file": "049.json",
+      "ayahs": 18,
+      "with_words": 18,
+      "missing_qul": 0
+    },
+    "50": {
+      "file": "050.json",
+      "ayahs": 45,
+      "with_words": 45,
+      "missing_qul": 0
+    },
+    "51": {
+      "file": "051.json",
+      "ayahs": 60,
+      "with_words": 60,
+      "missing_qul": 0
+    },
+    "52": {
+      "file": "052.json",
+      "ayahs": 49,
+      "with_words": 49,
+      "missing_qul": 0
+    },
+    "53": {
+      "file": "053.json",
+      "ayahs": 62,
+      "with_words": 62,
+      "missing_qul": 0
+    },
+    "54": {
+      "file": "054.json",
+      "ayahs": 55,
+      "with_words": 55,
+      "missing_qul": 0
+    },
+    "55": {
+      "file": "055.json",
+      "ayahs": 78,
+      "with_words": 78,
+      "missing_qul": 0
+    },
+    "56": {
+      "file": "056.json",
+      "ayahs": 96,
+      "with_words": 96,
+      "missing_qul": 0
+    },
+    "57": {
+      "file": "057.json",
+      "ayahs": 29,
+      "with_words": 29,
+      "missing_qul": 0
+    },
+    "58": {
+      "file": "058.json",
+      "ayahs": 22,
+      "with_words": 22,
+      "missing_qul": 0
+    },
+    "59": {
+      "file": "059.json",
+      "ayahs": 24,
+      "with_words": 24,
+      "missing_qul": 0
+    },
+    "60": {
+      "file": "060.json",
+      "ayahs": 13,
+      "with_words": 13,
+      "missing_qul": 0
+    },
+    "61": {
+      "file": "061.json",
+      "ayahs": 14,
+      "with_words": 14,
+      "missing_qul": 0
+    },
+    "62": {
+      "file": "062.json",
+      "ayahs": 11,
+      "with_words": 11,
+      "missing_qul": 0
+    },
+    "63": {
+      "file": "063.json",
+      "ayahs": 11,
+      "with_words": 11,
+      "missing_qul": 0
+    },
+    "64": {
+      "file": "064.json",
+      "ayahs": 18,
+      "with_words": 18,
+      "missing_qul": 0
+    },
+    "65": {
+      "file": "065.json",
+      "ayahs": 12,
+      "with_words": 12,
+      "missing_qul": 0
+    },
+    "66": {
+      "file": "066.json",
+      "ayahs": 12,
+      "with_words": 12,
+      "missing_qul": 0
+    },
+    "67": {
+      "file": "067.json",
+      "ayahs": 30,
+      "with_words": 30,
+      "missing_qul": 0
+    },
+    "68": {
+      "file": "068.json",
+      "ayahs": 52,
+      "with_words": 52,
+      "missing_qul": 0
+    },
+    "69": {
+      "file": "069.json",
+      "ayahs": 52,
+      "with_words": 52,
+      "missing_qul": 0
+    },
+    "70": {
+      "file": "070.json",
+      "ayahs": 44,
+      "with_words": 44,
+      "missing_qul": 0
+    },
+    "71": {
+      "file": "071.json",
+      "ayahs": 28,
+      "with_words": 28,
+      "missing_qul": 0
+    },
+    "72": {
+      "file": "072.json",
+      "ayahs": 28,
+      "with_words": 28,
+      "missing_qul": 0
+    },
+    "73": {
+      "file": "073.json",
+      "ayahs": 20,
+      "with_words": 20,
+      "missing_qul": 0
+    },
+    "74": {
+      "file": "074.json",
+      "ayahs": 56,
+      "with_words": 56,
+      "missing_qul": 0
+    },
+    "75": {
+      "file": "075.json",
+      "ayahs": 40,
+      "with_words": 40,
+      "missing_qul": 0
+    },
+    "76": {
+      "file": "076.json",
+      "ayahs": 31,
+      "with_words": 31,
+      "missing_qul": 0
+    },
+    "77": {
+      "file": "077.json",
+      "ayahs": 50,
+      "with_words": 50,
+      "missing_qul": 0
+    },
+    "78": {
+      "file": "078.json",
+      "ayahs": 40,
+      "with_words": 40,
+      "missing_qul": 0
+    },
+    "79": {
+      "file": "079.json",
+      "ayahs": 46,
+      "with_words": 46,
+      "missing_qul": 0
+    },
+    "80": {
+      "file": "080.json",
+      "ayahs": 42,
+      "with_words": 42,
+      "missing_qul": 0
+    },
+    "81": {
+      "file": "081.json",
+      "ayahs": 29,
+      "with_words": 29,
+      "missing_qul": 0
+    },
+    "82": {
+      "file": "082.json",
+      "ayahs": 19,
+      "with_words": 19,
+      "missing_qul": 0
+    },
+    "83": {
+      "file": "083.json",
+      "ayahs": 36,
+      "with_words": 36,
+      "missing_qul": 0
+    },
+    "84": {
+      "file": "084.json",
+      "ayahs": 25,
+      "with_words": 25,
+      "missing_qul": 0
+    },
+    "85": {
+      "file": "085.json",
+      "ayahs": 22,
+      "with_words": 22,
+      "missing_qul": 0
+    },
+    "86": {
+      "file": "086.json",
+      "ayahs": 17,
+      "with_words": 17,
+      "missing_qul": 0
+    },
+    "87": {
+      "file": "087.json",
+      "ayahs": 19,
+      "with_words": 19,
+      "missing_qul": 0
+    },
+    "88": {
+      "file": "088.json",
+      "ayahs": 26,
+      "with_words": 26,
+      "missing_qul": 0
+    },
+    "89": {
+      "file": "089.json",
+      "ayahs": 30,
+      "with_words": 30,
+      "missing_qul": 0
+    },
+    "90": {
+      "file": "090.json",
+      "ayahs": 20,
+      "with_words": 20,
+      "missing_qul": 0
+    },
+    "91": {
+      "file": "091.json",
+      "ayahs": 15,
+      "with_words": 15,
+      "missing_qul": 0
+    },
+    "92": {
+      "file": "092.json",
+      "ayahs": 21,
+      "with_words": 21,
+      "missing_qul": 0
+    },
+    "93": {
+      "file": "093.json",
+      "ayahs": 11,
+      "with_words": 11,
+      "missing_qul": 0
+    },
+    "94": {
+      "file": "094.json",
+      "ayahs": 8,
+      "with_words": 8,
+      "missing_qul": 0
+    },
+    "95": {
+      "file": "095.json",
+      "ayahs": 8,
+      "with_words": 8,
+      "missing_qul": 0
+    },
+    "96": {
+      "file": "096.json",
+      "ayahs": 19,
+      "with_words": 19,
+      "missing_qul": 0
+    },
+    "97": {
+      "file": "097.json",
+      "ayahs": 5,
+      "with_words": 5,
+      "missing_qul": 0
+    },
+    "98": {
+      "file": "098.json",
+      "ayahs": 8,
+      "with_words": 8,
+      "missing_qul": 0
+    },
+    "99": {
+      "file": "099.json",
+      "ayahs": 8,
+      "with_words": 8,
+      "missing_qul": 0
+    },
+    "100": {
+      "file": "100.json",
+      "ayahs": 11,
+      "with_words": 11,
+      "missing_qul": 0
+    },
+    "101": {
+      "file": "101.json",
+      "ayahs": 11,
+      "with_words": 11,
+      "missing_qul": 0
+    },
+    "102": {
+      "file": "102.json",
+      "ayahs": 8,
+      "with_words": 8,
+      "missing_qul": 0
+    },
+    "103": {
+      "file": "103.json",
+      "ayahs": 3,
+      "with_words": 3,
+      "missing_qul": 0
+    },
+    "104": {
+      "file": "104.json",
+      "ayahs": 9,
+      "with_words": 9,
+      "missing_qul": 0
+    },
+    "105": {
+      "file": "105.json",
+      "ayahs": 5,
+      "with_words": 5,
+      "missing_qul": 0
+    },
+    "106": {
+      "file": "106.json",
+      "ayahs": 4,
+      "with_words": 4,
+      "missing_qul": 0
+    },
+    "107": {
+      "file": "107.json",
+      "ayahs": 7,
+      "with_words": 7,
+      "missing_qul": 0
+    },
+    "108": {
+      "file": "108.json",
+      "ayahs": 3,
+      "with_words": 3,
+      "missing_qul": 0
+    },
+    "109": {
+      "file": "109.json",
+      "ayahs": 6,
+      "with_words": 6,
+      "missing_qul": 0
+    },
+    "110": {
+      "file": "110.json",
+      "ayahs": 3,
+      "with_words": 3,
+      "missing_qul": 0
+    },
+    "111": {
+      "file": "111.json",
+      "ayahs": 5,
+      "with_words": 5,
+      "missing_qul": 0
+    },
+    "112": {
+      "file": "112.json",
+      "ayahs": 4,
+      "with_words": 4,
+      "missing_qul": 0
+    },
+    "113": {
+      "file": "113.json",
+      "ayahs": 5,
+      "with_words": 5,
+      "missing_qul": 0
+    },
+    "114": {
+      "file": "114.json",
+      "ayahs": 6,
+      "with_words": 6,
+      "missing_qul": 0
+    }
+  }
+}

@@ -4,21 +4,24 @@ package com.quransunah.app.share
 data class VideoMakerOptions(
     val background: String = ShareBackgrounds.FILES.first(),
     val backgrounds: List<String> = listOf(background),
-    val trackingMode: Int = 0, // 0 progress band, 1 cumulative, 2 underline, 3 current, 4 glow
+    val trackingMode: Int = 0, // 0 gold progress band, 1 cumulative colour, 2 cumulative underline
     val markerColor: Int = 0xFFD4B06A.toInt(),
     val font: Int = 0,
     val highlightColor: Int = 0xFFD4B06A.toInt(),
     val glow: Boolean = false,
-    val motion: Boolean = false,
+    val shadow: Boolean = false,
+    val vignette: Boolean = false,
+    val motion: Boolean = false, // Ken Burns on the background
     val textBackdrop: Boolean = false,
     val showTitle: Boolean = true,
+    val titleFrame: Int = 0, // 0 Madinah header, 1 slim ornate frame
     val translation: Boolean = false,
     val marker: Boolean = true,
-    val textScale: Float = 1f,
+    val tajweedText: Boolean = false,
     val ayahX: Float = .5f,
-    val ayahY: Float = .48f,
+    val ayahY: Float = .28f,
     val titleX: Float = .5f,
-    val titleY: Float = .16f,
+    val titleY: Float = .11f,
 )
 
 data class WordSegment(val position: Int, val startMs: Long, val endMs: Long)
@@ -73,17 +76,40 @@ fun makerBackgroundMix(positionUs: Long, durationUs: Long, count: Int): MakerBac
     return MakerBackgroundMix(index, index, 0f)
 }
 
-fun makerRenderFrames(segments: List<WordSegment>, durationUs: Long, smooth: Boolean): List<WordVideoFrame> {
+fun makerNeedsSmoothFrames(options: VideoMakerOptions): Boolean =
+    options.trackingMode == ShareMushafLayout.TRACKING_BAND ||
+        options.trackingMode == ShareMushafLayout.TRACKING_UNDERLINE ||
+        options.motion ||
+        options.backgrounds.size > 1
+
+/**
+ * Smooth highlight sampling. Short videos stay near 10 fps. Longer ones widen the
+ * step so the whole export stays within [maxFrames] unique pictures.
+ */
+fun makerExportFrameUs(totalDurationUs: Long, smooth: Boolean, maxFrames: Int = 480): Long {
+    val minFrame = 33_334L
+    if (!smooth || totalDurationUs <= 0L) return minFrame
+    val preferred = 100_000L
+    val capped = totalDurationUs / maxFrames.coerceAtLeast(1)
+    return maxOf(preferred, capped, minFrame)
+}
+
+fun makerRenderFrames(
+    segments: List<WordSegment>,
+    durationUs: Long,
+    smooth: Boolean,
+    frameUs: Long = 33_334L,
+): List<WordVideoFrame> {
     require(durationUs > 0)
     val cursor = segments.cursorSegments(durationUs)
     // Media3's image TimestampIterator floors duration*fps. A shorter item can have
     // zero timestamps, so never enqueue a sub-frame image. Preserve total audio time.
-    val frameUs = 33334L
-    val desired = if (smooth) generateSequence(0L) { it + frameUs }.takeWhile { it < durationUs }.toList() + durationUs
+    val step = frameUs.coerceAtLeast(33_334L)
+    val desired = if (smooth) generateSequence(0L) { it + step }.takeWhile { it < durationUs }.toList() + durationUs
         else (listOf(0L,durationUs) + cursor.flatMap { listOf(it.startMs*1000,it.endMs*1000) }.filter { it in 0..durationUs }).distinct().sorted()
     val points = mutableListOf(0L)
-    desired.drop(1).forEach { point -> if(point-points.last()>=frameUs || point==durationUs) points += point }
-    if(points.size>2 && points.last()-points[points.lastIndex-1]<frameUs)points.removeAt(points.lastIndex-1)
+    desired.drop(1).forEach { point -> if(point-points.last()>=step || point==durationUs) points += point }
+    if(points.size>2 && points.last()-points[points.lastIndex-1]<step)points.removeAt(points.lastIndex-1)
     return points.zipWithNext().map { (a,b) -> WordVideoFrame(a,b-a,cursor.wordAt((a+(b-a)/2)/1000)) }
 }
 
@@ -91,13 +117,15 @@ fun makerRenderFrames(segments: List<WordSegment>, durationUs: Long, smooth: Boo
 data class MakerPreviewGeometry(val ayahCenterY:Float=.48f,val titleCenterY:Float=.16f,
     val ayahHeight:Float=.10f,val titleHeight:Float=.06f)
 fun makerBlockSeparation(ayahHeight:Float,titleHeight:Float):Float =
-    (maxOf(ayahHeight,.18f)+maxOf(titleHeight,.165f))/2f+.028f
+    ayahHeight / 2f + titleHeight / 2f + 0.016f
 fun makerVerticalPlacement(ayahY:Float,titleY:Float,ayahHeight:Float,titleHeight:Float,
                            showTitle:Boolean,translation:Boolean):MakerPreviewGeometry {
+    // Ayat block (arabic +/- translation) stays above the watermark strip (~0.90).
     val minAyah=.08f+ayahHeight/2f
-    val maxAyah=(if(translation).80f else .86f)-ayahHeight/2f
+    val maxAyah=(if(translation).88f else .90f)-ayahHeight/2f
     var ayah=ayahY.coerceIn(minAyah,maxOf(minAyah,maxAyah))
-    val minTitle=.05f+titleHeight/2f
+    // Surah-name frame: from top of frame down to the top edge of the ayat block.
+    val minTitle=.04f+titleHeight/2f
     val gap=makerBlockSeparation(ayahHeight,titleHeight)
     if(showTitle)ayah=maxOf(ayah,minTitle+gap).coerceAtMost(maxOf(minAyah,maxAyah))
     val maxTitle=if(showTitle)ayah-gap else .85f

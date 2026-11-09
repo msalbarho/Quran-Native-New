@@ -1,5 +1,7 @@
 package com.quransunah.app.ui.study
 
+import com.quransunah.app.share.ShareMushafLayout
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import com.quransunah.app.ui.shell.GoldCornerFrame
 import com.quransunah.app.ui.shell.GoldCornerFrameShape
@@ -83,6 +85,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
@@ -238,7 +242,8 @@ fun WordSheet(
             onSelectReciter = viewModel::selectReciter,
             onOpenTafsir = viewModel::openTafsir,
             onToggleBookmark = viewModel::toggleBookmark,
-            onShareImage = viewModel::shareImage,
+            onShareImage = { viewModel.shareImage() },
+            onShareRangeImage = viewModel::shareImage,
             onShareText = { viewModel.shareText(translationTag) },
             onVideoFrom = viewModel::setVideoFrom,
             onVideoTo = viewModel::setVideoTo,
@@ -330,7 +335,11 @@ fun WordSheet(
 
     if (ui.tafsirOpen && !inspection) {
         TafsirSheet(
-            surahName = ui.surahName.ifBlank {
+            surahName = com.quransunah.app.ui.index.SurahNames.displayName(
+                ArabicRtl.currentTag(LocalContext.current),
+                selected.surah,
+                ui.surahName,
+            ).ifBlank {
                 stringResource(R.string.surah_fallback, EasternArabic.format(selected.surah))
             },
             ayah = selected.ayah,
@@ -360,6 +369,7 @@ fun WordSheetContent(
     onOpenTafsir: () -> Unit,
     onToggleBookmark: () -> Unit,
     onShareImage: () -> Unit,
+    onShareRangeImage: (Int, Int) -> Unit,
     onShareText: () -> Unit,
     onVideoFrom: (Int) -> Unit,
     onVideoTo: (Int) -> Unit,
@@ -394,8 +404,8 @@ fun WordSheetContent(
         modifier = modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-            .padding(bottom = 28.dp),
+            .padding(horizontal = 16.dp)
+            .padding(top = 2.dp, bottom = 28.dp),
     ) {
         SheetSection {
         CompositionLocalProvider(LocalLayoutDirection provides uiLayoutDirection()) {
@@ -433,7 +443,7 @@ fun WordSheetContent(
                 pageNumber = ui.pageNumber,
                 fontManager = fontManager,
                 onSelectWord = onSelectWord,
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier.padding(top = 2.dp),
             )
         } else {
             UthmanicText(
@@ -445,7 +455,7 @@ fun WordSheetContent(
                 maxLines = 6,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 12.dp),
+                    .padding(top = 2.dp, bottom = 6.dp),
             )
         }
         }
@@ -454,8 +464,8 @@ fun WordSheetContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+                .padding(top = 3.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp),
         ) {
             SheetSection {
             Row(
@@ -521,7 +531,7 @@ fun WordSheetContent(
             }
             }
 
-            SheetSection {
+            SheetSection(compact = true) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -564,21 +574,69 @@ fun WordSheetContent(
             }
             SheetSection {
                 AccentFillButton(
-                    label = stringResource(
-                        if (ui.sharing) R.string.word_preparing else R.string.word_share_image,
-                    ),
-                    onClick = onShareImage,
-                    enabled = !ui.sharing,
-                )
-                AccentFillButton(
-                    label = stringResource(R.string.word_share_text),
-                    onClick = onShareText,
+                    label = stringResource(R.string.word_share_video),
+                    onClick = onShareVideo,
                     enabled = !ui.sharing,
                 )
             }
             SheetSection {
-                AccentFillButton(label = "فيديو جديد • آيات، خلفية، تنسيق، مشاركة", onClick = onShareVideo, enabled = !ui.sharing)
+                var rangeFrom by remember(word.ayah) { mutableIntStateOf(word.ayah) }
+                var rangeTo by remember(word.ayah) { mutableIntStateOf(word.ayah) }
+                val imageMax = ShareMushafLayout.IMAGE_SHARE_MAX_AYAT
+                val toMax = (rangeFrom + imageMax - 1).coerceAtMost(maxAyah)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(stringResource(R.string.word_share_from_ayah), color = paper.textMuted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                        VideoFromAyahDropdown(
+                            fromAyah = rangeFrom,
+                            maxAyah = maxAyah,
+                            onSelect = { start ->
+                                rangeFrom = start
+                                rangeTo = rangeTo.coerceIn(start, (start + ShareMushafLayout.IMAGE_SHARE_MAX_AYAT - 1).coerceAtMost(maxAyah))
+                            },
+                            label = "",
+                        )
+                    }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(stringResource(R.string.word_share_to_ayah), color = paper.textMuted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                        VideoToAyahDropdown(
+                            fromAyah = rangeFrom,
+                            toAyah = rangeTo.coerceIn(rangeFrom, toMax),
+                            maxAyah = maxAyah,
+                            onSelect = { rangeTo = it },
+                            label = "",
+                        )
+                    }
+                }
+                Text(
+                    stringResource(R.string.word_share_image_max),
+                    color = paper.textMuted,
+                    fontSize = 11.sp,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    AccentFillButton(
+                        label = stringResource(
+                            if (ui.sharing) R.string.word_preparing else R.string.word_share_image,
+                        ),
+                        onClick = { onShareRangeImage(rangeFrom, rangeTo.coerceIn(rangeFrom, toMax)) },
+                        enabled = !ui.sharing,
+                        modifier = Modifier.weight(1f),
+                    )
+                    AccentFillButton(
+                        label = stringResource(R.string.word_share_text),
+                        onClick = onShareText,
+                        enabled = !ui.sharing,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
+            
             if (ui.sharing) {
                 LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth(),
@@ -616,7 +674,7 @@ private fun WordSheetHeader(onClose: () -> Unit) {
         ) {
             Box(
                 modifier = Modifier
-                    .padding(top = 10.dp)
+                    .padding(top = 6.dp)
                     .size(width = 36.dp, height = 4.dp)
                     .clip(RoundedCornerShape(999.dp))
                     .background(paper.textMuted.copy(alpha = 0.45f))
@@ -631,10 +689,11 @@ private fun WordSheetHeader(onClose: () -> Unit) {
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
-                        .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
+                        .minimumInteractiveComponentSize()
+                        .defaultMinSize(minWidth = 40.dp, minHeight = 40.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .clickable(role = Role.Button, onClick = onClose)
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                        .padding(horizontal = 10.dp, vertical = 4.dp),
                 )
             }
         }
@@ -643,11 +702,13 @@ private fun WordSheetHeader(onClose: () -> Unit) {
 
 @Composable
 private fun SheetSection(
+    compact: Boolean = false,
     content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit,
 ) {
     val paper = LocalPaperColors.current
     val night = LocalNightMode.current
-    val shape = GoldCornerFrameShape(16.dp)
+    val shape = GoldCornerFrameShape(12.dp)
+    val pad = if (compact) 8.dp else 12.dp
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -660,8 +721,8 @@ private fun SheetSection(
                 },
             )
             .border(1.dp, paper.accent.copy(alpha = if (night) 0.34f else 0.18f), shape)
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .padding(pad),
+        verticalArrangement = Arrangement.spacedBy(if (compact) 3.dp else 5.dp),
         content = content,
     )
 }
@@ -775,7 +836,9 @@ private fun SheetChipButton(
     val fill = if (emphasized) paper.accent.copy(alpha = 0.16f) else Color.Transparent
     Box(
         modifier = modifier
-            .heightIn(min = 44.dp)
+            .minimumInteractiveComponentSize()
+            .heightIn(min = 40.dp)
+            .defaultMinSize(minHeight = 40.dp)
             .clip(shape)
             .border(1.dp, border, shape)
             .background(fill)
@@ -791,6 +854,14 @@ private fun SheetChipButton(
             textAlign = TextAlign.Center,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
+            style = TextStyle(
+                textAlign = TextAlign.Center,
+                lineHeightStyle = LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.Both,
+                ),
+                platformStyle = PlatformTextStyle(includeFontPadding = false),
+            ),
         )
     }
 }
@@ -861,17 +932,21 @@ private fun AccentFillButton(
     label: String,
     onClick: () -> Unit,
     enabled: Boolean = true,
+    modifier: Modifier = Modifier,
 ) {
     val paper = LocalPaperColors.current
     val shape = GoldCornerFrameShape(12.dp)
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 44.dp)
+            .minimumInteractiveComponentSize()
+            .heightIn(min = 40.dp)
+            .defaultMinSize(minHeight = 40.dp)
             .clip(shape)
             .background(if (enabled) paper.accent else paper.accent.copy(alpha = 0.45f))
+            .border(ChromeTokens.GoldStroke, ChromeTokens.Gold, shape)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -880,6 +955,14 @@ private fun AccentFillButton(
             fontWeight = FontWeight.Bold,
             fontSize = 15.sp,
             textAlign = TextAlign.Center,
+            style = TextStyle(
+                textAlign = TextAlign.Center,
+                lineHeightStyle = LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.Both,
+                ),
+                platformStyle = PlatformTextStyle(includeFontPadding = false),
+            ),
         )
     }
 }
@@ -953,6 +1036,7 @@ private fun VideoFromAyahDropdown(
     maxAyah: Int,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    label: String = stringResource(R.string.audio_range_from),
 ) {
     // Start may go back up to (range max - 1) ayahs before the long-pressed ayah, so the
     // selected range can still contain it; the "to" list then follows the chosen start.
@@ -965,7 +1049,7 @@ private fun VideoFromAyahDropdown(
     }
     AyahNumberDropdown(
         value = fromAyah,
-        label = stringResource(R.string.audio_range_from),
+        label = label,
         options = options,
         onSelect = onSelect,
         modifier = modifier,
@@ -1041,6 +1125,7 @@ private fun VideoToAyahDropdown(
     maxAyah: Int,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    label: String = stringResource(R.string.audio_range_to),
 ) {
     val options = remember(fromAyah, maxAyah) {
         val start = fromAyah.coerceIn(1, maxAyah.coerceAtLeast(1))
@@ -1061,7 +1146,7 @@ private fun VideoToAyahDropdown(
     ) {
         CompactSelectorField(
             value = EasternArabic.format(toAyah),
-            label = stringResource(R.string.audio_range_to),
+            label = label,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .menuAnchor(MenuAnchorType.PrimaryNotEditable)
@@ -1104,6 +1189,7 @@ private fun WordSheetPreview() {
             onOpenTafsir = {},
             onToggleBookmark = {},
             onShareImage = {},
+            onShareRangeImage = { _, _ -> },
             onShareText = {},
             onVideoFrom = {},
             onVideoTo = {},

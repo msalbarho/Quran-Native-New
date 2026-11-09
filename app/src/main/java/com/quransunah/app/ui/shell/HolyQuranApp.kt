@@ -809,8 +809,10 @@ val restoreBar = tab == AppTab.Reading || tab == AppTab.Training
                 } else {
                     pageContentDirection
                 }
+                val playbackCursor = com.quransunah.app.ui.mushaf.rememberQulPlaybackCursor(playback)
                 CompositionLocalProvider(
                     LocalLayoutDirection provides meaningsPagerDirection,
+                    com.quransunah.app.ui.mushaf.LocalQulPlaybackCursor provides playbackCursor,
                     com.quransunah.app.ui.mushaf.LocalTrainingRevealedWordIds provides trainingRevealedWords,
                     com.quransunah.app.ui.mushaf.LocalTrainingWordMarks provides if (tab == AppTab.Training) trainingMarks else emptyMap(),
                     com.quransunah.app.ui.mushaf.LocalTrainingFocusWordId provides if (tab == AppTab.Training) trainingFocusWordId else null,
@@ -849,7 +851,8 @@ val restoreBar = tab == AppTab.Reading || tab == AppTab.Training
                                 .distinctUntilChanged()
                         }.collectAsStateWithLifecycle(initialValue = cachedPage(viewModel, pageNo))
                         val lineRecords = remember(pageData) { pageData?.toLineRecords().orEmpty() }
-                        val qulWord = com.quransunah.app.ui.mushaf.rememberQulPlaybackWord(playback, lineRecords)
+                        val pageHighlightWord = highlight.wordId
+                        val pageHighlightAyah = highlight.ayah?.let { it.surah to it.ayah }
                         val showMeanings = tab == AppTab.Reading && meaningsMode
                         Box(Modifier.fillMaxSize()) {
                         // Mounted on this pager page; the global toolbar covers it without moving the text.
@@ -896,8 +899,8 @@ val restoreBar = tab == AppTab.Reading || tab == AppTab.Training
                                     androidx.compose.ui.graphics.Color.Black
                                 },
                                 highlightColor = paper.ayahHighlight,
-                                highlightWordId = qulWord ?: highlight.wordId,
-                                highlightAyah = highlight.ayah?.let { it.surah to it.ayah },
+                                highlightWordId = if (playbackCursor != null) null else pageHighlightWord,
+                                highlightAyah = if (playbackCursor != null) null else pageHighlightAyah,
                                 hideAyahText = tab == AppTab.Training && hideTrainingWords,
                                 revealedAyahs = trainingVisibleAyahs,
                                 chromeVisible = chrome && tab != AppTab.Training,
@@ -938,8 +941,8 @@ val restoreBar = tab == AppTab.Reading || tab == AppTab.Training
                                     androidx.compose.ui.graphics.Color.Black
                                 },
                                 highlightColor = paper.ayahHighlight,
-                                highlightWordId = qulWord ?: highlight.wordId,
-                                highlightAyah = highlight.ayah?.let { it.surah to it.ayah },
+                                highlightWordId = pageHighlightWord,
+                                highlightAyah = pageHighlightAyah,
                                 hideAyahText = tab == AppTab.Training && hideTrainingWords,
                                 revealedAyahs = trainingVisibleAyahs,
                                 onRevealTrainingText = if (tab == AppTab.Training) { { word ->

@@ -45,3 +45,10 @@ public/fonts/qcf4/
 /25 4.2.0/
 google-services.json
 GoogleService-Info.plist
+
+# Agent / local scratch (never commit)
+review-tmp/
+_inspect_signing.py
+_inspect_*.py
+_bump_*.py
+

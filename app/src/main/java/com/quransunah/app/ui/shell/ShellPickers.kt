@@ -373,7 +373,7 @@ private fun SettingsPickerHeader(onClose: () -> Unit) {
         ) {
             Box(
                 modifier = Modifier
-                    .padding(top = 10.dp)
+                    .padding(top = 6.dp)
                     .size(width = 36.dp, height = 4.dp)
                     .clip(RoundedCornerShape(999.dp))
                     .background(paper.textMuted.copy(alpha = 0.45f))

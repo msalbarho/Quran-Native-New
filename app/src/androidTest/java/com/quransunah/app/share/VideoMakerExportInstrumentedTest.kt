@@ -47,7 +47,7 @@ class VideoMakerExportInstrumentedTest {
         }
         assertEquals("white text must persist after each inline marker",0,bluePixels)
         sharedImage.recycle()
-        val modeNames=listOf("progress","cumulative","underline","current","glow")
+        val modeNames=listOf("progress","cumulative","underline")
         modeNames.forEachIndexed { mode,name ->
             for(frame in 0..8) {
                 val image=exporter.makerPreview(content,options.copy(trackingMode=mode),frame/3+1,(frame%3)/2f)
@@ -55,7 +55,7 @@ class VideoMakerExportInstrumentedTest {
                 image.recycle()
             }
         }
-        for((name,colour) in listOf("gold" to 0xFFD4B06A.toInt(),"white" to -1,"black" to 0xFF000000.toInt(),"red" to 0xFFE53935.toInt(),"yellow" to 0xFFFFEB3B.toInt(),"green" to 0xFF4CAF50.toInt())) {
+        for((name,colour) in listOf("gold" to 0xFFD4B06A.toInt(),"white" to -1,"green" to 0xFF4CAF50.toInt())) {
             val image=exporter.markerPreview(286,colour)
             File(evidence,"marker-colour-$name.png").outputStream().use { image.compress(Bitmap.CompressFormat.PNG,100,it) };image.recycle()
         }
