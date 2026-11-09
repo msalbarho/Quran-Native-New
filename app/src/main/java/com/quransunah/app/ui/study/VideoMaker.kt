@@ -1,11 +1,18 @@
 package com.quransunah.app.ui.study
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Typeface
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
+import android.view.View
+import android.view.WindowManager
+import android.view.ViewTreeObserver
 import android.widget.VideoView
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -16,7 +23,9 @@ import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.sp
@@ -25,7 +34,6 @@ import androidx.compose.foundation.layout.defaultMinSize
 import com.quransunah.app.ui.theme.LocalPaperColors
 import com.quransunah.app.ui.shell.ChromeTokens
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -57,11 +65,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextDirection
 import com.quransunah.app.fonts.QcfFontManager
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.quransunah.app.R
 import com.quransunah.app.core.ArabicRtl
 import com.quransunah.app.core.LanguageRegistry
@@ -212,9 +223,13 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
         if (!onPreview || clips.isEmpty()) return@LaunchedEffect
         viewModel.audioPlayer.pause()
         val player = MediaPlayer()
+        // USAGE_MEDIA is treated as now-playing on Android 13+ / Samsung One UI
+        // and can surface this app's MediaSessionService ("Holy Quran • Recitation").
+        // USAGE_GAME keeps preview audio local: no media notification, no lock-screen
+        // controls, and no MediaSession / PlaybackService / Android Auto involvement.
         player.setAudioAttributes(
             AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setUsage(AudioAttributes.USAGE_GAME)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                 .build(),
         )
@@ -345,20 +360,27 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
         CompositionLocalProvider(LocalLayoutDirection provides uiDirection) {
+            val contentInsets = rememberDialogSafeInsets()
+            val density = LocalDensity.current
+            val statusTopPx = WindowInsets.statusBars.getTop(density)
+            val insetTopPx = contentInsets.getTop(density)
+            val extraTop = with(density) { ((insetTopPx - statusTopPx).coerceAtLeast(0) / 2).toDp() }
             BackHandler { if (!busy) { if (step > 0) step-- else onClose() } }
             Box(
                 Modifier
                     .fillMaxSize()
-                    .background(MakerPaper)
-                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)),
+                    .background(MakerPaper),
             ) {
                 TiledOrnamentBackground(Modifier.matchParentSize().alpha(0.14f))
                 Column(
                     Modifier
                         .fillMaxSize()
                         .imePadding()
+                        .windowInsetsPadding(
+                            WindowInsets.statusBars.union(contentInsets.only(WindowInsetsSides.Horizontal)),
+                        )
                         .padding(horizontal = 16.dp)
-                        .padding(top = 4.dp),
+                        .padding(top = extraTop + 2.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -372,9 +394,21 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
                             R.string.video_step_style,
                             R.string.video_step_share,
                         ).forEachIndexed { index, name ->
-                            TextButton(onClick = { step = index }, enabled = !busy, contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)) {
-                                Text("${if (step == index) "●" else if (step > index) "✓" else "○"} ${stringResource(name)}", color = MakerGold,
-                                    fontWeight = if (step == index) FontWeight.Bold else FontWeight.Normal, fontSize = 13.sp)
+                            TextButton(
+                                onClick = { step = index },
+                                enabled = !busy,
+                                modifier = Modifier.weight(1f),
+                                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 0.dp),
+                            ) {
+                                Text(
+                                    "${if (step == index) "●" else if (step > index) "✓" else "○"} ${stringResource(name)}",
+                                    color = MakerGold,
+                                    fontWeight = if (step == index) FontWeight.Bold else FontWeight.Normal,
+                                    fontSize = 13.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    textAlign = TextAlign.Center,
+                                )
                             }
                         }
                     }
@@ -427,7 +461,7 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
                             }
                         }
                         1 -> Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            MakerPreviewOrLoading(preview, previewStamp, options, geometry, step, busy) { options = it }
+                            MakerPreviewOrLoading(preview, previewStamp, options, geometry, step, busy, Modifier.fillMaxWidth().weight(1f)) { options = it }
                             PreviewTransport(previewPlaying, { previewPlaying = !previewPlaying }, { previewRestart += 1 })
                             Text(stringResource(R.string.video_backgrounds_count, options.backgrounds.size), color = MakerGold, fontWeight = FontWeight.Bold)
                             Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -460,7 +494,7 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
                             }
                         }
                         2 -> Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            MakerPreviewOrLoading(preview, previewStamp, options, geometry, step, busy) { options = it }
+                            MakerPreviewOrLoading(preview, previewStamp, options, geometry, step, busy, Modifier.fillMaxWidth().weight(1f)) { options = it }
                             PreviewTransport(previewPlaying, { previewPlaying = !previewPlaying }, { previewRestart += 1 })
                             Text(stringResource(R.string.video_drag_hint), color=MakerGold, fontSize = 10.sp, lineHeight = 12.sp)
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -555,10 +589,23 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
                             }
                         }
                         else -> Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            MakerPreviewOrLoading(preview, previewStamp, options, geometry, step, busy) { options = it }
+                            MakerPreviewOrLoading(preview, previewStamp, options, geometry, step, busy, Modifier.fillMaxWidth().weight(1f)) { options = it }
                             PreviewTransport(previewPlaying, { previewPlaying = !previewPlaying }, { previewRestart += 1 })
                             if(saved)Text(stringResource(R.string.video_saved_mark),color=MakerGold,style=MaterialTheme.typography.bodySmall)
-                            Spacer(Modifier.weight(1f))
+                        }
+                    }
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .windowInsetsPadding(contentInsets.only(WindowInsetsSides.Bottom))
+                            .navigationBarsPadding()
+                            .padding(bottom = 15.dp),
+                    ) {
+                        if (busy) { LinearProgressIndicator(Modifier.fillMaxWidth(), color = MakerGold); Text(stringResource(R.string.video_please_wait), color = MakerGold) }
+                        error?.let { Text(it, color = Color(0xFFB3261E)) }
+                        if (step < 3) {
+                            MakerButton(stringResource(listOf(R.string.video_next_background, R.string.video_next_style, R.string.video_next_share)[step]), !busy) { step++ }
+                        } else {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Button(onClick = { export() }, enabled = !busy && content!=null, modifier = Modifier.weight(1f).minimumInteractiveComponentSize().heightIn(min = 42.dp).defaultMinSize(minHeight = 40.dp),
                                     shape = GoldCornerFrameShape(10.dp), colors = ButtonDefaults.buttonColors(containerColor = MakerGold),
@@ -571,15 +618,8 @@ fun VideoMaker(viewModel: StudyViewModel, ui: StudyUiState, onClose: () -> Unit)
                                     Text(if(busy && sharing) stringResource(R.string.video_preparing) else stringResource(R.string.video_share), fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                 }
                             }
+                            TextButton(onClick = { step-- }, enabled = !busy) { Text(stringResource(R.string.video_back_style), color = MakerGold) }
                         }
-                    }
-                    Column(
-                        Modifier.fillMaxWidth().navigationBarsPadding(),
-                    ) {
-                        if (busy) { LinearProgressIndicator(Modifier.fillMaxWidth(), color = MakerGold); Text(stringResource(R.string.video_please_wait), color = MakerGold) }
-                        error?.let { Text(it, color = Color(0xFFB3261E)) }
-                        if (step < 3) MakerButton(stringResource(listOf(R.string.video_next_background, R.string.video_next_style, R.string.video_next_share)[step]), !busy) { step++ }
-                        else TextButton(onClick = { step-- }, enabled = !busy) { Text(stringResource(R.string.video_back_style), color = MakerGold) }
                     }
                 }
             }
@@ -652,22 +692,24 @@ private data class PreviewClip(
     geometry: MakerPreviewGeometry,
     step: Int,
     busy: Boolean,
+    modifier: Modifier = Modifier,
     onChange: (VideoMakerOptions) -> Unit,
 ) {
     val MakerGold = LocalPaperColors.current.accent
-    preview?.let { bmp -> MakerDragPreview(bmp, stamp, options, geometry, step, busy, onChange) }
-        ?: Box(Modifier.fillMaxWidth().height(if (step == 3) 460.dp else 320.dp), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = MakerGold)
-        }
+    Box(modifier, contentAlignment = Alignment.Center) {
+        preview?.let { bmp -> MakerDragPreview(bmp, stamp, options, geometry, step, busy, onChange, Modifier.fillMaxSize()) }
+            ?: CircularProgressIndicator(color = MakerGold)
+    }
 }
 
 /** Dedicated immediate vertical drag targets win over the surrounding scroll container. */
-@Composable private fun MakerDragPreview(bitmap:Bitmap,stamp:Int,options:VideoMakerOptions,geometry:MakerPreviewGeometry,step:Int,busy:Boolean,onChange:(VideoMakerOptions)->Unit) {
+@Composable private fun MakerDragPreview(bitmap:Bitmap,stamp:Int,options:VideoMakerOptions,geometry:MakerPreviewGeometry,step:Int,busy:Boolean,onChange:(VideoMakerOptions)->Unit,modifier:Modifier=Modifier) {
     val MakerGold = LocalPaperColors.current.accent
-    val previewHeight=when(step){2->340.dp;3->460.dp;else->300.dp}
-    val heightPx=with(LocalDensity.current){previewHeight.toPx()}
-    Box(Modifier.fillMaxWidth(),contentAlignment=Alignment.Center) {
-        Box(Modifier.height(previewHeight).width(previewHeight*9f/16f)) {
+    BoxWithConstraints(modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        val previewHeight = minOf(maxHeight, maxWidth * 16f / 9f)
+        val previewWidth = previewHeight * 9f / 16f
+        val heightPx=with(LocalDensity.current){previewHeight.toPx()}
+        Box(Modifier.height(previewHeight).width(previewWidth)) {
             val frame = remember(bitmap, stamp) { bitmap.asImageBitmap() }
             Image(frame, stringResource(R.string.video_preview), contentScale=ContentScale.FillBounds, modifier=Modifier.matchParentSize())
             if(step in 2..3 && !busy) {
@@ -901,3 +943,63 @@ private data class PreviewClip(
     }
 }
 
+
+private fun Context.findActivity(): Activity? {
+    var ctx: Context = this
+    while (ctx is ContextWrapper) {
+        if (ctx is Activity) return ctx
+        ctx = ctx.baseContext
+    }
+    return null
+}
+
+private fun readHostSystemInsets(context: Context, fallbackView: View): WindowInsets {
+    val typesCompat = WindowInsetsCompat.Type.systemBars() or
+        WindowInsetsCompat.Type.displayCutout() or
+        WindowInsetsCompat.Type.mandatorySystemGestures()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        val wm = context.getSystemService(WindowManager::class.java)
+            ?: context.findActivity()?.windowManager
+        val metrics = wm?.currentWindowMetrics?.windowInsets
+        if (metrics != null) {
+            val types = android.view.WindowInsets.Type.systemBars() or
+                android.view.WindowInsets.Type.displayCutout() or
+                android.view.WindowInsets.Type.mandatorySystemGestures()
+            val sys = metrics.getInsets(types)
+            if (sys.bottom > 0 || sys.top > 0) {
+                return WindowInsets(sys.left, sys.top, sys.right, sys.bottom)
+            }
+        }
+    }
+    val root = context.findActivity()?.window?.decorView ?: fallbackView.rootView
+    val sys = ViewCompat.getRootWindowInsets(root)?.getInsets(typesCompat)
+    return if (sys != null) {
+        WindowInsets(sys.left, sys.top, sys.right, sys.bottom)
+    } else {
+        WindowInsets(0, 0, 0, 0)
+    }
+}
+
+/**
+ * Dialog windows often expose empty navigation-bar WindowInsets.
+ * Union Compose safeDrawing with the host window's WindowMetrics so the
+ * same padding works for any screen size, density, and navigation mode.
+ */
+@Composable
+private fun rememberDialogSafeInsets(): WindowInsets {
+    val context = LocalContext.current
+    val view = LocalView.current
+    val configuration = LocalConfiguration.current
+    var host by remember { mutableStateOf(WindowInsets(0, 0, 0, 0)) }
+    DisposableEffect(context, view, configuration) {
+        val root = context.findActivity()?.window?.decorView ?: view.rootView
+        fun read() {
+            host = readHostSystemInsets(context, view)
+        }
+        read()
+        val listener = ViewTreeObserver.OnGlobalLayoutListener { read() }
+        root.viewTreeObserver.addOnGlobalLayoutListener(listener)
+        onDispose { root.viewTreeObserver.removeOnGlobalLayoutListener(listener) }
+    }
+    return WindowInsets.safeDrawing.union(host)
+}
