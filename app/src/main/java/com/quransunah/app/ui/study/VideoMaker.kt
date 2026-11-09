@@ -654,13 +654,13 @@ private data class PreviewClip(
             if(step in 2..3 && !busy) {
                 val ayahDrag=rememberDraggableState { delta ->
                     val current=makerVerticalPlacement(options.ayahY,options.titleY,geometry.ayahHeight,geometry.titleHeight,options.showTitle,options.translation)
-                    val maxY=(if(options.translation).80f else .86f)-geometry.ayahHeight/2f
+                    val maxY=(if(options.translation).88f else .90f)-geometry.ayahHeight/2f
                     val minY=if(options.showTitle)current.titleCenterY+makerBlockSeparation(geometry.ayahHeight,geometry.titleHeight) else .08f+geometry.ayahHeight/2f
                     onChange(options.copy(ayahY=(current.ayahCenterY+delta/heightPx).coerceIn(minY.coerceAtMost(maxY),maxY),titleY=current.titleCenterY))
                 }
                 val titleDrag=rememberDraggableState { delta ->
                     val current=makerVerticalPlacement(options.ayahY,options.titleY,geometry.ayahHeight,geometry.titleHeight,options.showTitle,options.translation)
-                    val minY=.05f+geometry.titleHeight/2f
+                    val minY=.04f+geometry.titleHeight/2f
                     val maxY=(current.ayahCenterY-makerBlockSeparation(geometry.ayahHeight,geometry.titleHeight)).coerceAtLeast(minY)
                     onChange(options.copy(titleY=(current.titleCenterY+delta/heightPx).coerceIn(minY,maxY),ayahY=current.ayahCenterY))
                 }

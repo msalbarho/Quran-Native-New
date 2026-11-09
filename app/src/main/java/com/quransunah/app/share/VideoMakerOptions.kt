@@ -120,10 +120,12 @@ fun makerBlockSeparation(ayahHeight:Float,titleHeight:Float):Float =
     ayahHeight / 2f + titleHeight / 2f + 0.016f
 fun makerVerticalPlacement(ayahY:Float,titleY:Float,ayahHeight:Float,titleHeight:Float,
                            showTitle:Boolean,translation:Boolean):MakerPreviewGeometry {
+    // Ayat block (arabic +/- translation) stays above the watermark strip (~0.90).
     val minAyah=.08f+ayahHeight/2f
-    val maxAyah=(if(translation).80f else .86f)-ayahHeight/2f
+    val maxAyah=(if(translation).88f else .90f)-ayahHeight/2f
     var ayah=ayahY.coerceIn(minAyah,maxOf(minAyah,maxAyah))
-    val minTitle=.05f+titleHeight/2f
+    // Surah-name frame: from top of frame down to the top edge of the ayat block.
+    val minTitle=.04f+titleHeight/2f
     val gap=makerBlockSeparation(ayahHeight,titleHeight)
     if(showTitle)ayah=maxOf(ayah,minTitle+gap).coerceAtMost(maxOf(minAyah,maxAyah))
     val maxTitle=if(showTitle)ayah-gap else .85f
