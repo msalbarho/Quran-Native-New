@@ -241,6 +241,18 @@ class StudyViewModel @Inject constructor(
         _ui.update { it.copy(reciterMenuOpen = open) }
     }
 
+    /** Default share-video range for the current surah: ayah 1..min(10, ayahCount), never past this surah. */
+    fun prepareVideoMakerRange() {
+        val word = _ui.value.word ?: return
+        val max = SurahAyahCounts.ayahCount(word.surah).coerceAtLeast(1)
+        _ui.update {
+            it.copy(
+                videoFromAyah = 1,
+                videoToAyah = AppConstants.SHARE_AYAH_RANGE_MAX.coerceAtMost(max),
+            )
+        }
+    }
+
     fun setVideoFrom(ayah: Int) {
         val word = _ui.value.word ?: return
         val max = SurahAyahCounts.ayahCount(word.surah)
@@ -249,14 +261,14 @@ class StudyViewModel @Inject constructor(
         _ui.update {
             it.copy(
                 videoFromAyah = from,
-                videoToAyah = toMax, // a new start always offers the full 10-ayah range
+                videoToAyah = toMax, // a new start always offers the full 10-ayah range within this surah
             )
         }
     }
 
     fun setVideoTo(ayah: Int) {
         val word = _ui.value.word ?: return
-        val from = _ui.value.videoFromAyah
+        val from = _ui.value.videoFromAyah.coerceIn(1, SurahAyahCounts.ayahCount(word.surah))
         val max = SurahAyahCounts.ayahCount(word.surah)
         val toMax = (from + AppConstants.SHARE_AYAH_RANGE_MAX - 1).coerceAtMost(max)
         _ui.update { it.copy(videoToAyah = ayah.coerceIn(from, toMax)) }
@@ -492,9 +504,11 @@ class StudyViewModel @Inject constructor(
             ?.takeIf { TranslationRegistry.forLanguage(it) != null }
             ?: TranslationRegistry.forLanguage(settings.appLanguage)?.languageTag
             ?: "en"
-        val fromAyah = from ?: word.ayah
-        val rawTo = to ?: word.ayah
-        val toAyah = rawTo.coerceAtMost(fromAyah + AppConstants.SHARE_AYAH_RANGE_MAX - 1)
+        val surahMax = SurahAyahCounts.ayahCount(word.surah)
+        val fromAyah = (from ?: word.ayah).coerceIn(1, surahMax)
+        val rawTo = (to ?: word.ayah).coerceIn(1, surahMax)
+        // Stay inside this surah only; never spill into the next surah.
+        val toAyah = rawTo.coerceAtMost(fromAyah + AppConstants.SHARE_AYAH_RANGE_MAX - 1).coerceAtMost(surahMax).coerceAtLeast(fromAyah)
         val verses = SurahAyahCounts.range(word.surah, fromAyah, word.surah, toAyah)
             .take(AppConstants.SHARE_AYAH_RANGE_MAX)
             .map { (_, ayah) ->
@@ -518,7 +532,9 @@ class StudyViewModel @Inject constructor(
                     lines = page.lines.map { line ->
                         ShareSourceLine(
                             lineNumber = line.lineNumber,
-                            words = line.words.map { token ->
+                            // Keep only this surah's words so ayah 1..N never pulls
+                            // the previous/next surah that shares the Madinah page.
+                            words = line.words.filter { it.surah == word.surah }.map { token ->
                                 ShareMushafWord(
                                     ayah = token.ayah,
                                     position = token.wordIndex,

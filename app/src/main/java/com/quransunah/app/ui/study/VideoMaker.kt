@@ -766,16 +766,20 @@ private data class PreviewClip(
         val markerBase = 15.sp * ShareMushafLayout.VIDEO_ARABIC_SIZE_FACTOR
         var widestWord = 0f
         tokens.forEach { (page, word) ->
-            val family = faces[page]?.let { FontFamily(it) } ?: FontFamily.Serif
-            val glyph = word.qcf.ifBlank { word.uthmanic }
-            val shown = if (glyph.any { it.code in 0xE000..0xF8FF }) glyph.reversed() else glyph
+            val face = faces[page]
+            val useQcf = face != null && word.qcf.isNotBlank()
+            // QCF page glyphs are visual-order (PUA / Arabic Presentation Forms). Draw LTR so
+            // Compose bidi does not reshuffle them into scrambled shapes; never paint those
+            // codes with Serif while the page face is still loading.
+            val shown = if (useQcf) word.qcf else word.uthmanic
             if (shown.isEmpty()) return@forEach
+            val family = if (useQcf) FontFamily(face!!) else FontFamily.SansSerif
             val ink = measurer.measure(
                 text = shown,
                 style = TextStyle(
                     fontSize = if (word.isMarker) markerBase else base,
                     fontFamily = family,
-                    textDirection = TextDirection.Content,
+                    textDirection = if (useQcf) TextDirection.Ltr else TextDirection.Content,
                 ),
             ).size.width.toFloat()
             if (ink > widestWord) widestWord = ink
@@ -789,17 +793,17 @@ private data class PreviewClip(
             ) {
                 tokens.forEach { (page, word) ->
                     val face = faces[page]
-                    val glyph = word.qcf.ifBlank { word.uthmanic }
-                    val shown = if (glyph.any { it.code in 0xE000..0xF8FF }) glyph.reversed() else glyph
+                    val useQcf = face != null && word.qcf.isNotBlank()
+                    val shown = if (useQcf) word.qcf else word.uthmanic
                     if (shown.isEmpty()) return@forEach
                     Text(
                         text = shown,
                         color = Color(0xFF1A140F),
                         fontSize = (if (word.isMarker) markerBase else base) * scale,
-                        fontFamily = if (face != null) FontFamily(face) else FontFamily.Serif,
+                        fontFamily = if (useQcf) FontFamily(face!!) else FontFamily.SansSerif,
                         maxLines = 1,
                         softWrap = false,
-                        style = TextStyle(textDirection = TextDirection.Content),
+                        style = TextStyle(textDirection = if (useQcf) TextDirection.Ltr else TextDirection.Content),
                     )
                 }
             }

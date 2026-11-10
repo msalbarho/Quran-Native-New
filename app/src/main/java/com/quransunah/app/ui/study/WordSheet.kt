@@ -248,7 +248,7 @@ fun WordSheet(
             onVideoFrom = viewModel::setVideoFrom,
             onVideoTo = viewModel::setVideoTo,
             onSelectVideoReciter = viewModel::selectVideoReciter,
-            onShareVideo = { makerOpen = true },
+            onShareVideo = { viewModel.prepareVideoMakerRange(); makerOpen = true },
             modifier = contentModifier,
         )
     }
