@@ -16,6 +16,7 @@ import android.graphics.Typeface
 import android.net.Uri
 import android.text.TextPaint
 import android.widget.Toast
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
 import androidx.media3.common.MediaItem
@@ -125,24 +126,7 @@ class AyahShareExporter @Inject constructor(
     internal fun promotionalWatermarkLabel(): String = "القرآن الكريم - تلاوة واستماع"
 
     suspend fun shareImage(content: AyahShareContent) = withContext(Dispatchers.IO) {
-        fontManager.ensureMaps()
-        val verse = content.verses.firstOrNull() ?: return@withContext
-        val bitmap = renderMaker(
-            content,
-            verse,
-            VideoMakerOptions(
-                ayahY = 0.50f,
-                titleY = 0.13f,
-            ),
-            null,
-            1080,
-            1920,
-            displayVerses = content.verses,
-            lineSpacing = ShareMushafLayout.IMAGE_LINE_MULTIPLIER,
-            fitWidthFraction = 0.72f,
-        )
-        val file = writeJpeg(bitmap, "ayah-${content.surah}-${verse.ayah}.jpg")
-        bitmap.recycle()
+        val file = makeShareImage(content)
         saveToGalleryThenShare(
             file = file,
             mime = "image/jpeg",
@@ -578,9 +562,31 @@ class AyahShareExporter @Inject constructor(
         else launchShare(file, "video/mp4", context.getString(R.string.app_name))
     }
 
+    internal suspend fun makeShareImage(content: AyahShareContent): File = withContext(Dispatchers.IO) {
+        val bitmap = shareImagePreview(content)
+        try {
+            writeJpeg(bitmap, "ayah-${content.surah}-${content.fromAyah}.jpg")
+        } finally {
+            bitmap.recycle()
+        }
+    }
+
     suspend fun shareImagePreview(content: AyahShareContent): Bitmap = withContext(Dispatchers.IO) {
         fontManager.ensureMaps()
-        renderMaker(content,content.verses.first(),VideoMakerOptions(),null,1080,1920,displayVerses=content.verses)
+        require(content.verses.size in 1..ShareMushafLayout.IMAGE_SHARE_MAX_AYAT &&
+            content.verses.map { it.ayah } == (content.fromAyah..content.toAyah).toList() &&
+            content.verses.all { it.uthmanicText.isNotBlank() }) {
+            "Invalid ayah range for image sharing"
+        }
+        renderMaker(
+            content, content.verses.first(),
+            VideoMakerOptions(ayahY = 0.50f, titleY = 0.13f),
+            null, 1080, 1920,
+            displayVerses = content.verses,
+            lineSpacing = ShareMushafLayout.IMAGE_LINE_MULTIPLIER,
+            fitWidthFraction = 0.72f,
+            imageRange = true,
+        )
     }
 
     suspend fun markerPreview(number: Int, color: Int = 0xFFD4B06A.toInt()): Bitmap = withContext(Dispatchers.IO) {
@@ -621,6 +627,7 @@ class AyahShareExporter @Inject constructor(
         fitWidthFraction: Float = 0.82f,
         plate: MakerPlate = MakerPlate.FULL,
         wordBoxes: MutableList<ShareWordBox>? = null,
+        imageRange: Boolean = false,
     ): Bitmap {
         val glyphsOnly = plate == MakerPlate.GLYPHS
         val bitmap = createBitmap(width, height)
@@ -641,7 +648,7 @@ class AyahShareExporter @Inject constructor(
         }
         val hafs = fontManager.loadUthmanicTypeface() ?: Typeface.DEFAULT
         val tracking = options.trackingMode.coerceIn(0, 2)
-        val maxWidth = (width * .82f).toInt()
+        val maxWidth = (width * if (imageRange) fitWidthFraction else .82f).toInt()
         val uiLanguage = com.quransunah.app.core.ArabicRtl.currentTag(context)
         val localizedSurah = if (options.showTitle) {
             com.quransunah.app.ui.index.SurahNames.displayName(uiLanguage, content.surah, content.surahName)
@@ -666,9 +673,24 @@ class AyahShareExporter @Inject constructor(
         if (title.isNotEmpty()) titlePaint.getTextBounds(title, 0, title.length, titleBounds)
         val titleInk = if (options.showTitle) maxOf(titleBounds.height().toFloat(), width * .062f) else 0f
         val titleFrameH = titleInk * (1f + 2f * ShareMushafLayout.TITLE_PAD_Y_FACTOR)
-        // One ayah per page: keep only that ayah's words (by ayah number), reflow
-        // to wrap width at the uniform size, paginate only if > MAX wrapped lines.
-        val mushaf = if (content.mushafLines.isNotEmpty()) {
+        val heading = if (content.shouldShowBasmalah() && verse.ayah == content.verses.firstOrNull()?.ayah) {
+            fontManager.displayBasmalahLigature()
+        } else {
+            ""
+        }
+        val headingFace = if (heading.isNotEmpty()) fontManager.loadSurahTitleTypeface() else null
+        val headingBounds = Rect()
+        val headingPaint = headingFace?.let {
+            ligaturePaint(it, width * .065f, com.quransunah.app.ui.shell.ChromeTokens.BasmalaGold.toArgb()).apply {
+                colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
+                fitWidth(this, heading, width * .56f, 1f)
+                getTextBounds(heading, 0, heading.length, headingBounds)
+            }
+        }
+        val headingHeight = if (headingPaint != null) headingBounds.height() + width * .018f else 0f
+        // Video renders one active ayah. An image uses the full shaped Hafs range
+        // below so its text stays complete even across source page boundaries.
+        val mushaf = if (!imageRange && content.mushafLines.isNotEmpty()) {
             val ayah = activeAyah ?: content.verses.firstOrNull()?.ayah
             if (ayah == null) {
                 null
@@ -703,7 +725,7 @@ class AyahShareExporter @Inject constructor(
             } else {
                 0f
             }
-            val blockH = measured.height + translationReserve
+            val blockH = headingHeight + measured.height + translationReserve
             val ayahHFrac = blockH / height
             val geometry = makerVerticalPlacement(
                 options.ayahY,
@@ -715,7 +737,7 @@ class AyahShareExporter @Inject constructor(
             )
             onGeometry?.invoke(geometry)
             // Arabic centered in the upper portion of the (arabic+translation) block.
-            bodyTop = geometry.ayahCenterY * height - blockH / 2f
+            bodyTop = geometry.ayahCenterY * height - blockH / 2f + headingHeight
             bodyHeight = measured.height
             ayahTextSize = measured.textSize
             if (options.textBackdrop && !glyphsOnly) drawTextBackdrop(canvas, bodyTop, bodyTop + bodyHeight)
@@ -728,17 +750,14 @@ class AyahShareExporter @Inject constructor(
             )
             }
         } else {
-            val pageFace = if (options.font == 0) fontManager.loadPageTypeface(verse.pageNumber, night = true) else null
-            val qcf = options.font == 0 && verse.qcfText.any { it.code in 0xFB50..0xFEFF || it.code in 0xE000..0xF8FF } && pageFace != Typeface.DEFAULT
-            val face = if (qcf) pageFace!! else if (options.font == 2) Typeface.create("serif", Typeface.NORMAL) else hafs
-            val words = (if (qcf) verse.qcfText else verse.uthmanicText).trim().split(Regex("\\s+"))
+            // Without word/page boundaries, a single page font could be wrong for a multi-page verse.
+            val face = if (options.font == 2) Typeface.create("serif", Typeface.NORMAL) else hafs
+            val words = verse.uthmanicText.trim().split(Regex("\\s+"))
             val starts = words.indices.map { index -> words.take(index).sumOf { it.length + 1 } }
             val text = android.text.SpannableStringBuilder()
             displayVerses.forEachIndexed { index, item ->
-                val itemPage = if (options.font == 0) fontManager.loadPageTypeface(item.pageNumber, night = true) else null
-                val itemQcf = options.font == 0 && item.qcfText.any { it.code in 0xFB50..0xFEFF || it.code in 0xE000..0xF8FF } && itemPage != Typeface.DEFAULT
-                val itemFace = if (itemQcf) itemPage!! else if (options.font == 2) Typeface.create("serif", Typeface.NORMAL) else hafs
-                val itemWords = (if (itemQcf) item.qcfText else item.uthmanicText).trim().split(Regex("\\s+"))
+                val itemFace = if (options.font == 2) Typeface.create("serif", Typeface.NORMAL) else hafs
+                val itemWords = item.uthmanicText.trim().split(Regex("\\s+"))
                 val begin = text.length
                 text.append(itemWords.joinToString(" "))
                 text.setSpan(object : android.text.style.MetricAffectingSpan() {
@@ -749,7 +768,7 @@ class AyahShareExporter @Inject constructor(
                     override fun updateMeasureState(tp: TextPaint) { tp.typeface = itemFace }
                 }, begin, text.length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                 if (options.marker) HafsAyahMarker.appendInline(text, hafs, item.ayah, options.markerColor, itemWords.last(), itemFace)
-                if (index < displayVerses.lastIndex) text.append(" ")
+                if (index < displayVerses.lastIndex) text.append(if (imageRange) "\n" else " ")
             }
             if (activeWord != null && tracking == ShareMushafLayout.TRACKING_CUMULATIVE) {
                 val currentAyah = activeAyah ?: verse.ayah
@@ -784,22 +803,23 @@ class AyahShareExporter @Inject constructor(
                 .setAlignment(android.text.Layout.Alignment.ALIGN_CENTER)
                 .setTextDirection(android.text.TextDirectionHeuristics.RTL)
                 .setLineSpacing(if (lineSpacing > 1.2f) paint.textSize * 0.45f else 0f, 1f)
-                .setIncludePad(false)
+                .setIncludePad(imageRange)
                 .setHyphenationFrequency(android.text.Layout.HYPHENATION_FREQUENCY_NONE)
                 .build()
             var body = layout()
-            while (body.height > height * .48f && paint.textSize > width * .025f) {
+            val bodyLimit = height * (if (imageRange) .59f else .48f) - headingHeight
+            while (body.height > bodyLimit && paint.textSize > (if (imageRange) 1f else width * .025f)) {
                 paint.textSize *= .9f
                 body = layout()
             }
             val visibleWidth = (0 until body.lineCount).maxOf { body.getLineRight(it) - body.getLineLeft(it) }
             val bodyX = (width * options.ayahX).coerceIn(visibleWidth / 2f, width - visibleWidth / 2f) - maxWidth / 2f
             val geometry = makerVerticalPlacement(
-                options.ayahY, options.titleY, body.height.toFloat() / height,
+                options.ayahY, options.titleY, (body.height + headingHeight) / height,
                 titleFrameH / height, options.showTitle, options.translation,
             )
             onGeometry?.invoke(geometry)
-            bodyTop = geometry.ayahCenterY * height - body.height / 2f
+            bodyTop = geometry.ayahCenterY * height + (headingHeight - body.height) / 2f
             bodyHeight = body.height.toFloat()
             ayahTextSize = paint.textSize
             if (options.textBackdrop) drawTextBackdrop(canvas, bodyTop, bodyTop + bodyHeight)
@@ -811,12 +831,15 @@ class AyahShareExporter @Inject constructor(
             body.draw(canvas)
             canvas.restore()
         }
+        if (!glyphsOnly && headingPaint != null) {
+            canvas.drawText(heading, width / 2f, bodyTop - headingHeight - headingBounds.top, headingPaint)
+        }
         if (options.showTitle && !glyphsOnly) {
             drawSurahTitle(
                 canvas, title, titlePaint, titleBounds,
                 width * options.titleX,
                 height * makerVerticalPlacement(
-                    options.ayahY, options.titleY, bodyHeight / height, titleFrameH / height,
+                    options.ayahY, options.titleY, (bodyHeight + headingHeight) / height, titleFrameH / height,
                     options.showTitle, options.translation,
                 ).titleCenterY,
                 options.titleFrame, width,
@@ -911,14 +934,15 @@ class AyahShareExporter @Inject constructor(
                     maxAscent = maxOf(maxAscent, textSize * 0.75f)
                     continue
                 }
-                val glyph = if (options.font == 0) word.qcf.ifBlank { word.uthmanic } else word.uthmanic
+                val usePageGlyph = options.font == 0 && word.qcf.isNotBlank()
+                val glyph = if (usePageGlyph) word.qcf else word.uthmanic
                 if (glyph.isBlank()) continue
                 val page = word.sourcePage.takeIf { it > 0 } ?: line.pageNumber
-                val pageFace = if (options.font == 0) fontManager.loadPageTypeface(page, night = true) else null
-                val face = if (options.font == 0 && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
+                val pageFace = if (usePageGlyph) fontManager.loadPageTypeface(page, night = true) else null
+                val face = if (usePageGlyph && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
                 paint.typeface = face
                 paint.textSize = textSize
-                val shown = if (options.font == 0) visualPua(glyph) else glyph
+                val shown = if (usePageGlyph) visualPua(glyph) else glyph
                 paint.getTextBounds(shown, 0, shown.length, bounds)
                 maxAscent = maxOf(maxAscent, (-bounds.top).toFloat())
             }
@@ -940,9 +964,10 @@ class AyahShareExporter @Inject constructor(
         for (line in lines) {
             for (word in line.words) {
                 if (word.isMarker) continue
+                val usePageGlyph = options.font == 0 && word.qcf.isNotBlank()
                 val page = word.sourcePage.takeIf { it > 0 } ?: line.pageNumber
-                val pageFace = if (options.font == 0) fontManager.loadPageTypeface(page, night = true) else null
-                val face = if (options.font == 0 && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
+                val pageFace = if (usePageGlyph) fontManager.loadPageTypeface(page, night = true) else null
+                val face = if (usePageGlyph && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
                 faces += face
             }
         }
@@ -956,14 +981,15 @@ class AyahShareExporter @Inject constructor(
                     maxSpan = maxOf(maxSpan, textSize * 0.95f)
                     continue
                 }
-                val glyph = if (options.font == 0) word.qcf.ifBlank { word.uthmanic } else word.uthmanic
+                val usePageGlyph = options.font == 0 && word.qcf.isNotBlank()
+                val glyph = if (usePageGlyph) word.qcf else word.uthmanic
                 if (glyph.isBlank()) continue
                 val page = word.sourcePage.takeIf { it > 0 } ?: line.pageNumber
-                val pageFace = if (options.font == 0) fontManager.loadPageTypeface(page, night = true) else null
-                val face = if (options.font == 0 && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
+                val pageFace = if (usePageGlyph) fontManager.loadPageTypeface(page, night = true) else null
+                val face = if (usePageGlyph && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
                 paint.typeface = face
                 paint.textSize = textSize
-                val shown = if (options.font == 0) visualPua(glyph) else glyph
+                val shown = if (usePageGlyph) visualPua(glyph) else glyph
                 paint.getTextBounds(shown, 0, shown.length, bounds)
                 maxSpan = maxOf(maxSpan, bounds.height().toFloat())
             }
@@ -1026,14 +1052,15 @@ class AyahShareExporter @Inject constructor(
             val visible = line.words.filter { options.marker || !it.isMarker }
             val pieces = visible.map { word ->
                 val page = word.sourcePage.takeIf { it > 0 } ?: line.pageNumber
-                val pageFace = if (options.font == 0) fontManager.loadPageTypeface(page, night = true) else null
-                val face = if (options.font == 0 && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
+                val usePageGlyph = options.font == 0 && word.qcf.isNotBlank()
+                val pageFace = if (usePageGlyph) fontManager.loadPageTypeface(page, night = true) else null
+                val face = if (usePageGlyph && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
                 paint.typeface = face
                 if (word.isMarker) {
                     Piece(word, "", textSize * .90f * 1.05f, true) to face
                 } else {
-                    val glyph = if (options.font == 0) word.qcf.ifBlank { word.uthmanic } else word.uthmanic
-                    val shown = if (options.font == 0) visualPua(glyph) else glyph
+                    val glyph = if (usePageGlyph) word.qcf else word.uthmanic
+                    val shown = if (usePageGlyph) visualPua(glyph) else glyph
                     Piece(word, shown, paint.measureText(shown), false) to face
                 }
             }
@@ -1358,8 +1385,6 @@ class AyahShareExporter @Inject constructor(
         val titleFace = fontManager.loadSurahTitleTypeface()
             ?: fontManager.loadUthmanicTypeface()
             ?: Typeface.create(Typeface.SERIF, Typeface.BOLD)
-        // Share art is always light text on a dark photo, so use the dark tajweed palette (white base layer).
-        val pageFace = fontManager.loadPageTypeface(verse.pageNumber, night = true)
         val uthmanicFace = fontManager.loadUthmanicTypeface()
             ?: Typeface.create(Typeface.SERIF, Typeface.NORMAL)
         val bitmap = createBitmap(canvasWidth, canvasHeight)
@@ -1380,21 +1405,11 @@ class AyahShareExporter @Inject constructor(
             SharePaintMode.BASMALAH, SharePaintMode.FULL -> content.shouldShowBasmalah()
         }
         val basmalah = if (showBasmalah) fontManager.displayBasmalahLigature() else ""
-        val qcfBody = verse.qcfText.trim()
-        val markerRaw = verse.markerLigature?.takeIf { it.isNotBlank() }
-        val pageFaceReady = pageFace != Typeface.DEFAULT && pageFace != uthmanicFace &&
-            // QPC V4 page glyphs live in U+FB50..U+FEFF (older QCF builds used the PUA)
-            qcfBody.any { it.code in 0xE000..0xF8FF || it.code in 0xFB50..0xFEFF } &&
-            fontManager.canDrawLigature(qcfBody, pageFace) &&
-            (markerRaw == null || fontManager.canDrawLigature(markerRaw, pageFace))
-        val usePageFace = pageFaceReady
-        val ayahSource = when {
-            usePageFace -> qcfBody
-            verse.uthmanicText.isNotBlank() -> verse.uthmanicText
-            else -> qcfBody
-        }
-        val ayahFace = if (usePageFace) pageFace else uthmanicFace
-        val markerLigature = if (usePageFace) markerRaw else null
+        // A share card has one text face, but a verse can cross a Mushaf page boundary.
+        // Render verified Unicode Hafs text rather than page-specific codes with one font.
+        val ayahSource = verse.uthmanicText
+        val ayahFace = uthmanicFace
+        val markerLigature: String? = null
         val numberLabel = formatShareAyahNumberLabel(verse.ayah)
 
         when (mode) {
@@ -1408,7 +1423,7 @@ class AyahShareExporter @Inject constructor(
                 numberLabel,
                 ayahFace,
                 uthmanicFace,
-                reverseAyah = usePageFace,
+                reverseAyah = false,
             )
             SharePaintMode.FULL -> drawFullCopy(
                 canvas,
@@ -1421,7 +1436,7 @@ class AyahShareExporter @Inject constructor(
                 titleFace,
                 ayahFace,
                 uthmanicFace,
-                reverseAyah = usePageFace,
+                reverseAyah = false,
             )
         }
         drawBranding(canvas)
@@ -1762,16 +1777,17 @@ class AyahShareExporter @Inject constructor(
         data class Piece(val word: ShareMushafWord, val width: Float)
         val pieces = ArrayList<Piece>()
         for (line in lines) {
-            val pageFace = if (options.font == 0) fontManager.loadPageTypeface(line.pageNumber, night = true) else null
-            val face = if (options.font == 0 && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
             paint.textSize = textSize
-            paint.typeface = face
             line.words.filter { options.marker || !it.isMarker }.forEach { word ->
+                val usePageGlyph = options.font == 0 && word.qcf.isNotBlank()
+                val page = word.sourcePage.takeIf { it > 0 } ?: line.pageNumber
+                val pageFace = if (usePageGlyph) fontManager.loadPageTypeface(page, night = true) else null
+                paint.typeface = if (usePageGlyph && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
                 val width = if (word.isMarker) {
                     textSize * .90f * 1.05f
                 } else {
-                    val glyph = if (options.font == 0) word.qcf.ifBlank { word.uthmanic } else word.uthmanic
-                    val shown = if (options.font == 0) visualPua(glyph) else glyph
+                    val glyph = if (usePageGlyph) word.qcf else word.uthmanic
+                    val shown = if (usePageGlyph) visualPua(glyph) else glyph
                     paint.measureText(shown)
                 }
                 pieces += Piece(word.copy(sourcePage = line.pageNumber), width)
@@ -1822,19 +1838,20 @@ class AyahShareExporter @Inject constructor(
     }
 
     private suspend fun lineInkWidth(line: ShareMushafLine, options: VideoMakerOptions, textSize: Float, paint: TextPaint): Float {
-        val pageFace = if (options.font == 0) fontManager.loadPageTypeface(line.pageNumber, night = true) else null
         val hafs = fontManager.loadUthmanicTypeface() ?: Typeface.DEFAULT
         val fallback = if (options.font == 2) Typeface.create("serif", Typeface.NORMAL) else hafs
-        val face = if (options.font == 0 && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
         paint.textSize = textSize
-        paint.typeface = face
         val gap = ShareMushafLayout.wordGap(textSize, options.font == 0)
         val visible = line.words.filter { options.marker || !it.isMarker }
         var ink = 0f
         visible.forEachIndexed { index, word ->
+            val usePageGlyph = options.font == 0 && word.qcf.isNotBlank()
+            val page = word.sourcePage.takeIf { it > 0 } ?: line.pageNumber
+            val pageFace = if (usePageGlyph) fontManager.loadPageTypeface(page, night = true) else null
+            paint.typeface = if (usePageGlyph && pageFace != null && pageFace != Typeface.DEFAULT) pageFace else fallback
             ink += if (word.isMarker) textSize * .90f * 1.05f else {
-                val glyph = if (options.font == 0) word.qcf.ifBlank { word.uthmanic } else word.uthmanic
-                val shown = if (options.font == 0) visualPua(glyph) else glyph
+                val glyph = if (usePageGlyph) word.qcf else word.uthmanic
+                val shown = if (usePageGlyph) visualPua(glyph) else glyph
                 paint.measureText(shown)
             }
             if (index < visible.lastIndex) ink += gap
@@ -1845,8 +1862,8 @@ class AyahShareExporter @Inject constructor(
         canvasWidth * 0.058f
 
 
-    // Legacy QCF PUA glyphs are bidi-neutral and must be pre-reversed; QPC V4 glyphs (U+FB50..U+FEFF)
-    // are strong RTL, so the text stack already orders them right to left.
+    // Auxiliary private-use glyph assets are bidi-neutral; QPC V4 page glyphs (U+FB50..U+FEFF)
+    // carry RTL direction and are ordered by the text stack.
     private fun visualPua(text: String): String =
         if (text.any { it.code in 0xE000..0xF8FF }) text.reversed() else text
 

@@ -44,8 +44,8 @@ android {
         applicationId = "com.quransunah.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 28
-        versionName = "4.3.2"
+        versionCode = 29
+        versionName = "4.3.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "QURAN_DB_CONTENT_HASH", "\"$quranDbContentHash\"")
         buildConfigField("long", "QURAN_DB_CONTENT_BYTES", "${unifiedDbSource.length()}L")
@@ -180,29 +180,39 @@ val pythonCommandPrefix: List<String> = when (pythonExecutable) {
     else -> listOf(pythonExecutable)
 }
 
-// Medina page fonts: 604 coloured QPC V4 tajweed fonts public/fonts/qcf4/p1.ttf..p604.ttf (COLR v0 + CPAL),
-// packaged as they are. Nothing is converted any more (the old 47-face WOFF2 conversion from D:\quran-app is gone).
-val convertQcf4Fonts by tasks.registering {
+// Medina page fonts: the exact 604 coloured QPC V4 tajweed fonts public/fonts/qcf4/p1.ttf..p604.ttf (COLR v0 + CPAL).
+val qcf4FontDir = rootProject.file("public/fonts/qcf4")
+val qcf4PageFontNames = (1..604).map { "p$it.ttf" }.toSet()
+val validateQpcV4PageFonts by tasks.registering {
     group = "assets"
-    description = "Verify the 604 QPC V4 page fonts are present in public/fonts/qcf4."
-    val dir = rootProject.file("public/fonts/qcf4")
-    onlyIf { dir.isDirectory && (1..604).any { dir.resolve("p$it.ttf").isFile } }
-    if (dir.isDirectory) inputs.dir(dir)
+    description = "Require the exact 604 QPC V4 page-font set in public/fonts/qcf4."
+    inputs.dir(qcf4FontDir)
     doLast {
-        val missing = (1..604).filter { !dir.resolve("p$it.ttf").isFile }
-        if (missing.isNotEmpty()) {
-            logger.warn(
-                "QPC V4 page fonts missing from ${dir} (${missing.size}); " +
-                    "debug builds still assemble and fall back to the Uthmanic face.",
+        if (!qcf4FontDir.isDirectory) {
+            throw GradleException("Required QPC V4 page-font directory is missing: $qcf4FontDir")
+        }
+        val ttfNames = qcf4FontDir.listFiles()
+            ?.filter { it.isFile && it.extension.equals("ttf", ignoreCase = true) }
+            ?.map { it.name }
+            ?.toSet()
+            .orEmpty()
+        val missing = qcf4PageFontNames - ttfNames
+        val unexpected = ttfNames - qcf4PageFontNames
+        val empty = qcf4PageFontNames.filter { !qcf4FontDir.resolve(it).isFile || qcf4FontDir.resolve(it).length() == 0L }
+        if (missing.isNotEmpty() || unexpected.isNotEmpty() || empty.isNotEmpty()) {
+            throw GradleException(
+                "Invalid QPC V4 page-font set in $qcf4FontDir: " +
+                    "missing=${missing.sorted().take(12)}, unexpected=${unexpected.sorted().take(12)}, empty=${empty.take(12)}",
             )
         }
+        logger.lifecycle("Validated ${qcf4PageFontNames.size} QPC V4 page fonts; no extra TTFs present.")
     }
 }
 
 val optimizePackagedFonts by tasks.registering(Exec::class) {
     group = "assets"
     description = "Compact packaged TTFs without dropping QCF ligatures."
-    dependsOn(convertQcf4Fonts)
+    dependsOn(validateQpcV4PageFonts)
     onlyIf { pythonCommandPrefix.isNotEmpty() }
     workingDir = rootProject.projectDir
     commandLine(pythonCommandPrefix + listOf("tools/optimize_ttf_fonts.py"))
@@ -214,6 +224,9 @@ val syncPublicFontAssets by tasks.registering(Copy::class) {
     doFirst {
         layout.projectDirectory.file("src/main/assets/fonts/qbsml.ttf").asFile.delete()
         val generatedFonts = generatedPublicAssets.get().asFile.resolve("fonts")
+        generatedFonts.resolve("qcf4").listFiles()
+            ?.filter { it.isFile && it.extension.equals("ttf", ignoreCase = true) && it.name !in qcf4PageFontNames }
+            ?.forEach { it.delete() }
         generatedFonts.resolve("hafsq1.ttf").delete()
         generatedFonts.resolve("hafsq2.ttf").delete()
         generatedFonts.resolve("ksax.ttf").delete()
@@ -228,11 +241,22 @@ val syncPublicFontAssets by tasks.registering(Copy::class) {
             "Amiri-Bold.ttf",
             "NotoNaskhArabic-Regular.ttf",
             "NotoNaskhArabic-Bold.ttf",
-            "qcf4/*.ttf",
+            "qcf4/p*.ttf",
         )
         exclude("*.woff", "*.woff2", "hafsq1.ttf", "hafsq2.ttf", "ksax.ttf")
     }
     into(generatedPublicAssets.map { it.asFile.resolve("fonts") })
+    doLast {
+        val packagedPageFonts = generatedPublicAssets.get().asFile.resolve("fonts/qcf4")
+            .listFiles()
+            ?.filter { it.isFile && it.extension.equals("ttf", ignoreCase = true) }
+            ?.map { it.name }
+            ?.toSet()
+            .orEmpty()
+        if (packagedPageFonts != qcf4PageFontNames) {
+            throw GradleException("Generated QPC V4 assets differ from p1.ttf..p604.ttf: found ${packagedPageFonts.size} page-font files")
+        }
+    }
 }
 
 val packagedDbDir = layout.projectDirectory.dir("src/main/assets/databases")

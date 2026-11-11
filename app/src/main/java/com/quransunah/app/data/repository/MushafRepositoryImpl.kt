@@ -421,9 +421,8 @@ class MushafRepositoryImpl @Inject constructor(
         surah = surahId,
         ayah = ayahNumber,
         wordIndex = wordPosition,
-        // Glyphs for the 604 coloured page fonts (v4 codes); DB qpc_ligature = old 47-face codes.
-        textLigature = wordId?.let { v4Glyphs.forWord(it) }
-            ?: qpcLigature?.ifBlank { null } ?: textHafs.orEmpty(),
+        // Rendering codes come only from the verified QPC V4 word table; qpc_ligature remains metadata for marker classification.
+        textLigature = wordId?.let { v4Glyphs.forWord(it) }.orEmpty(),
         textHafs = textHafs.orEmpty(),
         meaning = meaningByWordId[wordId],
         isAyahMarker = AyahMarkerRule.isMarker(isAyahMarker, textHafs.orEmpty(), qpcLigature.orEmpty()),

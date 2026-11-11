@@ -53,8 +53,7 @@ object AppConstants {
     const val USER_DB_FILE = "holy_quran_user.db"
 
     const val QCF4_FONT_DIR = "fonts"
-    const val QCF4_FACE_DIR = "fonts/qcf4"
-    const val QCF4_FONT_MAP_ASSET = "json/qcf4-font-map.json"
+    /** Coloured QPC V4 page fonts live under assets/fonts/qcf4/pN.ttf (see qcf4PageAsset). */
     const val QBSML_FONT = "fonts/qbsml.ttf"
     const val JUZ_NAME_FONT = "fonts/juz.ttf"
     /** Body / lists / tafsir UI (Noto Naskh). */

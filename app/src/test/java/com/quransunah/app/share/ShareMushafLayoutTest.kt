@@ -78,6 +78,44 @@ class ShareMushafLayoutTest {
     }
 
     @Test
+    fun videoRangeStartsAtSelectedAyahAndKeepsTenAyahMaximum() {
+        // Model a page containing ayahs 6–9: first, middle and last selections stay exact.
+        assertEquals(6..15, ShareMushafLayout.initialAyahRange(6, 286, 10))
+        assertEquals(8..17, ShareMushafLayout.initialAyahRange(8, 286, 10))
+        assertEquals(9..18, ShareMushafLayout.initialAyahRange(9, 286, 10))
+        assertEquals(10, ShareMushafLayout.initialAyahRange(8, 286, 10).count())
+        assertEquals(1..10, ShareMushafLayout.initialAyahRange(1, 286, 10))
+        assertEquals(286..286, ShareMushafLayout.initialAyahRange(286, 286, 10))
+        assertEquals(8..8, ShareMushafLayout.initialAyahRange(8, 8, 10))
+    }
+
+    @Test
+    fun imageRangeKeepsSelectedConsecutiveVersesWithinThreeVerseLimit() {
+        assertEquals(8..10, ShareMushafLayout.imageShareRange(8, 10, 286))
+        assertEquals(8..9, ShareMushafLayout.imageShareRange(8, 9, 286))
+        assertEquals(286..286, ShareMushafLayout.imageShareRange(286, 300, 286))
+        assertEquals(3, ShareMushafLayout.imageShareRange(8, 10, 286).count())
+    }
+
+    @Test
+    fun imageMushafLinesKeepEverySelectedAyahAndExcludeAdjacentAyat() {
+        val pages = listOf(
+            SharePageLines(
+                pageNumber = 1,
+                lines = listOf(
+                    ShareSourceLine(1, listOf(word(7, 1), word(8, 1))),
+                    ShareSourceLine(2, listOf(word(8, 2), word(9, 1))),
+                    ShareSourceLine(3, listOf(word(9, 2), word(10, 1), word(11, 1))),
+                ),
+            ),
+        )
+        val range = ShareMushafLayout.imageShareRange(8, 10, 286)
+        val cut = ShareMushafLayout.cutLines(pages, range.first, range.last)
+        assertEquals(listOf(8, 9, 10), cut.flatMap { line -> line.words.map { it.ayah } }.distinct())
+        assertTrue(cut.none { line -> line.words.any { it.ayah == 7 || it.ayah == 11 } })
+    }
+
+    @Test
     fun underlineGrowsRtlThroughEveryRecitedWord() {
         val boxes = listOf(
             ShareWordBox(0, 1, 1, 0, 80f, 120f, 0f, 20f, 16f, 4f),

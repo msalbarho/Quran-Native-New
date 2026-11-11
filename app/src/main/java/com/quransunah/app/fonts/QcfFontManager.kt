@@ -57,7 +57,6 @@ class QcfFontManager @Inject constructor(
 
     private val json = Json { ignoreUnknownKeys = true }
     @Volatile private var mapsLoaded = false
-    @Volatile private var pageFaceNumbers: Map<Int, Int> = emptyMap()
     @Volatile private var decorativeSurahLigatures: Map<Int, String> = emptyMap()
     @Volatile private var headerSingleSurahs: Map<Int, String> = emptyMap()
     @Volatile private var headerCombinedSurahs: Map<String, String> = emptyMap()
@@ -259,9 +258,7 @@ class QcfFontManager @Inject constructor(
         synchronized(paintCache) { paintCache.clear() }
     }
 
-    /**
-     * Per-face TTF files use the same BMP PUA as `qpc_ligature` in the React DB.
-     */
+    /** QPC V4 glyph strings are already encoded for their page fonts; never remap them to legacy face slots. */
     fun remapLigature(raw: String, @Suppress("UNUSED_PARAMETER") pageNumber: Int): String = raw
 
     /** v4 page-font glyphs of a word (null if unknown). */
@@ -352,27 +349,12 @@ class QcfFontManager @Inject constructor(
         return table.entries.associate { (id, value) -> id to value.jsonPrimitive.content }
     }
 
-    private fun loadPageFaceNumbers(): Map<Int, Int> {
-        return runCatching {
-            val raw = context.assets.open(AppConstants.QCF4_FONT_MAP_ASSET).bufferedReader().use { it.readText() }
-            json.parseToJsonElement(raw).jsonObject.entries.associate { (key, value) ->
-                val page = key.toInt()
-                val face = FACE_NUMBER.find(value.jsonPrimitive.content)?.groupValues?.get(1)?.toIntOrNull()
-                    ?: defaultFaceNumber(page)
-                page to face
-            }
-        }.getOrDefault(emptyMap())
-    }
-
     companion object {
         const val QBSML_MAP_ASSET = "json/qcf4-qbsml-map.json"
         private const val NIGHT_DISK_CACHE_FILES = 60
         const val DEFAULT_BASMALAH_LIGATURE = "\uFAD0\uFAD1\uFAD2\uFAD3"
-        private val FACE_NUMBER = Regex("(\\d+)$")
         private val PUA_RANGE = 0xE000..0xF8FF
 
-        fun defaultFaceNumber(pageNumber: Int): Int =
-            ((pageNumber.coerceIn(1, AppConstants.TOTAL_PAGES) - 1) / 13) + 1
 
         const val QBSML_HEADER_SURAH_MIN = 0xF174
         const val QBSML_HEADER_SURAH_MAX = 0xF1D5

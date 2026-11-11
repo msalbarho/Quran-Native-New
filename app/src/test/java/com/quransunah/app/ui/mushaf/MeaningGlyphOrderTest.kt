@@ -7,12 +7,24 @@ import java.sql.Connection
 import java.sql.DriverManager
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MeaningGlyphOrderTest {
+    private val v4Glyphs by lazy {
+        File("src/main/assets/json/qpc-v4-glyphs.tsv").readLines()
+            .asSequence()
+            .filter { it.isNotBlank() && !it.startsWith("#") }
+            .map { line ->
+                val (wordId, codePoints) = line.split('\t', limit = 2)
+                wordId.toInt() to codePoints.split('+').joinToString("") { hex ->
+                    String(Character.toChars(hex.toInt(16)))
+                }
+            }
+            .toMap()
+    }
+
     @Test
     fun quarterMarkIsItsOwnGlyphBeforeTheFirstWord() {
         val words = loadAyah("text_hafs LIKE ? AND is_ayah_marker = 0", "${RubElHizb.MARK}%")
@@ -36,26 +48,7 @@ class MeaningGlyphOrderTest {
         // 604 page fonts: the overline + mark are part of the word's own v4 glyph run.
         assertEquals(null, SajdahAyah.numberLigature(marker, previous))
         assertEquals(null, SajdahAyah.overlayLigature(previous, marker))
-    }
-
-    @Test
-    fun sajdahSignStaysBeforeTheAyahNumber() {
-        // Legacy 47-face behaviour (DB codes) stays available behind the switch.
-        SajdahAyah.synthesizeSlots = true
-        try { legacySajdah() } finally { SajdahAyah.synthesizeSlots = false }
-    }
-
-    private fun legacySajdah() {
-        val words = loadAyah("instr(text_hafs, ?) > 0", SajdahAyah.MARK.toString())
-        val painted = paint(words)
-        val marker = words.last { it.isAyahMarker }
-        val previous = words[words.indexOf(marker) - 1]
-        val number = SajdahAyah.numberLigature(marker, previous)
-        assertNotNull(number)
-        assertEquals(display(marker), painted.glyphs.last())
-        assertEquals(number, painted.marker)
-        assertNotEquals(display(marker), painted.marker)
-        assertTrue(previous.uthmanic.contains(SajdahAyah.MARK))
+        assertEquals(display(marker), paint(words).marker)
     }
 
     @Test
@@ -126,7 +119,7 @@ class MeaningGlyphOrderTest {
                         surah = rows.getInt(2),
                         ayah = rows.getInt(3),
                         wordIndex = rows.getInt(4),
-                        textLigature = ligature,
+                        textLigature = v4Glyphs[rows.getInt(1)].orEmpty(),
                         textHafs = hafs,
                         isAyahMarker = AyahMarkerRule.isMarker(rows.getInt(7), hafs, ligature),
                     ).toWordRecord()

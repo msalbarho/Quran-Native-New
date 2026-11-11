@@ -99,7 +99,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quransunah.app.R
 import com.quransunah.app.core.uiLayoutDirection
-import com.quransunah.app.core.AppConstants
 import com.quransunah.app.core.ArabicRtl
 import com.quransunah.app.core.EasternArabic
 import com.quransunah.app.data.catalog.ReciterNames
@@ -248,7 +247,7 @@ fun WordSheet(
             onVideoFrom = viewModel::setVideoFrom,
             onVideoTo = viewModel::setVideoTo,
             onSelectVideoReciter = viewModel::selectVideoReciter,
-            onShareVideo = { makerOpen = true },
+            onShareVideo = { viewModel.prepareVideoMakerRange(word); makerOpen = true },
             modifier = contentModifier,
         )
     }
@@ -582,8 +581,7 @@ fun WordSheetContent(
             SheetSection {
                 var rangeFrom by remember(word.ayah) { mutableIntStateOf(word.ayah) }
                 var rangeTo by remember(word.ayah) { mutableIntStateOf(word.ayah) }
-                val imageMax = ShareMushafLayout.IMAGE_SHARE_MAX_AYAT
-                val toMax = (rangeFrom + imageMax - 1).coerceAtMost(maxAyah)
+                val imageRange = ShareMushafLayout.imageShareRange(rangeFrom, rangeTo, maxAyah)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -595,7 +593,7 @@ fun WordSheetContent(
                             maxAyah = maxAyah,
                             onSelect = { start ->
                                 rangeFrom = start
-                                rangeTo = rangeTo.coerceIn(start, (start + ShareMushafLayout.IMAGE_SHARE_MAX_AYAT - 1).coerceAtMost(maxAyah))
+                                rangeTo = ShareMushafLayout.imageShareRange(start, rangeTo, maxAyah).last
                             },
                             label = "",
                         )
@@ -604,9 +602,9 @@ fun WordSheetContent(
                         Text(stringResource(R.string.word_share_to_ayah), color = paper.textMuted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                         VideoToAyahDropdown(
                             fromAyah = rangeFrom,
-                            toAyah = rangeTo.coerceIn(rangeFrom, toMax),
+                            toAyah = imageRange.last,
                             maxAyah = maxAyah,
-                            onSelect = { rangeTo = it },
+                            onSelect = { rangeTo = ShareMushafLayout.imageShareRange(rangeFrom, it, maxAyah).last },
                             label = "",
                         )
                     }
@@ -624,7 +622,7 @@ fun WordSheetContent(
                         label = stringResource(
                             if (ui.sharing) R.string.word_preparing else R.string.word_share_image,
                         ),
-                        onClick = { onShareRangeImage(rangeFrom, rangeTo.coerceIn(rangeFrom, toMax)) },
+                        onClick = { onShareRangeImage(imageRange.first, imageRange.last) },
                         enabled = !ui.sharing,
                         modifier = Modifier.weight(1f),
                     )
@@ -1130,7 +1128,8 @@ private fun VideoToAyahDropdown(
     val options = remember(fromAyah, maxAyah) {
         val start = fromAyah.coerceIn(1, maxAyah.coerceAtLeast(1))
         val firstNext = (start + 1).coerceAtMost(maxAyah.coerceAtLeast(1))
-        val end = (start + AppConstants.SHARE_AYAH_RANGE_MAX - 1).coerceAtMost(maxAyah.coerceAtLeast(1))
+        val end = (start + ShareMushafLayout.IMAGE_SHARE_MAX_AYAT - 1)
+            .coerceAtMost(maxAyah.coerceAtLeast(1))
         val following = if (firstNext <= end && firstNext != start) {
             (firstNext..end).toList()
         } else {
