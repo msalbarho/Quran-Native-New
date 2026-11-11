@@ -69,6 +69,21 @@ object ShareMushafLayout {
         return (1f / kotlin.math.sqrt(count.toFloat())).coerceIn(0.42f, 1f)
     }
 
+    /** Initial video selection begins at the exact ayah selected by the user, capped within its surah. */
+    fun initialAyahRange(selectedAyah: Int, surahAyahCount: Int, maxAyat: Int): IntRange {
+        require(surahAyahCount > 0 && maxAyat > 0)
+        val from = selectedAyah.coerceIn(1, surahAyahCount)
+        return from..(from + maxAyat - 1).coerceAtMost(surahAyahCount)
+    }
+
+    /** Image selection remains consecutive and is limited to three verses, without crossing a surah. */
+    fun imageShareRange(fromAyah: Int, toAyah: Int, surahAyahCount: Int): IntRange {
+        require(surahAyahCount > 0)
+        val from = fromAyah.coerceIn(1, surahAyahCount)
+        val maxTo = (from + IMAGE_SHARE_MAX_AYAT - 1).coerceAtMost(surahAyahCount)
+        return from..toAyah.coerceIn(from, maxTo)
+    }
+
     fun arabicLineHeight(textSize: Float): Float = textSize * ARABIC_LINE_MULTIPLIER
 
     fun heightFitScale(lineCount: Int, lineHeight: Float, availableHeight: Float): Float {

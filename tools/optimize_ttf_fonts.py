@@ -37,9 +37,7 @@ def optimize_ttf(path: Path) -> tuple[int, int]:
 
 def iter_targets() -> list[Path]:
     files: list[Path] = []
-    qcf = FONTS / "qcf4"
-    if qcf.is_dir():
-        files.extend(sorted(qcf.glob("QCF4_Hafs_*.ttf")))
+    # Page fonts p1..p604.ttf are packaged as-is (already COLR/CPAL); only sidecars here.
     for name in ("qbsml.ttf", "hafs.ttf", "ksa.ttf"):
         candidate = FONTS / name
         if candidate.is_file():

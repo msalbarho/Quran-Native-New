@@ -54,8 +54,8 @@ fun WordEntity.toWordRecord(meaning: String? = null): WordRecord = WordRecord(
     ayah = ayahNumber,
     position = wordPosition,
     uthmanic = textHafs.orEmpty(),
-    // 604 coloured page fonts: v4 per-page codes (the DB column keeps the old 47-face codes).
-    qcfLigature = wordId?.let { com.quransunah.app.fonts.QpcV4Glyphs.instance?.forWord(it) } ?: qpcLigature.orEmpty(),
+    // Resolve only the 604-page QPC V4 mapping; never render DB qpc_ligature codes through a page font.
+    qcfLigature = wordId?.let { com.quransunah.app.fonts.QpcV4Glyphs.instance?.forWord(it) }.orEmpty(),
     isAyahMarker = isAyahMarker == 1,
     meaning = meaning,
 )

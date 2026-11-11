@@ -241,14 +241,18 @@ class StudyViewModel @Inject constructor(
         _ui.update { it.copy(reciterMenuOpen = open) }
     }
 
-    /** Default share-video range for the current surah: ayah 1..min(10, ayahCount), never past this surah. */
-    fun prepareVideoMakerRange() {
-        val word = _ui.value.word ?: return
+    /** Start the video range at the selected ayah, retaining the existing ten-ayah maximum. */
+    fun prepareVideoMakerRange(word: WordRecord) {
         val max = SurahAyahCounts.ayahCount(word.surah).coerceAtLeast(1)
+        val range = ShareMushafLayout.initialAyahRange(
+            selectedAyah = word.ayah,
+            surahAyahCount = max,
+            maxAyat = AppConstants.SHARE_AYAH_RANGE_MAX,
+        )
         _ui.update {
             it.copy(
-                videoFromAyah = 1,
-                videoToAyah = AppConstants.SHARE_AYAH_RANGE_MAX.coerceAtMost(max),
+                videoFromAyah = range.first,
+                videoToAyah = range.last,
             )
         }
     }
@@ -479,7 +483,7 @@ class StudyViewModel @Inject constructor(
             ayah = target.ayah,
             position = target.wordIndex,
             uthmanic = target.textHafs,
-            qcfLigature = target.textLigature,
+            qcfLigature = fontManager.v4Glyphs(target.id).orEmpty(),
             isAyahMarker = target.isAyahMarker,
             meaning = target.meaning,
         )
@@ -517,7 +521,7 @@ class StudyViewModel @Inject constructor(
             AyahShareVerse(
                 ayah = ayah,
                 pageNumber = mushafRepository.getPageForAyah(word.surah, ayah),
-                qcfText = body.joinToString(" ") { it.textLigature.ifBlank { it.textHafs } }.trim(),
+                qcfText = body.joinToString(" ") { fontManager.v4Glyphs(it.id).orEmpty() }.trim(),
                 uthmanicText = body.joinToString(" ") { it.textHafs }.trim(),
                 markerLigature = shareMarkerLigature(words),
                 englishTranslation = translationRepository.getAyahTranslation(translationTag, word.surah, ayah),
@@ -538,7 +542,7 @@ class StudyViewModel @Inject constructor(
                                 ShareMushafWord(
                                     ayah = token.ayah,
                                     position = token.wordIndex,
-                                    qcf = token.textLigature.ifBlank { token.textHafs },
+                                    qcf = fontManager.v4Glyphs(token.id).orEmpty(),
                                     uthmanic = token.textHafs,
                                     isMarker = token.isAyahMarker,
                                 )

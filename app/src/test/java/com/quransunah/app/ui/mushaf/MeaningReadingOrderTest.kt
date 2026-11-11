@@ -16,6 +16,19 @@ import org.junit.Assume.assumeTrue
 import org.junit.Test
 
 class MeaningReadingOrderTest {
+    private val v4Glyphs by lazy {
+        File("src/main/assets/json/qpc-v4-glyphs.tsv").readLines()
+            .asSequence()
+            .filter { it.isNotBlank() && !it.startsWith("#") }
+            .map { line ->
+                val (wordId, codePoints) = line.split('\t', limit = 2)
+                wordId.toInt() to codePoints.split('+').joinToString("") { hex ->
+                    String(Character.toChars(hex.toInt(16)))
+                }
+            }
+            .toMap()
+    }
+
     @Test
     fun page71And604UseTheirOwnColouredPageFonts() {
         // One QPC V4 tajweed font per page (COLR/CPAL), no 47-face map any more.
@@ -130,27 +143,6 @@ class MeaningReadingOrderTest {
         }
     }
 
-    private fun markerLigature(surah: Int, ayah: Int): String {
-        Class.forName("org.sqlite.JDBC")
-        return DriverManager.getConnection("jdbc:sqlite:${assetDb().absolutePath}").use { db ->
-            db.prepareStatement(
-                """
-                SELECT qpc_ligature FROM words
-                WHERE surah_id = ? AND ayah_number = ? AND is_ayah_marker = 1
-                ORDER BY word_id DESC
-                LIMIT 1
-                """.trimIndent(),
-            ).use { statement ->
-                statement.setInt(1, surah)
-                statement.setInt(2, ayah)
-                statement.executeQuery().use { rows ->
-                    assertTrue(rows.next())
-                    rows.getString(1)
-                }
-            }
-        }
-    }
-
     private fun fontHasColorTables(file: File): Boolean {
         assertTrue(file.isFile)
         val data = file.readBytes()
@@ -239,7 +231,7 @@ class MeaningReadingOrderTest {
                         surah = rows.getInt(2),
                         ayah = rows.getInt(3),
                         wordIndex = rows.getInt(4),
-                        textLigature = ligature,
+                        textLigature = v4Glyphs[rows.getInt(1)].orEmpty(),
                         textHafs = hafs,
                         isAyahMarker = AyahMarkerRule.isMarker(flag, hafs, ligature),
                     )
